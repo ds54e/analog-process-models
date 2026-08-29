@@ -1,0 +1,23 @@
+schema = "apm.benchmark-passives.v1"
+status = "draft-values-unfrozen"
+
+[resistor]
+public_name = "Rbench"
+parameters = ["value", "tc1", "match_size"]
+process_sigma = "TBD"
+mismatch_sigma_ref = "TBD"
+mismatch_scaling_law = "sigma_ref/sqrt(match_size)"
+implementation = "resolved concrete SPICE resistor value"
+
+[capacitor]
+public_name = "Cbench"
+parameters = ["value", "tc1", "match_size"]
+process_sigma = "TBD"
+mismatch_sigma_ref = "TBD"
+mismatch_scaling_law = "sigma_ref/sqrt(match_size)"
+implementation = "resolved concrete SPICE capacitor value"
+
+[requirements]
+match_size_is_dimensionless = true
+technology_neutral = true
+native_passives_optional = true
