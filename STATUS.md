@@ -79,6 +79,8 @@ None yet.
 
 Only record decisions that materially affect public API, model provenance/fidelity, characterization semantics, variation semantics, supported runtime, or release claims. Do not use this section as a verbose work diary.
 
+When a material decision intentionally departs from `PROJECT_CONTEXT.md`, record the new evidence and rationale here so future continuation does not accidentally revert it.
+
 ## Evidence index
 
 No implementation evidence yet. See `validation/evidence/README.md` for the evidence format.
@@ -95,6 +97,10 @@ Complete these only during M10:
 - all-five-kit comparison result:
 - provenance/license audit result:
 - README claim audit result:
+- release-critical placeholder/TBD scan result:
+- package version (`pyproject.toml`) = 1.0.0:
+- runtime `__version__` = 1.0.0:
+- `CHANGELOG.md` v1.0.0 release entry present:
 - Spectre status confirmed experimental/unverified:
 - final release commit:
 - v1.0.0 tag created: NO
