@@ -1,0 +1,40 @@
+id = "apm022"
+technology_class = "22nm-class"
+architecture = "planar_bulk"
+compact_model = "bsim4"
+model_origin = "apm_generic"
+foundry_correlated = false
+ptm_derived = false
+
+[source]
+status = "apm-authored"
+project = "Analog Process Models"
+license = "Apache-2.0"
+
+[development]
+allowed_inputs = [
+  "public literature",
+  "BSIM4 specifications",
+  "published representative technology characteristics",
+  "explicit APM behavior contracts"
+]
+forbidden_numeric_source = "Official PTM22 model-card parameters"
+ptm_usage = "local non-redistributed sanity/comparison oracle only"
+
+[behavior_contract]
+requirements = [
+  "stronger short-channel effects than APM045",
+  "larger DIBL near minimum length than APM045",
+  "lower intrinsic gain near minimum length than APM045",
+  "lower-voltage scaled-planar operation",
+  "higher current/speed capability than APM045",
+  "sensible Id-Vg, Id-Vd, and capacitance behavior"
+]
+
+[variation]
+benchmark = true
+native = false
+
+[validation]
+ngspice = "not_started"
+spectre = "experimental_unverified"
