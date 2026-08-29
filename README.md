@@ -31,6 +31,13 @@ The common v1.0 characterization contract is planned to include Id–Vg, Id–Vd
 
 Technology-neutral benchmark resistor and capacitor models are included in scope so circuits can be compared without inventing process-specific passive technology for every node.
 
+The benchmark variation/passive framework is implemented and real-tool
+validated for the currently operational PSP103, BSIM4, and BSIM-CMG families.
+It uses observable `vth_shift`/`drive_shift` intents, persisted NumPy PCG64
+samples, fixed common corners, and native simulator R/C primitives. See
+[`docs/benchmark-variation.md`](docs/benchmark-variation.md) for the exact
+statistical, matching, sign, replay, and native-versus-benchmark semantics.
+
 ## Backend status
 
 | Backend / frontend | v1.0 status target |
@@ -60,4 +67,16 @@ The repository is designed so a long-running implementation agent can work witho
 - [`validation/evidence/`](validation/evidence/) — compact committed audit evidence for completed validation claims.
 - Per-kit `provenance.toml` files — model source/origin and licensing metadata.
 
-The repository is currently in initial implementation state. Do not interpret planned features as validated until the v1.0 release gates in `GOAL.md` and `validation/release_gates.toml` have passed with evidence.
+For a deterministic benchmark sample and the current real-ngspice benchmark
+regression:
+
+```console
+apm sample-variation --request examples/benchmark_request.json --mode all \
+  --seed 20260830 --output results/all.json
+apm benchmark-check --output results/benchmark-check
+```
+
+The repository is under active v1.0 implementation. M0 through M4 are validated;
+later kit, native-variation, Spectre, and clean-clone release gates remain open.
+Do not interpret planned features as validated; `STATUS.md` and committed
+evidence identify the exact current boundary.

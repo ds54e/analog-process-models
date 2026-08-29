@@ -10,7 +10,7 @@ It is **not** evidence by itself. Validation claims must point to committed summ
 - Repository: https://github.com/ds54e/analog-process-models
 - Target: v1.0.0
 - Current state: `IN_PROGRESS`
-- Current milestone: `M4 Benchmark R/C + variation`
+- Current milestone: `M5 APM022`
 - Release eligible: `NO`
 
 ## Reported initial environment
@@ -32,8 +32,8 @@ See `ENVIRONMENT.md`. M0 verified the host and bootstrapped the project-local re
 | M1 APM130 | VALIDATED | `validation/evidence/m1-apm130.md`: public N/P wrappers and complete nominal terminal characterization passed at all temperatures and lengths, including PSP native gm/gds oracle agreement. |
 | M2 APM045 | VALIDATED | `validation/evidence/m2-apm045.md`: exact Apache-2.0 FreePDK45 VTG subset, public N/P wrappers, and complete native-BSIM4 terminal characterization passed. |
 | M3 APM016F | VALIDATED | `validation/evidence/m3-apm016f.md`: independent APM cards, genuine BSIM-CMG OSDI, discrete `l,nfin` public results, and complete nominal terminal/NFIN characterization passed. |
-| M4 Benchmark R/C + variation | IN_PROGRESS | Implement common deterministic benchmark R/C and observable-intent MOS variation after three model families are running. |
-| M5 APM022 | NOT_STARTED | — |
+| M4 Benchmark R/C + variation | VALIDATED | `validation/evidence/m4-benchmark.md`: frozen synthetic severities, measured PSP/BSIM4/BSIM-CMG intent adapters, deterministic PCG64 samples/replay, five common corners, and native R/C value/noise checks passed. |
+| M5 APM022 | IN_PROGRESS | Independently author and validate the scaled-planar BSIM4 deck, then calibrate its benchmark adapter. |
 | M6 APM350 | NOT_STARTED | — |
 | M7 Common characterization completion | NOT_STARTED | — |
 | M8 IHP-native variation | NOT_STARTED | — |
@@ -71,7 +71,8 @@ Record actual validated values when M0 runs:
 The normative gate definition is `validation/release_gates.toml`.
 
 Validated gates: `runtime.wsl2_el9`, `runtime.ngspice_headless`,
-`runtime.psp103_osdi`, `runtime.bsimcmg_osdi`, and `finfet.integrity`.
+`runtime.psp103_osdi`, `runtime.bsimcmg_osdi`, `passives.benchmark`, and
+`finfet.integrity`.
 
 All remaining gates are unvalidated.
 
@@ -97,6 +98,15 @@ A blocker entry should state:
 - APM045 pins the open-source-clean FreePDK45 1.4 mirror at commit `688ee68ec5301e5fe11ebee5e53c1109d3cfd51d` and ships only its byte-identical nominal VTG cards plus licensing/model-basis documents. Its disclosed PTM ancestry is isolated from the independently authored APM022 deck.
 - APM045 uses 101-point DC sweeps so the 1.0 V endpoints and 10 mV finite-difference grid are exact. Monotonicity is required from the documented constant-current criterion through conduction; full-range picoamp leakage-partition reversals are retained and reported separately.
 - APM016F uses the exact ECL-2.0 Berkeley BSIM-CMG 112.1.0 engine with independently authored Apache-2.0 parameter cards. Public dimensions, doping, 0.8 V operation, and behavior targets come from cited primary literature and official BSIM-CMG semantics; no PTM-MG card values were used. Its public/result geometry is only `l,nfin`, threshold extraction is `Id=100 nA*NFIN`, self-heating is off, and a 5 mV gate grid provides converged canonical gm.
+- APM benchmark variation uses frozen synthetic sigmas only after real PSP103,
+  BSIM4, and BSIM-CMG calibration. Canonical positive threshold shift means
+  larger `|Vth|` for N/P even though raw signs differ; canonical positive drive
+  shift means larger reference-bias `|Id|`. NumPy PCG64 resolves deterministic
+  samples outside ngspice, and persisted samples are the replay authority.
+- Benchmark process variables are independent/global per class; mismatch is
+  independent/local per instance; threshold combines additively while drive
+  and passive scale factors combine multiplicatively. Planar matching uses
+  `W*L`, FinFET matching uses `NFIN*L`, and passive `match_size` is dimensionless.
 
 Only record decisions that materially affect public API, model provenance/fidelity, characterization semantics, variation semantics, supported runtime, or release claims. Do not use this section as a verbose work diary.
 
@@ -108,6 +118,9 @@ When a material decision intentionally departs from `PROJECT_CONTEXT.md`, record
 - `validation/evidence/m1-apm130.md` — nominal APM130 public devices and complete terminal characterization at required temperatures.
 - `validation/evidence/m2-apm045.md` — exact-source nominal APM045 public devices and complete native-BSIM4 terminal characterization.
 - `validation/evidence/m3-apm016f.md` — independently authored generic FinFET cards, genuine BSIM-CMG execution, and complete discrete-NFIN terminal characterization.
+- `validation/evidence/m4-benchmark.md` — calibrated observable-intent mappings,
+  deterministic benchmark modes/corners/replay, and technology-neutral R/C
+  value, temperature, matching, and native-noise validation.
 
 ## Final-review fields
 

@@ -1,0 +1,83 @@
+{
+  "schema": "apm.benchmark-request.v1",
+  "instances": {
+    "mos": [
+      {
+        "id": "mn130",
+        "kit_id": "apm130",
+        "polarity": "n",
+        "geometry": {
+          "w_m": 1e-06,
+          "l_m": 2.6e-07
+        },
+        "ngspice_instance": "xmn130"
+      },
+      {
+        "id": "mp130",
+        "kit_id": "apm130",
+        "polarity": "p",
+        "geometry": {
+          "w_m": 1e-06,
+          "l_m": 2.6e-07
+        },
+        "ngspice_instance": "xmp130"
+      },
+      {
+        "id": "mn045",
+        "kit_id": "apm045",
+        "polarity": "n",
+        "geometry": {
+          "w_m": 1e-06,
+          "l_m": 1e-07
+        },
+        "ngspice_instance": "xmn045"
+      },
+      {
+        "id": "mp045",
+        "kit_id": "apm045",
+        "polarity": "p",
+        "geometry": {
+          "w_m": 1e-06,
+          "l_m": 1e-07
+        },
+        "ngspice_instance": "xmp045"
+      },
+      {
+        "id": "mn016f",
+        "kit_id": "apm016f",
+        "polarity": "n",
+        "geometry": {
+          "l_m": 3.2e-08,
+          "nfin": 1
+        },
+        "ngspice_instance": "xmn016f"
+      },
+      {
+        "id": "mp016f",
+        "kit_id": "apm016f",
+        "polarity": "p",
+        "geometry": {
+          "l_m": 3.2e-08,
+          "nfin": 1
+        },
+        "ngspice_instance": "xmp016f"
+      }
+    ],
+    "resistors": [
+      {
+        "id": "rload",
+        "value": 10000.0,
+        "tc1_per_c": 0.001,
+        "match_size": 1.0
+      }
+    ],
+    "capacitors": [
+      {
+        "id": "cload",
+        "value": 1e-12,
+        "tc1_per_c": 0.0002,
+        "match_size": 1.0
+      }
+    ]
+  }
+}

@@ -1,8 +1,17 @@
 schema = "apm.benchmark-variation.v1"
-status = "draft-values-unfrozen"
+status = "v1-values-frozen-2026-08-30"
 
 [notes]
-text = "Architecture, sign, distribution, units, and correlation semantics are part of the v1.0 contract. Numerical sigma/corner severity values remain intentionally unset until representative kits are characterized."
+text = "Synthetic benchmark values were frozen only after real-tool PSP103, BSIM4, and BSIM-CMG observable-intent mappings were characterized. They are comparison severities, not foundry statistics or yield predictions."
+
+[calibration_basis]
+date = "2026-08-30"
+representative_kits = ["apm130", "apm045", "apm016f"]
+model_families = ["psp103", "bsim4", "bsim_cmg"]
+mapping_file = "variation/adapters_v1.toml"
+reference_condition = "L=2*Lmin, VOUT=0.5*VDD, nominal VCTRL nearest gm/Id=15 1/V, 27 degC"
+corner_strength_sigma = 3.0
+selection_rationale = "12 mV process Vth and 4% process drive sigma give visible but moderate cross-kit perturbations; 3-sigma corners stay inside the empirically swept raw-adapter range. Local reference sigmas are smaller and use the explicit synthetic matching law."
 
 [distribution]
 normalized_variable = "z ~ Normal(mean=0, std=1)"
@@ -12,15 +21,15 @@ resolved_samples_are_persisted = true
 no_implicit_truncation = true
 
 [mos.process]
-vth_shift_sigma = "TBD"
+vth_shift_sigma = 0.012
 vth_shift_sigma_units = "V"
-drive_shift_sigma = "TBD"
+drive_shift_sigma = 0.04
 drive_shift_sigma_units = "fractional_Id_change"
 
 [mos.mismatch]
-vth_shift_sigma_ref = "TBD"
+vth_shift_sigma_ref = 0.008
 vth_shift_sigma_ref_units = "V"
-drive_shift_sigma_ref = "TBD"
+drive_shift_sigma_ref = 0.025
 drive_shift_sigma_ref_units = "fractional_Id_change"
 scaling_law = "sigma_ref/sqrt(match_size)"
 
@@ -45,26 +54,49 @@ mismatch_vth_vs_drive_same_instance = "independent_by_default"
 mismatch_vs_process = "independent_by_default"
 
 [corner.bench_tt]
+semantic = "nominal_benchmark_vector"
 vth_n_sigma = 0.0
 drive_n_sigma = 0.0
 vth_p_sigma = 0.0
 drive_p_sigma = 0.0
+resistor_scale_sigma = 0.0
+capacitor_scale_sigma = 0.0
 
 [corner.bench_ff]
 semantic = "lower_abs_vth_higher_drive_for_n_and_p"
-strength_sigma = "TBD"
+vth_n_sigma = -3.0
+drive_n_sigma = 3.0
+vth_p_sigma = -3.0
+drive_p_sigma = 3.0
+resistor_scale_sigma = 0.0
+capacitor_scale_sigma = 0.0
 
 [corner.bench_ss]
 semantic = "higher_abs_vth_lower_drive_for_n_and_p"
-strength_sigma = "TBD"
+vth_n_sigma = 3.0
+drive_n_sigma = -3.0
+vth_p_sigma = 3.0
+drive_p_sigma = -3.0
+resistor_scale_sigma = 0.0
+capacitor_scale_sigma = 0.0
 
 [corner.bench_fs]
 semantic = "fast_n_slow_p"
-strength_sigma = "TBD"
+vth_n_sigma = -3.0
+drive_n_sigma = 3.0
+vth_p_sigma = 3.0
+drive_p_sigma = -3.0
+resistor_scale_sigma = 0.0
+capacitor_scale_sigma = 0.0
 
 [corner.bench_sf]
 semantic = "slow_n_fast_p"
-strength_sigma = "TBD"
+vth_n_sigma = 3.0
+drive_n_sigma = -3.0
+vth_p_sigma = -3.0
+drive_p_sigma = 3.0
+resistor_scale_sigma = 0.0
+capacitor_scale_sigma = 0.0
 
 [requirements]
 process_mode = true

@@ -198,8 +198,9 @@ def test_apm_authored_scaled_models_are_explicitly_not_ptm_derived() -> None:
     assert apm016f["ptm_mg_derived"] is False
 
 
-def test_benchmark_variation_contract_remains_unfrozen_initially() -> None:
+def test_benchmark_variation_contract_is_frozen_after_three_family_calibration() -> None:
     variation = load_toml("variation/benchmark_v1.toml")
+    assert variation["status"] == "v1-values-frozen-2026-08-30"
     assert variation["requirements"]["process_mode"] is True
     assert variation["requirements"]["mismatch_mode"] is True
     assert variation["requirements"]["all_mode"] is True
@@ -240,6 +241,14 @@ def test_release_validation_flag_is_part_of_cli_contract() -> None:
     args = parser.parse_args(["validate", "--release"])
     assert args.command == "validate"
     assert args.release is True
+
+
+def test_benchmark_validation_command_is_part_of_cli_contract(tmp_path: Path) -> None:
+    parser = build_parser()
+    output = tmp_path / "benchmark"
+    args = parser.parse_args(["benchmark-check", "--output", str(output)])
+    assert args.command == "benchmark-check"
+    assert args.output == output
 
 
 def test_spectre_is_not_a_real_tool_release_gate() -> None:

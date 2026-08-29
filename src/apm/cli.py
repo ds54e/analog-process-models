@@ -5,6 +5,15 @@ import json
 import sys
 from pathlib import Path
 
+from .benchmark import (
+    BENCHMARK_CORNERS,
+    BENCHMARK_MODES,
+    BenchmarkError,
+    resolve_corner,
+    resolve_monte_carlo,
+    write_resolved_sample,
+)
+from .benchmark_validate import validate_benchmark
 from .characterize import CharacterizationError, characterize
 from .doctor import run_doctor
 from .model_build import build_models
@@ -45,6 +54,27 @@ def build_parser() -> argparse.ArgumentParser:
     p_compare.add_argument("technology_a", choices=TECHNOLOGIES)
     p_compare.add_argument("technology_b", choices=TECHNOLOGIES)
 
+    p_sample = sub.add_parser(
+        "sample-variation", help="Resolve a deterministic APM benchmark Monte Carlo sample"
+    )
+    p_sample.add_argument("--request", type=Path, required=True)
+    p_sample.add_argument("--mode", choices=BENCHMARK_MODES, required=True)
+    p_sample.add_argument("--seed", type=int, required=True)
+    p_sample.add_argument("--output", type=Path, required=True)
+
+    p_corner = sub.add_parser(
+        "resolve-corner", help="Resolve a deterministic APM benchmark corner vector"
+    )
+    p_corner.add_argument("corner", choices=BENCHMARK_CORNERS)
+    p_corner.add_argument("--request", type=Path, required=True)
+    p_corner.add_argument("--output", type=Path, required=True)
+
+    p_benchmark = sub.add_parser(
+        "benchmark-check",
+        help="Run deterministic real-ngspice benchmark variation/passive validation",
+    )
+    p_benchmark.add_argument("--output", type=Path, required=True)
+
     return parser
 
 
@@ -64,7 +94,50 @@ def main() -> int:
             result = characterize(args.technology, args.output)
             print(json.dumps(result, indent=2, sort_keys=True))
             return 0
-    except (CharacterizationError, FileNotFoundError, RuntimeError, ToolchainError) as error:
+        if args.command == "benchmark-check":
+            result = validate_benchmark(args.output)
+            print(
+                json.dumps(
+                    {
+                        "status": result["status"],
+                        "output_directory": result["output_directory"],
+                        "report_path": result["report_path"],
+                        "checks": result["checks"],
+                    },
+                    indent=2,
+                    sort_keys=True,
+                )
+            )
+            return 0
+        if args.command in ("sample-variation", "resolve-corner"):
+            request = json.loads(args.request.read_text(encoding="utf-8"))
+            if args.command == "sample-variation":
+                result = resolve_monte_carlo(request, mode=args.mode, seed=args.seed)
+            else:
+                result = resolve_corner(request, corner=args.corner)
+            output = write_resolved_sample(result, args.output)
+            print(
+                json.dumps(
+                    {
+                        "sample_id": result["sample_id"],
+                        "variation_mode": result["variation_mode"],
+                        "corner_profile": result["corner_profile"],
+                        "output": str(output),
+                    },
+                    indent=2,
+                    sort_keys=True,
+                )
+            )
+            return 0
+    except (
+        BenchmarkError,
+        CharacterizationError,
+        FileNotFoundError,
+        json.JSONDecodeError,
+        OSError,
+        RuntimeError,
+        ToolchainError,
+    ) as error:
         print(f"apm {args.command}: {error}", file=sys.stderr)
         return 1
     mode = " --release" if args.command == "validate" and args.release else ""
