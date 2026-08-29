@@ -76,8 +76,15 @@ def test_benchmark_variation_contract_remains_unfrozen_initially() -> None:
     assert variation["requirements"]["all_mode"] is True
     assert variation["requirements"]["python_rng_for_ngspice"] is True
     assert variation["requirements"]["spectre_statistics_for_spectre"] is True
+    assert variation["requirements"]["explicit_distribution_semantics"] is True
+    assert variation["requirements"]["explicit_units"] is True
     assert variation["requirements"]["explicit_sign_semantics"] is True
     assert variation["requirements"]["explicit_correlation_semantics"] is True
+    assert "Normal(mean=0, std=1)" in variation["distribution"]["normalized_variable"]
+    assert "PCG64" in variation["distribution"]["rng_reference"]
+    assert variation["distribution"]["resolved_samples_are_persisted"] is True
+    assert variation["mos"]["process"]["vth_shift_sigma_units"] == "V"
+    assert variation["mos"]["process"]["drive_shift_sigma_units"] == "fractional_Id_change"
     assert "larger |Vth|" in variation["mos"]["intent"]["vth_shift"]
     assert "larger |Id|" in variation["mos"]["intent"]["drive_shift"]
     assert variation["mos"]["intent"]["raw_parameter_sign_is_not_canonical"] is True
@@ -92,6 +99,9 @@ def test_benchmark_passive_contract_is_technology_neutral() -> None:
     assert passives["requirements"]["technology_neutral"] is True
     assert passives["requirements"]["explicit_sign_semantics"] is True
     assert passives["requirements"]["explicit_correlation_semantics"] is True
+    assert passives["requirements"]["explicit_temperature_semantics"] is True
+    assert passives["temperature"]["reference_c"] == 27.0
+    assert passives["temperature"]["tc1_units"] == "1/degC"
     assert "increases resolved resistance" in passives["resistor"]["positive_scale_semantic"]
     assert "increases resolved capacitance" in passives["capacitor"]["positive_scale_semantic"]
 
@@ -159,9 +169,11 @@ def test_research_baseline_is_dated_and_non_normative() -> None:
     assert "PSP 103.6" in text
 
 
-def test_unattended_protocol_requires_project_context_and_status() -> None:
+def test_unattended_protocol_requires_full_context_and_status() -> None:
     text = (ROOT / "UNATTENDED_EXECUTION.md").read_text(encoding="utf-8")
     assert "PROJECT_CONTEXT.md" in text
+    assert "ENVIRONMENT.md" in text
+    assert "RESEARCH_BASELINE.md" in text
     assert "STATUS.md" in text
     assert "apm validate --release" in text
     assert "fresh clone" in text.lower()
