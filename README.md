@@ -6,7 +6,7 @@ Analog Process Models (**APM**) is a new project defined by this repository: an 
 
 Within this repository, **APM means Analog Process Models**. It is not an external product, Microsoft technology, application-performance-monitoring package, or pre-existing software framework.
 
-The planned v1.0 spans:
+The v1.0 target spans five implemented model kits:
 
 - **APM350** — 0.35 µm-class planar CMOS, BSIM3-class
 - **APM130** — 130 nm planar CMOS, IHP SG13G2 / PSP103
@@ -27,12 +27,16 @@ The validated reference flow targeted for v1.0 is:
 
 APM is **not a manufacturable PDK** and does not provide layout rules, PCells, DRC, LVS, PEX, foundry signoff, or silicon-correlation guarantees.
 
-The common v1.0 characterization contract is planned to include Id–Vg, Id–Vd, gm/Id, gm/gds, length scaling, DIBL, terminal small-signal admittance/capacitance, temperature sweeps, common benchmark corners, and benchmark process/mismatch Monte Carlo variation.
+The common v1.0 characterization contract implements Id–Vg, Id–Vd, gm/Id,
+gm/gds, length scaling, DIBL, raw terminal small-signal admittance and derived
+capacitance, four-temperature sweeps, common benchmark corners, and benchmark
+process/mismatch/all Monte Carlo variation.
 
 Technology-neutral benchmark resistor and capacitor models are included in scope so circuits can be compared without inventing process-specific passive technology for every node.
 
 The benchmark variation/passive framework is implemented and real-tool
-validated for the currently operational PSP103, BSIM4, and BSIM-CMG families.
+validated across all five kits and the BSIM3, PSP103, BSIM4, and BSIM-CMG
+families.
 It uses observable `vth_shift`/`drive_shift` intents, persisted NumPy PCG64
 samples, fixed common corners, and native simulator R/C primitives. See
 [`docs/benchmark-variation.md`](docs/benchmark-variation.md) for the exact
@@ -76,7 +80,16 @@ apm sample-variation --request examples/benchmark_request.json --mode all \
 apm benchmark-check --output results/benchmark-check
 ```
 
-The repository is under active v1.0 implementation. M0 through M4 are validated;
-later kit, native-variation, Spectre, and clean-clone release gates remain open.
-Do not interpret planned features as validated; `STATUS.md` and committed
-evidence identify the exact current boundary.
+For complete nominal characterization and normalized comparisons:
+
+```console
+apm characterize apm045 --output results/apm045
+apm characterization-check --output results/all-kits
+apm compare apm022 apm016f --output results/apm022-vs-apm016f
+```
+
+The repository remains under active v1.0 implementation. M0 through M7 are
+validated; IHP-native variation, experimental Spectre model files, final
+release validation, and clean-clone gates remain open. Do not interpret an
+implemented model as a foundry or silicon-correlation claim. `STATUS.md` and
+committed evidence identify the exact current boundary.

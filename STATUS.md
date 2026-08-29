@@ -10,7 +10,7 @@ It is **not** evidence by itself. Validation claims must point to committed summ
 - Repository: https://github.com/ds54e/analog-process-models
 - Target: v1.0.0
 - Current state: `IN_PROGRESS`
-- Current milestone: `M7 Common characterization completion`
+- Current milestone: `M8 IHP-native variation`
 - Release eligible: `NO`
 
 ## Reported initial environment
@@ -35,8 +35,8 @@ See `ENVIRONMENT.md`. M0 verified the host and bootstrapped the project-local re
 | M4 Benchmark R/C + variation | VALIDATED | `validation/evidence/m4-benchmark.md`: frozen synthetic severities, measured PSP/BSIM4/BSIM-CMG intent adapters, deterministic PCG64 samples/replay, five common corners, and native R/C value/noise checks passed. |
 | M5 APM022 | VALIDATED | `validation/evidence/m5-apm022.md`: independent non-PTM BSIM4 cards, explicit behavior contracts, complete terminal characterization, APM045/APM016F comparisons, and benchmark adapter/corners passed. |
 | M6 APM350 | VALIDATED | `validation/evidence/m6-apm350.md`: independently authored open generic BSIM3 cards, rejected-source license audit, complete terminal characterization, and fifth benchmark adapter passed. |
-| M7 Common characterization completion | IN_PROGRESS | Integrate all five result sets, comparisons, common result-contract checks, and regression evidence. |
-| M8 IHP-native variation | NOT_STARTED | — |
+| M7 Common characterization completion | VALIDATED | `validation/evidence/m7-all-kits.md`: fresh all-kit execution, complete result-contract audits, normalized terminal comparison, and explicit planar-per-width versus FinFET-per-fin semantics passed. |
+| M8 IHP-native variation | IN_PROGRESS | Validate selected available IHP SG13G2 native corners/process/mismatch in ngspice, kept distinct from APM benchmark variation. |
 | M9 Spectre model-only compatibility | NOT_STARTED | — |
 | M10 License/provenance + clean-clone release review | NOT_STARTED | — |
 
@@ -119,6 +119,10 @@ A blocker entry should state:
   independent/local per instance; threshold combines additively while drive
   and passive scale factors combine multiplicatively. Planar matching uses
   `W*L`, FinFET matching uses `NFIN*L`, and passive `match_size` is dimensionless.
+- Integrated comparisons use 27 degC, `L/Lmin=2`, `VOUT/VDD=0.5`, and the
+  available gate-grid point nearest `gm/Id=15 1/V`. Planar current/gm/
+  capacitance remain per micrometre of drawn width and FinFET quantities remain
+  per fin; cross-basis current and capacitance ratios are intentionally absent.
 
 Only record decisions that materially affect public API, model provenance/fidelity, characterization semantics, variation semantics, supported runtime, or release claims. Do not use this section as a verbose work diary.
 
@@ -139,6 +143,9 @@ When a material decision intentionally departs from `PROJECT_CONTEXT.md`, record
 - `validation/evidence/m6-apm350.md` — rejected-candidate provenance audit,
   independent mature-planar BSIM3 characterization, and the completed
   five-kit benchmark adapter/corner/Monte Carlo validation.
+- `validation/evidence/m7-all-kits.md` — fresh five-kit characterization,
+  persisted result-contract audit, normalized terminal table, and safe
+  planar-to-FinFET comparison semantics.
 
 ## Final-review fields
 

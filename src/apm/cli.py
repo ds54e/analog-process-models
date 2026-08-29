@@ -15,6 +15,7 @@ from .benchmark import (
 )
 from .benchmark_validate import validate_benchmark
 from .characterize import CharacterizationError, characterize
+from .compare import ComparisonError, compare_technologies, validate_all_characterizations
 from .doctor import run_doctor
 from .model_build import build_models
 from .toolchain import ToolchainError
@@ -53,6 +54,17 @@ def build_parser() -> argparse.ArgumentParser:
     p_compare = sub.add_parser("compare", help="Compare two technology kits")
     p_compare.add_argument("technology_a", choices=TECHNOLOGIES)
     p_compare.add_argument("technology_b", choices=TECHNOLOGIES)
+    p_compare.add_argument(
+        "--output",
+        type=Path,
+        help="Result directory (default: a new UTC-stamped comparison directory)",
+    )
+
+    p_characterization = sub.add_parser(
+        "characterization-check",
+        help="Run and audit the common terminal characterization across all five kits",
+    )
+    p_characterization.add_argument("--output", type=Path, required=True)
 
     p_sample = sub.add_parser(
         "sample-variation", help="Resolve a deterministic APM benchmark Monte Carlo sample"
@@ -109,6 +121,42 @@ def main() -> int:
                 )
             )
             return 0
+        if args.command == "characterization-check":
+            result = validate_all_characterizations(args.output)
+            print(
+                json.dumps(
+                    {
+                        "status": result["status"],
+                        "output_directory": result["output_directory"],
+                        "report_path": result["report_path"],
+                        "checks": result["checks"],
+                    },
+                    indent=2,
+                    sort_keys=True,
+                )
+            )
+            return 0
+        if args.command == "compare":
+            result = compare_technologies(
+                args.technology_a,
+                args.technology_b,
+                args.output,
+            )
+            print(
+                json.dumps(
+                    {
+                        "status": result["status"],
+                        "technologies": result["technologies"],
+                        "output_directory": result["output_directory"],
+                        "report_path": result["report_path"],
+                        "checks": result["checks"],
+                        "pairwise_relations": result["pairwise_relations"],
+                    },
+                    indent=2,
+                    sort_keys=True,
+                )
+            )
+            return 0
         if args.command in ("sample-variation", "resolve-corner"):
             request = json.loads(args.request.read_text(encoding="utf-8"))
             if args.command == "sample-variation":
@@ -132,6 +180,7 @@ def main() -> int:
     except (
         BenchmarkError,
         CharacterizationError,
+        ComparisonError,
         FileNotFoundError,
         json.JSONDecodeError,
         OSError,

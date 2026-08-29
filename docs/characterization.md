@@ -64,3 +64,36 @@ when gate/junction leakage and current partition dominate an otherwise-off
 channel. The raw signed curves remain authoritative, and this distinction must
 not be used to hide a reversal once channel conduction reaches the documented
 threshold criterion.
+
+## Integrated five-kit validation and comparison
+
+`apm characterization-check --output DIR` runs all five kits from the current
+checkout, stores each complete result below `DIR/kits/<kit-id>/`, audits the
+persisted result contract, and writes:
+
+- `normalized_comparison.csv`: one 27 degC row per kit and polarity at
+  `L/Lmin=2`, `VOUT/VDD=0.5`, and the available gate-grid point nearest
+  `gm/Id=15 1/V`;
+- `report.json`: schema `apm.characterization-validation.v1`, per-kit model and
+  artifact identities, row counts, simulator-log diagnostics, normalized
+  comparison rows, and every pass criterion.
+
+The audit requires all four temperatures and all raw/derived/Y artifacts,
+checks the N/P public-device and variation identities in every table, verifies
+full 4x4 complex Y storage, checks raw versus canonical current semantics, and
+fails if any per-kit real-tool requirement or integrated comparison property
+fails. Result paths stored inside the report are relative to `DIR`; the command
+refuses to overwrite a non-empty directory.
+
+Planar current, gm, and capacitance are normalized per micrometre of drawn
+width. APM016F quantities are normalized per fin and retain `nfin`; no planar
+`w_m` is invented. These normalizations are distinct. The integrated table is
+useful for side-by-side inspection, but it does not imply that a per-width
+number and a per-fin number have the same denominator.
+
+`apm compare TECHNOLOGY_A TECHNOLOGY_B --output DIR` runs the same complete
+audited flow for a selected pair and adds dimensionless B/A ratios for
+gm/gds, DIBL, and threshold. It reports normalized current and capacitance
+ratios only when both devices use the same basis. For a planar-to-FinFET pair,
+those ratios are deliberately `null` with status
+`not_reported_across_per_width_and_per_fin_bases`.
