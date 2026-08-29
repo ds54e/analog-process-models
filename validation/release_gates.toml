@@ -9,7 +9,15 @@ spectre_real_validation_required = false
 repository_visibility_may_change = false
 clean_clone_required = true
 clean_clone_platform = "WSL2 + RHEL-compatible EL9 Linux + x86_64"
-reference_simulator = "ngspice"
+reference_simulator = "ngspice 47 with OSDI"
+
+[runtime]
+primary_distribution = "AlmaLinux 9"
+acceptable_distribution_class = "RHEL-compatible EL9"
+architecture = "x86_64"
+required_ngspice_major = 47
+osdi_required = true
+python_minimum = "3.9"
 
 [release_metadata]
 target_version = "1.0.0"
@@ -126,13 +134,13 @@ release_metadata_audit_required = true
 id = "runtime.wsl2_el9"
 required = true
 validation = "real_environment"
-summary = "Fresh-clone reference flow executes on WSL2 + EL9-compatible x86_64 Linux."
+summary = "Fresh-clone reference flow executes on WSL2 + RHEL-compatible EL9 x86_64 Linux; AlmaLinux 9 is the primary reference distribution."
 
 [[gate]]
 id = "runtime.ngspice_headless"
 required = true
 validation = "real_tool"
-summary = "Headless ngspice reference simulation executes successfully."
+summary = "Headless ngspice 47 reference simulation executes successfully with the required OSDI capability."
 
 [[gate]]
 id = "runtime.psp103_osdi"
