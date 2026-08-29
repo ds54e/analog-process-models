@@ -13,26 +13,59 @@ Use this order when repository instructions appear to conflict:
 3. `GOAL.md` — authoritative v1.0 scope, requirements, and Definition of Done
 4. this file — unattended execution procedure
 5. `PROJECT_CONTEXT.md` — informative design history and rationale
-6. `README.md` — public-facing project description
+6. `ENVIRONMENT.md` — reported initial environment and M0 bootstrap expectations
+7. `RESEARCH_BASELINE.md` — dated external-research baseline
+8. `README.md` — public-facing project description
 
-`PROJECT_CONTEXT.md` explains why important design choices were made, but it is not allowed to override the normative contract above it.
+`PROJECT_CONTEXT.md`, `ENVIRONMENT.md`, and `RESEARCH_BASELINE.md` provide context and starting assumptions, but they are not allowed to override the normative contract above them. Current authoritative upstream evidence or actual tool behavior may supersede a dated research baseline; record material changes in `STATUS.md` and provenance/evidence.
 
 Do not silently resolve a material conflict by dropping a harder requirement. Prefer the stricter interpretation and record the decision in `STATUS.md`.
+
+## Expected initial execution environment
+
+The first unattended implementation run is expected to start with Codex CLI running directly inside WSL2 on AlmaLinux, with ngspice/OpenVAF not yet installed. Treat that as reported input, not validation.
+
+Missing initial simulator/compiler tooling is expected M0 bootstrap work, not a blocker by itself.
+
+Do not create a nested container or alternate Linux VM merely to claim that the WSL2/EL9 release gate was satisfied. Containers may be useful supplementary checks, but the direct WSL2 + AlmaLinux environment is the primary reference environment and final clean-clone target.
 
 ## Startup sequence
 
 Before implementation work:
 
 1. Confirm the working repository origin is `https://github.com/ds54e/analog-process-models`.
-2. Read `AGENTS.md`, `GOAL.md`, `PROJECT_CONTEXT.md`, `UNATTENDED_EXECUTION.md`, and `README.md` completely.
+2. Read `AGENTS.md`, `GOAL.md`, `PROJECT_CONTEXT.md`, `ENVIRONMENT.md`, `RESEARCH_BASELINE.md`, `UNATTENDED_EXECUTION.md`, and `README.md` completely.
 3. Read `validation/release_gates.toml` and `STATUS.md` before deciding what is already complete.
 4. Inspect `git status` before changing anything.
 5. Preserve any pre-existing user changes. Never use destructive `git reset --hard`, `git clean -fdx`, force-push, or history rewriting to obtain a clean tree.
-6. Confirm the actual execution environment and record it in `STATUS.md` and validation evidence.
+6. Verify the actual WSL2/EL9 environment locally rather than trusting the reported initial state. Record the result in `STATUS.md` and validation evidence.
 7. Inventory installed simulator/compiler/tool versions before installing or upgrading anything.
-8. Begin with M0 from `GOAL.md`; do not start by inventing a generic framework.
+8. Bootstrap the required M0 toolchain when absent. For the initial target, this means Python >=3.9, ngspice 47 with OSDI, and OpenVAF-ReLoaded where Verilog-A-to-OSDI compilation is required.
+9. Begin actual model qualification with M0 from `GOAL.md`; do not start by inventing a generic framework.
 
-Use `PROJECT_CONTEXT.md` to understand settled rationale before reopening architecture questions. A different implementation is acceptable when new authoritative evidence or actual tool behavior requires it, but record material departures and their evidence in `STATUS.md` rather than silently replacing the original design intent.
+Use `PROJECT_CONTEXT.md` to understand settled rationale before reopening architecture questions. Use `RESEARCH_BASELINE.md` to avoid repeating already-completed discovery, but re-check authoritative upstream sources before pinning a revision or making a release claim. A different implementation is acceptable when new authoritative evidence or actual tool behavior requires it, but record material departures and their evidence in `STATUS.md` rather than silently replacing the original design intent.
+
+## M0 toolchain bootstrap discipline
+
+On the reported bare AlmaLinux environment, source-building required tools is an acceptable and expected path.
+
+For ngspice:
+
+- target ngspice 47 with the OSDI/predictor support required by the project;
+- use authoritative source;
+- prefer a reproducible user-local/project-controlled install prefix when practical;
+- do not destructively replace unrelated system software solely for APM;
+- document dependencies, source version/hash, configure flags, compiler, prefix, and version output;
+- prove OSDI with actual loaded-model simulation.
+
+For OpenVAF-ReLoaded:
+
+- use authoritative upstream binaries or source;
+- pin the actual revision/version used;
+- record the toolchain if building from source;
+- prove the selected tool by compiling the actual PSP103 and BSIM-CMG paths required by APM, not just a trivial example.
+
+Do not modify user shell startup files as the required installation mechanism. Use explicit/project-managed paths or reproducible setup scripts/configuration.
 
 ## Milestone execution loop
 
@@ -41,7 +74,7 @@ Treat M0–M10 in `GOAL.md` as durable checkpoints.
 For each milestone:
 
 1. Re-read the relevant `GOAL.md` requirements and relevant rationale in `PROJECT_CONTEXT.md`.
-2. Research only the external facts needed for that milestone.
+2. Re-check any dated upstream fact from `RESEARCH_BASELINE.md` that will become a pinned dependency, vendored asset, or release claim.
 3. Implement the smallest complete design that satisfies the milestone and preserves the public contract.
 4. Run milestone-level tests using the actual tools whenever available.
 5. Investigate failures rather than weakening assertions or changing requirements to match broken behavior.
@@ -131,6 +164,8 @@ Do not:
 - replace the user's shell configuration as an installation mechanism;
 - require `/mnt/c` for source/build/run data;
 - assume a tool feature exists without checking the installed version or authoritative documentation.
+
+Use the distro package manager for ordinary build prerequisites when appropriate, but avoid replacing or removing unrelated user software. Prefer user-local prefixes for source-built simulator/compiler tooling when practical.
 
 Pin model-engine/upstream revisions where reproducibility requires it. Record actual validated tool versions rather than claiming compatibility with untested versions.
 
