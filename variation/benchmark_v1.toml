@@ -2,22 +2,38 @@ schema = "apm.benchmark-variation.v1"
 status = "draft-values-unfrozen"
 
 [notes]
-text = "Architecture and sign/correlation semantics are part of the v1.0 contract. Numerical sigma/corner severity values remain intentionally unset until representative kits are characterized."
+text = "Architecture, sign, distribution, units, and correlation semantics are part of the v1.0 contract. Numerical sigma/corner severity values remain intentionally unset until representative kits are characterized."
+
+[distribution]
+normalized_variable = "z ~ Normal(mean=0, std=1)"
+rng_reference = "NumPy Generator with explicitly selected PCG64 bit generator for ngspice benchmark sampling"
+seed_is_integer = true
+resolved_samples_are_persisted = true
+no_implicit_truncation = true
 
 [mos.process]
 vth_shift_sigma = "TBD"
+vth_shift_sigma_units = "V"
 drive_shift_sigma = "TBD"
+drive_shift_sigma_units = "fractional_Id_change"
 
 [mos.mismatch]
 vth_shift_sigma_ref = "TBD"
+vth_shift_sigma_ref_units = "V"
 drive_shift_sigma_ref = "TBD"
+drive_shift_sigma_ref_units = "fractional_Id_change"
 scaling_law = "sigma_ref/sqrt(match_size)"
 
 [mos.intent]
 vth_shift = "observable threshold-magnitude shift; positive means larger |Vth| (slower threshold direction) for both N and P"
-drive_shift = "observable relative drain-current-magnitude shift at the kit reference bias; positive means larger |Id| (stronger/faster drive) for both N and P"
+drive_shift = "observable fractional drain-current-magnitude shift at the kit reference bias; positive means larger |Id| (stronger/faster drive) for both N and P"
 raw_parameter_sign_is_not_canonical = true
 adapter_must_map_sign_per_model_and_polarity = true
+
+[mos.composition]
+threshold = "vth_shift_total = vth_shift_process + vth_shift_local"
+drive = "drive_factor_total = (1 + drive_shift_process) * (1 + drive_shift_local)"
+invalid_drive_factor = "must not be silently clipped; benchmark sigma values must be chosen so normal sampled operation is physically valid, and any invalid resolved sample must be reported explicitly"
 
 [mos.correlation]
 process_n_vth_vs_n_drive = "independent_by_default"
@@ -25,6 +41,7 @@ process_p_vth_vs_p_drive = "independent_by_default"
 process_n_vs_p = "independent_by_default"
 process_mos_vs_passives = "independent_by_default"
 mismatch_between_instances = "independent_by_default"
+mismatch_vth_vs_drive_same_instance = "independent_by_default"
 mismatch_vs_process = "independent_by_default"
 
 [corner.bench_tt]
@@ -55,5 +72,7 @@ mismatch_mode = true
 all_mode = true
 python_rng_for_ngspice = true
 spectre_statistics_for_spectre = true
+explicit_distribution_semantics = true
+explicit_units = true
 explicit_sign_semantics = true
 explicit_correlation_semantics = true
