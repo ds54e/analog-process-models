@@ -5,6 +5,7 @@ path = [
   "README.md",
   "GOAL.md",
   "AGENTS.md",
+  "PROJECT_CONTEXT.md",
   "UNATTENDED_EXECUTION.md",
   "STATUS.md",
   "THIRD_PARTY.md",
@@ -16,12 +17,14 @@ path = [
   "validation/**",
   "examples/**",
   "tools/**",
-  "tests/**"
+  "tests/**",
+  "models/*/provenance.toml"
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "APM contributors"
 SPDX-License-Identifier = "Apache-2.0"
 
-# Vendored model files are intentionally NOT covered by this aggregate annotation.
-# Add file-level or narrowly scoped directory annotations only after exact upstream
-# license/provenance audit. Do not use this file to overwrite upstream licensing.
+# Vendored model/source files under models/** are intentionally NOT covered by this
+# aggregate annotation except for the explicitly listed APM-authored provenance.toml
+# files above. Add file-level or narrowly scoped directory annotations only after exact
+# upstream license/provenance audit. Do not use this file to overwrite upstream licensing.
