@@ -8,6 +8,7 @@ path = [
   "PROJECT_CONTEXT.md",
   "UNATTENDED_EXECUTION.md",
   "STATUS.md",
+  "CHANGELOG.md",
   "THIRD_PARTY.md",
   ".gitignore",
   "pyproject.toml",
