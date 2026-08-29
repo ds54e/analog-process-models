@@ -12,7 +12,10 @@ Use this order when repository instructions appear to conflict:
 2. `AGENTS.md` — mandatory repository policy and guardrails
 3. `GOAL.md` — authoritative v1.0 scope, requirements, and Definition of Done
 4. this file — unattended execution procedure
-5. `README.md` — public-facing project description
+5. `PROJECT_CONTEXT.md` — informative design history and rationale
+6. `README.md` — public-facing project description
+
+`PROJECT_CONTEXT.md` explains why important design choices were made, but it is not allowed to override the normative contract above it.
 
 Do not silently resolve a material conflict by dropping a harder requirement. Prefer the stricter interpretation and record the decision in `STATUS.md`.
 
@@ -21,12 +24,15 @@ Do not silently resolve a material conflict by dropping a harder requirement. Pr
 Before implementation work:
 
 1. Confirm the working repository origin is `https://github.com/ds54e/analog-process-models`.
-2. Read `AGENTS.md`, `GOAL.md`, `UNATTENDED_EXECUTION.md`, and `README.md` completely.
-3. Inspect `git status` before changing anything.
-4. Preserve any pre-existing user changes. Never use destructive `git reset --hard`, `git clean -fdx`, force-push, or history rewriting to obtain a clean tree.
-5. Confirm the actual execution environment and record it in `STATUS.md` and validation evidence.
-6. Inventory installed simulator/compiler/tool versions before installing or upgrading anything.
-7. Begin with M0 from `GOAL.md`; do not start by inventing a generic framework.
+2. Read `AGENTS.md`, `GOAL.md`, `PROJECT_CONTEXT.md`, `UNATTENDED_EXECUTION.md`, and `README.md` completely.
+3. Read `validation/release_gates.toml` and `STATUS.md` before deciding what is already complete.
+4. Inspect `git status` before changing anything.
+5. Preserve any pre-existing user changes. Never use destructive `git reset --hard`, `git clean -fdx`, force-push, or history rewriting to obtain a clean tree.
+6. Confirm the actual execution environment and record it in `STATUS.md` and validation evidence.
+7. Inventory installed simulator/compiler/tool versions before installing or upgrading anything.
+8. Begin with M0 from `GOAL.md`; do not start by inventing a generic framework.
+
+Use `PROJECT_CONTEXT.md` to understand settled rationale before reopening architecture questions. A different implementation is acceptable when new authoritative evidence or actual tool behavior requires it, but record material departures and their evidence in `STATUS.md` rather than silently replacing the original design intent.
 
 ## Milestone execution loop
 
@@ -34,7 +40,7 @@ Treat M0–M10 in `GOAL.md` as durable checkpoints.
 
 For each milestone:
 
-1. Re-read the relevant `GOAL.md` requirements.
+1. Re-read the relevant `GOAL.md` requirements and relevant rationale in `PROJECT_CONTEXT.md`.
 2. Research only the external facts needed for that milestone.
 3. Implement the smallest complete design that satisfies the milestone and preserves the public contract.
 4. Run milestone-level tests using the actual tools whenever available.
@@ -110,6 +116,8 @@ Freeze them only after representative model families are operational and the eff
 
 Keep process/global, mismatch/local, N/P, and R/C correlation semantics explicit. Do not introduce undocumented correlation.
 
+Development-time TBDs must not survive into release-critical model provenance, benchmark variation/passive configuration, or release metadata. The final release validator must treat unresolved release-critical placeholders as failure.
+
 ## Environment and dependency changes
 
 Local installation of required development dependencies inside the designated WSL/EL9 environment is permitted.
@@ -175,6 +183,14 @@ can evaluate all automatically checkable mandatory gates and exits non-zero when
 
 Do not let that command report success merely because an unimplemented check was skipped. Required-but-manual gates must be represented separately and remain visibly incomplete until evidence exists.
 
+The release-oriented validator must also reject at least:
+
+- unresolved release-critical `TBD`, placeholder, or candidate-only provenance state;
+- package/release metadata that does not identify the target as v1.0.0;
+- missing required license/provenance evidence;
+- a required gate with no evidence or an explicitly blocked status;
+- Spectre claims stronger than the available evidence allows.
+
 `STATUS.md` is a progress index, not proof. Evidence and actual test execution are proof.
 
 ## Final clean-clone protocol
@@ -190,10 +206,12 @@ Before v1.0.0 can be declared complete:
 7. run `apm validate --release` or the final equivalent;
 8. run representative characterization/comparison commands for all five kits;
 9. verify the provenance/license audit from the clean clone;
-10. confirm README claims match actual evidence;
-11. confirm Spectre remains labeled experimental/unverified unless separately validated;
-12. confirm every mandatory `GOAL.md` gate has evidence;
-13. only then prepare/tag v1.0.0.
+10. confirm no release-critical `TBD` or placeholder values remain;
+11. confirm package/release metadata and release notes identify v1.0.0 consistently;
+12. confirm README claims match actual evidence;
+13. confirm Spectre remains labeled experimental/unverified unless separately validated;
+14. confirm every mandatory `GOAL.md` gate has evidence;
+15. only then prepare/tag v1.0.0.
 
 If any mandatory gate fails, fix it and repeat the relevant clean-clone steps. Do not waive a gate solely because the run has already consumed substantial time.
 
