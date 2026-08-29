@@ -1,5 +1,17 @@
 # APM v1.0 Implementation Goal
 
+## 0. Repository identity
+
+Work on the existing repository:
+
+- **Repository:** `https://github.com/ds54e/analog-process-models`
+- **Project:** Analog Process Models
+- **Project acronym:** **APM = Analog Process Models**
+
+Within this goal, **APM always means the Analog Process Models project defined by this repository**. It is not a Microsoft technology, application-performance-monitoring product, external package, or pre-existing software framework.
+
+Do not create, migrate to, or substitute another repository as the project authority. Do not change repository visibility. Only prepare/tag v1.0.0 after every release gate below is actually satisfied.
+
 Build and release **Analog Process Models (APM) v1.0.0** as a self-contained, open compact-model collection and characterization framework spanning mature planar CMOS through FinFET.
 
 Work autonomously until the Definition of Done is satisfied. Do not stop at scaffolding, planning, or partial implementation. Research authoritative public sources as needed, implement, simulate, validate, fix failures, audit licensing, document limitations, and leave the repository release-ready.
@@ -33,6 +45,8 @@ Validated v1.0 reference environment:
 Native Windows and macOS support are out of scope. Keep build/run data on the WSL Linux filesystem, not `/mnt/c`.
 
 Automated characterization must be headless and must not depend on xschem, `~/.spiceinit`, or other user-global simulator state.
+
+An EL9 container or CI job is useful supplementary validation, but it does **not** replace the final clean-clone validation on an actual WSL2 + EL9-compatible Linux environment.
 
 ## 3. Model-kit requirements
 
@@ -101,14 +115,25 @@ Disable self-heating in v1.0 unless basic model operation requires otherwise.
 
 ## 4. Public device interface
 
-Keep the public simulation interface intentionally small.
+Keep the public simulation interface intentionally small and use stable APM-owned names.
 
-Planar devices expose only:
+Planar devices:
+
+- `apm350_nmos`, `apm350_pmos`
+- `apm130_nmos`, `apm130_pmos`
+- `apm045_nmos`, `apm045_pmos`
+- `apm022_nmos`, `apm022_pmos`
+
+Planar public interface:
 
 - terminals: `d g s b`
 - parameters: `w`, `l`
 
-FinFET devices expose only:
+FinFET devices:
+
+- `apm016f_nfet`, `apm016f_pfet`
+
+FinFET public interface:
 
 - terminals: `d g s b`
 - parameters: `l`, `nfin`
@@ -116,6 +141,8 @@ FinFET devices expose only:
 Do not expose common v1.0 public parameters for multiplicity, finger count, `nf`, `ng`, or layout semantics. Parallel devices can be represented as separate instances.
 
 Do not invent a universal effective-width abstraction across planar and FinFET devices.
+
+Upstream model names may be used internally but are not the stable APM public contract.
 
 ## 5. Benchmark passives
 
@@ -165,16 +192,27 @@ Use normalized comparison coordinates where appropriate:
 
 Provide native/raw views and normalized cross-technology views. Do not use identical absolute W or VGS as the primary cross-process comparison method.
 
+### N/P polarity convention
+
+Preserve raw simulator terminal voltages and currents with their native signed convention.
+
+For canonical positive-magnitude N/P comparison metrics, use effective positive control/output variables:
+
+- NMOS/NFET: `VCTRL = VGS`, `VOUT = VDS`, `IDMAG = abs(ID)`
+- PMOS/PFET: `VCTRL = VSG`, `VOUT = VSD`, `IDMAG = abs(ID)`
+
+Canonical comparison gm/gds and gm/Id must use these effective variables so normal-conduction PMOS/PFET results are not accidentally sign-inverted. Metadata must state whether a field is a raw signed simulator quantity or a canonical positive-magnitude comparison quantity.
+
 ## 7. gm and gds
 
 Simulator-internal OP field names are not the canonical API.
 
-Canonical values come from terminal finite differences:
+Canonical values come from terminal finite differences using the effective variables defined above:
 
-- `gm = dId/dVg`
-- `gds = dId/dVd`
+- `gm = d(IDMAG)/d(VCTRL)`
+- `gds = d(IDMAG)/d(VOUT)`
 
-Use central differences and numerical convergence checks with more than one perturbation size.
+Use central differences and numerical convergence checks with more than one perturbation size while holding the other independent terminal biases fixed.
 
 Native simulator gm/gds may be used as validation oracles. For APM130, explicitly compare derived quantities with PSP native OP values to validate the methodology.
 
@@ -182,24 +220,33 @@ Native simulator gm/gds may be used as validation oracles. For APM130, explicitl
 
 Use a documented constant-current threshold method.
 
-Default drain voltages:
+Default effective drain voltages:
 
-- `VDS_low = 50 mV`
-- `VDS_high = 0.8 * nominal VDD`
+- `VOUT_low = 50 mV`
+- `VOUT_high = 0.8 * nominal VDD`
 
-Compute:
+Use threshold-voltage magnitude for both N and P devices and report positive DIBL for the normal case where threshold magnitude is reduced at higher drain bias:
 
-`DIBL = (Vth_low - Vth_high) / (VDS_high - VDS_low)`
+`DIBL = (|Vth_low| - |Vth_high|) / (VOUT_high - VOUT_low)`
 
-Use technology-appropriate threshold-current normalization: planar devices by W/L, FinFET devices by NFIN. Store the exact extraction convention in result metadata.
+Use technology-appropriate threshold-current normalization: planar devices by W/L, FinFET devices by NFIN. The exact normalized constant-current coefficient must be documented and stored in result metadata; do not hide or silently change the extraction convention.
 
 ## 9. Capacitance
 
 Do not use compact-model-specific `cgg/cgd/cgs` OP names as the canonical API.
 
-Use AC analysis to obtain terminal admittance. Store the complex Y matrix as raw data and derive capacitance quantities from its imaginary terms.
+Use AC analysis to obtain terminal admittance at each DC bias point.
 
-Check that the selected quasi-static characterization frequency does not materially change extracted capacitance over a reasonable low-frequency range.
+Use fixed terminal order `d, g, s, b`. To construct the raw 4-terminal Y matrix, excite one terminal at a time with a known small-signal voltage while holding the other terminal voltage sources at AC ground, and record all terminal currents using a documented current-direction convention. Store the complex Y matrix as raw authoritative data.
+
+For angular frequency `omega`, derive self and transfer capacitances using a documented sign convention. A default convention is:
+
+- self term: `Cii = imag(Yii) / omega`
+- transfer term reported as positive coupling magnitude: `Cij = -imag(Yij) / omega` for `i != j`
+
+At minimum report Cgg, Cgd, and Cgs and retain the raw Y matrix so alternative definitions can be recomputed later.
+
+Check that the selected quasi-static characterization frequency does not materially change extracted capacitance over a reasonable low-frequency range. Record the actual frequency/frequencies used.
 
 MOS noise characterization is out of scope for v1.0, but the design must not prevent adding it later.
 
@@ -235,6 +282,31 @@ Do not assume equal raw parameter percentages mean equal observable shifts.
 Calibrate drive mapping per kit at a documented reference point, e.g. approximately `L=2*Lmin`, `VDS=0.5*VDD`, `gm/Id≈15 V^-1`. Store calibration metadata.
 
 Do not freeze benchmark sigma/severity values until representative kits are operational and the impact is characterized.
+
+### Benchmark statistical semantics
+
+The benchmark specification must explicitly define correlation rather than leaving it implicit.
+
+Unless a later calibrated benchmark profile explicitly states otherwise, use independent normalized benchmark process variables for:
+
+- NMOS/NFET `vth_shift`
+- NMOS/NFET `drive_shift`
+- PMOS/PFET `vth_shift`
+- PMOS/PFET `drive_shift`
+- Rbench global scale
+- Cbench global scale
+
+Each process variable is global within one Monte Carlo sample for its relevant device/passive class.
+
+Mismatch variables are local per APM device/passive instance, independent between instances, and independent of process variables unless the benchmark profile explicitly documents another correlation model.
+
+Composition semantics:
+
+- threshold process + local shifts combine additively
+- drive/process and passive scale factors combine multiplicatively
+- `all` means the documented process perturbation and local mismatch perturbation are both applied in the same sample/run
+
+Do not invent hidden cross-correlation to make distributions appear more realistic.
 
 ## 11. Benchmark mismatch law
 
@@ -280,6 +352,7 @@ Requirements:
 - same seed reproduces identical benchmark samples
 - different seeds differ
 - machine-readable sample persistence
+- resolved samples contain enough information to replay a run deterministically
 
 Do not rely on Verilog-A random-number functions for APM benchmark variation.
 
@@ -320,11 +393,15 @@ Virtuoso integration is fully user-managed.
 
 Use native Spectre BSIM3/PSP/BSIM4/BSIM-CMG implementations where practical.
 
-Prefer thin Spectre subckt wrappers as the public MOS interface so local mismatch can be applied cleanly per instance.
+Prefer thin Spectre subckt wrappers with the same public APM device names as the ngspice-facing interface so local mismatch can be applied cleanly per instance.
 
 Use Spectre `statistics` blocks so standard Spectre/ADE Monte Carlo can select Process, Mismatch, or All.
 
 For APM130 Spectre support, APM benchmark variation is required; IHP-native Monte Carlo compatibility is not claimed for v1.0.
+
+Spectre's own RNG does **not** need to reproduce the ngspice Python sampler seed-for-seed in v1.0. The required compatibility target is equivalent intended distributions, geometry scaling, process/local semantics, and documented correlation assumptions. Fixed-sample cross-simulator Monte Carlo conformance is explicitly deferred.
+
+Do not claim Spectre parse validity or numerical conformance without a real Spectre run. Static structural checks are useful but are not Spectre validation.
 
 ## 15. xschem
 
@@ -383,7 +460,7 @@ Prefer robust property-based regression over brittle exact-number assertions.
 
 Test properties such as:
 
-- sane NMOS/NFET and PMOS/PFET polarity
+- sane NMOS/NFET and PMOS/PFET polarity under the documented raw/canonical sign conventions
 - finite, physically sensible results in supported bias ranges
 - increasing planar L generally improves gm/gds in appropriate operating regions
 - NFIN increase gives sensible FinFET current scaling
@@ -393,6 +470,8 @@ Test properties such as:
 - sensible benchmark-corner ordering
 - numerical convergence of finite-difference gm/gds
 - reasonable APM130 agreement between derived and PSP native gm/gds
+- Y-matrix KCL/sign consistency within numerical tolerance
+- capacitance extraction is reasonably insensitive to the selected low-frequency characterization point
 
 Small upstream numerical changes should not fail the suite solely because exact snapshots moved. Reference snapshots may be used for warnings/review.
 
@@ -422,13 +501,14 @@ Do not declare completion until all are true:
 - Every vendored file has auditable provenance/license information.
 
 ### Reference runtime
-- Clean setup works on WSL2 + EL9-compatible Linux.
+- Clean setup works on an actual WSL2 + EL9-compatible Linux environment.
 - Headless ngspice simulation works.
 - PSP103 OSDI works.
 - BSIM-CMG OSDI works.
+- CI/container validation, if present, is supplementary and does not substitute for the WSL2 clean-clone gate.
 
 ### Devices
-- Every kit has usable N/P devices with the defined public interface.
+- Every kit has usable N/P devices with the defined stable APM public names and interface.
 
 ### Characterization
 Every kit completes:
@@ -440,6 +520,7 @@ Every kit completes:
 - DIBL
 - terminal Y matrix / capacitance
 - required temperature sweep
+- raw/canonical N/P sign conventions are documented and tested
 
 ### Passives
 - Rbench and Cbench work identically across all kits.
@@ -451,7 +532,7 @@ Every kit supports:
 - benchmark mismatch MC
 - benchmark process+mismatch MC
 
-with reproducible ngspice benchmark sampling.
+with reproducible ngspice benchmark sampling and explicit process/local correlation semantics.
 
 ### Native IHP variation
 - APM130 supports the selected available IHP-native corners/process/mismatch flow in the ngspice reference implementation.
@@ -463,16 +544,18 @@ with reproducible ngspice benchmark sampling.
 - Model-only Spectre artifacts exist for every kit and include benchmark MC design.
 - They are clearly labeled experimental/unverified.
 - Actual Spectre validation is not required for v1.0.
+- No README or metadata may imply Spectre was run when it was not.
 
 ### Documentation
-README documents scope, installation, model provenance, fidelity limitations, benchmark vs native variation, benchmark passives, comparison methodology, Spectre status, and the non-manufacturable-PDK disclaimer.
+README documents scope, installation, model provenance, fidelity limitations, benchmark vs native variation, benchmark passives, comparison methodology, Spectre status, repository identity, and the non-manufacturable-PDK disclaimer.
 
 ### Release readiness
 - tests pass
 - license audit passes
-- clean-clone validation passes
+- clean-clone validation passes on the designated WSL2 + EL9 environment
 - no accidental credentials, scratch data, generated binaries, or model files with unclear redistribution rights are committed
 - release notes/changelog are ready
+- repository visibility has not been changed autonomously
 
 ## 22. Explicit non-goals for v1.0
 
@@ -495,10 +578,12 @@ Do not expand scope because an upstream project supports related functionality.
 
 ## 23. Autonomy boundaries
 
-High autonomy is desired. Do not ask for confirmation for routine in-scope implementation decisions, local dependency installation inside the designated WSL environment, refactoring, testing, research, or failure repair.
+High autonomy is desired. Do not ask for confirmation for routine in-scope implementation decisions, local dependency installation inside the designated WSL environment, refactoring, testing, research, failure repair, commits, or pushes to this repository.
 
 Do not:
 
+- create or substitute another authoritative project repository
+- change repository visibility or security-sensitive repository/account settings
 - copy or redistribute files with unclear licensing
 - commit credentials/tokens/secrets/proprietary models
 - modify unrelated user data or repositories
@@ -513,7 +598,7 @@ If blocked, investigate alternatives and continue. Prefer a smaller correct impl
 
 Before declaring v1.0 ready:
 
-1. Perform a fresh clean-clone setup.
+1. Perform a fresh clean-clone setup on the designated WSL2 + EL9 environment.
 2. Build required local compact-model artifacts.
 3. Run the complete validation suite.
 4. Run representative comparisons across all five technologies.
