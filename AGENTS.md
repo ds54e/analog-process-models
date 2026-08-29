@@ -22,6 +22,31 @@ Work in this existing repository. Do not create, migrate to, or substitute anoth
 
 Implement `GOAL.md` faithfully and finish APM v1.0.0. Optimize for correctness, reproducibility, licensing clarity, and a small maintainable architecture.
 
+## Unattended execution
+
+Assume normal implementation may run for a long time without human supervision.
+
+Before substantive work, read all of:
+
+1. `GOAL.md`
+2. `AGENTS.md`
+3. `UNATTENDED_EXECUTION.md`
+4. `README.md`
+5. `validation/release_gates.toml`
+6. `STATUS.md`
+
+Follow `UNATTENDED_EXECUTION.md` as the required long-running execution procedure.
+
+Keep `STATUS.md` current at milestone boundaries so work can be safely resumed after interruption. `STATUS.md` is only a progress index; it never substitutes for actual validation evidence.
+
+Write compact auditable validation summaries under `validation/evidence/` as milestones and release gates are completed. Do not mark missing, skipped, static-only, or unavailable real-tool checks as validated.
+
+The machine-readable v1.0 release-gate contract is `validation/release_gates.toml`. Implementation may extend the validator around this file, but must not weaken or silently omit required gates.
+
+Design the final validation flow so a single release-oriented command, preferably `apm validate --release`, exits non-zero whenever any automatically checkable required gate fails or remains unimplemented.
+
+Do not declare or tag v1.0.0 merely because the agent has reached the end of its run. Completion is evidence-based.
+
 ## Scope discipline
 
 Do not expand v1.0 scope beyond `GOAL.md` unless a required item cannot be implemented correctly without a narrowly-scoped change.
@@ -156,4 +181,4 @@ Do not change repository visibility or security-sensitive repository/account set
 
 ## Completion
 
-Do not declare v1.0 complete before every `GOAL.md` release gate is actually satisfied.
+Do not declare v1.0 complete before every `GOAL.md` release gate is actually satisfied and the required release evidence is present.
