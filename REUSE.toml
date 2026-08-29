@@ -6,6 +6,7 @@ path = [
   "GOAL.md",
   "AGENTS.md",
   "PROJECT_CONTEXT.md",
+  "ENVIRONMENT.md",
   "UNATTENDED_EXECUTION.md",
   "STATUS.md",
   "CHANGELOG.md",
