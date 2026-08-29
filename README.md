@@ -43,10 +43,16 @@ Spectre compatibility includes model files, benchmark corners, and benchmark Mon
 
 Virtuoso libraries, symbols, CDFs, SKILL, ADE/Maestro setup, and other Virtuoso integration are user-managed and out of scope.
 
-## Development specification
+## Development and validation specification
 
-- [`GOAL.md`](GOAL.md) is the authoritative v1.0 implementation and Definition of Done.
-- [`AGENTS.md`](AGENTS.md) contains mandatory repository-wide engineering constraints.
-- Each model kit must maintain explicit provenance and licensing metadata.
+The repository is designed so a long-running implementation agent can work without relying on conversational history or continuous human supervision.
 
-The repository is currently in initial implementation state. Do not interpret planned features as validated until the v1.0 release gates in `GOAL.md` have passed.
+- [`GOAL.md`](GOAL.md) — authoritative v1.0 implementation requirements and Definition of Done.
+- [`AGENTS.md`](AGENTS.md) — mandatory repository-wide engineering and safety/quality constraints.
+- [`UNATTENDED_EXECUTION.md`](UNATTENDED_EXECUTION.md) — required procedure for long-running autonomous implementation, checkpointing, blockers, and final clean-clone validation.
+- [`STATUS.md`](STATUS.md) — compact persistent progress index; never evidence by itself.
+- [`validation/release_gates.toml`](validation/release_gates.toml) — machine-readable v1.0 release-gate contract.
+- [`validation/evidence/`](validation/evidence/) — compact committed audit evidence for completed validation claims.
+- Per-kit `provenance.toml` files — model source/origin and licensing metadata.
+
+The repository is currently in initial implementation state. Do not interpret planned features as validated until the v1.0 release gates in `GOAL.md` and `validation/release_gates.toml` have passed with evidence.
