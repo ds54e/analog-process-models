@@ -32,6 +32,17 @@ def test_cli_and_release_gate_use_same_five_kits() -> None:
     assert TECHNOLOGIES == EXPECTED_KITS
 
 
+def test_reference_runtime_contract_is_el9_ngspice47_osdi() -> None:
+    gates = load_toml("validation/release_gates.toml")
+    runtime = gates["runtime"]
+    assert runtime["primary_distribution"] == "AlmaLinux 9"
+    assert runtime["acceptable_distribution_class"] == "RHEL-compatible EL9"
+    assert runtime["architecture"] == "x86_64"
+    assert runtime["required_ngspice_major"] == 47
+    assert runtime["osdi_required"] is True
+    assert runtime["python_minimum"] == "3.9"
+
+
 def test_public_geometry_contract_stays_small() -> None:
     gates = load_toml("validation/release_gates.toml")
     public = gates["public_devices"]
@@ -117,6 +128,8 @@ def test_project_context_exists_and_is_explicitly_informative() -> None:
     assert "informative, not normative" in text
     assert "Commonize the characterization contract, not the compact-model API" in text
     assert "PTM/PTM-MG" in text
+    assert "ngspice 47" in text
+    assert "AlmaLinux 9" in text
 
 
 def test_unattended_protocol_requires_project_context_and_status() -> None:
