@@ -52,6 +52,7 @@ The repository is designed so a long-running implementation agent can work witho
 - [`AGENTS.md`](AGENTS.md) — mandatory repository-wide engineering and safety/quality constraints.
 - [`PROJECT_CONTEXT.md`](PROJECT_CONTEXT.md) — condensed design history and rationale behind the v1.0 contract; informative, not normative.
 - [`ENVIRONMENT.md`](ENVIRONMENT.md) — known starting WSL2/AlmaLinux state and M0 bootstrap expectations; reported state must be locally verified.
+- [`RESEARCH_BASELINE.md`](RESEARCH_BASELINE.md) — dated upstream research facts used to seed implementation; re-check before pinning or release claims.
 - [`UNATTENDED_EXECUTION.md`](UNATTENDED_EXECUTION.md) — required procedure for long-running autonomous implementation, checkpointing, blockers, and final clean-clone validation.
 - [`STATUS.md`](STATUS.md) — compact persistent progress index; never evidence by itself.
 - [`validation/release_gates.toml`](validation/release_gates.toml) — machine-readable v1.0 release-gate contract.
