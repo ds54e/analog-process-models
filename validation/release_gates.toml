@@ -11,6 +11,25 @@ clean_clone_required = true
 clean_clone_platform = "WSL2 + RHEL-compatible EL9 Linux + x86_64"
 reference_simulator = "ngspice"
 
+[release_metadata]
+target_version = "1.0.0"
+package_version_must_match_target = true
+release_notes_required = true
+unresolved_release_placeholders_forbidden = true
+placeholder_scan_paths = [
+  "models/*/provenance.toml",
+  "variation/benchmark_v1.toml",
+  "passives/benchmark_v1.toml",
+]
+forbidden_release_placeholder_tokens = [
+  "TBD",
+  "candidate-unvendored",
+  "planned-vendor-subset",
+  "not_started",
+  "draft-values-unfrozen",
+]
+version_metadata_paths = ["pyproject.toml", "src/apm/__init__.py"]
+
 [kits]
 required = ["apm350", "apm130", "apm045", "apm022", "apm016f"]
 
@@ -100,6 +119,7 @@ all_five_kit_representative_comparison_required = true
 license_provenance_audit_required = true
 readme_claim_audit_required = true
 fresh_clone_from_repository_required = true
+release_metadata_audit_required = true
 
 [[gate]]
 id = "runtime.wsl2_el9"
@@ -178,6 +198,12 @@ id = "distribution.self_contained_models"
 required = true
 validation = "clean_clone"
 summary = "No separate transistor-model download is required after cloning the repository."
+
+[[gate]]
+id = "release.metadata_complete"
+required = true
+validation = "tests_and_audit"
+summary = "Package/version metadata identifies v1.0.0, release notes exist, and no release-critical TBD/candidate/not-started placeholders remain."
 
 [[gate]]
 id = "release.clean_clone"
