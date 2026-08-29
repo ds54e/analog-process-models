@@ -40,13 +40,14 @@ in real ngspice 47.
 | --- | --- | --- | --- | ---: |
 | APM130 / PSP103 | `delvto`, `factuo` | `delvto`, `factuo` | N `+`, P `+` | N 0.9948, P 0.9865 |
 | APM045 / BSIM4 | `delvto`, `mulu0` | `delvto`, `mulu0` | N `+`, P `-` | N 0.8574, P 0.8953 |
+| APM022 / BSIM4 | `delvto`, `mulu0` | `delvto`, `mulu0` | N `+`, P `-` | N 1.0007, P 1.0121 |
 | APM016F / BSIM-CMG | `DELVTRAND`, `IDS0MULT` | `DELVTRAND`, `IDS0MULT` | N `-`, P `-` | N 1.0000, P 1.0000 |
 
 Here the drive response is observable fractional Id change per unit raw
 multiplier change near nominal. `variation/adapters_v1.toml` is authoritative
 for all coefficients, residuals, reference currents, geometry, biases, raw
-parameter paths, and calibrated ranges. APM022 and APM350 adapters are added at
-their implementation milestones; the benchmark specification itself does not
+parameter paths, and calibrated ranges. The remaining APM350 adapter is added
+at its implementation milestone; the benchmark specification itself does not
 change per kit.
 
 ## Frozen v1 distributions

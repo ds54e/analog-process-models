@@ -109,6 +109,7 @@ class PlanarKit:
     idvg_points: int
     idvd_points: int
     y_frequencies_hz: tuple[float, ...]
+    behavior_targets: dict[str, Any]
 
     def raw_voltage(self, polarity: str, effective_voltage: float) -> float:
         return effective_voltage if polarity == "n" else -effective_voltage
@@ -240,6 +241,7 @@ def _load_apm130(root: Path) -> PlanarKit:
         y_frequencies_hz=tuple(
             float(value) for value in data["characterization"]["y_frequencies_hz"]
         ),
+        behavior_targets={},
     )
 
 
@@ -280,6 +282,49 @@ def _load_apm045(root: Path) -> PlanarKit:
         y_frequencies_hz=tuple(
             float(value) for value in data["characterization"]["y_frequencies_hz"]
         ),
+        behavior_targets={},
+    )
+
+
+def _load_apm022(root: Path) -> PlanarKit:
+    path = root / "models/apm022/kit.toml"
+    with path.open("rb") as handle:
+        data = tomllib.load(handle)
+    provenance_path = root / "models/apm022/provenance.toml"
+    with provenance_path.open("rb") as handle:
+        provenance = tomllib.load(handle)
+    return PlanarKit(
+        kit_id=data["id"],
+        compact_model=data["compact_model"],
+        vdd_v=float(data["nominal_vdd_v"]),
+        lmin_m=float(data["model_lmin_m"]),
+        width_m=float(data["default_w_m"]),
+        lengths_m=tuple(float(value) for value in data["characterization_lengths_m"]),
+        temperatures_c=tuple(int(value) for value in data["temperatures_c"]),
+        public_devices=dict(data["public_devices"]),
+        model_library=None,
+        model_section=None,
+        model_includes=(root / "models/apm022/ngspice/apm022_models.inc",),
+        wrapper_file=root / "models/apm022/ngspice/apm022_wrappers.inc",
+        osdi_artifacts=(),
+        native_vector_templates={
+            "n": "@m.xdut.mapm022_core[{quantity}]",
+            "p": "@m.xdut.mapm022_core[{quantity}]",
+        },
+        native_oracle_name="ngspice BSIM4",
+        provenance_revision=provenance["source"].get(
+            "parameter_revision", "apm022-development"
+        ),
+        threshold_coefficient_a=float(data["threshold"]["planar_current_coefficient_a"]),
+        vout_low_v=float(data["threshold"]["vout_low_v"]),
+        vout_high_v=float(data["threshold"]["vout_high_fraction_vdd"])
+        * float(data["nominal_vdd_v"]),
+        idvg_points=int(data["characterization"]["idvg_points"]),
+        idvd_points=int(data["characterization"]["idvd_points"]),
+        y_frequencies_hz=tuple(
+            float(value) for value in data["characterization"]["y_frequencies_hz"]
+        ),
+        behavior_targets=dict(data["behavior_targets"]),
     )
 
 
@@ -333,6 +378,8 @@ def load_kit(technology: str, root: Path) -> CharacterizationKit:
         return _load_apm130(root)
     if technology == "apm045":
         return _load_apm045(root)
+    if technology == "apm022":
+        return _load_apm022(root)
     if technology == "apm016f":
         return _load_apm016f(root)
     raise CharacterizationError(
@@ -1047,6 +1094,184 @@ def _build_checks(
             dibl_target[0] < checks["nominal_lmin_dibl_min_v_per_v"]
             and checks["nominal_lmin_dibl_max_v_per_v"] <= dibl_target[1]
         )
+    if isinstance(kit, PlanarKit) and kit.behavior_targets:
+        targets = kit.behavior_targets
+        nominal_lmin_dibl = [
+            row
+            for row in dibl
+            if row["temperature_c"] == 27 and row["l_m"] == kit.lmin_m
+        ]
+        nominal_moderate_by_polarity_and_length: dict[
+            tuple[str, float], dict[str, Any]
+        ] = {}
+        for polarity in ("n", "p"):
+            for length in kit.lengths_m:
+                candidates = [
+                    row
+                    for row in derived
+                    if row["temperature_c"] == 27
+                    and row["polarity"] == polarity
+                    and row["l_m"] == length
+                ]
+                nominal_moderate_by_polarity_and_length[(polarity, length)] = min(
+                    candidates,
+                    key=lambda row: (
+                        abs(row["gm_over_id_per_v"] - 15.0)
+                        if math.isfinite(row["gm_over_id_per_v"])
+                        else math.inf
+                    ),
+                )
+        nominal_lmin_moderate = [
+            nominal_moderate_by_polarity_and_length[(polarity, kit.lmin_m)]
+            for polarity in ("n", "p")
+        ]
+        nominal_on_current: dict[str, float] = {}
+        for polarity in ("n", "p"):
+            candidates = [
+                row
+                for row in idvd
+                if row["temperature_c"] == 27
+                and row["polarity"] == polarity
+                and row["l_m"] == kit.lmin_m
+                and math.isclose(row["vctrl_v"], kit.vdd_v, rel_tol=0.0, abs_tol=1e-15)
+                and math.isclose(row["vout_v"], kit.vdd_v, rel_tol=0.0, abs_tol=1e-15)
+            ]
+            if len(candidates) != 1:
+                raise CharacterizationError(
+                    f"expected one nominal {polarity}-device on-current row, found "
+                    f"{len(candidates)}"
+                )
+            nominal_on_current[polarity] = candidates[0]["idmag_a"] / (
+                candidates[0]["w_m"] / 1e-6
+            )
+
+        length_scaling_dibl_violations = 0
+        length_scaling_vth_violations = 0
+        length_scaling_gain_violations = 0
+        length_scaling_observations: dict[str, list[dict[str, float]]] = {}
+        for polarity in ("n", "p"):
+            ordered_dibl = sorted(
+                (
+                    row
+                    for row in dibl
+                    if row["temperature_c"] == 27 and row["polarity"] == polarity
+                ),
+                key=lambda row: row["l_m"],
+            )
+            ordered_gain = [
+                nominal_moderate_by_polarity_and_length[(polarity, length)]
+                for length in sorted(kit.lengths_m)
+            ]
+            length_scaling_dibl_violations += sum(
+                longer["dibl_v_per_v"] >= shorter["dibl_v_per_v"]
+                for shorter, longer in zip(ordered_dibl, ordered_dibl[1:])
+            )
+            length_scaling_vth_violations += sum(
+                longer["vth_high_magnitude_v"] <= shorter["vth_high_magnitude_v"]
+                for shorter, longer in zip(ordered_dibl, ordered_dibl[1:])
+            )
+            length_scaling_gain_violations += sum(
+                longer["gm_over_gds"] <= shorter["gm_over_gds"]
+                for shorter, longer in zip(ordered_gain, ordered_gain[1:])
+            )
+            length_scaling_observations[polarity] = [
+                {
+                    "l_m": dibl_row["l_m"],
+                    "vth_high_magnitude_v": dibl_row["vth_high_magnitude_v"],
+                    "dibl_v_per_v": dibl_row["dibl_v_per_v"],
+                    "gm_over_gds_at_nearest_gm_over_id_15": gain_row["gm_over_gds"],
+                    "gm_over_id_per_v": gain_row["gm_over_id_per_v"],
+                }
+                for dibl_row, gain_row in zip(ordered_dibl, ordered_gain)
+            ]
+
+        vth_target = targets["nominal_lmin_vth_magnitude_v"]
+        dibl_target = targets["nominal_lmin_dibl_v_per_v"]
+        gain_target = targets["nominal_lmin_gm_over_gds_at_gm_over_id_15"]
+        n_on_target = targets["nominal_lmin_on_current_n_a_per_um"]
+        p_on_target = targets["nominal_lmin_on_current_p_a_per_um"]
+        checks.update(
+            {
+                "nominal_lmin_vth_high_min_magnitude_v": min(
+                    row["vth_high_magnitude_v"] for row in nominal_lmin_dibl
+                ),
+                "nominal_lmin_vth_high_max_magnitude_v": max(
+                    row["vth_high_magnitude_v"] for row in nominal_lmin_dibl
+                ),
+                "nominal_lmin_dibl_min_v_per_v": min(
+                    row["dibl_v_per_v"] for row in nominal_lmin_dibl
+                ),
+                "nominal_lmin_dibl_max_v_per_v": max(
+                    row["dibl_v_per_v"] for row in nominal_lmin_dibl
+                ),
+                "nominal_lmin_gm_over_gds_at_nearest_gm_over_id_15_min": min(
+                    row["gm_over_gds"] for row in nominal_lmin_moderate
+                ),
+                "nominal_lmin_gm_over_gds_at_nearest_gm_over_id_15_max": max(
+                    row["gm_over_gds"] for row in nominal_lmin_moderate
+                ),
+                "nominal_lmin_on_current_n_a_per_um": nominal_on_current["n"],
+                "nominal_lmin_on_current_p_a_per_um": nominal_on_current["p"],
+                "nominal_length_scaling_dibl_violation_count": (
+                    length_scaling_dibl_violations
+                ),
+                "nominal_length_scaling_vth_violation_count": (
+                    length_scaling_vth_violations
+                ),
+                "nominal_length_scaling_intrinsic_gain_violation_count": (
+                    length_scaling_gain_violations
+                ),
+                "nominal_length_scaling_observations": length_scaling_observations,
+            }
+        )
+        checks["criteria"].update(
+            {
+                "nominal_lmin_vth_magnitude_v": vth_target,
+                "nominal_lmin_dibl_v_per_v": dibl_target,
+                "nominal_lmin_gm_over_gds_at_gm_over_id_15": gain_target,
+                "nominal_lmin_on_current_n_a_per_um": n_on_target,
+                "nominal_lmin_on_current_p_a_per_um": p_on_target,
+                "nominal_length_scaling_violation_count_max": 0,
+            }
+        )
+        checks["requirements"].update(
+            {
+                "nominal_lmin_threshold_target": (
+                    vth_target[0] <= checks["nominal_lmin_vth_high_min_magnitude_v"]
+                    and checks["nominal_lmin_vth_high_max_magnitude_v"] <= vth_target[1]
+                ),
+                "nominal_lmin_dibl_target": (
+                    dibl_target[0] <= checks["nominal_lmin_dibl_min_v_per_v"]
+                    and checks["nominal_lmin_dibl_max_v_per_v"] <= dibl_target[1]
+                ),
+                "nominal_lmin_intrinsic_gain_target": (
+                    gain_target[0]
+                    <= checks[
+                        "nominal_lmin_gm_over_gds_at_nearest_gm_over_id_15_min"
+                    ]
+                    and checks[
+                        "nominal_lmin_gm_over_gds_at_nearest_gm_over_id_15_max"
+                    ]
+                    <= gain_target[1]
+                ),
+                "nominal_lmin_on_current_target": (
+                    n_on_target[0]
+                    <= checks["nominal_lmin_on_current_n_a_per_um"]
+                    <= n_on_target[1]
+                    and p_on_target[0]
+                    <= checks["nominal_lmin_on_current_p_a_per_um"]
+                    <= p_on_target[1]
+                ),
+                "nominal_length_scaling": (
+                    checks["nominal_length_scaling_dibl_violation_count"] == 0
+                    and checks["nominal_length_scaling_vth_violation_count"] == 0
+                    and checks[
+                        "nominal_length_scaling_intrinsic_gain_violation_count"
+                    ]
+                    == 0
+                ),
+            }
+        )
     checks["overall_pass"] = all(checks["requirements"].values())
     return checks
 
@@ -1305,6 +1530,13 @@ def characterize(
             "effective_width_is_not_public_or_reported": True,
             "self_heating_enabled": False,
             "behavior_targets": kit.behavior_targets,
+        }
+    if isinstance(kit, PlanarKit) and kit.behavior_targets:
+        metadata["generic_planar_contract"] = {
+            "public_sizing": ["w", "l"],
+            "behavior_targets": kit.behavior_targets,
+            "model_origin": "apm_generic",
+            "terminal_characterization_is_authoritative": True,
         }
     metadata_path = output / "metadata.json"
     metadata_path.write_text(

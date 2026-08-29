@@ -7,9 +7,47 @@ foundry_correlated = false
 ptm_derived = false
 
 [source]
-status = "apm-authored"
-project = "Analog Process Models"
-license = "Apache-2.0"
+status = "apm-authored-parameter-deck"
+parameter_project = "Analog Process Models"
+parameter_revision = "apm022-params-v1-2026-08-30"
+parameter_license = "Apache-2.0"
+model_semantics_project = "UC Berkeley BSIM4"
+model_semantics_url = "https://www.bsim.berkeley.edu/models/bsim4/"
+model_semantics_revision = "4.8.2 technical manual and card dialect, released 2020-01-01"
+simulator_engine = "native BSIM4 in ngspice 47"
+research_retrieved_utc = "2026-08-29"
+
+[source.authored_files]
+"kit.toml" = "ef75720da6e5d6bf0033705ee8a647af7aa28f38fc4ca30caed38fe92a9df99d"
+"ngspice/apm022_models.inc" = "4556a5901940eb0a2a3c130b4a843a1fe53fecbd36acb5e5d8b1ef4e82c70ff0"
+"ngspice/apm022_wrappers.inc" = "e55dd185cdfc5047c9d01dd6f0244ab49496601f1b6fafc018ead17a45a8d83e"
+"parameter_generation.md" = "87047bf4ec587c75b933942671e74e7e924ba86b425b816c84e98bf75b3b368c"
+
+[[source.research_inputs]]
+title = "Performance and Yield Benefits of Quasi-Planar Bulk CMOS Technology for 6-T SRAM at the 22-nm Node"
+identifier = "DOI 10.1109/TED.2011.2139213"
+url = "https://doi.org/10.1109/TED.2011.2139213"
+usage = "class-level physical gate length, electrical channel length, EOT, extension depth, and lower-voltage operating basis"
+redistributed = false
+
+[[source.research_inputs]]
+title = "UC Berkeley BSIM4 4.8.2 release and technical manual"
+identifier = "BSIM4 4.8.2, 2020-01-01"
+url = "https://www.bsim.berkeley.edu/models/bsim4/"
+usage = "compact-model equations, parameter semantics, and documented defaults only"
+redistributed = false
+
+[[source.research_inputs]]
+title = "2011 ITRS Process Integration, Devices, and Structures roadmap"
+identifier = "ITRS 2011 PIDS"
+usage = "qualitative scaled-planar context only; no numerical model-card input"
+redistributed = false
+
+[redistribution]
+ship_in_repo = true
+authorship = "all APM022 kit, parameter, wrapper, and generation files are APM-authored"
+third_party_files = []
+generated_binaries_committed = false
 
 [development]
 allowed_inputs = [
@@ -19,7 +57,8 @@ allowed_inputs = [
   "explicit APM behavior contracts"
 ]
 forbidden_numeric_source = "Official PTM22 model-card parameters"
-ptm_usage = "local non-redistributed sanity/comparison oracle only"
+ptm_usage = "not used during APM022 parameter generation; policy permits only a local non-redistributed sanity/comparison oracle"
+generation_record = "models/apm022/parameter_generation.md"
 
 [behavior_contract]
 requirements = [
@@ -28,6 +67,7 @@ requirements = [
   "lower intrinsic gain near minimum length than APM045",
   "lower-voltage scaled-planar operation",
   "higher current/speed capability than APM045",
+  "monotonic threshold rolloff with length",
   "sensible Id-Vg, Id-Vd, and capacitance behavior"
 ]
 
@@ -36,5 +76,5 @@ benchmark = true
 native = false
 
 [validation]
-ngspice = "not_started"
+ngspice = "M5 complete nominal terminal characterization and benchmark-adapter validation passed; see validation/evidence/m5-apm022.md"
 spectre = "experimental_unverified"

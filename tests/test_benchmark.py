@@ -63,7 +63,7 @@ def test_modes_share_draws_but_apply_only_the_documented_components() -> None:
     mismatch = resolve_monte_carlo(request, mode="mismatch", seed=77, root=ROOT)
     combined = resolve_monte_carlo(request, mode="all", seed=77, root=ROOT)
     assert process["draw_order"] == mismatch["draw_order"] == combined["draw_order"]
-    assert len(combined["draw_order"]) == 20  # six globals, two per MOS, one per passive
+    assert len(combined["draw_order"]) == 24  # six globals, two per MOS, one per passive
     process_mos = by_id(process, "mos_instances")
     mismatch_mos = by_id(mismatch, "mos_instances")
     combined_mos = by_id(combined, "mos_instances")
@@ -164,6 +164,8 @@ def test_corner_semantics_map_canonical_polarity_to_measured_raw_signs() -> None
     assert results["mp130"]["raw_adapter"]["vth_value"] < 0.0
     assert results["mn045"]["raw_adapter"]["vth_value"] < 0.0
     assert results["mp045"]["raw_adapter"]["vth_value"] > 0.0
+    assert results["mn022"]["raw_adapter"]["vth_value"] < 0.0
+    assert results["mp022"]["raw_adapter"]["vth_value"] > 0.0
     assert results["mn016f"]["raw_adapter"]["vth_value"] > 0.0
     assert results["mp016f"]["raw_adapter"]["vth_value"] > 0.0
     assert all(result["raw_adapter"]["vth_within_calibrated_raw_range"] for result in results.values())
@@ -209,7 +211,7 @@ def test_resolved_sample_hash_detects_tampering_and_write_is_non_destructive(tmp
 @pytest.mark.parametrize(
     ("change", "message"),
     [
-        (lambda request: request["instances"]["mos"][4]["geometry"].update(nfin=1.5), "nfin"),
+        (lambda request: request["instances"]["mos"][6]["geometry"].update(nfin=1.5), "nfin"),
         (
             lambda request: request["instances"]["resistors"][0].update(match_size=0.0),
             "match_size",

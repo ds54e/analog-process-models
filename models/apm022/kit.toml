@@ -1,0 +1,54 @@
+schema = "apm.kit.v1"
+id = "apm022"
+technology_class = "22nm-class"
+architecture = "planar_bulk"
+compact_model = "bsim4"
+nominal_vdd_v = 0.8
+model_lmin_m = 2.5e-8
+default_w_m = 1.0e-6
+default_l_m = 2.5e-8
+characterization_lengths_m = [2.5e-8, 5.0e-8, 1.0e-7]
+temperatures_c = [-40, 27, 85, 125]
+
+[supply_basis]
+source = "DOI 10.1109/TED.2011.2139213 plus APM lower-voltage behavior contract"
+statement = "The public 22 nm-node bulk study uses 1.0 V device optimization and projects SRAM operation to about 0.8 V; APM022 adopts 0.8 V as a conservative generic lower-voltage comparison point, not a foundry claim."
+
+[geometry_basis]
+source = "DOI 10.1109/TED.2011.2139213"
+physical_gate_length_m = 2.5e-8
+electrical_channel_length_n_m = 2.7e-8
+electrical_channel_length_p_m = 2.8e-8
+eot_m = 9.0e-10
+source_drain_extension_depth_m = 1.0e-8
+valid_l_m = [2.5e-8, 1.0e-7]
+valid_w_m = [1.0e-7, 1.0e-4]
+
+[public_devices]
+n = "apm022_nmos"
+p = "apm022_pmos"
+terminals = ["d", "g", "s", "b"]
+parameters = ["w", "l"]
+
+[threshold]
+method = "constant_current"
+planar_current_coefficient_a = 1.0e-7
+normalization = "Id criterion = coefficient * W/L"
+vout_low_v = 0.05
+vout_high_fraction_vdd = 0.8
+
+[characterization]
+idvg_points = 161
+idvd_points = 81
+gm_gds_relative_perturbations = [0.01, 0.02]
+y_frequencies_hz = [1.0e5, 1.0e6]
+terminal_order = ["d", "g", "s", "b"]
+
+[behavior_targets]
+nominal_lmin_vth_magnitude_v = [0.18, 0.34]
+nominal_lmin_dibl_v_per_v = [0.14, 0.30]
+nominal_lmin_gm_over_gds_at_gm_over_id_15 = [2.0, 9.0]
+nominal_lmin_on_current_n_a_per_um = [1.0e-3, 2.5e-3]
+nominal_lmin_on_current_p_a_per_um = [7.0e-4, 2.0e-3]
+length_scaling_requires_lower_dibl_and_higher_intrinsic_gain = true
+length_scaling_requires_higher_vth = true

@@ -10,7 +10,7 @@ It is **not** evidence by itself. Validation claims must point to committed summ
 - Repository: https://github.com/ds54e/analog-process-models
 - Target: v1.0.0
 - Current state: `IN_PROGRESS`
-- Current milestone: `M5 APM022`
+- Current milestone: `M6 APM350`
 - Release eligible: `NO`
 
 ## Reported initial environment
@@ -33,8 +33,8 @@ See `ENVIRONMENT.md`. M0 verified the host and bootstrapped the project-local re
 | M2 APM045 | VALIDATED | `validation/evidence/m2-apm045.md`: exact Apache-2.0 FreePDK45 VTG subset, public N/P wrappers, and complete native-BSIM4 terminal characterization passed. |
 | M3 APM016F | VALIDATED | `validation/evidence/m3-apm016f.md`: independent APM cards, genuine BSIM-CMG OSDI, discrete `l,nfin` public results, and complete nominal terminal/NFIN characterization passed. |
 | M4 Benchmark R/C + variation | VALIDATED | `validation/evidence/m4-benchmark.md`: frozen synthetic severities, measured PSP/BSIM4/BSIM-CMG intent adapters, deterministic PCG64 samples/replay, five common corners, and native R/C value/noise checks passed. |
-| M5 APM022 | IN_PROGRESS | Independently author and validate the scaled-planar BSIM4 deck, then calibrate its benchmark adapter. |
-| M6 APM350 | NOT_STARTED | — |
+| M5 APM022 | VALIDATED | `validation/evidence/m5-apm022.md`: independent non-PTM BSIM4 cards, explicit behavior contracts, complete terminal characterization, APM045/APM016F comparisons, and benchmark adapter/corners passed. |
+| M6 APM350 | IN_PROGRESS | Add the redistributable mature-planar BSIM3 anchor and calibrate its benchmark adapter. |
 | M7 Common characterization completion | NOT_STARTED | — |
 | M8 IHP-native variation | NOT_STARTED | — |
 | M9 Spectre model-only compatibility | NOT_STARTED | — |
@@ -98,6 +98,12 @@ A blocker entry should state:
 - APM045 pins the open-source-clean FreePDK45 1.4 mirror at commit `688ee68ec5301e5fe11ebee5e53c1109d3cfd51d` and ships only its byte-identical nominal VTG cards plus licensing/model-basis documents. Its disclosed PTM ancestry is isolated from the independently authored APM022 deck.
 - APM045 uses 101-point DC sweeps so the 1.0 V endpoints and 10 mV finite-difference grid are exact. Monotonicity is required from the documented constant-current criterion through conduction; full-range picoamp leakage-partition reversals are retained and reported separately.
 - APM016F uses the exact ECL-2.0 Berkeley BSIM-CMG 112.1.0 engine with independently authored Apache-2.0 parameter cards. Public dimensions, doping, 0.8 V operation, and behavior targets come from cited primary literature and official BSIM-CMG semantics; no PTM-MG card values were used. Its public/result geometry is only `l,nfin`, threshold extraction is `Id=100 nA*NFIN`, self-heating is off, and a 5 mV gate grid provides converged canonical gm.
+- APM022 is an independently authored native-BSIM4 22 nm-class deck using
+  public quasi-planar bulk dimensions and official BSIM semantics, with no PTM
+  card use. Its supported v1 range is L=25..100 nm at 0.8 V. The card
+  explicitly disables the unevidenced BSIM pocket-length default, and terminal
+  gates enforce monotonic threshold/gain increase, monotonic DIBL decrease,
+  minimum-length behavior ranges, and the required APM045/APM016F comparisons.
 - APM benchmark variation uses frozen synthetic sigmas only after real PSP103,
   BSIM4, and BSIM-CMG calibration. Canonical positive threshold shift means
   larger `|Vth|` for N/P even though raw signs differ; canonical positive drive
@@ -121,6 +127,9 @@ When a material decision intentionally departs from `PROJECT_CONTEXT.md`, record
 - `validation/evidence/m4-benchmark.md` — calibrated observable-intent mappings,
   deterministic benchmark modes/corners/replay, and technology-neutral R/C
   value, temperature, matching, and native-noise validation.
+- `validation/evidence/m5-apm022.md` — independent scaled-planar cards,
+  terminal behavior and cross-kit comparisons, plus the calibrated APM022
+  benchmark adapter and deterministic variation rerun.
 
 ## Final-review fields
 

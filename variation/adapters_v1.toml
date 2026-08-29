@@ -137,3 +137,44 @@ drive_fit_linear = 0.99999987839775
 drive_fit_quadratic = 0.0
 drive_fit_max_residual_fraction = 1.94289029309402e-16
 ngspice_device_path_template = "@n.{instance}.napm016f_core"
+
+[kit.apm022]
+architecture = "planar_bulk"
+compact_model = "bsim4"
+reference_l_m = 5.0e-8
+reference_w_m = 1.0e-6
+threshold_coefficient_a = 1.0e-7
+threshold_normalization = "coefficient * W/L"
+vdd_v = 0.8
+vout_reference_v = 0.4
+vth_raw_parameter = "delvto"
+drive_raw_parameter = "mulu0"
+drive_raw_nominal = 1.0
+
+[kit.apm022.n]
+public_device = "apm022_nmos"
+vctrl_reference_v = 0.685
+nominal_gm_over_id_per_v = 15.02401400584678
+nominal_reference_id_a = 2.62199069540897e-5
+nominal_threshold_magnitude_v = 0.5200011895650262
+vth_fit_linear = 1.0738212166880654
+vth_fit_quadratic = -0.04378353001341257
+vth_fit_max_residual_v = 2.9709643825384657e-5
+drive_fit_linear = 1.000697311928817
+drive_fit_quadratic = -0.017515051956367187
+drive_fit_max_residual_fraction = 2.514984059565073e-5
+ngspice_device_path_template = "@m.{instance}.mapm022_core"
+
+[kit.apm022.p]
+public_device = "apm022_pmos"
+vctrl_reference_v = 0.685
+nominal_gm_over_id_per_v = 15.215657811248576
+nominal_reference_id_a = 1.350678184858348e-5
+nominal_threshold_magnitude_v = 0.5440806427985366
+vth_fit_linear = -1.080947326903536
+vth_fit_quadratic = -0.027335390338690292
+vth_fit_max_residual_v = 2.423035468553103e-5
+drive_fit_linear = 1.012129720318809
+drive_fit_quadratic = 0.0009833847008120682
+drive_fit_max_residual_fraction = 1.8073928963663333e-5
+ngspice_device_path_template = "@m.{instance}.mapm022_core"

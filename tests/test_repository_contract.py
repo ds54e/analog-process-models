@@ -119,6 +119,31 @@ def test_apm045_public_wrapper_and_model_basis_are_explicit() -> None:
         assert forbidden not in wrapper.lower()
 
 
+def test_apm022_public_wrapper_and_authored_provenance_are_explicit() -> None:
+    kit = load_toml("models/apm022/kit.toml")
+    provenance = load_toml("models/apm022/provenance.toml")
+    assert kit["nominal_vdd_v"] == 0.8
+    assert kit["model_lmin_m"] == 2.5e-8
+    assert kit["characterization_lengths_m"] == [2.5e-8, 5.0e-8, 1.0e-7]
+    assert kit["geometry_basis"]["valid_l_m"] == [2.5e-8, 1.0e-7]
+    assert kit["public_devices"]["parameters"] == ["w", "l"]
+    assert kit["behavior_targets"]["length_scaling_requires_higher_vth"] is True
+    assert provenance["source"]["parameter_revision"] == "apm022-params-v1-2026-08-30"
+    assert provenance["ptm_derived"] is False
+    assert provenance["development"]["ptm_usage"].startswith("not used")
+    wrapper = (ROOT / "models/apm022/ngspice/apm022_wrappers.inc").read_text()
+    assert ".subckt apm022_nmos d g s b w=1u l=25n" in wrapper
+    assert ".subckt apm022_pmos d g s b w=1u l=25n" in wrapper
+    for forbidden in (" m=", " nf=", " ng="):
+        assert forbidden not in wrapper.lower()
+    model = (ROOT / "models/apm022/ngspice/apm022_models.inc").read_text().lower()
+    assert model.count("lpe0=0 lpeb=0") == 2
+    assert "level=54 version=4.8.2" in model
+    for relative, expected_hash in provenance["source"]["authored_files"].items():
+        payload = (ROOT / "models/apm022" / relative).read_bytes()
+        assert hashlib.sha256(payload).hexdigest() == expected_hash
+
+
 def test_apm016f_public_wrapper_preserves_discrete_fin_semantics() -> None:
     kit = load_toml("models/apm016f/kit.toml")
     provenance = load_toml("models/apm016f/provenance.toml")

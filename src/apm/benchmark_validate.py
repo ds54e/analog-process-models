@@ -23,7 +23,7 @@ from .model_build import build_models, sha256_file
 from .toolchain import Toolchain, resolve_toolchain, run_checked
 
 VALIDATION_SEED = 20260830
-VALIDATED_KITS = ("apm130", "apm045", "apm016f")
+VALIDATED_KITS = ("apm130", "apm045", "apm022", "apm016f")
 BOLTZMANN_J_PER_K = 1.380649e-23
 VTH_CALIBRATION_RAW_VALUES = tuple(index / 100.0 for index in range(-4, 5))
 DRIVE_CALIBRATION_RAW_VALUES = tuple(0.8 + index * 0.05 for index in range(9))
