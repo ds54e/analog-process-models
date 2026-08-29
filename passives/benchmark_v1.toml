@@ -1,6 +1,11 @@
 schema = "apm.benchmark-passives.v1"
 status = "draft-values-unfrozen"
 
+[temperature]
+reference_c = 27.0
+tc1_units = "1/degC"
+linear_law = "resolved_value(T)=resolved_value_at_27C*(1+tc1*(T-27C))"
+
 [resistor]
 public_name = "Rbench"
 parameters = ["value", "tc1", "match_size"]
@@ -24,7 +29,7 @@ process_scope = "global per passive class within one benchmark sample"
 mismatch_scope = "local per APM passive instance"
 process_vs_mismatch = "independent_by_default"
 resistor_vs_capacitor_process = "independent_by_default"
-composition = "multiplicative scale factors applied to nominal value"
+composition = "multiplicative scale factors applied to nominal value before deterministic temperature scaling"
 
 [requirements]
 match_size_is_dimensionless = true
@@ -32,3 +37,4 @@ technology_neutral = true
 native_passives_optional = true
 explicit_sign_semantics = true
 explicit_correlation_semantics = true
+explicit_temperature_semantics = true
