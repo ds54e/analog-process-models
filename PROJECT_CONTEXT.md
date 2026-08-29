@@ -19,6 +19,8 @@ The important product is therefore not only a collection of model cards. It is t
 - technology-neutral benchmark R/C models;
 - enough metadata and evidence that comparisons remain interpretable.
 
+The first formal public release target is **v1.0.0**. M0–M10 are implementation milestones, not separate public compatibility promises.
+
 ## Why these five technology kits
 
 The v1.0 sequence is intended to cover both process scaling and a device-architecture transition:
@@ -62,6 +64,16 @@ PTM/PTM-MG may be used locally only as non-redistributed sanity/comparison oracl
 
 This distinction matters both for licensing clarity and for intellectual honesty in model provenance.
 
+## Runtime target and development environment
+
+The initial concrete runtime target selected during project definition was **ngspice 47 with OSDI enabled**, using OpenVAF-ReLoaded where Verilog-A compact models need compilation. If implementation evidence shows that another compatible ngspice revision is necessary or materially better, record the actual validated revision and rationale rather than silently changing the compatibility claim.
+
+The primary development environment is intended to be **WSL2 running an EL9-compatible distribution**, with **AlmaLinux 9 x86_64** as the primary concrete candidate. Native Windows support remains out of scope.
+
+Keep repository, model-build, cache, and simulation-run data inside the WSL Linux filesystem, for example under `~/src`, `~/.cache`, or another Linux-native path. Avoid `/mnt/c` for normal build/run workloads.
+
+The project does not need to bundle ngspice, OpenVAF-ReLoaded, Python, or xschem binaries. "Self-contained models" means the repository contains the model source/parameter assets needed by the five kits so users do not have to separately fetch transistor model decks. Generated `.osdi` binaries should normally be built locally and not committed.
+
 ## Why ngspice is the validated reference backend
 
 The project needs an open, reproducible, headless flow that can run in CI-like environments and on the user's primary development platform.
@@ -85,7 +97,7 @@ The intended execution path is roughly:
 - APM022 -> native ngspice BSIM4;
 - APM016F -> BSIM-CMG Verilog-A compiled to OSDI.
 
-`apm doctor` is expected to exercise real model instances, not merely check file existence.
+`apm doctor` is expected to exercise real model instances, not merely check file existence. In particular, it should eventually prove both the PSP103 and BSIM-CMG OSDI paths with actual device simulations.
 
 ## Why compact-model APIs are not unified
 
@@ -104,6 +116,25 @@ The common cross-technology layer exists at the measurement/result level: Id-Vg,
 
 This is also why v1.0 does not expose common `m`, `nf`, `ng`, or finger semantics. Multiplicity and fingerization carry model/layout-specific matching and correlation assumptions that are outside the desired v1.0 scope.
 
+## Cross-technology comparison philosophy
+
+Avoid primary comparisons at identical absolute W, VGS, or nominal bias across unrelated nodes.
+
+The preferred comparison coordinates are normalized quantities such as:
+
+- `L/Lmin`;
+- `VDS/VDD` or the corresponding positive effective PMOS/PFET drain bias;
+- `gm/Id` inversion level;
+- dimensionless or nearly universal figures such as gm/gds.
+
+A representative design-comparison point discussed during project definition is approximately:
+
+`gm/gds at gm/Id ~= 15 V^-1, L ~= 2*Lmin, VDS ~= 0.5*VDD`
+
+This is a useful comparison convention, not a mandatory single operating point for every plot. Raw/native views should still be retained.
+
+Planar current-density-like quantities may naturally be expressed per width, while FinFET quantities may naturally be expressed per fin. Do not invent a fake continuous effective width merely to make the tables look uniform.
+
 ## Why canonical gm/gds come from terminal finite differences
 
 Model families and simulators expose internal operating-point fields differently. An internal field such as `gm` is useful as a validation oracle, but it is a poor stable API across PSP, BSIM, BSIM-CMG, ngspice, and future Spectre support.
@@ -120,6 +151,8 @@ The project stores the raw complex Y matrix and derives reported capacitances fr
 
 This is more durable than making model-specific `cgg`, `cgd`, or `cgs` names part of the public contract.
 
+If a simple estimate such as `gm/(2*pi*Cgg)` is ever added later, do not casually label it the transistor's true `fT` unless the actual current-gain unity crossing is computed. A derived approximation should be named accordingly, for example `ft_est`.
+
 ## Why there are two distinct variation systems
 
 Two different questions are useful and must not be confused:
@@ -130,6 +163,8 @@ Two different questions are useful and must not be confused:
 APM130/IHP can expose native corners and native statistical/mismatch behavior on the validated ngspice side. Those results are useful as native model behavior, but they are not directly comparable to a synthetic common variation model applied to every kit.
 
 Every result therefore needs a clear distinction such as `variation_origin = native` versus `variation_origin = benchmark`.
+
+For IHP native variation, process/statistical and mismatch modes are known as separate concepts. Do not invent a native combined "All" mode unless the actual selected upstream model explicitly supports it and that support is validated. The cross-kit APM benchmark variation does require Process, Mismatch, and All.
 
 ## Why benchmark MOS variation has only `vth_shift` and `drive_shift`
 
@@ -196,6 +231,19 @@ Therefore v1.0 includes technology-neutral `Rbench` and `Cbench` primitives with
 Native passives may be exposed where reliable open models exist, especially for IHP, but they are optional and must never silently become the cross-process golden comparison basis.
 
 `match_size` for benchmark passives is a dimensionless benchmark quantity, not claimed physical layout area.
+
+## FinFET sanity expectations
+
+APM016F must preserve discrete fin semantics rather than hiding them behind a continuous planar-width abstraction.
+
+Useful sanity characterization includes several legal NFIN values such as 1, 2, and 4 where supported by the chosen deck/interface. At a common legal bias and L:
+
+- Id should scale roughly with NFIN;
+- gm should scale roughly with NFIN;
+- gm/Id should remain broadly similar;
+- gm/gds should remain broadly similar unless the compact model gives a documented reason otherwise.
+
+These are sanity properties, not exact linearity requirements across every bias point.
 
 ## Why Spectre support is model-only and experimental
 
