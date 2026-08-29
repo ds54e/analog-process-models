@@ -1,6 +1,10 @@
 # Analog Process Models
 
-Analog Process Models (APM) is an open, self-contained collection of analog compact-model technology kits and a common characterization framework for cross-process studies.
+**Repository:** https://github.com/ds54e/analog-process-models
+
+Analog Process Models (**APM**) is a new project defined by this repository: an open, self-contained collection of analog compact-model technology kits and a common characterization framework for cross-process studies.
+
+Within this repository, **APM means Analog Process Models**. It is not an external product, Microsoft technology, application-performance-monitoring package, or pre-existing software framework.
 
 The planned v1.0 spans:
 
@@ -12,7 +16,7 @@ The planned v1.0 spans:
 
 ## Scope
 
-The validated reference flow for v1.0 is planned to be:
+The validated reference flow targeted for v1.0 is:
 
 - WSL2
 - RHEL-compatible EL9 Linux, x86_64
@@ -26,16 +30,23 @@ The common v1.0 characterization contract is planned to include Id–Vg, Id–Vd
 
 Technology-neutral benchmark resistor and capacitor models are included in scope so circuits can be compared without inventing process-specific passive technology for every node.
 
-## Spectre compatibility
+## Backend status
 
-v1.0 is planned to include a **model-only Spectre compatibility layer**, including benchmark corners and Monte Carlo statistics. This layer is explicitly **experimental and unverified** until tested in an external Spectre environment.
+| Backend / frontend | v1.0 status target |
+| --- | --- |
+| ngspice | **Validated reference backend** |
+| xschem | Optional, example-supported frontend |
+| Spectre | **Experimental / unverified**, model-only compatibility |
+| Virtuoso | User-managed; no APM integration layer |
+
+Spectre compatibility includes model files, benchmark corners, and benchmark Monte Carlo statistics, but is not considered validated until tested in a real Spectre environment.
 
 Virtuoso libraries, symbols, CDFs, SKILL, ADE/Maestro setup, and other Virtuoso integration are user-managed and out of scope.
 
 ## Development specification
 
-- [`GOAL.md`](GOAL.md) is the v1.0 completion contract for the implementation agent.
-- [`AGENTS.md`](AGENTS.md) contains repository-wide engineering constraints.
+- [`GOAL.md`](GOAL.md) is the authoritative v1.0 implementation and Definition of Done.
+- [`AGENTS.md`](AGENTS.md) contains mandatory repository-wide engineering constraints.
 - Each model kit must maintain explicit provenance and licensing metadata.
 
 The repository is currently in initial implementation state. Do not interpret planned features as validated until the v1.0 release gates in `GOAL.md` have passed.
