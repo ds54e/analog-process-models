@@ -1,0 +1,47 @@
+schema = "apm.benchmark-variation.v1"
+status = "draft-values-unfrozen"
+
+[notes]
+text = "Architecture is part of the v1.0 contract. Numerical sigma/corner severity values remain intentionally unset until representative kits are characterized."
+
+[mos.process]
+vth_shift_sigma = "TBD"
+drive_shift_sigma = "TBD"
+
+[mos.mismatch]
+vth_shift_sigma_ref = "TBD"
+drive_shift_sigma_ref = "TBD"
+scaling_law = "sigma_ref/sqrt(match_size)"
+
+[mos.intent]
+vth_shift = "observable threshold-behavior shift"
+drive_shift = "observable relative Id shift at the kit reference bias"
+
+[corner.bench_tt]
+vth_n_sigma = 0.0
+drive_n_sigma = 0.0
+vth_p_sigma = 0.0
+drive_p_sigma = 0.0
+
+[corner.bench_ff]
+semantic = "lower_abs_vth_higher_drive_for_n_and_p"
+strength_sigma = "TBD"
+
+[corner.bench_ss]
+semantic = "higher_abs_vth_lower_drive_for_n_and_p"
+strength_sigma = "TBD"
+
+[corner.bench_fs]
+semantic = "fast_n_slow_p"
+strength_sigma = "TBD"
+
+[corner.bench_sf]
+semantic = "slow_n_fast_p"
+strength_sigma = "TBD"
+
+[requirements]
+process_mode = true
+mismatch_mode = true
+all_mode = true
+python_rng_for_ngspice = true
+spectre_statistics_for_spectre = true
