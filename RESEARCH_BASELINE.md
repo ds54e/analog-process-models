@@ -1,132 +1,231 @@
-# Upstream Research Baseline
+# Upstream Research Baseline for APM v2
 
-This file records externally researched facts that informed the initial APM specification. It is a **dated implementation aid**, not immutable policy. Upstream projects can change; re-check authoritative sources before pinning or vendoring anything.
+This file records researched facts that seed v2 implementation. It is dated guidance, not immutable policy. Re-check authoritative upstream sources before pinning, vendoring, freezing a release claim, or deriving a generic target.
 
-Baseline date: **2026-08-29**
+Baseline date: **2026-08-30**
 
-If this file conflicts with `AGENTS.md` or `GOAL.md`, follow the normative repository contract. If current authoritative upstream evidence differs from this baseline, use the current evidence and record the material change in `STATUS.md` and provenance metadata.
+If current primary evidence differs, use the stronger/current evidence and record the material change in `STATUS.md` and provenance.
 
-## ngspice
+## 1. v1 validated runtime baseline
 
-Authoritative sources:
+The v1.0.0 release already validated the following direct WSL2/EL9 reference path:
 
-- https://ngspice.sourceforge.io/download.html
-- https://ngspice.sourceforge.io/docs.html
-
-Baseline findings:
-
-- ngspice **47** is the current stable release as of this baseline date.
-- The upstream download page describes ngspice 47 as the stable end-user release.
-- Upstream does not provide a normal precompiled Linux stable package; Linux users may use distro packages or compile the release from source.
-- The v1.0 APM target is ngspice 47 with OSDI support.
-- OSDI capability must be proven by a real loaded compact-model simulation, not inferred from version text alone.
+- WSL2 kernel / AlmaLinux 9.7 x86_64 on Linux filesystem;
+- Python 3.9.25;
+- ngspice 47 built with `--enable-predictor --enable-osdi --with-x=no`;
+- project-local OpenVAF-ReLoaded tag `v24.0.2mob`, commit `fdf2522b70f42793f64b1c72f0195c96dea0cc19`, source-built against AlmaLinux LLVM 20.1.8;
+- PSP103 OSDI real-device execution;
+- BSIM-CMG 112.1.0 OSDI real-device execution;
+- native ngspice BSIM3/BSIM4 execution.
 
 Implementation implication:
 
-On the reported bare AlmaLinux environment, source-building ngspice 47 is an expected M0 path if the available package is absent, stale, or lacks the required OSDI configuration.
+Reuse the existing validated development toolchain when present. Do not repeat bootstrap discovery/build merely because v2 starts. Final v2 release still requires its own clean-clone/bootstrap validation.
 
-## OpenVAF-ReLoaded
-
-Authoritative upstream:
-
-- https://github.com/OpenVAF/OpenVAF-Reloaded
-
-Baseline findings from the upstream README:
-
-- OpenVAF-ReLoaded generates OSDI model libraries.
-- Current development uses OSDI API **0.4**.
-- The legacy `osdi_0.3` branch is no longer maintained.
-- The upstream compatibility table states ngspice >=44 supports OSDI 0.3 and 0.4 (using the relevant compatible subset).
-- 64-bit Linux binaries are available upstream.
-- Source builds support LLVM 18 through 21 at this baseline and require an explicitly selected/detected LLVM version plus Rust tooling.
-- Upstream project license is GPL-3.0; OpenVAF-ReLoaded is an external build tool and is not intended to be vendored as APM project code.
-
-Implementation implication:
-
-Pin the actual OpenVAF-ReLoaded revision/binary used for v1.0 validation and prove compatibility with the selected ngspice 47 build by compiling/loading the real PSP103 and BSIM-CMG paths.
-
-Do not assume Verilog-A RNG support is available or suitable for APM benchmark Monte Carlo; the benchmark reference flow remains Python-generated resolved samples plus deterministic ngspice runs.
-
-## BSIM-CMG
-
-Authoritative source:
-
-- https://bsim.berkeley.edu/models/bsimcmg/
-
-Baseline finding:
-
-- Latest standard BSIM-CMG version is **112.1.0**, dated **2026-04-28**.
-
-Implementation implication:
-
-112.1.0 is the preferred initial engine revision to investigate/pin for APM016F, subject to:
-
-- obtaining the exact authoritative distributable source;
-- auditing the exact source/license/agreement text being shipped;
-- confirming OpenVAF-ReLoaded compilation;
-- confirming ngspice 47 OSDI execution;
-- keeping the APM016F **parameter deck** independently APM-authored.
-
-Do not substitute a PTM-MG parameter deck merely because it already runs.
-
-## IHP SG13G2 / PSP
+## 2. IHP SG13G2 LV/HV family structure
 
 Authoritative upstream:
 
 - https://github.com/IHP-GmbH/IHP-Open-PDK
+- pinned v1 APM source revision: `331c00484213b13414777eec1336ef5c29b969bd`
 
-Relevant baseline file:
+Primary README finding:
 
-- `ihp-sg13g2/libs.tech/ngspice/models/sg13g2_moslv_mod_mismatch.lib`
+IHP SG13G2 provides two gate oxides:
 
-Baseline findings:
+- thin gate oxide for 1.2 V digital logic;
+- thick gate oxide for 3.3 V supply.
 
-- IHP SG13G2 is a 0.13 um BiCMOS open PDK with low-voltage MOS device models suitable as APM130's foundry-derived open anchor.
-- The open PDK README currently describes the open-source PDK content as **Preview**, even though the underlying SG13G2 process/PDK lineage has manufactured designs. APM must therefore avoid upgrading that into an independent production/silicon-correlation claim.
-- The inspected low-voltage MOS mismatch file identifies the model as **PSP 103.6**.
-- That file carries an Apache-2.0 header.
-- The mismatch wrapper visibly uses local randomized quantities including `delvto` and `factuo`, with geometry/multiplicity-dependent scaling in the upstream native model.
+For both modules, NMOS, PMOS, and isolated NMOS devices are offered.
 
-Implementation implication:
+This supports treating `lv` and `hv` as distinct electrical families while avoiding `core`/`io` as primary family identity.
 
-- Treat **PSP103.6** as the concrete initial APM130 compact-model target, while recording the exact IHP revision actually vendored.
-- Preserve IHP-native variation semantics separately from APM benchmark variation.
-- Do not copy IHP's native multiplicity/mismatch semantics into the APM common public geometry contract.
-- Do not invent a native Process+Mismatch "All" mode unless the selected upstream model explicitly provides and validates one; APM Benchmark Variation has its own required `all` mode.
+### LV model evidence
 
-## FreePDK45
+The upstream low-voltage corner model identifies:
 
-APM currently intends to use a minimal, clearly redistributable FreePDK45 simulation-model subset as APM045.
+- PSP 103.6;
+- maximum drain-source voltage 1.5 V in the model header;
+- valid L approximately 0.13–10 um;
+- valid W approximately 0.15–10 um;
+- TT/SS/FF/SF/FS corner structure;
+- TT statistical/process and mismatch structures in the open model set.
 
-A clean/open mirror has been considered during project definition, but **the exact imported files, exact revision, and file-level redistribution terms must still be audited during implementation**.
+APM v1 validated LV nominal/corners/statistical/mismatch behavior using the pinned snapshot.
 
-Do not treat this research baseline as license authorization. `models/apm045/provenance.toml`, `THIRD_PARTY.md`, and the exact upstream file headers control the eventual vendoring decision.
+### HV model evidence
 
-## APM350 candidate
+The pinned IHP snapshot also contains `cornerMOShv.lib`; no IHP revision bump is inherently required just to add HV.
 
-A generic SCN4M_SUBM-class open model is the current APM350 candidate, with the `silicon-vlsi-org/eda-technology` repository considered during project definition.
+The inspected HV file identifies:
 
-The intended metadata distinction is:
+- PSP 103.6;
+- model revision/date information in the file header;
+- maximum drain-source voltage 3.3 V;
+- NMOS valid L approximately 0.45–10 um;
+- PMOS valid L approximately 0.40–10 um;
+- W approximately 0.30–10 um;
+- TT/SS/FF/SF/FS corner libraries;
+- TT statistical profile;
+- TT mismatch profile.
 
-- technology class: 0.35 um-class;
-- actual model Lmin: whatever the selected model explicitly supports, potentially around 0.4 um.
+The file carries an Apache-2.0 header at current upstream; exact pinned-revision files must still be audited before vendoring.
 
-The exact model file's provenance/header/license must be re-audited before vendoring. If redistribution remains ambiguous, use another clearly redistributable source or author an APM generic BSIM3 deck rather than blocking the release.
+Implementation implications:
 
-## Spectre
+- prefer the existing pinned IHP revision when exact HV assets/terms pass audit;
+- support N/P-specific geometry bounds;
+- validate LV/HV native variation independently;
+- do not invent LV-HV joint correlation or upstream combined `all` semantics;
+- isolated/RF/layout variants are not automatically new APM electrical families.
 
-The project-definition research found the required compact-model families conceptually available in modern Spectre flows (BSIM3, PSP, BSIM4, BSIM-CMG) and normal Spectre Monte Carlo modeling uses `statistics` process/mismatch semantics.
+## 3. FreePDK45 family structure
 
-However, APM's local v1.0 development environment does not include validated Spectre execution. Therefore this research is only a design basis for the **experimental/unverified model-only compatibility layer**.
+Relevant authoritative/project sources include NCSU FreePDK45 documentation/manual and the already selected open-source-clean FreePDK45 1.4 mirror pinned by APM v1.
 
-Do not turn internet documentation into a claim that APM Spectre model files parse or simulate correctly. Real Spectre conformance is deferred until an actual Spectre environment is available.
+v1 APM source revision:
 
-## Research discipline for the implementation agent
+`688ee68ec5301e5fe11ebee5e53c1109d3cfd51d`
 
-When a baseline fact matters to a release claim:
+FreePDK45 identifies distinct model flavors including:
 
-1. re-check the authoritative upstream source;
-2. pin the exact version/revision used;
-3. prefer primary project documentation/source over search snippets or third-party summaries;
-4. record the result in provenance/evidence;
-5. distinguish an upstream statement from something APM actually validated locally.
+- VTL — low threshold;
+- VTG — general/regular threshold;
+- VTH — high threshold;
+- THKOX — thick-oxide/high-voltage off-chip-I/O-oriented device.
+
+The FreePDK45 manual uses Ion/Ioff as central Vt-flavor comparison observables. Published manual values show the expected trend from VTL to VTG to VTH: lower Ion and dramatically lower Ioff as threshold rises.
+
+Implementation implications:
+
+- use `vtl`, `vtg`, `vth`, `thkox` as technology-local family identities;
+- keep `vtg` as cross-process anchor;
+- use VTL/VTG/VTH native behavior to establish v2 family comparison methodology and generic multi-Vt target ranges;
+- re-audit every newly vendored VTL/VTH/THKOX file at the exact pinned clean-mirror revision;
+- do not assume THKOX nominal/reference VDD from secondary convention alone. If the pinned primary model/docs do not state a clear nominal VDD, choose an APM operating profile explicitly and label its origin `apm_selected`.
+
+## 4. SKY130 evidence for sparse/asymmetric families and validity metadata
+
+Authoritative documentation:
+
+- https://skywater-pdk.readthedocs.io/en/main/rules/device-details.html
+
+Useful structural findings:
+
+- SPICE model validity is documented separately for VDS/VGS/VBS, supporting APM's separation of model validity from Operating Profile.
+- SKY130 contains low-/high-/native-threshold device options that are not necessarily symmetric N/P pairs; for example documented high-Vt 1.8 V PMOS and native NMOS options demonstrate that family/device sets may be sparse.
+- native NMOS documentation describes creation by blocking VT implants, while threshold-flavor devices can share broad cross-section/gate-stack basis with threshold-adjust process differences.
+
+Implementation implications:
+
+- v2 schema must not require every family to contain N and P;
+- validity fields should be optional/evidence-backed rather than treated as unlimited when missing;
+- APM022 threshold-isolated generic LVT/HVT variants are a defensible controlled abstraction when clearly labeled, but should not be misrepresented as a complete foundry multi-Vt process recreation.
+
+## 5. GF180 evidence for family versus layout/operating variants
+
+Authoritative documentation:
+
+- https://gf180mcu-pdk.readthedocs.io/en/latest/physical_verification/design_manual/drm_15.html
+
+The GF180 device list demonstrates:
+
+- 3.3 V NMOS inside/outside DNWELL can map to the same `nfet_03v3` SPICE model;
+- 5 V and 6 V NMOS device options can map to the same `nfet_06v0` electrical model;
+- analogous DNWELL/SAB/layout variants may share electrical models;
+- native-Vt devices use distinct electrical model identities.
+
+Implementation implications:
+
+- operating-voltage/use/layout variant is not automatically Electrical Family identity;
+- DNWELL/isolated/SAB/RF views should not explode the family taxonomy when terminal electrical identity is shared;
+- Operating Profile is a separate first-class concept because one electrical model may legitimately be characterized/used under more than one profile;
+- reserve future mode/view extension rather than overloading v2 Family.
+
+## 6. BSIM-CMG workfunction semantics and ASAP7 multi-Vt evidence
+
+Authoritative BSIM-CMG model documentation identifies `PHIG` as gate workfunction.
+
+Relevant open predictive example:
+
+- The-OpenROAD-Project ASAP7 PDK/model cards.
+
+ASAP7 documentation provides multiple FinFET Vt flavors (RVT/LVT/SLVT and SRAM flavor). Inspected open model cards show that NMOS LVT/RVT/SLVT share a common broad FinFET geometry/EOT basis while changing `PHIG` materially. The same cards also show smaller family-dependent changes in parameters such as mobility/short-channel/saturation-related terms.
+
+Implementation implications:
+
+- APM016F multi-Vt should be `workfunction_dominant`, not falsely described as `PHIG-only`;
+- begin generic LVT/HVT development with PHIG changes calibrated to terminal threshold targets;
+- allow only minimal evidence-backed secondary changes if PHIG-only terminal behavior is poor;
+- use ASAP7 only as qualitative structural evidence/trend context. Do not copy ASAP7 numerical parameter values into APM016F.
+
+## 7. Generic multi-Vt target strategy
+
+Do not freeze APM022/APM016F LVT/SVT/HVT spacing before native/open family characterization.
+
+Preferred evidence order:
+
+1. APM045 VTL/VTG/VTH terminal characterization using the exact v2 framework;
+2. other public/open PDK family behavior such as SKY130;
+3. advanced open/predictive examples such as ASAP7;
+4. compact-model semantics and public literature.
+
+Use these to choose rounded generic observable targets/trends, not to copy a source model card.
+
+Hard generic family-ordering target:
+
+- `|Vth_LVT| < |Vth_SVT| < |Vth_HVT|`;
+- `Ion_LVT > Ion_SVT > Ion_HVT`;
+- `Ioff_LVT > Ioff_SVT > Ioff_HVT`.
+
+Do not force universal monotonic DIBL/gain/capacitance ordering without evidence.
+
+## 8. Subthreshold swing methodology
+
+Subthreshold swing is useful/required for multi-Vt family characterization, but the extraction window is not yet sufficiently justified to freeze in this planning phase.
+
+Implementation should evaluate candidate terminal methods on APM130 LV/HV and APM045 VTL/VTG/VTH data, for example local derivative versus one-decade or normalized-current linear-fit approaches, then freeze a robust method with fit diagnostics before release.
+
+Do not move the extraction window silently per device merely to obtain a plausible number.
+
+## 9. Benchmark family correlation interpretation
+
+Real multi-Vt family process correlation is not generally justified by a simple universal coefficient. Do not invent values such as `rho=0.8`.
+
+APM v2 therefore defines Benchmark Global as **common synthetic observable stress**, not a physical foundry process-correlation model:
+
+- draw technology/polarity `vth` and `drive` latent stresses;
+- apply the same observable stress to all relevant electrical families in that technology;
+- convert it through family/device-specific real-tool calibrated raw adapters.
+
+This preserves comparable benchmark severity and family ordering without claiming real family correlation.
+
+Keep the resolved sample namespace extensible for future family-specific residual latents if evidence eventually supports them.
+
+Upstream/native variation keeps actual upstream semantics and does not inherit APM benchmark correlation assumptions.
+
+## 10. Toolchain/research discipline
+
+Do not redo solved v1 toolchain research without reason. First inventory the actual existing project-local toolchain and compare it with v1 evidence.
+
+When a v2 fact matters to a release claim:
+
+1. re-check primary authoritative source;
+2. prefer already pinned v1 source revision when suitable;
+3. pin exact new file/revision/hash;
+4. distinguish observed upstream evidence from APM inference/engineering choice;
+5. record alternate interpretations/unknowns when material;
+6. record final decision in provenance/status/evidence;
+7. never treat absence of public evidence as proof of a hidden/proprietary property.
+
+## 11. Deliberately unresolved implementation research
+
+The implementation agent must resolve with evidence before v2 release:
+
+- exact FreePDK45 VTL/VTH/THKOX imported file set and file-level audit;
+- THKOX reference operating profile/VDD;
+- common-overlap gate-stack comparison biases;
+- final SS extraction convention;
+- APM022 generic multi-Vt target spacing;
+- APM016F generic multi-Vt target spacing and whether secondary parameters beyond PHIG need changes;
+- whether v1 benchmark sigma/corner severity remains appropriate after all 13 family adapters are characterized.

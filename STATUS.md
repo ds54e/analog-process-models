@@ -1,206 +1,134 @@
-# APM v1.0 Implementation Status
+# APM v2.0 Implementation Status
 
-This file is the compact persistent progress index for unattended execution.
-
-It is **not** evidence by itself. Validation claims must point to committed summaries under `validation/evidence/` or to reproducible commands/tests.
+This file is the compact persistent progress index for the current v2 development line. It is not evidence by itself.
 
 ## Overall state
 
 - Project: Analog Process Models (APM)
-- Repository: https://github.com/ds54e/analog-process-models
-- Target: v1.0.0
-- Current state: `RELEASE_READY`
-- Current milestone: `M10 License/provenance + clean-clone release review`
-- Release eligible: `YES` — tag only after the exact evidence commit repeats
-  the attested fresh-clone release command successfully
+- Repository: `https://github.com/ds54e/analog-process-models`
+- Stable historical release: `v1.0.0`
+- v1 baseline commit: `e7bba6aaba1487a1116459a6b7b2c3c5add93318`
+- Current target: `v2.0.0`
+- Current state: `V2_NOT_STARTED`
+- Current milestone: `V2-M0 Domain/catalog migration foundation`
+- Release eligible: `NO`
 
-## Reported initial environment
+The v2 specification intentionally breaks the v1 one-family-per-technology architecture. Current implementation code is still the v1 baseline until Codex performs the v2 migration.
 
-The following was the user-reported starting context before M0:
+Existing v1 release evidence is historical baseline only and does not satisfy v2 release gates.
 
-- Codex CLI is running directly inside WSL2 on AlmaLinux.
-- ngspice is not currently installed.
-- OpenVAF-ReLoaded is not currently assumed to be installed.
-- PSP103 / BSIM-CMG OSDI build artifacts are not currently assumed to exist.
+## v1 validated toolchain baseline available for reuse
 
-See `ENVIRONMENT.md`. M0 verified the host and bootstrapped the project-local reference toolchain without root access.
+The v1.0 implementation validated:
 
-## Milestones
+- WSL2 kernel `6.18.33.2-microsoft-standard-WSL2`
+- AlmaLinux 9.7, x86_64
+- repository/build work on Linux ext4, not `/mnt/c`
+- Python 3.9.25
+- ngspice 47 built with `--enable-predictor --enable-osdi --with-x=no`
+- project-local OpenVAF-ReLoaded tag `v24.0.2mob`, commit `fdf2522b70f42793f64b1c72f0195c96dea0cc19`
+- AlmaLinux LLVM 20.1.8 source-build path for OpenVAF
+- PSP103 OSDI real-device simulation
+- BSIM-CMG 112.1.0 OSDI real-device simulation
+- native BSIM3/BSIM4 real-device simulation
 
-| Milestone | Status | Evidence / notes |
+During v2 development the existing `.apm` toolchain, OSDI artifacts, caches, and `.venv` should be reused when present and verified. Do not rebuild solved infrastructure without reason.
+
+Final v2 release still requires its own clean-clone/bootstrap/release validation.
+
+## v2 required family target
+
+| Technology | Required families | Current v2 status |
 | --- | --- | --- |
-| M0 Runtime qualification | VALIDATED | `validation/evidence/m0-runtime.md`: reproducible project-local bootstrap and real native BSIM3/BSIM4, PSP103 OSDI, and BSIM-CMG OSDI simulations passed. |
-| M1 APM130 | VALIDATED | `validation/evidence/m1-apm130.md`: public N/P wrappers and complete nominal terminal characterization passed at all temperatures and lengths, including PSP native gm/gds oracle agreement. |
-| M2 APM045 | VALIDATED | `validation/evidence/m2-apm045.md`: exact Apache-2.0 FreePDK45 VTG subset, public N/P wrappers, and complete native-BSIM4 terminal characterization passed. |
-| M3 APM016F | VALIDATED | `validation/evidence/m3-apm016f.md`: independent APM cards, genuine BSIM-CMG OSDI, discrete `l,nfin` public results, and complete nominal terminal/NFIN characterization passed. |
-| M4 Benchmark R/C + variation | VALIDATED | `validation/evidence/m4-benchmark.md`: frozen synthetic severities, measured PSP/BSIM4/BSIM-CMG intent adapters, deterministic PCG64 samples/replay, five common corners, and native R/C value/noise checks passed. |
-| M5 APM022 | VALIDATED | `validation/evidence/m5-apm022.md`: independent non-PTM BSIM4 cards, explicit behavior contracts, complete terminal characterization, APM045/APM016F comparisons, and benchmark adapter/corners passed. |
-| M6 APM350 | VALIDATED | `validation/evidence/m6-apm350.md`: independently authored open generic BSIM3 cards, rejected-source license audit, complete terminal characterization, and fifth benchmark adapter passed. |
-| M7 Common characterization completion | VALIDATED | `validation/evidence/m7-all-kits.md`: fresh all-kit execution, complete result-contract audits, normalized terminal comparison, and explicit planar-per-width versus FinFET-per-fin semantics passed. |
-| M8 IHP-native variation | VALIDATED | `validation/evidence/m8-apm130-native.md`: all five IHP corners plus 128-sample native process/mismatch cohorts, replay, global/local semantics, and geometry scaling passed in ngspice. |
-| M9 Spectre model-only compatibility | VALIDATED | `validation/evidence/m9-spectre.md`: all five kits, benchmark R/C, five corners, Process/Mismatch/All statistics, provenance, and model-only scope passed the required static gate; backend remains experimental/unverified with no Spectre parse claim. |
-| M10 License/provenance + clean-clone release review | VALIDATED | `validation/evidence/m10-release.md`: a genuinely fresh clone built the entire toolchain/model stack and passed all 16 fail-closed release gates plus focused planar and planar/FinFET comparisons. |
+| APM350 | `general` | NOT_STARTED migration from v1 |
+| APM130 | `lv`, `hv` | NOT_STARTED; LV exists in v1, HV to add |
+| APM045 | `vtl`, `vtg`, `vth`, `thkox` | NOT_STARTED; VTG exists in v1 |
+| APM022 | `lvt`, `svt`, `hvt` | NOT_STARTED; v1 deck becomes SVT baseline |
+| APM016F | `lvt`, `svt`, `hvt` | NOT_STARTED; v1 deck becomes SVT baseline |
 
-Allowed milestone status values:
+Total target: 13 Electrical Families.
 
-- `NOT_STARTED`
-- `IN_PROGRESS`
-- `VALIDATED`
-- `BLOCKED`
+## v2 milestones
 
-Do not mark a milestone `VALIDATED` when its required real-tool checks have not run successfully.
+| Milestone | Status | Purpose |
+| --- | --- | --- |
+| V2-M0 Domain/catalog migration | NOT_STARTED | Manifest-driven Technology/Family/Device/OperatingProfile/BackendBinding architecture; migrate existing v1 representative families first. |
+| V2-M1 APM130 LV/HV | NOT_STARTED | Add/audit IHP HV family, N/P-specific bounds, native LV/HV variation, gate-stack profile semantics. |
+| V2-M2 APM045 VTL/VTG/VTH/THKOX | NOT_STARTED | Add/audit all FreePDK45 families, collect native multi-Vt/gate-stack characterization, freeze THKOX profile research. |
+| V2-M3 Characterization/result/comparison v2 | NOT_STARTED | v2 identity/schema; Ion/Ioff/log ratio/SS; comparison sets and views. |
+| V2-M4 Benchmark Global/Local/All | NOT_STARTED | Multi-family latent stress, family adapters, deterministic replay, severity review. |
+| V2-M5 APM022 multi-Vt | NOT_STARTED | Threshold-isolated generic LVT/SVT/HVT families. |
+| V2-M6 APM016F multi-Vt | NOT_STARTED | Workfunction-dominant generic LVT/SVT/HVT FinFET families. |
+| V2-M7 Integrated all-family validation | NOT_STARTED | All five technologies/13 families, comparisons, variation, removal of v1 runtime SSOT dependency. |
+| V2-M8 Spectre/provenance/docs | NOT_STARTED | v2 model-only Spectre structure, exact-file audits, claims/docs, remove obsolete v1 canonical artifacts. |
+| V2-M9 Release validation | NOT_STARTED | 2.0.0 metadata, fail-closed validator, fresh clone, all gates, tag. |
 
-## Validated reference environment
+Allowed status values: `NOT_STARTED`, `IN_PROGRESS`, `VALIDATED`, `BLOCKED`.
 
-Reference environment and simulator runtime qualified on 2026-08-29 UTC:
+## Authoritative v2 design decisions already settled
 
-Record actual validated values when M0 runs:
+- v2 is an intentional breaking redesign; no backward-compatibility layer is required.
+- canonical hierarchy is `Technology -> Electrical Family -> Device`.
+- Operating Profile, Backend Binding, Variation, and Comparison Set are orthogonal concepts.
+- Family means nominal electrical parameterization, not primarily `core/io/RF` usage.
+- Family IDs are technology-local; cross-technology semantics come from metadata/comparison sets.
+- schema must allow sparse/asymmetric devices; do not require N/P pairs globally.
+- model validity, APM Operating Profile, and reliability/rating claims are distinct.
+- runtime must be manifest-driven by v2 release; normal family addition must not require a technology-specific loader branch.
+- APM130 should preserve the pinned v1 IHP revision if its HV assets pass exact-file audit.
+- APM045 should preserve the pinned v1 clean FreePDK45 revision if VTL/VTH/THKOX assets pass audit.
+- APM022 LVT/HVT are `threshold_isolated` generic variants around SVT.
+- APM016F LVT/HVT are `workfunction_dominant` generic variants around SVT.
+- APM016F thick-oxide/high-voltage I/O is deferred beyond v2.
+- v2 adds Ion, Ioff, `log10(Ion/Ioff)`, and subthreshold swing.
+- threshold-family comparison requires equal-bias and equal-inversion views.
+- gate-stack comparison requires native-profile and validated common-overlap-bias views.
+- APM synthetic variation terminology becomes Benchmark Global / Benchmark Local / Benchmark All.
+- Benchmark Global is common synthetic observable stress across a technology/polarity's families, not a real foundry family-correlation claim.
+- upstream/native family-to-family statistical correlation is not invented.
+- Spectre remains model-only experimental/unverified unless real execution occurs.
 
-- WSL version / host context: WSL2 kernel `6.18.33.2-microsoft-standard-WSL2`
-- EL9 distribution and version: AlmaLinux 9.7
-- architecture: x86_64
-- repository path/filesystem: `/home/admin/src/analog-process-models` on Linux ext4 (`/dev/sdd`), not `/mnt/c`
-- Python version: 3.9.25
-- ngspice version/build options/prefix: ngspice 47; `--enable-predictor --enable-osdi --with-x=no`; project-local `.apm/toolchain/ngspice-47`
-- OSDI load mechanism: ngspice `pre_osdi` inside a headless `.control` block
-- OpenVAF-ReLoaded version/revision: tag `v24.0.2mob`, commit `fdf2522b70f42793f64b1c72f0195c96dea0cc19`, source-built against AlmaLinux LLVM 20.1.8
-- PSP103 source/revision: PSP 103.8.2 / JUNCAP 200.6.2 from IHP commit `331c00484213b13414777eec1336ef5c29b969bd`; IHP parameter cards identify PSP 103.6
-- BSIM-CMG source/revision: UC Berkeley BSIM-CMG 112.1.0, upstream archive SHA-256 `9c70a7c9fcfafe66fb1582655bbfd36714b90ecba137a9dd83c76b3a0bd9e50a`
+## Deliberately unresolved v2 research values
 
-## Release-gate summary
+These are not blockers at V2-M0 but must be frozen with evidence before release:
 
-The normative gate definition is `validation/release_gates.toml`.
+- FreePDK45 THKOX reference Operating Profile/VDD;
+- common-overlap LV/HV and VTG/THKOX comparison biases;
+- final subthreshold-swing extraction convention/window;
+- APM022 generic LVT/SVT/HVT target spacing/secondary adjustments;
+- APM016F generic LVT/SVT/HVT target spacing/secondary adjustments;
+- whether v1 benchmark sigma/corner severity remains appropriate for v2;
+- all new family-specific benchmark adapter coefficients.
 
-All 16 required gates are validated at release-candidate commit `74389a5`:
-`runtime.wsl2_el9`, `runtime.ngspice_headless`, `runtime.psp103_osdi`,
-`runtime.bsimcmg_osdi`, `models.all_kits`, `characterization.all_kits`,
-`passives.benchmark`, `variation.benchmark`, `variation.apm130_native`,
-`finfet.integrity`, `spectre.model_only`, `licensing.provenance`,
-`distribution.self_contained_models`, `release.metadata_complete`,
-`release.clean_clone`, and `release.claim_audit`.
+Do not replace these with arbitrary convenient values.
 
-The final evidence/status commit is intentionally re-run from another exact
-attested clone before the annotated tag is created; the tag message is the
-non-circular record of that final commit and report hash.
+## v1 historical evidence
 
-Do not convert absence of evidence into PASS.
+The existing `validation/evidence/m0-runtime.md` through `m10-release.md` remain useful historical evidence for v1 and for unchanged tool/model baseline facts.
+
+They do not mark any V2-M* milestone VALIDATED.
+
+New v2 evidence should use clearly v2-labeled filenames/metadata and bind claims to current v2 commits/results.
+
+## Expected state immediately after this specification commit
+
+It is expected that:
+
+- package/runtime implementation may still report 1.0.0;
+- current `kit.toml` and v1 loaders/configs still exist temporarily;
+- v1 release-validator tests may fail because `validation/release_gates.toml` now describes v2;
+- current public wrappers/results are still v1 until V2-M0+ migration.
+
+This is intentional development state, not a release failure to be hidden. Codex should implement `GOAL.md`, not weaken v2 policy to make old v1 validation green.
 
 ## Current blockers
 
-None recorded yet. Missing initial simulator/compiler installations are expected M0 bootstrap work, not blockers by themselves.
+None recorded.
 
-A blocker entry should state:
+## Release gate summary
 
-- affected milestone/gate;
-- exact blocker;
-- investigation performed;
-- compliant alternatives considered;
-- whether independent work can continue.
+The authoritative gate contract is `validation/release_gates.toml`.
 
-## Material decisions made during implementation
+Current validated v2 gates: **none**.
 
-- The official OpenVAF `v24.0.2mob` Linux binary requires glibc newer than EL9 and an unavailable `libLLVM.so.18.1`. The reproducible bootstrap therefore builds the pinned `openvaf-driver` source package against project-local AlmaLinux LLVM 20.1.8. This preserves the EL9 reference platform.
-- Current IHP upstream combines PSP 103.6 parameter cards with PSP 103.8.2 source. APM pins both exact assets, records the distinction, and has verified their nominal QS combination in real ngspice 47. No card values were translated or changed.
-- APM130 uses the upstream-documented 1.2 V thin-oxide supply and 0.13 um model Lmin. Its canonical threshold method is `Id=100 nA * W/L`; the coefficient, geometry, and drain biases are persisted with every DIBL result.
-- APM045 pins the open-source-clean FreePDK45 1.4 mirror at commit `688ee68ec5301e5fe11ebee5e53c1109d3cfd51d` and ships only its byte-identical nominal VTG cards plus licensing/model-basis documents. Its disclosed PTM ancestry is isolated from the independently authored APM022 deck.
-- APM045 uses 101-point DC sweeps so the 1.0 V endpoints and 10 mV finite-difference grid are exact. Monotonicity is required from the documented constant-current criterion through conduction; full-range picoamp leakage-partition reversals are retained and reported separately.
-- APM016F uses the exact ECL-2.0 Berkeley BSIM-CMG 112.1.0 engine with independently authored Apache-2.0 parameter cards. Public dimensions, doping, 0.8 V operation, and behavior targets come from cited primary literature and official BSIM-CMG semantics; no PTM-MG card values were used. Its public/result geometry is only `l,nfin`, threshold extraction is `Id=100 nA*NFIN`, self-heating is off, and a 5 mV gate grid provides converged canonical gm.
-- APM022 is an independently authored native-BSIM4 22 nm-class deck using
-  public quasi-planar bulk dimensions and official BSIM semantics, with no PTM
-  card use. Its supported v1 range is L=25..100 nm at 0.8 V. The card
-  explicitly disables the unevidenced BSIM pocket-length default, and terminal
-  gates enforce monotonic threshold/gain increase, monotonic DIBL decrease,
-  minimum-length behavior ranges, and the required APM045/APM016F comparisons.
-- APM350 does not vendor the preferred SCN4M_SUBM candidate card because its
-  exact file has no original-source or file-level rights statement. It instead
-  uses an independently authored Apache-2.0 BSIM3 generic reference, while the
-  pinned MIT README supplies only class-level 0.4 um Lmin, 0.6 um Wmin, and 5 V
-  statements. The technology label remains 0.35 um-class and the actual model
-  minimum is recorded honestly as 0.4 um.
-- APM benchmark variation uses frozen synthetic sigmas only after real PSP103,
-  BSIM4, and BSIM-CMG calibration. Canonical positive threshold shift means
-  larger `|Vth|` for N/P even though raw signs differ; canonical positive drive
-  shift means larger reference-bias `|Id|`. NumPy PCG64 resolves deterministic
-  samples outside ngspice, and persisted samples are the replay authority.
-- Benchmark process variables are independent/global per class; mismatch is
-  independent/local per instance; threshold combines additively while drive
-  and passive scale factors combine multiplicatively. Planar matching uses
-  `W*L`, FinFET matching uses `NFIN*L`, and passive `match_size` is dimensionless.
-- Integrated comparisons use 27 degC, `L/Lmin=2`, `VOUT/VDD=0.5`, and the
-  available gate-grid point nearest `gm/Id=15 1/V`. Planar current/gm/
-  capacitance remain per micrometre of drawn width and FinFET quantities remain
-  per fin; cross-basis current and capacitance ratios are intentionally absent.
-- APM130's selected native flow retains the five upstream `mos_*` corners,
-  `mos_tt_stat`, and `mos_tt_mismatch` identities and uses
-  ngspice-native seeded random evaluation. It has no stochastic native `all`
-  profile because upstream provides none. The sole 1e-9 relative PMOS
-  `dphiblw` process entry is persisted but explicitly classified as effectively
-  fixed at ngspice 47 expanded-deck precision; 33 process fields vary measurably.
-- Spectre v1 artifacts are a model-only, static-checked layer with one common
-  variation library: five deterministic benchmark sections and a `bench_mc`
-  section whose normal Spectre `process`/`mismatch` blocks support user-selected
-  Process, Mismatch, or All. Six process variables are independent/global;
-  four mismatch variables are independent and referenced within regular
-  device/passive subcircuits for per-instance sampling. Public sizing remains
-  planar `w,l` or FinFET `l,nfin`; no testbench or Virtuoso asset is shipped.
-- APM130's Spectre nominal card is a deterministic Apache-2.0 translation of
-  the pinned IHP TT QS subset. It preserves the selected 34 global and two N/P
-  model-block parameter values, changes only `psp103va` to native `psp103`, and
-  fixes upstream wrapper-scope inputs. IHP-native Spectre MC, Spectre parsing,
-  and numerical conformance remain explicitly unclaimed.
-
-Only record decisions that materially affect public API, model provenance/fidelity, characterization semantics, variation semantics, supported runtime, or release claims. Do not use this section as a verbose work diary.
-
-When a material decision intentionally departs from `PROJECT_CONTEXT.md`, record the new evidence and rationale here so future continuation does not accidentally revert it.
-
-## Evidence index
-
-- `validation/evidence/m0-runtime.md` — reference host/toolchain and four real simulator runtime smokes.
-- `validation/evidence/m1-apm130.md` — nominal APM130 public devices and complete terminal characterization at required temperatures.
-- `validation/evidence/m2-apm045.md` — exact-source nominal APM045 public devices and complete native-BSIM4 terminal characterization.
-- `validation/evidence/m3-apm016f.md` — independently authored generic FinFET cards, genuine BSIM-CMG execution, and complete discrete-NFIN terminal characterization.
-- `validation/evidence/m4-benchmark.md` — calibrated observable-intent mappings,
-  deterministic benchmark modes/corners/replay, and technology-neutral R/C
-  value, temperature, matching, and native-noise validation.
-- `validation/evidence/m5-apm022.md` — independent scaled-planar cards,
-  terminal behavior and cross-kit comparisons, plus the calibrated APM022
-  benchmark adapter and deterministic variation rerun.
-- `validation/evidence/m6-apm350.md` — rejected-candidate provenance audit,
-  independent mature-planar BSIM3 characterization, and the completed
-  five-kit benchmark adapter/corner/Monte Carlo validation.
-- `validation/evidence/m7-all-kits.md` — fresh five-kit characterization,
-  persisted result-contract audit, normalized terminal table, and safe
-  planar-to-FinFET comparison semantics.
-- `validation/evidence/m8-apm130-native.md` — five pinned IHP corner profiles,
-  model-global native process sampling, instance-local native mismatch,
-  deterministic replay, and upstream geometry scaling in real ngspice.
-- `validation/evidence/m9-spectre.md` — structurally checked model-only files
-  for all five kits, common corners/statistics/passives, exact adapter and
-  provenance audits, and explicit experimental/unverified evidence boundary.
-- `validation/evidence/m10-release.md` — exact fresh-clone attestation,
-  source-built toolchain/model artifacts, 16/16 release-gate report, complete
-  license/provenance/claim/distribution audits, and focused comparisons.
-
-## Final-review fields
-
-- clean clone path/environment: new clone under
-  `/home/admin/src/apm-v1-clean-IN1XjOZk`, WSL2 + AlmaLinux 9.7 x86_64 on ext4
-- clean-clone setup result: PASS; exact origin/commit and pre-bootstrap state
-  attested before a source-only bootstrap
-- `apm doctor` result: PASS; native BSIM3/BSIM4, PSP103 OSDI, and BSIM-CMG OSDI
-- complete test-suite result: PASS; 58 tests plus Ruff
-- `apm validate --release` result: PASS; 16/16 required gates
-- all-five-kit comparison result: PASS; five technologies, both polarities,
-  10 normalized rows, plus focused planar and planar/FinFET pairs
-- provenance/license audit result: PASS; exact manifests and complete REUSE
-  coverage
-- README claim audit result: PASS; hash-bound manual review
-- release-critical placeholder scan result: PASS
-- package version (`pyproject.toml`) = `1.0.0`: PASS
-- installed distribution and runtime `__version__` = `1.0.0`: PASS
-- `CHANGELOG.md` v1.0.0 release entry present: PASS
-- Spectre status confirmed `experimental_unverified`: PASS
-- final release commit: the commit targeted by annotated tag `v1.0.0`; the tag
-  message records its exact post-evidence clean-clone validation hash
-- v1.0.0 tag: created only after that exact-commit validation, without moving
-  or rewriting the validated commit
+`v1.0.0` remains the only validated release until all v2 gates pass.

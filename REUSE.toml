@@ -5,6 +5,7 @@ path = [
   "README.md",
   "GOAL.md",
   "AGENTS.md",
+  "DEVICE_FAMILY_MODEL.md",
   "PROJECT_CONTEXT.md",
   "ENVIRONMENT.md",
   "RESEARCH_BASELINE.md",
@@ -71,5 +72,5 @@ SPDX-FileCopyrightText = [
 ]
 SPDX-License-Identifier = "Apache-2.0"
 
-# Other future vendored model/source files under models/** remain intentionally
-# uncovered until their exact file-level terms and provenance have been audited.
+# Future vendored model/source files under models/** remain intentionally
+# uncovered until exact file-level terms and provenance have been audited.

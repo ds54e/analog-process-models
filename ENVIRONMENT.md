@@ -1,74 +1,80 @@
-# Initial Development Environment
+# APM v2 Development Environment
 
-This file records the known starting environment for the first unattended implementation run. It is an input to M0, not validation evidence. The agent must verify all reported facts locally before promoting them to validated status.
+This file records the expected continuation environment for the v2 implementation. Unlike the original v1 startup, v2 begins after a successful v1.0.0 implementation in the same WSL2/AlmaLinux workspace.
 
-## User-reported initial state
+## Validated v1 baseline
 
-- Codex CLI is running **directly inside WSL2 on AlmaLinux**.
-- The intended architecture is x86_64.
-- ngspice is **not currently installed**.
-- OpenVAF-ReLoaded is **not currently assumed to be installed**.
-- Required PSP103 / BSIM-CMG OSDI build artifacts are **not currently assumed to exist**.
-- Spectre/Virtuoso are not part of the validated local v1.0 reference flow.
+The v1 release evidence established a working direct environment with:
 
-Do not treat the missing simulator/compiler toolchain as a blocker. Bootstrapping the reproducible reference toolchain is part of **M0 Runtime qualification**.
+- WSL2
+- AlmaLinux 9.7 / RHEL-compatible EL9
+- x86_64
+- Linux filesystem working directory, not `/mnt/c`
+- Python 3.9.25
+- ngspice 47 with `--enable-predictor --enable-osdi --with-x=no`
+- project-local OpenVAF-ReLoaded `v24.0.2mob`, commit `fdf2522b70f42793f64b1c72f0195c96dea0cc19`
+- project-local LLVM 20.1.8 path used to build OpenVAF
+- PSP103 OSDI artifacts proven by real simulation
+- BSIM-CMG 112.1.0 OSDI artifacts proven by real simulation
+- native BSIM3/BSIM4 real simulations
 
-## M0 bootstrap objective
+See the v1 tag and historical evidence for exact commands/hashes.
 
-Starting from this AlmaLinux environment, establish and document a reproducible toolchain that can perform the required real-device smoke tests.
+## v2 startup expectation
 
-Initial target:
+The current Codex session may be compacted after v1 completion and continue in the same repository/environment.
 
-- WSL2 + AlmaLinux 9 x86_64
-- Python >= 3.9
-- **ngspice 47 with OSDI support**
-- OpenVAF-ReLoaded for Verilog-A -> OSDI compilation where required
+Before installing/building anything:
 
-The agent must inspect the actual system first (`/etc/os-release`, architecture, installed packages, compiler/tool versions) rather than blindly running installation commands.
+1. inspect the current repository/branch/HEAD/status;
+2. inspect `.apm/toolchain`, `.apm/models`/generated OSDI state, caches, and `.venv`;
+3. compare tool versions with the validated v1 baseline;
+4. run the existing doctor/smoke path if practical;
+5. reuse valid local toolchain state.
 
-## ngspice policy
+Do **not** treat v2 as a bare-machine M0 unless the existing toolchain is actually absent/broken/incompatible.
 
-ngspice 47 is the intended v1.0 reference release. Linux upstream distribution does not need to provide a prebuilt current package; a reproducible source build is acceptable and expected if the distro package is absent, stale, or lacks the required OSDI capability.
+## Reuse policy
 
-Authoritative ngspice OSDI documentation states that an OSDI-capable build should explicitly include:
+Development may reuse:
 
-- `--enable-predictor`
-- `--enable-osdi`
+- source-built ngspice 47;
+- source-built OpenVAF-ReLoaded;
+- downloaded/pinned source caches;
+- compiled PSP103/BSIM-CMG OSDI artifacts;
+- existing Python virtual environment, after dependency/project metadata changes are reconciled;
+- simulator knowledge/workarounds recorded during v1.
 
-If building ngspice from source:
+When code/model bindings change, rebuild only affected generated artifacts as required.
 
-- use an authoritative ngspice 47 source release;
-- determine and document the build prerequisites actually needed on AlmaLinux 9;
-- use the required OSDI/predictor configuration explicitly rather than assuming distro/default flags;
-- prefer a user-local or project-controlled prefix when practical rather than destructively replacing unrelated system software;
-- record source release/hash, configure flags, compiler versions, prefix, and `ngspice --version` output in M0 evidence;
-- prove OSDI by loading and simulating a real OSDI compact model, not only by checking build flags or shared-library presence.
+If an existing artifact's source/binding/revision changes, do not assume its v1 binary remains valid; rebuild and record the new dependency chain.
 
-For hermetic APM runs, prefer batch execution that does not depend on user startup state. In particular, use ngspice's no-user-startup behavior where appropriate (for example the `-n` command-line option) and do not require `~/.spiceinit`.
+## Final release boundary
 
-For model loading, prefer netlist-local `pre_osdi` where practical. Upstream ngspice documents that a relative path passed to `pre_osdi` is resolved relative to the netlist, which is useful for self-contained run directories.
+Local reuse accelerates development but does not satisfy the v2 clean-clone release gate.
 
-Do not silently downgrade to an older ngspice merely because it is easier to install.
+Before v2.0.0, a fresh clone must prove the documented source bootstrap/build/doctor/test/characterization/release-validation flow on WSL2 + RHEL-compatible EL9 x86_64.
 
-## OpenVAF-ReLoaded policy
+The final clean clone may use documented external network downloads/cache mechanisms allowed by the release flow, but it must not depend on untracked files copied from the development checkout.
 
-OpenVAF-ReLoaded is an external development tool, not a vendored APM runtime payload.
+## Platform policy
 
-Use an authoritative upstream release/revision and pin the version/revision used for v1.0 validation. Current upstream supports OSDI 0.4 and documents compatibility with ngspice >=44; verify the selected revision against ngspice 47 in M0 rather than relying only on documentation.
+Keep source/build/run data on the Linux filesystem.
 
-Prefer a reproducible installation method. A maintained upstream 64-bit Linux binary may be used if suitable and its provenance/version can be pinned; building from source is also acceptable when needed. If building from source, document the Rust/LLVM requirements actually used on AlmaLinux.
+Do not depend on:
 
-Do not modify user shell startup files merely to make the tool discoverable. Project scripts/configuration may set PATH or explicit tool paths in a reproducible way.
+- `/mnt/c` for normal builds/runs;
+- user-global `~/.spiceinit` state;
+- GUI state;
+- shell-startup-file modification as required setup;
+- nested container/VM substitution for the required final WSL2/EL9 gate.
 
-## M0 acceptance evidence
+Containers/CI may supplement validation but do not replace the final reference environment.
 
-M0 is not complete until the environment is verified and the following actually execute:
+## Spectre/Virtuoso
 
-1. native BSIM3 device smoke simulation;
-2. PSP103 compiled/loaded through OSDI and simulated;
-3. native BSIM4 device smoke simulation;
-4. BSIM-CMG compiled/loaded through OSDI and simulated as a genuine FinFET device.
+No real Spectre/Virtuoso environment is assumed for v2 development.
 
-Evidence should include exact commands, versions, exit codes, and concise sanity results. Static inspection is not enough.
+Spectre remains model-only experimental/unverified unless real Spectre access is actually available and intentionally used.
 
-After M0, update `STATUS.md` with the actual validated environment rather than leaving this initial report as the source of truth.
+Virtuoso integration remains out of scope.

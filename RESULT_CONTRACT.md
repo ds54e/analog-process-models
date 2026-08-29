@@ -1,43 +1,50 @@
-# APM v1 Result Contract
+# APM v2 Result Contract
 
-This file defines the stable semantic minimum for v1 characterization results. It exists to prevent different model-kit adapters from producing incompatible or ambiguous outputs.
+This file defines the stable semantic minimum for APM v2 persisted characterization results.
 
-The exact internal Python classes and file layout may evolve during implementation, but the information below must remain recoverable from persisted results.
+If this file conflicts with `AGENTS.md`, `GOAL.md`, or `DEVICE_FAMILY_MODEL.md`, those files win.
 
-If this file conflicts with `GOAL.md` or `AGENTS.md`, those files win.
+## 1. Principles
 
-## General principles
+1. Persist machine-readable numerical results; plots are derived presentation only.
+2. Canonical identity is `technology_id / family_id / device_id`.
+3. Bind results to immutable semantic manifests, backend bindings, model/provenance identity, and operating profile.
+4. Preserve raw signed terminal quantities separately from canonical positive-magnitude comparison quantities.
+5. Preserve enough method metadata to recompute/audit every derived metric.
+6. Preserve the raw complex 4x4 terminal Y matrix.
+7. Do not invent planar effective width for FinFET results.
+8. Keep APM Benchmark variation distinct from upstream/native variation.
+9. Do not duplicate every family attribute into every raw row when immutable metadata binding is sufficient; comparison tables may denormalize useful attributes.
 
-1. Persist machine-readable numerical results; plots are derived presentation, never the only output.
-2. Preserve raw signed terminal quantities separately from canonical positive-magnitude comparison quantities.
-3. Preserve enough method metadata to recompute or audit every derived quantity.
-4. Preserve model/simulator/provenance identity with every result set.
-5. Do not invent a planar effective width for FinFET results.
-6. Preserve the raw complex terminal Y matrix rather than only derived capacitance labels.
-7. Distinguish APM benchmark variation from PDK-native variation in every result set.
+## 2. Result-set identity
 
-## Required result identity
-
-Every persisted characterization result set must identify at least:
+Every persisted v2 result set must identify at least:
 
 - result schema version;
-- APM kit ID (`apm350`, `apm130`, `apm045`, `apm022`, or `apm016f`);
-- APM public device name;
-- polarity (`n` or `p`);
-- compact-model family;
-- model/deck revision or immutable source identifier where available;
-- simulator backend;
-- simulator version/build identity;
-- characterization type/method;
+- `technology_id`;
+- `family_id`;
+- `device_id`;
+- polarity as device metadata or explicit field;
+- public APM device name;
+- compact-model family/engine;
+- model/deck revision or immutable source identifier;
+- technology manifest path/hash;
+- family manifest path/hash;
+- backend binding path/hash;
+- relevant provenance path/hash;
+- simulator backend/version/build identity;
+- operating profile ID and resolved profile data;
+- characterization method/type;
 - temperature;
-- nominal kit VDD used by the characterization;
 - geometry;
-- variation origin/mode;
-- relevant extraction-method metadata.
+- variation origin/mode/profile/sample identity;
+- extraction-method metadata.
 
-## Canonical units
+The same family/device under different Operating Profiles must remain distinguishable.
 
-Persist canonical numeric fields in explicit SI-derived units:
+## 3. Canonical units
+
+Stored canonical numerical fields use explicit SI-derived units:
 
 - voltage: V
 - current: A
@@ -49,152 +56,249 @@ Persist canonical numeric fields in explicit SI-derived units:
 - gm/Id: 1/V
 - gm/gds: dimensionless
 - DIBL: V/V
+- subthreshold swing: V/decade or explicitly named mV/decade display field
+- planar current density: A/m of drawn width
+- FinFET normalized current: A/fin
 
-Human-facing tables/plots may rescale units (mV, uA, fF, nm, etc.), but stored machine-readable fields must identify the actual unit and must not rely on display labels for interpretation.
+Human-facing outputs may use uA/um, fF/um, mV/dec, etc., but persisted field names/metadata must make units unambiguous.
 
-## Geometry
+## 4. Geometry
 
-For planar devices persist:
+Planar devices persist:
 
 - `w_m`
 - `l_m`
 - `l_over_lmin`
+- family/device Lmin used for normalization
 
-For APM016F persist:
+FinFET devices persist:
 
 - `l_m`
-- `nfin`
+- integer `nfin`
 - `l_over_lmin`
+- family/device Lmin used for normalization
 
-Do not fabricate or require `w_m` for FinFET comparison.
+Do not fabricate `w_m` for FinFET results.
 
-Record the kit's `model_lmin`/reference Lmin used to compute normalized length.
+Geometry validity may be N/P/device-specific. Do not infer a technology-wide Lmin when manifests say otherwise.
 
-## Raw DC quantities
+## 5. Raw and canonical DC semantics
 
-Raw device data must retain the simulator's signed terminal convention.
+Preserve raw simulator terminal convention.
 
-Where applicable persist terminal voltages/currents or enough equivalent data to reconstruct the characterized bias point.
-
-Canonical comparison coordinates are separate fields:
+Canonical effective comparison variables:
 
 - NMOS/NFET: `vctrl_v = VGS`, `vout_v = VDS`, `idmag_a = abs(ID)`
 - PMOS/PFET: `vctrl_v = VSG`, `vout_v = VSD`, `idmag_a = abs(ID)`
 
-Do not overwrite the raw signed current with `idmag_a`.
+Do not overwrite raw signed current with `idmag_a`.
 
-## Id-Vg and Id-Vd
+Persist enough terminal/bias information to reconstruct the characterized operating point.
 
-Persist the sweep coordinates and current values in machine-readable form, including:
+## 6. Id-Vg / Id-Vd
 
-- effective sweep voltage;
-- fixed effective bias voltage(s);
-- raw signed drain current where available;
-- canonical current magnitude;
-- geometry;
-- temperature;
-- variation identity.
+Persist sweep coordinates, fixed effective biases, raw signed current, canonical magnitude, geometry, temperature, operating profile, and variation identity.
 
-The exact CSV/table organization may be chosen during implementation as long as these semantics are explicit.
+All family/device sweep generation must use the common manifest-driven characterization engine unless a documented compact-model limitation requires a narrow adapter.
 
-## gm and gds
+## 7. gm / gds
 
-Canonical derived values are:
+Canonical values:
 
 - `gm_s = d(IDMAG)/d(VCTRL)`
 - `gds_s = d(IDMAG)/d(VOUT)`
 - `gm_over_id_per_v = gm_s / IDMAG`
 - `gm_over_gds = gm_s / gds_s`
 
-Persist finite-difference method metadata, including the perturbation sizes actually used and the convergence/error criterion/result.
+Use central finite differences and more than one perturbation size/convergence check.
 
-If a native compact-model OP value is also saved for validation, name it distinctly (for example `native_gm_s`) and never substitute it silently for the canonical finite-difference quantity.
+Persist perturbation sizes, convergence/error diagnostics, and any native OP oracle separately as e.g. `native_gm_s`/`native_gds_s`.
 
-## Threshold and DIBL
+## 8. Threshold and DIBL
+
+Persist:
+
+- threshold magnitude at low effective drain bias;
+- threshold magnitude at high effective drain bias;
+- low/high effective drain biases;
+- threshold-current criterion and normalization rule;
+- DIBL in V/V.
+
+Canonical DIBL remains:
+
+`DIBL = (|Vth_low| - |Vth_high|)/(VOUT_high - VOUT_low)`
+
+Default low drain bias remains 50 mV where legal; high drain bias is normally an operating-profile fraction such as 0.8*reference VDD and must be stored explicitly.
+
+Threshold-current normalization must remain explicit and geometry-aware.
+
+## 9. Ion / Ioff
+
+For the selected Operating Profile, canonical v2 definitions are:
+
+- Ion: `VCTRL = reference_vdd`, `VOUT = reference_vdd`
+- Ioff: `VCTRL = 0`, `VOUT = reference_vdd`
+
+Persist:
+
+- raw signed current;
+- `ion_a` / `ioff_a` magnitudes;
+- normalized current basis;
+- planar normalized values in A/m of drawn width or clearly equivalent persisted field;
+- FinFET normalized values in A/fin;
+- `log10_ion_over_ioff` when both magnitudes are finite/positive;
+- any underflow/floor/measurement diagnostics.
+
+A linear Ion/Ioff ratio may be a derived display value but must not be the only persisted representation.
+
+Upstream published Ion/Ioff metrics at different biases are separate native/spec observations and must not silently replace the APM canonical definitions.
+
+## 10. Subthreshold swing
+
+Subthreshold swing is required in v2.
+
+The exact extraction convention is research-dependent until native family data are reviewed, but before release it must be frozen and versioned.
 
 Persist at least:
 
-- extracted threshold magnitude at low effective drain bias;
-- extracted threshold magnitude at high effective drain bias;
-- effective low/high drain biases;
-- normalized constant-current criterion and its units/normalization rule;
-- resulting DIBL in V/V.
+- extraction method ID/version;
+- drain/output bias;
+- current window or gate-voltage window;
+- normalization basis;
+- fit/derivative method;
+- fitted slope and SS;
+- number of points;
+- fit quality/residual diagnostic;
+- failure/insufficient-range status when extraction is not valid.
 
-The constant-current extraction coefficient must be explicit metadata because it is not to be inferred from model family or technology name.
+Do not hide a failed SS extraction by clipping or silently moving the window without recording the resolved method.
 
-## Terminal Y matrix
+## 11. Terminal Y matrix
 
-Use fixed terminal order:
+Fixed terminal order:
 
 `d, g, s, b`
 
-Define:
+Definition:
 
-`Y[i,j] = terminal current entering terminal i / small-signal voltage excitation applied to terminal j`
+`Y[i,j] = terminal current entering terminal i / AC voltage excitation applied to terminal j`
 
-with the other terminal voltage sources at AC ground according to the measurement harness.
+with other terminal voltage sources AC grounded according to the measurement harness.
 
-Persist for each Y extraction:
+Persist for every Y extraction:
 
-- DC bias point;
-- frequency in Hz;
+- DC bias;
+- frequency;
 - terminal order;
-- current-direction convention;
-- real and imaginary parts of all 16 Y entries, in S;
-- any numerical/KCL consistency diagnostics.
+- current convention;
+- real/imaginary parts of all 16 entries in S;
+- KCL/numerical consistency diagnostics.
 
-Do not store only a reduced capacitance table and discard Y.
+Raw Y is authoritative.
 
-## Derived capacitances
+## 12. Derived capacitances
 
-With the above Y convention and angular frequency `omega = 2*pi*f`, the default reported capacitance convention is:
+Default convention:
 
-- self: `Cii = imag(Yii)/omega`
-- transfer coupling magnitude: `Cij = -imag(Yij)/omega`, `i != j`
+- `Cii = imag(Yii)/omega`
+- `Cij = -imag(Yij)/omega`, `i != j`
 
-At minimum expose:
+At minimum persist/expose Cgg, Cgd, Cgs with exact source entries.
 
-- `cgg_f` from the gate self term;
-- `cgd_f` from gate-current response to drain excitation (`Y[g,d]`);
-- `cgs_f` from gate-current response to source excitation (`Y[g,s]`).
+Do not silently symmetrize non-reciprocal terms.
 
-If a model is measurably non-reciprocal in small signal, do not silently average `Y[g,d]` with `Y[d,g]`. Preserve the raw matrix and document any alternate derived definition.
+Record selected quasi-static frequencies and frequency-insensitivity diagnostics.
 
-Record the chosen characterization frequency and the low-frequency sensitivity check used to justify it.
+## 13. Comparison identity
 
-## Variation identity
+Comparison outputs must identify the comparison kind and its resolved coordinate/profile.
+
+Supported v2 comparison kinds include:
+
+- `cross_process_anchor`
+- `threshold_equal_bias`
+- `threshold_equal_inversion`
+- `gate_stack_native_profile`
+- `gate_stack_common_overlap`
+
+Comparison tables may denormalize:
+
+- technology/family/device IDs;
+- threshold class;
+- gate-stack class;
+- origin;
+- operating-profile reference VDD;
+- current-density basis.
+
+Do not report current/capacitance ratios across planar-per-width and FinFET-per-fin bases unless a future explicit physical conversion model is introduced. Current v2 must leave such cross-basis ratios absent/null.
+
+## 14. Variation identity
 
 Every result must include:
 
-- `variation_origin`: `none`, `benchmark`, or `native`;
-- `variation_mode`: appropriate value such as `nominal`, `corner`, `process`, `mismatch`, or `all`;
-- corner/profile name if applicable.
+- `variation_origin`: at least `none`, `benchmark`, or `upstream`;
+- variation mode;
+- profile/corner/sample ID where applicable.
 
-For APM benchmark variation also include where applicable:
+### Benchmark modes
 
-- benchmark specification/schema version;
-- RNG algorithm/seed for generated samples;
-- resolved sample identifier/path/hash;
-- global process perturbations;
-- local perturbation identity for the characterized instance.
+Canonical v2 benchmark mode names:
 
-For PDK-native variation, identify the actual upstream section/profile/model used rather than translating it into an APM benchmark label.
+- `global`
+- `local`
+- `all`
+- `corner` for deterministic benchmark corners
 
-## Provenance and validation status
+Persist where applicable:
 
-A result generated by ngspice may be marked validated only when the required real simulation actually ran successfully under the documented reference flow.
+- benchmark spec/schema version/hash;
+- RNG algorithm;
+- seed;
+- latent variable names/values;
+- resolved sample ID/path/hash;
+- family/device raw adapter identity/hash;
+- global resolved perturbations;
+- local instance perturbations;
+- replay identity.
 
-Spectre artifacts/results must not be marked validated unless a real Spectre run occurred. Static-model inspection is `structurally_checked` or `experimental_unverified` as defined in `validation/evidence/README.md`.
+The v2 sample schema should support technology/polarity latent variables now and future family residual latents later without redefining Family identity.
 
-## Storage recommendation
+### Upstream/native modes
 
-Prefer a simple run/result directory with:
+Retain actual upstream section/profile names and semantics such as corner/statistical/process/mismatch. Do not translate them into benchmark labels.
 
-- one machine-readable metadata file (JSON is preferred for runtime records);
-- CSV or similarly simple tabular files for sweeps/derived tables;
-- a machine-readable raw Y-matrix representation;
-- optional plots generated from those data files.
+If cross-family upstream correlation is unknown, metadata must not imply it is known.
 
-Do not make a proprietary binary container the only persisted representation.
+## 15. Family-origin/fidelity binding
 
-File names/layout are not public API in the initial scaffold; semantic field meanings are more important. Once a v1.0 storage layout is chosen and exposed to users/tests, document and version it deliberately.
+Result metadata must preserve enough immutable binding to determine whether a family is:
+
+- `upstream_model`;
+- `apm_authored`;
+- `apm_derived_variant`.
+
+For derived variants, metadata must make base-family and variant-generation identity auditable.
+
+A result from an APM-authored/derived generic family must not be presented as foundry/silicon-correlated merely because the simulator run validated numerically.
+
+## 16. Validation status
+
+`validated` means the required real backend/tool actually executed and the result contract/checks passed.
+
+Spectre remains `structurally_checked` / `experimental_unverified` unless real Spectre execution occurs.
+
+Missing, skipped, stale-v1-only, or structurally inspected evidence is not a v2 real-tool pass.
+
+## 17. Storage recommendation
+
+Prefer per-run directories containing:
+
+- metadata JSON;
+- simple CSV tables for sweeps/derived metrics;
+- machine-readable raw Y JSON or equivalent;
+- resolved benchmark sample JSON where applicable;
+- optional plots derived from persisted numeric data.
+
+Persist manifest/binding/provenance hashes in metadata. Avoid proprietary-only binary containers.
+
+By v2 release, current runtime outputs must use v2 result schemas. Historical v1 result schemas remain available only through v1 history/tag and must not remain the canonical current output contract.

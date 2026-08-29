@@ -1,319 +1,232 @@
-# Project Context and Design Rationale
+# Project Context and Design Rationale — APM v2
 
-This file captures the design context behind `GOAL.md` so an implementation agent can understand *why* the repository contract looks the way it does.
+This file records why the v2 contract looks the way it does. It is informative; `AGENTS.md`, `GOAL.md`, and `DEVICE_FAMILY_MODEL.md` are normative on conflict.
 
-It is informative, not normative. If this file conflicts with `AGENTS.md` or `GOAL.md`, follow `AGENTS.md` and `GOAL.md` and record the discrepancy in `STATUS.md`.
+## 1. v1 outcome and why v2 exists
 
-## Project intent
+APM v1.0.0 successfully established five technology anchors and a reproducible terminal-level characterization/variation framework:
 
-Analog Process Models (APM) is a new project defined by this repository. The intent is to create a compact, self-contained, open collection of analog transistor model kits spanning several process generations, plus one reproducible characterization methodology that makes cross-generation analog studies practical.
+`0.35um-class planar -> 130nm planar -> 45nm planar -> 22nm-class planar -> 16nm-class FinFET`
 
-The project deliberately targets simulation and characterization rather than manufacturability. It is not trying to become a complete foundry PDK, an educational layout kit, or a physical-design platform.
+v1 intentionally used one representative N/P family per technology. That was the right way to establish the simulator/toolchain/result methodology with limited scope.
 
-The important product is therefore not only a collection of model cards. It is the combination of:
+The next technical limitation is now clear: real processes increasingly expose multiple nominal electrical device families within one technology, including low/high threshold options and thick-/thin-gate-stack options. Treating each technology as one VDD/Lmin/N/P pair is no longer an honest domain model.
 
-- model assets with explicit provenance and fidelity limits;
-- a reproducible ngspice reference flow;
-- common terminal-level characterization semantics;
-- common benchmark variation semantics;
-- technology-neutral benchmark R/C models;
-- enough metadata and evidence that comparisons remain interpretable.
+v2 therefore changes the object of study from only **technology scaling** to both:
 
-The first formal public release target is **v1.0.0**. M0–M10 are implementation milestones, not separate public compatibility promises.
+- cross-technology scaling; and
+- within-technology electrical-family tradeoffs.
 
-## Why these five technology kits
+## 2. Why the redesign is breaking rather than compatibility-preserving
 
-The v1.0 sequence is intended to cover both process scaling and a device-architecture transition:
+The repository has not been publicly adopted as a stable compatibility ecosystem. Preserving v1 aliases/schemas would make implementation more complex without real user benefit.
 
-`0.35 um-class planar -> 130 nm planar -> 45 nm planar -> 22 nm-class planar -> 16 nm-class FinFET`
+The v1 tag already preserves the complete validated historical release.
 
-The current five-kit set is:
+Therefore v2 is allowed to remove:
 
-1. **APM350** — mature/long-channel planar anchor, BSIM3-class.
-2. **APM130** — open foundry-derived anchor using IHP SG13G2 low-voltage MOS and PSP103.
-3. **APM045** — generic scaled-planar anchor using an open FreePDK45 BSIM4 subset.
-4. **APM022** — APM-authored aggressively scaled planar BSIM4 deck.
-5. **APM016F** — APM-authored FinFET parameter deck using a pinned BSIM-CMG engine.
+- one-family `kit.toml` SSOT;
+- unqualified public wrappers;
+- v1 result schemas;
+- v1 benchmark adapter schema;
+- technology-specific loaders superseded by the catalog.
 
-A 55 nm kit was considered earlier. It was removed from v1.0 because a clearly redistributable, sufficiently useful open 45 nm model already exists, while a credible 55 nm model would likely require additional synthetic-model development or reliance on less mature sources. The 45 nm choice reduces project risk while preserving the intended scaled-planar comparison point. A future 55 nm kit remains possible but is not part of v1.0.
+The objective is the best long-term architecture rather than a migration layer.
 
-## Provenance classes and fidelity claims
+## 3. Why Technology -> Electrical Family -> Device
 
-The kits intentionally have different origins. Do not flatten these distinctions.
+Research across IHP SG13G2, FreePDK45, SKY130, GF180, and ASAP7 shows that several concepts often diverge:
 
-- **APM350:** generic open reference model. It is a technology-class anchor, not a foundry-correlated claim.
-- **APM130:** foundry-derived open model subset from IHP SG13G2. This is the strongest real/open anchor in the set, but APM still does not make independent silicon-correlation guarantees.
-- **APM045:** open predictive/generic FreePDK45 model subset. Useful for scaled-planar studies, not a manufacturing guarantee.
-- **APM022:** `apm_generic`, independently authored by APM.
-- **APM016F:** `apm_generic`, independently authored APM parameters with an open/pinned BSIM-CMG engine.
+- electrical model/parameterization identity;
+- nominal/allowed operating voltage;
+- threshold flavor;
+- gate-stack class;
+- N/P availability;
+- DNWELL/isolation/layout option;
+- RF/ESD/schematic view;
+- usage such as core/IO/analog/standard-cell.
 
-The user-facing guarantee is reproducible simulation and comparison methodology, not process qualification or silicon accuracy.
+A single `device_type = core_lvt_io_thick...` taxonomy would eventually become contradictory.
 
-## Why PTM/PTM-MG are not vendored or used as parameter sources
+The durable abstraction is:
 
-Official PTM/PTM-MG model cards are useful technical references, but their redistribution permission was not considered sufficiently clear for a repository whose goal is clone-and-use distribution. Therefore v1.0 must not bundle official PTM22 or PTM-MG16 parameter decks.
+- **Technology** — node/process namespace;
+- **Electrical Family** — distinct nominal electrical parameterization;
+- **Device** — simulated entity/polarity/geometry inside the family.
 
-More importantly, APM022 and APM016F must not simply become renamed or interpolated PTM cards. Their parameter decks are intended to be independently authored from:
+Operating Profile, Backend Binding, Variation, and Comparison Set are separate.
 
-- public literature;
-- BSIM4 / BSIM-CMG model semantics and documentation;
-- published representative device characteristics;
-- explicit APM behavior contracts.
+## 4. Why Family is electrical identity, not usage
 
-PTM/PTM-MG may be used locally only as non-redistributed sanity/comparison oracles. They are not numeric source material for APM-authored parameter decks.
+IHP's thick-oxide 3.3 V MOS is useful for I/O but is also a high-voltage analog device. Calling the family `io` would encode one application as electrical truth.
 
-This distinction matters both for licensing clarity and for intellectual honesty in model provenance.
+GF180 shows 5 V and 6 V layout/device options mapping to the same electrical SPICE model, while DNWELL variants may also share a model.
 
-## Runtime target and development environment
+IHP RF views can share base electrical models/modes rather than represent entirely new process families.
 
-The initial concrete runtime target selected during project definition was **ngspice 47 with OSDI enabled**, using OpenVAF-ReLoaded where Verilog-A compact models need compilation. If implementation evidence shows that another compatible ngspice revision is necessary or materially better, record the actual validated revision and rationale rather than silently changing the compatibility claim.
+Therefore `core`, `io`, `rf`, etc. are descriptive use/view metadata when needed, not primary Family identity.
 
-The primary development environment is intended to be **WSL2 running an EL9-compatible distribution**, with **AlmaLinux 9 x86_64** as the primary concrete candidate. Native Windows support remains out of scope.
+## 5. Why Operating Profile is separate from Family
 
-Keep repository, model-build, cache, and simulation-run data inside the WSL Linux filesystem, for example under `~/src`, `~/.cache`, or another Linux-native path. Avoid `/mnt/c` for normal build/run workloads.
+A model family may support more than one useful operating profile, and a model-validity limit is not identical to a recommended/representative supply.
 
-The project does not need to bundle ngspice, OpenVAF-ReLoaded, Python, or xschem binaries. "Self-contained models" means the repository contains the model source/parameter assets needed by the five kits so users do not have to separately fetch transistor model decks. Generated `.osdi` binaries should normally be built locally and not committed.
+Three concepts are separated:
 
-## Why ngspice is the validated reference backend
+1. model validity evidence;
+2. APM Operating Profile;
+3. reliability/breakdown/lifetime rating.
 
-The project needs an open, reproducible, headless flow that can run in CI-like environments and on the user's primary development platform.
+APM v2 normally covers 1 and 2. It does not convert compact-model headers into reliability qualification.
 
-The chosen reference environment is:
+This separation also prevents a future 5V/6V-style shared model from requiring duplicated electrical families just because two application profiles exist.
 
-- WSL2;
-- RHEL-compatible EL9 Linux, x86_64;
-- ngspice with OSDI support;
-- Python;
-- OpenVAF-ReLoaded when Verilog-A compact models need compilation;
-- xschem only as an optional example/manual frontend.
+## 6. Why Devices need not be N/P symmetric
 
-The project should not depend on GUI state or user-global simulator configuration. Runs should be hermetic and should prefer netlist-local model loading such as `pre_osdi` where practical.
+Open PDKs demonstrate sparse device sets: high-/native-threshold options can exist for only one polarity or have distinct geometry/validity ranges.
 
-The intended execution path is roughly:
+IHP HV already gives a practical v2 stress case because NMOS and PMOS have different minimum lengths.
 
-- APM350 -> native ngspice BSIM3;
-- APM130 -> PSP103 Verilog-A compiled to OSDI;
-- APM045 -> native ngspice BSIM4;
-- APM022 -> native ngspice BSIM4;
-- APM016F -> BSIM-CMG Verilog-A compiled to OSDI.
+Therefore family manifests list Devices explicitly; no schema rule requires one N and one P device.
 
-`apm doctor` is expected to exercise real model instances, not merely check file existence. In particular, it should eventually prove both the PSP103 and BSIM-CMG OSDI paths with actual device simulations.
+## 7. Why APM130 comes first
 
-## Why compact-model APIs are not unified
+APM130 is the strongest real/open anchor and its existing pinned IHP snapshot already contains both LV and HV model structures.
 
-A central design principle is:
+It tests several domain requirements at once:
 
-> Commonize the characterization contract, not the compact-model API.
+- different gate stacks/operating profiles;
+- different N/P Lmin values;
+- real PSP/OSDI execution;
+- native corners/statistical/mismatch;
+- same upstream lineage without unnecessary source-revision churn.
 
-BSIM3, PSP103, BSIM4, and BSIM-CMG have different parameter vocabularies, geometry semantics, internal operating-point names, and model capabilities. Attempting to hide those differences behind a large universal MOS API would create an artificial abstraction and would likely distort FinFET semantics.
+If the family architecture works for APM130 LV/HV, it is less likely to have hidden one-family assumptions.
 
-The common public interface is intentionally minimal:
+## 8. Why APM045 comes before generic multi-Vt
 
-- planar: D/G/S/B plus W/L;
-- FinFET: D/G/S/B plus L/NFIN.
+FreePDK45 supplies VTL/VTG/VTH/THKOX flavors. This provides a native/open dataset for:
 
-The common cross-technology layer exists at the measurement/result level: Id-Vg, Id-Vd, gm/Id, gm/gds, DIBL, terminal Y/capacitance, temperature, corners, and benchmark variation.
+- threshold-family Ion/Ioff tradeoffs;
+- SS extraction-method testing;
+- equal-bias/equal-inversion comparison design;
+- gate-stack comparison design;
+- realistic magnitude/trend context for generic APM022/APM016F multi-Vt variants.
 
-This is also why v1.0 does not expose common `m`, `nf`, `ng`, or finger semantics. Multiplicity and fingerization carry model/layout-specific matching and correlation assumptions that are outside the desired v1.0 scope.
+Generic family targets should be chosen after observing native/open families, not before.
 
-## Cross-technology comparison philosophy
+## 9. Why APM022 multi-Vt is threshold-isolated
 
-Avoid primary comparisons at identical absolute W, VGS, or nominal bias across unrelated nodes.
+APM022 is a generic educational/comparison model, not a foundry process recreation.
 
-The preferred comparison coordinates are normalized quantities such as:
+The most honest new capability is a controlled experiment where geometry/gate stack/basic physical basis stays common while nominal threshold class changes enough to produce the expected Vth/Ion/Ioff ordering.
 
-- `L/Lmin`;
-- `VDS/VDD` or the corresponding positive effective PMOS/PFET drain bias;
-- `gm/Id` inversion level;
-- dimensionless or nearly universal figures such as gm/gds.
+This intentionally isolates a major multi-Vt design tradeoff rather than fabricating undocumented mobility/doping/layout differences.
 
-A representative design-comparison point discussed during project definition is approximately:
+Any secondary changes must be justified by terminal behavior and documented as APM engineering choices.
 
-`gm/gds at gm/Id ~= 15 V^-1, L ~= 2*Lmin, VDS ~= 0.5*VDD`
+## 10. Why APM016F multi-Vt is workfunction-dominant
 
-This is a useful comparison convention, not a mandatory single operating point for every plot. Raw/native views should still be retained.
+BSIM-CMG explicitly models gate workfunction through `PHIG`. Open predictive multi-Vt FinFET model examples such as ASAP7 show meaningful PHIG changes between Vt flavors, while also showing that real fitted families may differ slightly in secondary transport/SCE parameters.
 
-Planar current-density-like quantities may naturally be expressed per width, while FinFET quantities may naturally be expressed per fin. Do not invent a fake continuous effective width merely to make the tables look uniform.
+Therefore a truthful generic model strategy is:
 
-## Why canonical gm/gds come from terminal finite differences
+- use PHIG/workfunction as dominant Vt-family control;
+- validate observable threshold/Ion/Ioff/SS behavior;
+- add only minimal evidence-backed secondary adjustment if required.
 
-Model families and simulators expose internal operating-point fields differently. An internal field such as `gm` is useful as a validation oracle, but it is a poor stable API across PSP, BSIM, BSIM-CMG, ngspice, and future Spectre support.
+Calling the method `workfunction_dominant` is more accurate than claiming real multi-Vt processes differ only by PHIG.
 
-Therefore canonical gm and gds are derived from terminal behavior with central finite differences and convergence checks. APM130 should compare these derived values with PSP-native operating-point quantities to validate the extraction method.
+## 11. Why APM016F high-voltage/thick-oxide is deferred
 
-For N/P comparison, the canonical comparison metrics use positive effective variables and current magnitude while preserving raw signed simulator data separately. This prevents accidental PMOS sign inversions in gm/Id and gm/gds plots.
+A credible high-voltage FinFET family would require more than threshold shifting: gate stack/EOT, voltage handling, geometry, electrostatics, parasitics, and possibly different compact-model calibration.
 
-## Why capacitance comes from the terminal Y matrix
+The evidence burden is substantially larger than LVT/SVT/HVT. v2 therefore focuses on native IHP/FreePDK gate-stack examples and generic core FinFET Vt families. APM016F high-voltage I/O remains a later release candidate.
 
-The same portability issue applies to compact-model-specific capacitance fields. The canonical source is the small-signal terminal admittance matrix.
+## 12. Why Ion/Ioff and SS are added
 
-The project stores the raw complex Y matrix and derives reported capacitances from it. Keeping raw Y data means capacitance definitions can be improved later without rerunning every simulation.
+v1 was analog-characterization-centric: gm/Id, gm/gds, DIBL, Y/capacitance, temperature.
 
-This is more durable than making model-specific `cgg`, `cgd`, or `cgs` names part of the public contract.
+Those remain essential, but multi-Vt families are largely chosen around drive/leakage tradeoffs. Ion/Ioff and subthreshold swing expose that dimension directly.
 
-If a simple estimate such as `gm/(2*pi*Cgg)` is ever added later, do not casually label it the transistor's true `fT` unless the actual current-gain unity crossing is computed. A derived approximation should be named accordingly, for example `ft_est`.
+`log10(Ion/Ioff)` is persisted because HVT Ioff can be extremely small and a linear ratio alone is numerically awkward.
 
-## Why there are two distinct variation systems
+The SS method is intentionally frozen only after native-family curve review so APM does not encode an arbitrary extraction window as universal truth.
 
-Two different questions are useful and must not be confused:
+## 13. Why there are multiple comparison views
 
-1. **PDK-native variation:** what the upstream model itself predicts.
-2. **APM benchmark variation:** what happens when comparable synthetic variation severity is applied across technologies.
+Different family questions require different controls.
 
-APM130/IHP can expose native corners and native statistical/mismatch behavior on the validated ngspice side. Those results are useful as native model behavior, but they are not directly comparable to a synthetic common variation model applied to every kit.
+Threshold siblings:
 
-Every result therefore needs a clear distinction such as `variation_origin = native` versus `variation_origin = benchmark`.
+- equal bias shows drive/leakage differences directly;
+- equal inversion (e.g. gm/Id) shows analog gain/current/capacitance behavior at comparable inversion.
 
-For IHP native variation, process/statistical and mismatch modes are known as separate concepts. Do not invent a native combined "All" mode unless the actual selected upstream model explicitly supports it and that support is validated. The cross-kit APM benchmark variation does require Process, Mismatch, and All.
+Gate-stack/voltage families:
 
-## Why benchmark MOS variation has only `vth_shift` and `drive_shift`
+- native-profile view shows intended family operation;
+- common-overlap-bias view separates some voltage-profile effect from intrinsic family difference when a legal common bias can be established.
 
-The benchmark model intentionally avoids randomizing dozens of raw compact-model parameters.
+Cross-process golden comparison remains anchored to one representative family per technology so thick-oxide and Vt-option effects do not contaminate the scaling axis.
 
-The common intents are:
+## 14. Why Benchmark Process/Mismatch are renamed
 
-- `vth_shift` — observable threshold-behavior shift;
-- `drive_shift` — observable relative Id shift at a documented reference bias.
+v1 Benchmark Process was always synthetic, but the word `process` becomes misleading once APM contains multiple nominal Vt/gate-stack families whose real statistical cross-correlation is unknown.
 
-Each kit maps these intents to model-family-specific handles. Candidate handles include `delvto`/`mulu0` for BSIM, `delvto`/`factuo` for PSP, and `DELVTRAND` plus `IDS0MULT` or `U0MULT` for BSIM-CMG. These mappings must be characterized, not assumed.
+v2 names are:
 
-The important semantic is the observable effect. Equal raw percentages in two unrelated compact-model parameters are not automatically comparable.
+- Benchmark Global;
+- Benchmark Local;
+- Benchmark All.
 
-`drive_shift` should therefore be calibrated against a documented reference operating point, approximately around moderate inversion such as `L ~= 2*Lmin`, `VDS ~= 0.5*VDD`, `gm/Id ~= 15 V^-1`, with the exact implementation justified by characterization.
+Benchmark Global means shared synthetic observable stress, not a foundry process-correlation claim.
 
-## Why benchmark sigma values remain TBD initially
+This wording allows one common technology/polarity latent stress to be mapped through family-specific adapters without pretending that real LV/HV or LVT/SVT/HVT fluctuations are fully correlated.
 
-The architecture of benchmark variation is part of the v1.0 contract. The numerical severities are deliberately not preselected.
+Upstream/native process/mismatch terminology remains unchanged because it belongs to the source model.
 
-Choosing convenient sigma values before representative PSP, BSIM4, and BSIM-CMG devices are running would create false precision. The implementation agent should first make representative kits operational, measure the actual observable effects, then freeze documented benchmark values with evidence.
+## 15. Why the benchmark latent is shared across families
 
-The same applies to benchmark R/C variation severity and deterministic benchmark-corner strength.
+If each Vt family drew an independent benchmark Global Vth shift, deterministic corners or MC could create arbitrary cross-family movement and make comparisons difficult to interpret.
 
-TBDs are therefore temporary development markers, not permission to leave release metadata incomplete. No release-critical TBD may remain at v1.0.0.
+Sharing one technology/polarity observable latent keeps the synthetic stress comparable; each family-specific adapter still maps that common observable target into the correct raw compact-model handle/sign/sensitivity.
 
-## Why ngspice benchmark Monte Carlo uses Python RNG
+This is a benchmark-design choice, not a physical statistical model.
 
-The reference benchmark MC flow is intentionally:
+Future evidence may justify family residual latents; the sample namespace is designed to allow them without changing Family identity.
 
-`Python RNG -> resolved VariationSample -> deterministic netlist -> ngspice`
+## 16. Why manifest-driven architecture is now justified
 
-Reasons include:
+In v1, five explicit kit loaders were simple and appropriate. With 13 families and future sparse options, extending those loaders would create repetitive technology-specific code and make taxonomy changes expensive.
 
-- seed reproducibility;
-- explicit process/local semantics;
-- deterministic replay;
-- independence from compact-model random-number support;
-- avoiding dependence on Verilog-A RNG capabilities in the OSDI toolchain;
-- making samples inspectable and potentially reusable for later cross-simulator conformance.
+The new abstraction has multiple concrete use cases immediately:
 
-A resolved sample should contain enough global/local MOS and R/C perturbation information to reproduce a run exactly.
+- APM130 two families with asymmetric geometry;
+- APM045 four families;
+- APM022/APM016F three families each;
+- simulator-specific bindings that should not live in semantic manifests.
 
-Spectre does not need to reproduce Python RNG sample-for-sample in v1.0. Its native statistics machinery may generate samples, provided intended distributions, geometry scaling, process/local semantics, and documented correlation assumptions match the APM benchmark definition.
+Therefore manifest-driven catalog data is no longer premature abstraction. A plugin system still would be premature; straightforward dataclasses/TOML/discovery is enough.
 
-## Benchmark mismatch intent
+## 17. Toolchain continuity rationale
 
-The benchmark mismatch law is synthetic and technology-neutral by design. It is not a claim about real foundry Pelgrom coefficients.
+v1 already paid the cost of solving EL9/ngspice/OpenVAF/OSDI setup. Restarting that discovery on every architectural release wastes effort and loses useful operational context.
 
-The intended scaling is approximately:
+v2 development should reuse the validated local toolchain and compacted Codex implementation knowledge when still valid.
 
-- planar matching size proportional to W*L relative to a reference;
-- FinFET matching size proportional to NFIN*L relative to a reference;
-- local sigma proportional to `1/sqrt(match_size)`.
+Release reproducibility remains strict: the final v2 clean clone must prove that the repository can recreate the required environment/artifacts from documented source.
 
-This gives circuit designers a common matching-aware design variable without pretending every open technology kit has comparable measured mismatch data.
+## 18. Scope discipline
 
-## Why benchmark R/C exist separately from native passives
+v2 intentionally does not expand into every available open-PDK device type.
 
-Cross-process circuit comparison can be distorted if one process has detailed native resistor/capacitor models and another requires invented approximations.
+Deferred/not required:
 
-Therefore v1.0 includes technology-neutral `Rbench` and `Cbench` primitives with common process/mismatch semantics. These are the golden cross-process passive basis.
+- RF-specific views/models;
+- isolated/DNWELL/layout variants as first-class APM families unless later electrical-model evidence/use requires them;
+- ESD/SAB families;
+- MOS noise common characterization;
+- APM016F high-voltage I/O;
+- layout/verification/standard-cell artifacts;
+- Virtuoso automation.
 
-Native passives may be exposed where reliable open models exist, especially for IHP, but they are optional and must never silently become the cross-process golden comparison basis.
-
-`match_size` for benchmark passives is a dimensionless benchmark quantity, not claimed physical layout area.
-
-## FinFET sanity expectations
-
-APM016F must preserve discrete fin semantics rather than hiding them behind a continuous planar-width abstraction.
-
-Useful sanity characterization includes several legal NFIN values such as 1, 2, and 4 where supported by the chosen deck/interface. At a common legal bias and L:
-
-- Id should scale roughly with NFIN;
-- gm should scale roughly with NFIN;
-- gm/Id should remain broadly similar;
-- gm/gds should remain broadly similar unless the compact model gives a documented reason otherwise.
-
-These are sanity properties, not exact linearity requirements across every bias point.
-
-## Why Spectre support is model-only and experimental
-
-Cadence compatibility is valuable to analog designers, so v1.0 should include a model compatibility layer rather than postponing all Spectre work.
-
-However, the initial project does not have a locally validated Spectre/Virtuoso environment. Therefore Spectre support must remain explicitly:
-
-`EXPERIMENTAL / UNVERIFIED`
-
-The intended deliverable is model files only:
-
-- nominal model interfaces;
-- benchmark corners;
-- benchmark R/C;
-- benchmark Process/Mismatch/All Monte Carlo definitions.
-
-Virtuoso symbols, CDF, OA libraries, SKILL, ADE/Maestro configuration, OCEAN, and testbenches are not APM v1.0 responsibilities.
-
-The preferred Spectre design uses native compact-model implementations with thin APM-owned subcircuit wrappers, especially because per-instance mismatch semantics are easier to express cleanly through wrappers plus `statistics` blocks.
-
-Do not claim Spectre parse validity or numerical conformance until a real Spectre environment has tested it.
-
-## Why MOS noise is deferred
-
-MOS noise is intentionally out of v1.0.
-
-The simulator/model engines can support noise-related behavior, but credible cross-technology noise requires credible noise parameterization and careful validation. Including nominal-looking noise curves without trustworthy model inputs would create misleading confidence.
-
-The v1.0 architecture should not block future noise characterization, but MOS noise itself belongs in a later release.
-
-Normal SPICE resistor thermal noise need not be reimplemented; benchmark resistors should use ordinary simulator resistor primitives.
-
-## Expected development order and rationale
-
-The preferred order is not arbitrary:
-
-1. **M0 runtime qualification** — prove all required model families can execute in the target environment.
-2. **APM130** — use the strongest open/foundry-derived anchor to establish characterization methodology.
-3. **APM045** — ensure the framework is not PSP-specific.
-4. **APM016F** — introduce FinFET geometry early so planar assumptions do not harden into the architecture.
-5. **Benchmark R/C + variation** — design common semantics after multiple model families are actually running.
-6. **APM022** — author the aggressively scaled planar model with the working framework and FinFET comparison already available.
-7. **APM350** — add the mature long-channel anchor.
-8. Complete common characterization and native IHP variation.
-9. Add experimental Spectre model-only compatibility.
-10. Perform license/provenance, fresh-clone, and claim audits before v1.0.0.
-
-Do not reorder merely for convenience if doing so encourages premature abstraction or arbitrary benchmark calibration. Reordering is acceptable when actual tool or source evidence provides a concrete reason.
-
-## Important qualitative behavior contracts
-
-APM022 should, over documented supported operating ranges, show behavior qualitatively consistent with an aggressively scaled planar generation relative to APM045, including stronger short-channel effects, larger DIBL near Lmin, and lower intrinsic gain near Lmin.
-
-APM016F should genuinely exercise BSIM-CMG and FinFET sizing. Id and gm should scale sensibly with NFIN, while gm/Id should be broadly less sensitive to NFIN at a common bias condition. Electrostatic control should be qualitatively improved relative to APM022.
-
-These are behavior contracts, not invitations to tune against a hidden PTM numeric deck.
-
-## Release philosophy
-
-The release should be conservative in claims and strict in evidence.
-
-A file existing is not proof that a model works. A static Spectre file check is not Spectre validation. A container test is not the required WSL2+EL9 clean-clone validation. A repository-level license is not automatically enough to redistribute every vendored file.
-
-The v1.0 release should prioritize:
-
-- reproducibility;
-- explicit provenance;
-- explicit uncertainty;
-- stable characterization semantics;
-- honest backend validation status;
-- a small architecture that can be extended later.
-
-If a mandatory requirement remains genuinely blocked, complete all independent work and leave the repository auditable, but do not silently downgrade the requirement or tag an incomplete v1.0.0.
+The goal is a durable family framework plus a carefully chosen 13-family set, not a mirror of entire PDK catalogs.

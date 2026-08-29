@@ -1,316 +1,409 @@
-# APM v1.0 Implementation Goal
+# APM v2.0 Implementation Goal
 
-## 0. Repository identity
+## 0. Repository identity and release transition
 
 Work on the existing repository:
 
-- **Repository:** `https://github.com/ds54e/analog-process-models`
-- **Project:** Analog Process Models
-- **Project acronym:** **APM = Analog Process Models**
+- repository: `https://github.com/ds54e/analog-process-models`
+- project: Analog Process Models
+- acronym: **APM = Analog Process Models**
 
-Within this goal, **APM always means the Analog Process Models project defined by this repository**. It is not a Microsoft technology, application-performance-monitoring product, external package, or pre-existing software framework.
+The tagged `v1.0.0` release is the validated historical baseline. Current `main` intentionally begins a breaking v2 redesign. Do not preserve v1 compatibility unless this goal explicitly requires it.
 
-Do not create, migrate to, or substitute another repository as the project authority. Do not change repository visibility. Only prepare/tag v1.0.0 after every release gate below is actually satisfied.
+Target release: **APM v2.0.0**.
 
-Build and release **Analog Process Models (APM) v1.0.0** as a self-contained, open compact-model collection and characterization framework spanning mature planar CMOS through FinFET.
-
-Work autonomously until the Definition of Done is satisfied. Do not stop at scaffolding, planning, or partial implementation. Research authoritative public sources as needed, implement, simulate, validate, fix failures, audit licensing, document limitations, and leave the repository release-ready.
+Do not change repository visibility. Do not declare/tag v2.0.0 until every required release gate is satisfied with current evidence.
 
 ## 1. Purpose
 
-Provide five simulation technology kits:
+APM v2 turns the v1 one-representative-device-per-technology framework into a manifest-driven **multi-electrical-family compact-model framework** while preserving the strongest parts of v1:
 
-| Kit | Technology | Architecture | Compact model |
-| --- | --- | --- | --- |
-| APM350 | 0.35 µm-class | planar bulk | BSIM3-class |
-| APM130 | 130 nm | planar bulk | PSP103 |
-| APM045 | 45 nm | planar bulk | BSIM4 |
-| APM022 | 22 nm-class | planar bulk | BSIM4 |
-| APM016F | 16 nm-class | FinFET | BSIM-CMG |
+- open/self-contained model source distribution;
+- ngspice 47 + OSDI validated reference flow;
+- terminal-level characterization rather than raw compact-model API unification;
+- explicit model provenance/fidelity boundaries;
+- deterministic APM benchmark variation;
+- technology-neutral benchmark passives;
+- machine-readable evidence and fail-closed release validation.
 
-APM is **not a manufacturable PDK**. Do not implement layout, PCells, DRC, LVS, PEX, extraction, standard cells, signoff, or foundry correlation claims.
+APM is not a manufacturable PDK. v2 still does not provide layout, PCells, DRC/LVS/PEX, signoff, foundry correlation, standard cells, or reliability qualification.
 
-## 2. Reference platform
+## 2. Domain architecture
 
-Validated v1.0 reference environment:
+Implement `DEVICE_FAMILY_MODEL.md` faithfully.
 
-- WSL2
-- RHEL-compatible EL9 Linux
-- x86_64
-- ngspice with OSDI support
-- Python 3
-- OpenVAF-ReLoaded when Verilog-A/OSDI compilation is needed
-- xschem optional, examples only
+Canonical hierarchy:
 
-Native Windows and macOS support are out of scope. Keep build/run data on the WSL Linux filesystem, not `/mnt/c`.
+`Technology -> Electrical Family -> Device`
 
-Automated characterization must be headless and must not depend on xschem, `~/.spiceinit`, or other user-global simulator state.
+Orthogonal concepts:
 
-An EL9 container or CI job is useful supplementary validation, but it does **not** replace the final clean-clone validation on an actual WSL2 + EL9-compatible Linux environment.
+- Operating Profile
+- Backend Binding
+- Variation
+- Comparison Set
 
-## 3. Model-kit requirements
+The architecture must be manifest-driven rather than a collection of technology-specific Python loaders.
+
+Use a small explicit domain model such as:
+
+- `TechnologySpec`
+- `FamilySpec`
+- `DeviceSpec`
+- `OperatingProfile`
+- `BiasValidity`
+- `BackendBinding`
+
+Names may differ, but responsibilities must remain separated.
+
+## 3. Required technologies and families
+
+Required v2 Electrical Families:
+
+| Technology | Families |
+| --- | --- |
+| APM350 | `general` |
+| APM130 | `lv`, `hv` |
+| APM045 | `vtl`, `vtg`, `vth`, `thkox` |
+| APM022 | `lvt`, `svt`, `hvt` |
+| APM016F | `lvt`, `svt`, `hvt` |
+
+Total required Electrical Families: **13**.
+
+Schema design must remain sparse. Do not assume all families have both polarities or that every technology has the same Vt/gate-stack options.
+
+Cross-process comparison anchor families:
+
+- APM350 `general`
+- APM130 `lv`
+- APM045 `vtg`
+- APM022 `svt`
+- APM016F `svt`
+
+## 4. Required repository/catalog shape
+
+Replace v1 one-family `kit.toml` as the canonical SSOT with technology/family/device manifests.
+
+Preferred conceptual layout:
+
+```text
+models/<technology>/
+  technology.toml
+  provenance.toml
+  families/<family>/
+    family.toml
+    ngspice/
+      binding.toml
+      wrapper.inc
+    spectre/
+      binding.toml
+      model.scs
+```
+
+Exact filenames may change if a smaller equivalent design is clearly better, but:
+
+- semantic manifests must be backend-independent where practical;
+- simulator-specific model includes/sections/native OP paths belong in Backend Bindings;
+- family/device discovery must come from manifests;
+- release runtime must not depend on old per-technology hard-coded loader functions as the canonical path.
+
+By v2 release remove obsolete current-main canonical v1 SSOT/compatibility artifacts that conflict with the new design, including `models/*/kit.toml` and unqualified v1 public aliases if they are superseded.
+
+Historical v1 behavior remains available from tag `v1.0.0`; do not build a compatibility layer merely to preserve it.
+
+## 5. Public device interface
+
+Use family-qualified APM-owned names.
+
+Target names:
 
 ### APM350
 
-Use a clearly redistributable open generic 0.35 µm-class model. Current preferred reference is the open SCN4M_SUBM-class source, subject to exact file-level license verification.
-
-Represent metadata honestly. If the selected model has a minimum modeled length near 0.4 µm, record both the 0.35 µm technology class and the actual model minimum length.
-
-Do not claim foundry correlation.
+- `apm350_general_nmos`
+- `apm350_general_pmos`
 
 ### APM130
 
-Use the simulation subset of the IHP SG13G2 Open PDK needed for low-voltage NMOS/PMOS operation.
-
-Use PSP103 and preserve exact upstream provenance and licenses.
-
-Support on the validated ngspice side:
-
-- nominal
-- APM benchmark corners
-- APM benchmark process/mismatch/all variation
-- available IHP-native corners
-- available IHP-native process variation
-- available IHP-native mismatch variation
-
-Keep PDK-native and APM benchmark variation visibly distinct.
+- `apm130_lv_nmos`
+- `apm130_lv_pmos`
+- `apm130_hv_nmos`
+- `apm130_hv_pmos`
 
 ### APM045
 
-Use a clearly redistributable, open-source-clean FreePDK45 simulation-model subset. Prefer the Chips4Makers clean source if file-level license verification confirms redistribution.
-
-Do not vendor layout, Calibre, SVRF, or unrelated physical-design assets.
+- `apm045_vtl_nmos`, `apm045_vtl_pmos`
+- `apm045_vtg_nmos`, `apm045_vtg_pmos`
+- `apm045_vth_nmos`, `apm045_vth_pmos`
+- `apm045_thkox_nmos`, `apm045_thkox_pmos`
 
 ### APM022
 
-Use an **APM-authored** BSIM4 parameter deck.
-
-Do not copy, modify, interpolate, or numerically derive the parameter deck from official PTM22 model-card parameters. PTM may only be used locally as a non-redistributed comparison oracle.
-
-Create the deck independently using public literature, BSIM4 model semantics, published representative technology characteristics, and explicit APM behavioral requirements.
-
-Label it clearly as:
-
-- `model_origin = apm_generic`
-- not foundry-correlated
-- not PTM-derived
-
-Required qualitative behavior includes stronger short-channel effects than APM045, larger DIBL near minimum length, lower intrinsic gain near minimum length, lower-voltage operation, higher speed/current capability, and sensible capacitance behavior.
+- `apm022_lvt_nmos`, `apm022_lvt_pmos`
+- `apm022_svt_nmos`, `apm022_svt_pmos`
+- `apm022_hvt_nmos`, `apm022_hvt_pmos`
 
 ### APM016F
 
-Use a pinned, legally redistributable BSIM-CMG implementation from an authoritative open source. Preserve the exact upstream license text; do not relicense vendor code.
+- `apm016f_lvt_nfet`, `apm016f_lvt_pfet`
+- `apm016f_svt_nfet`, `apm016f_svt_pfet`
+- `apm016f_hvt_nfet`, `apm016f_hvt_pfet`
 
-The APM016F parameter deck itself must be APM-authored and must not be numerically derived from PTM-MG16 model-card parameters. PTM-MG may be used only as a local comparison oracle.
+If authoritative reality requires a sparse exception, record and preserve the sparse reality instead of manufacturing a complementary device merely for naming symmetry.
 
-Required behavior:
+Common terminals: `d g s b`.
 
-- genuine FinFET / multi-gate model execution
-- discrete `NFIN` sizing
-- Id and gm scale sensibly with NFIN
-- improved electrostatic control relative to APM022
-- sensible threshold roll-off, DIBL, output conductance, and capacitance
+Planar public parameters: `w`, `l`.
 
-Disable self-heating in v1.0 unless basic model operation requires otherwise.
+FinFET public parameters: `l`, `nfin`.
 
-## 4. Public device interface
+Do not expose common `m`, `nf`, `ng`, fingers, DNWELL, RF/layout, or fabricated effective-width semantics.
 
-Keep the public simulation interface intentionally small and use stable APM-owned names.
+## 6. APM130 v2: IHP LV + HV
 
-Planar devices:
+Preserve the already validated IHP SG13G2 revision `331c00484213b13414777eec1336ef5c29b969bd` if the required HV assets at that revision pass the exact-file licensing/provenance audit. Do not upgrade the upstream revision merely because v2 exists.
 
-- `apm350_nmos`, `apm350_pmos`
-- `apm130_nmos`, `apm130_pmos`
-- `apm045_nmos`, `apm045_pmos`
-- `apm022_nmos`, `apm022_pmos`
+Required families:
 
-Planar public interface:
+### `apm130/lv`
 
-- terminals: `d g s b`
-- parameters: `w`, `l`
+Retain the existing 1.2 V thin-gate-oxide PSP-based family as the anchor.
 
-FinFET devices:
+### `apm130/hv`
 
-- `apm016f_nfet`, `apm016f_pfet`
+Add the pinned IHP thick-gate-oxide/high-voltage MOS family.
 
-FinFET public interface:
+Known baseline evidence to re-check during implementation:
 
-- terminals: `d g s b`
-- parameters: `l`, `nfin`
+- PSP 103.6 model cards;
+- 3.3 V supply class / maximum drain-source statement in the upstream HV corner model;
+- NMOS valid L range approximately 0.45–10 um;
+- PMOS valid L range approximately 0.40–10 um;
+- W range approximately 0.30–10 um;
+- TT/SS/FF/SF/FS profiles;
+- TT statistical and mismatch profiles.
 
-Do not expose common v1.0 public parameters for multiplicity, finger count, `nf`, `ng`, or layout semantics. Parallel devices can be represented as separate instances.
+Use exact current upstream/pinned file evidence rather than copying these values blindly from this goal.
 
-Do not invent a universal effective-width abstraction across planar and FinFET devices.
+Validate nominal terminal characterization and selected upstream/native corner/statistical/mismatch behavior for both LV and HV families. Do not invent cross-family native correlation or a native combined All mode if upstream does not define it.
 
-Upstream model names may be used internally but are not the stable APM public contract.
+Family-specific N/P geometry bounds must be supported; do not force one technology-wide Lmin.
 
-## 5. Benchmark passives
+## 7. APM045 v2: FreePDK45 VTL/VTG/VTH/THKOX
 
-Every kit must support identical technology-neutral benchmark passives:
+Retain the existing v1 open-source-clean FreePDK45 revision if VTL/VTH/THKOX assets at that revision pass exact-file licensing/provenance audit. Avoid unnecessary source churn.
 
-- `Rbench(value, tc1, match_size)`
-- `Cbench(value, tc1, match_size)`
+Required families:
 
-`match_size` is dimensionless benchmark matching size, not physical layout area.
+- `vtl`
+- `vtg` — existing v1 anchor
+- `vth`
+- `thkox`
 
-Local benchmark mismatch scales approximately as `1/sqrt(match_size)`.
+Characterize all four with the generic v2 path.
 
-Resolve variation to concrete values, then use normal simulator resistor/capacitor primitives. Do not reimplement resistor Johnson-noise physics.
+Define a threshold-sibling comparison set:
 
-Technology-native passives are optional and are not a v1.0 release requirement.
+- members `vtl`, `vtg`, `vth`
+- anchor `vtg`
 
-## 6. Characterization contract
+Define a gate-stack comparison set:
 
-Implement the same terminal-level measurements for every technology.
+- members `vtg`, `thkox`
 
-Required raw characterization:
+Do not assume a THKOX reference VDD from secondary convention alone. Research the pinned model/docs. If no authoritative nominal VDD exists, choose and document an APM reference operating profile with explicit `apm_selected` origin and evidence that the selected bias is sensible for the model.
 
-- Id–Vg
-- Id–Vd
-- terminal small-signal complex Y matrix
+Use native VTL/VTG/VTH characterization to help freeze the v2 subthreshold-swing extraction method and to provide empirical context for generic APM022/APM016F multi-Vt target spacing.
 
-Required derived characterization:
+## 8. APM350 v2
 
+APM350 remains one `general` Electrical Family.
+
+Do not fabricate LVT/HVT/HV families simply to make the family matrix symmetric.
+
+Keep the independently authored generic BSIM3 provenance/fidelity boundary established in v1 unless new evidence requires a change.
+
+## 9. APM022 v2 generic multi-Vt
+
+APM022 remains independently APM-authored and non-PTM-derived.
+
+Required families:
+
+- `svt` — v1 baseline deck evolved into the v2 baseline family;
+- `lvt` — APM-derived generic low-threshold family;
+- `hvt` — APM-derived generic high-threshold family.
+
+For LVT/HVT record:
+
+- `origin = apm_derived_variant`
+- `base_family = svt`
+- `variant_method = threshold_isolated`
+
+Develop target spacing only after characterizing native/open multi-Vt examples. Use public literature/model semantics/trends, not official PTM numeric cards.
+
+Hard nominal family-ordering requirements across the supported reference envelope:
+
+- `|Vth_LVT| < |Vth_SVT| < |Vth_HVT|`
+- `Ion_LVT > Ion_SVT > Ion_HVT`
+- `Ioff_LVT > Ioff_SVT > Ioff_HVT`
+
+Do not force monotonic DIBL, gm/gds, SS, or capacitance ordering unless characterization/evidence justifies it.
+
+Keep shared physical/gate-stack/basic transport basis when possible; secondary parameter changes require explicit rationale and terminal evidence.
+
+## 10. APM016F v2 generic multi-Vt
+
+Keep the pinned BSIM-CMG 112.1.0 engine/provenance boundary unless a required compatibility/security issue justifies a change.
+
+Required families:
+
+- `svt` — v1 baseline deck evolved into v2 baseline;
+- `lvt`;
+- `hvt`.
+
+For LVT/HVT record:
+
+- `origin = apm_derived_variant`
+- `base_family = svt`
+- `variant_method = workfunction_dominant`
+
+Start family creation by adjusting BSIM-CMG gate workfunction (`PHIG`) to meet observable threshold-class targets.
+
+Only if PHIG-only variants produce demonstrably poor/unrepresentative terminal Ion/Ioff/SS/DIBL/numerical behavior may minimal secondary parameters be adjusted. Every secondary adjustment must be documented with rationale/evidence.
+
+ASAP7/open multi-Vt examples may be used to understand qualitative parameter structure/trends only. Do not copy their numerical model parameters into APM016F.
+
+Maintain genuine BSIM-CMG/NFIN behavior and self-heating-off v2 baseline unless evidence requires otherwise.
+
+APM016F thick-oxide/high-voltage I/O is explicitly deferred beyond v2.
+
+## 11. Operating profiles and validity
+
+Implement the distinction defined in `DEVICE_FAMILY_MODEL.md`:
+
+1. model/device validity evidence;
+2. APM Operating Profile;
+3. reliability/breakdown qualification.
+
+Only 1 and 2 are in normal v2 scope. Do not claim 3.
+
+Each family must have at least one release-ready characterization operating profile with explicit origin.
+
+Known geometry/terminal-bias validity metadata should be captured when authoritative evidence exists. Unknown fields remain unknown rather than being inferred.
+
+Gate-stack comparison may define a common-overlap-bias profile only after both families' model behavior/validity supports it. Do not silently use `min(VDD)` as the comparison method.
+
+## 12. Characterization v2
+
+Preserve all v1 terminal characterization requirements:
+
+- Id-Vg
+- Id-Vd
+- finite-difference gm/gds
 - gm/Id
 - gm/gds
 - length scaling
 - DIBL
-- derived capacitance matrix, including at least Cgg, Cgd, and Cgs
+- raw 4x4 terminal complex Y matrix
+- Cgg/Cgd/Cgs derived from Y
+- -40, 27, 85, 125 degC
+- raw signed and canonical positive N/P semantics
+- finite-difference convergence checks
+- low-frequency Y/capacitance consistency checks
 
-Required temperatures:
+Add required v2 family-oriented metrics:
 
-- -40 °C
-- 27 °C
-- 85 °C
-- 125 °C
+- Ion
+- Ioff
+- `log10(Ion/Ioff)`
+- subthreshold swing
 
-Use normalized comparison coordinates where appropriate:
+Canonical Ion/Ioff definitions use the selected operating profile:
 
-- `L/Lmin`
-- `VDS/VDD`
-- `gm/Id`
+- Ion: `VCTRL = reference_vdd`, `VOUT = reference_vdd`
+- Ioff: `VCTRL = 0`, `VOUT = reference_vdd`
 
-Provide native/raw views and normalized cross-technology views. Do not use identical absolute W or VGS as the primary cross-process comparison method.
+Persist current density basis explicitly: planar per width, FinFET per fin. Keep raw current too.
 
-### N/P polarity convention
+Subthreshold swing extraction convention is deliberately not frozen by this initial specification. Before release, evaluate candidate methods on native APM130/APM045 family data, freeze one robust documented method, and persist extraction window/bias/fit diagnostics.
 
-Preserve raw simulator terminal voltages and currents with their native signed convention.
+Gate leakage is optional, not a common required v2 metric.
 
-For canonical positive-magnitude N/P comparison metrics, use effective positive control/output variables:
+## 13. Comparison v2
 
-- NMOS/NFET: `VCTRL = VGS`, `VOUT = VDS`, `IDMAG = abs(ID)`
-- PMOS/PFET: `VCTRL = VSG`, `VOUT = VSD`, `IDMAG = abs(ID)`
+Implement explicit Comparison Sets and distinct comparison modes.
 
-Canonical comparison gm/gds and gm/Id must use these effective variables so normal-conduction PMOS/PFET results are not accidentally sign-inverted. Metadata must state whether a field is a raw signed simulator quantity or a canonical positive-magnitude comparison quantity.
+### Cross-technology anchors
 
-## 7. gm and gds
+Compare only the anchor family sequence for golden process scaling:
 
-Simulator-internal OP field names are not the canonical API.
+`apm350/general -> apm130/lv -> apm045/vtg -> apm022/svt -> apm016f/svt`
 
-Canonical values come from terminal finite differences using the effective variables defined above:
+Use normalized coordinates including `L/Lmin`, `VOUT/VDD`, and documented gm/Id inversion level where appropriate.
 
-- `gm = d(IDMAG)/d(VCTRL)`
-- `gds = d(IDMAG)/d(VOUT)`
+Planar quantities remain per width; FinFET quantities remain per fin. Do not invent cross-basis current/capacitance ratios.
 
-Use central differences and numerical convergence checks with more than one perturbation size while holding the other independent terminal biases fixed.
+### Threshold-family comparison
 
-Native simulator gm/gds may be used as validation oracles. For APM130, explicitly compare derived quantities with PSP native OP values to validate the methodology.
+For VTL/VTG/VTH and generic LVT/SVT/HVT provide:
 
-## 8. DIBL
+- equal-bias view;
+- equal-inversion view.
 
-Use a documented constant-current threshold method.
+Report threshold, Ion/Ioff/log ratio, SS, gm/Id, gm/gds, DIBL, and capacitance metrics with clear basis.
 
-Default effective drain voltages:
+### Gate-stack comparison
 
-- `VOUT_low = 50 mV`
-- `VOUT_high = 0.8 * nominal VDD`
+For APM130 LV/HV and APM045 VTG/THKOX provide:
 
-Use threshold-voltage magnitude for both N and P devices and report positive DIBL for the normal case where threshold magnitude is reduced at higher drain bias:
+- native-profile view;
+- common-overlap-bias view when validated/legal.
 
-`DIBL = (|Vth_low| - |Vth_high|) / (VOUT_high - VOUT_low)`
+Do not present gate-stack differences as merely Vt differences.
 
-Use technology-appropriate threshold-current normalization: planar devices by W/L, FinFET devices by NFIN. The exact normalized constant-current coefficient must be documented and stored in result metadata; do not hide or silently change the extraction convention.
+## 14. Result contract v2
 
-## 9. Capacitance
+Implement `RESULT_CONTRACT.md`.
 
-Do not use compact-model-specific `cgg/cgd/cgs` OP names as the canonical API.
+Canonical result identity becomes:
 
-Use AC analysis to obtain terminal admittance at each DC bias point.
+- `technology_id`
+- `family_id`
+- `device_id`
 
-Use fixed terminal order `d, g, s, b`. To construct the raw 4-terminal Y matrix, excite one terminal at a time with a known small-signal voltage while holding the other terminal voltage sources at AC ground, and record all terminal currents using a documented current-direction convention. Store the complex Y matrix as raw authoritative data.
+Result metadata must bind the relevant technology/family/device semantic manifest and backend binding hashes/snapshots, operating profile, simulator/toolchain identity, model provenance, extraction methods, geometry, and variation identity.
 
-For angular frequency `omega`, derive self and transfer capacitances using a documented sign convention. A default convention is:
+Do not require full family metadata duplicated into every raw CSV row; semantic identity plus immutable metadata binding is preferred. Comparison outputs may denormalize family attributes for usability.
 
-- self term: `Cii = imag(Yii) / omega`
-- transfer term reported as positive coupling magnitude: `Cij = -imag(Yij) / omega` for `i != j`
+Current runtime output must use v2 schemas by release. v1 result schemas are historical and must not remain the current canonical runtime contract.
 
-At minimum report Cgg, Cgd, and Cgs and retain the raw Y matrix so alternative definitions can be recomputed later.
+## 15. Benchmark Variation v2
 
-Check that the selected quasi-static characterization frequency does not materially change extracted capacitance over a reasonable low-frequency range. Record the actual frequency/frequencies used.
+Rename the APM synthetic modes:
 
-MOS noise characterization is out of scope for v1.0, but the design must not prevent adding it later.
+- Benchmark Global
+- Benchmark Local
+- Benchmark All
 
-## 10. APM benchmark variation
+Keep deterministic benchmark corners (`bench_tt`, `bench_ff`, `bench_ss`, `bench_fs`, `bench_sf`) as explicit fixed benchmark Global vectors.
 
-Provide one technology-neutral benchmark variation model across all five kits.
-
-Required modes:
-
-- process
-- mismatch
-- all = process + mismatch
-
-Canonical MOS variation intents:
+Canonical MOS observable intents remain:
 
 - `vth_shift`
 - `drive_shift`
 
-These are observable-level semantics, not raw compact-model parameters.
+### Global semantics
 
-`vth_shift` means a target threshold-behavior shift.
+Draw technology/polarity observable latent variables and share them across that technology's electrical families. Each family/device maps the common observable stress through its own real-tool-calibrated raw adapter.
 
-`drive_shift` means a target relative Id change at a defined reference bias.
+This is a synthetic common comparison stress, not a claim that real family process variations are fully correlated.
 
-Investigate and validate technology-specific mappings, likely including:
+Do not invent numeric partial-correlation coefficients.
 
-- BSIM3/BSIM4: `delvto`, `mulu0` or equivalents
-- PSP: `delvto`, `factuo` or equivalents
-- BSIM-CMG: `DELVTRAND`, `IDS0MULT`, `U0MULT` or equivalents
+Persist latent names/values so future family-specific residual latent variables can be added without redesigning the resolved sample concept.
 
-Do not assume equal raw parameter percentages mean equal observable shifts.
+### Local semantics
 
-Calibrate drive mapping per kit at a documented reference point, e.g. approximately `L=2*Lmin`, `VDS=0.5*VDD`, `gm/Id≈15 V^-1`. Store calibration metadata.
-
-Do not freeze benchmark sigma/severity values until representative kits are operational and the impact is characterized.
-
-### Benchmark statistical semantics
-
-The benchmark specification must explicitly define correlation rather than leaving it implicit.
-
-Unless a later calibrated benchmark profile explicitly states otherwise, use independent normalized benchmark process variables for:
-
-- NMOS/NFET `vth_shift`
-- NMOS/NFET `drive_shift`
-- PMOS/PFET `vth_shift`
-- PMOS/PFET `drive_shift`
-- Rbench global scale
-- Cbench global scale
-
-Each process variable is global within one Monte Carlo sample for its relevant device/passive class.
-
-Mismatch variables are local per APM device/passive instance, independent between instances, and independent of process variables unless the benchmark profile explicitly documents another correlation model.
-
-Composition semantics:
-
-- threshold process + local shifts combine additively
-- drive/process and passive scale factors combine multiplicatively
-- `all` means the documented process perturbation and local mismatch perturbation are both applied in the same sample/run
-
-Do not invent hidden cross-correlation to make distributions appear more realistic.
-
-## 11. Benchmark mismatch law
-
-Use an explicitly synthetic APM matching law.
+Keep explicit per-instance local mismatch. Preserve the synthetic v1 matching-size laws unless v2 evidence justifies a deliberate change:
 
 Planar:
 
@@ -320,291 +413,227 @@ FinFET:
 
 `match_size = (NFIN*L)/(NFINref*Lref)`
 
-Local benchmark sigma:
+`σ_local = σ_ref/sqrt(match_size)`
 
-`sigma_local = sigma_ref / sqrt(match_size)`
+### RNG/replay
 
-Never describe this as a foundry Pelgrom model or a silicon-yield prediction.
+Continue Python NumPy Generator + explicit PCG64 baseline for ngspice benchmark sampling unless evidence requires a documented migration.
 
-## 12. Benchmark corners
+Persist seeds, latents, resolved values, instance-local values, hashes, and deterministic replay identity.
 
-Provide common deterministic corners:
+### Calibration
 
-- `bench_tt`
-- `bench_ff`
-- `bench_ss`
-- `bench_fs`
-- `bench_sf`
+Every required family/device must have a validated adapter or a documented family-shared adapter only when real-tool evidence proves sharing is semantically valid.
 
-Define them from fixed benchmark-variation vectors. Keep them distinct from native PDK/model corners.
+Do not assume raw knob signs/scales match across families.
 
-Native corners may be exposed separately where they exist.
+The v1 frozen sigma/severity values are a starting prior, not an automatic v2 release decision. Re-evaluate them after multi-family adapters exist; preserve them only if evidence shows they remain sensible for the v2 comparison contract.
 
-## 13. ngspice Monte Carlo
+## 16. Upstream/native variation
 
-For APM benchmark variation, generate randomness in Python outside the compact model.
+Upstream/native variation remains separate from APM Benchmark Variation.
 
-Generate a machine-readable resolved variation sample containing global/local MOS and R/C perturbations, then perform deterministic ngspice simulation.
+For APM130 validate available LV and HV native:
 
-Requirements:
+- corners;
+- statistical/process profile(s);
+- mismatch profile(s).
 
-- explicit seed handling
-- same seed reproduces identical benchmark samples
-- different seeds differ
-- machine-readable sample persistence
-- resolved samples contain enough information to replay a run deterministically
+Retain upstream names and semantics. Do not invent family-to-family native correlation or an upstream `all` mode.
 
-Do not rely on Verilog-A random-number functions for APM benchmark variation.
+FreePDK45 Vt/THKOX families are nominal electrical families, not native statistical modes.
 
-IHP-native variation is a separate model-owned flow.
+## 17. Benchmark passives
 
-## 14. Spectre model-only compatibility
+Keep technology-neutral `Rbench(value, tc1, match_size)` and `Cbench(value, tc1, match_size)` as the common cross-technology passive basis.
 
-v1.0 must include Spectre-compatible **model files only**.
+Rename synthetic variation terminology consistently to Benchmark Global/Local/All.
 
-Status must be prominently labeled:
+`match_size` remains dimensionless synthetic matching size. Preserve ordinary simulator resistor/capacitor primitives and resistor Johnson-noise behavior.
+
+Native process passives remain optional/out of common v2 scope.
+
+## 18. Spectre v2 model-only layer
+
+Provide model-only Spectre-compatible artifacts for all required v2 families/devices, benchmark passives, benchmark corners, and Benchmark Global/Local/All semantics.
+
+Status remains prominently:
 
 **EXPERIMENTAL / UNVERIFIED**
 
-because Spectre is not available during initial development.
+unless real Spectre execution actually occurs.
 
-Include:
+Do not add Spectre testbenches, SKILL, CDF, symbols, OA libraries, ADE/Maestro states, OCEAN, or Virtuoso automation.
 
-- nominal model interface
-- benchmark corners
-- benchmark R/C
-- benchmark process MC
-- benchmark mismatch MC
-- benchmark all MC
-- documentation
+IHP-native Spectre family MC is not a v2 requirement.
 
-Do not include:
+## 19. Licensing/provenance
 
-- Spectre testbenches
-- SKILL
-- CDF
-- symbols
-- OA libraries
-- ADE/Maestro states
-- OCEAN
-- Virtuoso automation
+Maintain exact-file provenance for every shipped third-party family/model asset.
 
-Virtuoso integration is fully user-managed.
+Prefer existing v1-pinned source revisions where required family assets exist and are legally redistributable. Any new file requires fresh exact-file audit even when it comes from an already pinned upstream repository.
 
-Use native Spectre BSIM3/PSP/BSIM4/BSIM-CMG implementations where practical.
+APM-authored family decks/variant-generation records must clearly separate public inputs, APM choices, base family, generation/calibration method, and validation boundary.
 
-Prefer thin Spectre subckt wrappers with the same public APM device names as the ngspice-facing interface so local mismatch can be applied cleanly per instance.
+No official PTM/PTM-MG model card redistribution or numeric derivation of APM022/APM016F is permitted.
 
-Use Spectre `statistics` blocks so standard Spectre/ADE Monte Carlo can select Process, Mismatch, or All.
+Run REUSE/SPDX and self-contained-distribution audits.
 
-For APM130 Spectre support, APM benchmark variation is required; IHP-native Monte Carlo compatibility is not claimed for v1.0.
+## 20. Platform and toolchain
 
-Spectre's own RNG does **not** need to reproduce the ngspice Python sampler seed-for-seed in v1.0. The required compatibility target is equivalent intended distributions, geometry scaling, process/local semantics, and documented correlation assumptions. Fixed-sample cross-simulator Monte Carlo conformance is explicitly deferred.
+The validated v1 development baseline is reusable during v2 implementation:
 
-Do not claim Spectre parse validity or numerical conformance without a real Spectre run. Static structural checks are useful but are not Spectre validation.
+- WSL2
+- AlmaLinux/RHEL-compatible EL9 x86_64
+- ngspice 47 with OSDI/predictor
+- project-local OpenVAF-ReLoaded `v24.0.2mob`/recorded commit unless deliberately changed
+- PSP103 and BSIM-CMG OSDI paths
+- Python >=3.9
 
-## 15. xschem
+At v2 startup, inventory and reuse the existing `.apm`/`.venv` toolchain when valid. Do not rebuild solved infrastructure without reason.
 
-xschem is optional. Provide only a small set of useful example schematics for discoverability and manual exploration.
+This reuse does not waive final v2 clean-clone validation. Final release must prove source bootstrap/build/run from a new clone on the required WSL2/EL9 environment.
 
-The automated framework must not depend on GUI operation.
+Spectre remains non-required as a real-tool release dependency.
 
-## 16. Self-contained distribution
+## 21. CLI direction
 
-The repository must contain every technology model asset required for all five kits.
+Provide a family-aware CLI with equivalent capabilities to:
 
-Users must not need separate transistor-model downloads for PTM, FreePDK45, IHP, or BSIM model sources.
+```text
+apm list technologies
+apm list families apm045
+apm describe apm045/vtg
+apm characterize apm045/vtg
+apm characterize apm045/vtg/nmos
+apm characterize apm045
+apm compare apm045/vtl apm045/vth
+apm compare-set apm045 threshold
+apm compare-set apm130 gate_stack
+apm compare-anchors
+```
 
-Normal software dependencies such as ngspice, Python, OpenVAF-ReLoaded, and optional xschem may remain external.
+Exact command spelling may improve during implementation, but canonical selectors must clearly support technology/family/device identity and must not rely on ambiguous one-family kit names.
 
-Prefer building OSDI locally from redistributable source rather than committing generated OSDI binaries.
+## 22. Manifest-driven implementation requirement
 
-## 17. Licensing and provenance
+This is a release-critical architectural requirement.
 
-Licensing correctness is a v1.0 release requirement.
+The final runtime must discover technologies/families/devices from manifests. Normal family addition must not require adding a new technology-specific production loader/branch.
 
-APM-authored project code and APM-authored parameter decks may use Apache-2.0.
+Tests must prove generic catalog discovery and generic characterization/benchmark dispatch using fixture manifests or equivalent.
 
-Do not relicense third-party model sources.
+Do not replace straightforward manifest-driven Python with a speculative plugin ecosystem.
 
-Use SPDX/REUSE-compatible file-level metadata where practical.
+## 23. Deliberately unfrozen values
 
-Maintain:
+Do not invent these before evidence exists:
 
-- `LICENSES/`
-- `THIRD_PARTY.md`
-- `REUSE.toml` or equivalent
-- per-kit `provenance.toml`
+- FreePDK45 THKOX final reference operating VDD/profile;
+- final common-overlap gate-stack comparison biases;
+- v2 SS extraction window/method details;
+- APM022 LVT/SVT/HVT target spacing and any secondary adjustments;
+- APM016F LVT/SVT/HVT target spacing and any secondary parameter adjustments beyond workfunction-dominant baseline;
+- whether v1 benchmark Global/Local sigma magnitudes remain unchanged for v2;
+- family-specific benchmark adapter coefficients before real characterization.
 
-For imported model assets record upstream project, URL, exact revision, original license, imported files, modifications, and useful checksums.
+These are research/characterization tasks, not permanent release TBDs. Every release-critical value must be frozen with evidence before v2.0.0.
 
-If redistribution rights for any file are ambiguous, do not ship it. Replace it with an APM-authored model or a clearly redistributable source.
+## 24. Milestones
 
-## 18. CLI and workflow
+### V2-M0 — Domain/catalog migration foundation
 
-Keep the CLI small. Provide equivalents of:
+- implement Technology/Family/Device/OperatingProfile/Validity/BackendBinding manifests and loader;
+- migrate the existing five v1 representative families into the new architecture first;
+- prove generic manifest-driven discovery/dispatch;
+- reuse and smoke the existing validated local toolchain;
+- do not yet claim all 13 families.
 
-- `apm doctor`
-- `apm build-models`
-- `apm characterize <technology>`
-- `apm validate`
-- `apm compare <technology-a> <technology-b>`
+### V2-M1 — APM130 LV/HV
 
-Exact names may be simplified if justified.
+- vendor/audit required HV files from the pinned IHP snapshot if valid;
+- implement LV/HV family manifests/bindings/public wrappers;
+- support N/P-specific geometry limits;
+- validate nominal characterization and upstream LV/HV variation subsets;
+- establish family/gate-stack operating-profile semantics.
 
-`apm doctor` should perform real simulator/model smoke tests where practical, not only file-presence checks.
+### V2-M2 — APM045 VTL/VTG/VTH/THKOX
 
-## 19. Testing
-
-Prefer robust property-based regression over brittle exact-number assertions.
-
-Test properties such as:
-
-- sane NMOS/NFET and PMOS/PFET polarity under the documented raw/canonical sign conventions
-- finite, physically sensible results in supported bias ranges
-- increasing planar L generally improves gm/gds in appropriate operating regions
-- NFIN increase gives sensible FinFET current scaling
-- benchmark mismatch sigma decreases with match_size
-- fourfold match_size gives approximately half local sigma
-- seed reproducibility
-- sensible benchmark-corner ordering
-- numerical convergence of finite-difference gm/gds
-- reasonable APM130 agreement between derived and PSP native gm/gds
-- Y-matrix KCL/sign consistency within numerical tolerance
-- capacitance extraction is reasonably insensitive to the selected low-frequency characterization point
-
-Small upstream numerical changes should not fail the suite solely because exact snapshots moved. Reference snapshots may be used for warnings/review.
-
-## 20. Development order
-
-Proceed approximately in this order unless empirical evidence requires adjustment:
-
-1. **M0 Runtime qualification** — WSL2/EL9, ngspice/OSDI; smoke BSIM3, PSP103, BSIM4, BSIM-CMG.
-2. **M1 APM130** — establish the measurement methodology using a real open model.
-3. **M2 APM045** — ensure the implementation is not PSP-specific.
-4. **M3 APM016F** — introduce genuine FinFET/BSIM-CMG geometry early.
-5. **M4 Benchmark R/C and benchmark variation** across working model families.
-6. **M5 APM022** — independently author and validate a scaled-planar deck.
-7. **M6 APM350** — add the long-channel anchor.
-8. **M7** — complete DIBL, Y-matrix capacitance, temperature, and benchmark corners for all kits.
-9. **M8** — complete IHP-native corners/process/mismatch on the ngspice reference side.
-10. **M9** — add experimental Spectre model-only files with benchmark MC.
-11. **M10** — full licensing/provenance audit, clean-clone validation, release review.
-
-## 21. v1.0.0 Definition of Done
-
-Do not declare completion until all are true:
-
-### Packaging
-- All five kits are present.
-- No separate transistor-model download is required.
-- Every vendored file has auditable provenance/license information.
-
-### Reference runtime
-- Clean setup works on an actual WSL2 + EL9-compatible Linux environment.
-- Headless ngspice simulation works.
-- PSP103 OSDI works.
-- BSIM-CMG OSDI works.
-- CI/container validation, if present, is supplementary and does not substitute for the WSL2 clean-clone gate.
-
-### Devices
-- Every kit has usable N/P devices with the defined stable APM public names and interface.
-
-### Characterization
-Every kit completes:
-- Id–Vg
-- Id–Vd
-- gm/Id
-- gm/gds
-- length scaling
-- DIBL
-- terminal Y matrix / capacitance
-- required temperature sweep
-- raw/canonical N/P sign conventions are documented and tested
-
-### Passives
-- Rbench and Cbench work identically across all kits.
-
-### Benchmark variation
-Every kit supports:
-- benchmark corners
-- benchmark process MC
-- benchmark mismatch MC
-- benchmark process+mismatch MC
-
-with reproducible ngspice benchmark sampling and explicit process/local correlation semantics.
-
-### Native IHP variation
-- APM130 supports the selected available IHP-native corners/process/mismatch flow in the ngspice reference implementation.
-
-### FinFET integrity
-- APM016F genuinely uses BSIM-CMG and NFIN-based sizing; it is not a planar model behind a FinFET-looking interface.
-
-### Spectre
-- Model-only Spectre artifacts exist for every kit and include benchmark MC design.
-- They are clearly labeled experimental/unverified.
-- Actual Spectre validation is not required for v1.0.
-- No README or metadata may imply Spectre was run when it was not.
-
-### Documentation
-README documents scope, installation, model provenance, fidelity limitations, benchmark vs native variation, benchmark passives, comparison methodology, Spectre status, repository identity, and the non-manufacturable-PDK disclaimer.
-
-### Release readiness
-- tests pass
-- license audit passes
-- clean-clone validation passes on the designated WSL2 + EL9 environment
-- no accidental credentials, scratch data, generated binaries, or model files with unclear redistribution rights are committed
-- release notes/changelog are ready
-- repository visibility has not been changed autonomously
-
-## 22. Explicit non-goals for v1.0
-
-Do not implement:
-
-- layout / PCells
-- DRC / LVS / PEX / extraction
-- standard cells / P&R
-- silicon signoff
-- MOS noise characterization
-- HBT/BJT models
-- inductors / varactors / RF models
-- AMS co-simulation
-- native Windows support
-- macOS support
-- Virtuoso symbols/CDF/SKILL
-- ADE/Maestro automation
-
-Do not expand scope because an upstream project supports related functionality.
-
-## 23. Autonomy boundaries
-
-High autonomy is desired. Do not ask for confirmation for routine in-scope implementation decisions, local dependency installation inside the designated WSL environment, refactoring, testing, research, failure repair, commits, or pushes to this repository.
-
-Do not:
-
-- create or substitute another authoritative project repository
-- change repository visibility or security-sensitive repository/account settings
-- copy or redistribute files with unclear licensing
-- commit credentials/tokens/secrets/proprietary models
-- modify unrelated user data or repositories
-- weaken tests merely to make CI green
-- claim Spectre validation that was not performed
-- claim foundry accuracy or silicon correlation for generic/predictive APM models
-- silently substitute an easier requirement when a required item fails
-
-If blocked, investigate alternatives and continue. Prefer a smaller correct implementation over a speculative framework. Record material deviations in repository documentation.
-
-## 24. Final review
-
-Before declaring v1.0 ready:
-
-1. Perform a fresh clean-clone setup on the designated WSL2 + EL9 environment.
-2. Build required local compact-model artifacts.
-3. Run the complete validation suite.
-4. Run representative comparisons across all five technologies.
-5. Audit every vendored file's license/provenance.
-6. Review README claims against actual tested behavior.
-7. Verify all Spectre artifacts are marked experimental/unverified.
-8. Remove obsolete experiments, scratch outputs, temporary downloads, and dead code.
-9. Ensure a new user can reproduce the project without reading development history.
-10. Only then prepare/tag v1.0.0.
+- audit/vendor exact required model files;
+- implement all four families;
+- characterize threshold siblings and THKOX;
+- research/freeze THKOX operating profile;
+- collect native family evidence for Ion/Ioff/SS and generic multi-Vt target development.
+
+### V2-M3 — Characterization/result/comparison v2
+
+- switch runtime outputs to v2 result identity/schema;
+- add Ion/Ioff/log ratio and SS;
+- freeze/document SS extraction after native data review;
+- implement explicit comparison sets, equal-bias/equal-inversion/native-profile/common-overlap views;
+- preserve raw Y/finite-difference contract.
+
+### V2-M4 — Benchmark Global/Local/All v2
+
+- migrate terminology/sample schema;
+- implement technology/polarity shared observable latents;
+- calibrate family-specific adapters;
+- re-evaluate/freeze v2 sigma/corner severity;
+- preserve deterministic replay and benchmark passives.
+
+### V2-M5 — APM022 multi-Vt
+
+- implement SVT baseline plus threshold-isolated LVT/HVT generic families;
+- freeze evidence-based target spacing;
+- validate family ordering and full characterization/benchmark adapters.
+
+### V2-M6 — APM016F multi-Vt
+
+- implement SVT baseline plus workfunction-dominant LVT/HVT generic families;
+- validate genuine BSIM-CMG/NFIN behavior for all families;
+- freeze evidence-based target spacing and any minimal secondary adjustments.
+
+### V2-M7 — Integrated all-family validation
+
+- regenerate/audit all five technologies, all 13 families, all required devices/temperatures/metrics;
+- validate comparison anchors/sets and variation across the manifest-driven path;
+- prove no current runtime dependency on v1 `kit.toml`/unqualified aliases.
+
+### V2-M8 — Spectre/provenance/licensing/documentation
+
+- complete all v2 Spectre model-only structural artifacts;
+- complete new exact-file provenance/license audits;
+- update public docs/claim review;
+- remove obsolete v1 canonical SSOT/compatibility artifacts from main.
+
+### V2-M9 — Release validation
+
+- package/runtime/release metadata = 2.0.0;
+- fail-closed v2 release validator implements every required gate;
+- fresh network clone on WSL2/EL9;
+- bootstrap/build from source;
+- doctor/tests/real-tool all-family characterization/variation/comparison/provenance audit;
+- claim audit;
+- only then annotate/tag `v2.0.0`.
+
+## 25. Definition of Done
+
+APM v2.0.0 is complete only when all of the following are true:
+
+- five technologies and 13 required Electrical Families are present and manifest-discoverable;
+- required Devices use family-qualified public interfaces and correct geometry semantics;
+- APM130 LV/HV and APM045 VTL/VTG/VTH/THKOX use audited upstream assets;
+- APM022/016F generic multi-Vt families satisfy documented independent-authorship/variant contracts;
+- all required characterization metrics including Ion/Ioff/log ratio/SS complete at all required temperatures;
+- cross-process anchors and within-technology comparison sets work with documented views;
+- Benchmark Global/Local/All works across all required families with calibrated observable adapters and deterministic replay;
+- selected APM130 upstream/native LV/HV corner/stat/mismatch flows are validated without invented cross-family correlation;
+- FinFET families genuinely execute BSIM-CMG and preserve NFIN semantics;
+- Spectre model-only artifacts cover all required families and remain correctly experimental/unverified;
+- exact-file provenance/licensing and self-contained-source audits pass;
+- v1 canonical `kit.toml`/result/adapter/public-alias SSOT does not remain required by current runtime;
+- package/runtime/changelog/release metadata identify 2.0.0;
+- no release-critical research TBD/placeholder remains;
+- a fresh clone passes the full fail-closed v2 release validator;
+- README/release claims match actual evidence;
+- repository visibility has not been changed.

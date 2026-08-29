@@ -1,267 +1,310 @@
-# Unattended Execution Protocol
+# Unattended Execution Protocol for APM v2
 
-This document defines how a long-running autonomous implementation agent should execute `GOAL.md` when no human will supervise intermediate decisions.
+This document defines how a long-running autonomous implementation agent should execute the current v2 `GOAL.md` after the v1.0.0 baseline has already been completed.
 
-It is process guidance, not a replacement for `GOAL.md` or `AGENTS.md`.
+It is process guidance, subordinate to `AGENTS.md`, `GOAL.md`, and `DEVICE_FAMILY_MODEL.md`.
 
-## Authority and conflict handling
+## 1. Authority
 
-Use this order when repository instructions appear to conflict:
+Use this order on conflict:
 
-1. applicable safety/security requirements and explicit user instructions
-2. `AGENTS.md` — mandatory repository policy and guardrails
-3. `GOAL.md` — authoritative v1.0 scope, requirements, and Definition of Done
-4. this file — unattended execution procedure
-5. `RESULT_CONTRACT.md` — stable v1 result semantics subordinate to the goal/policy
-6. `PROJECT_CONTEXT.md` — informative design history and rationale
-7. `ENVIRONMENT.md` — reported initial environment and M0 bootstrap expectations
-8. `RESEARCH_BASELINE.md` — dated external-research baseline
-9. `README.md` — public-facing project description
+1. safety/security requirements and explicit user instructions
+2. `AGENTS.md`
+3. `GOAL.md`
+4. `DEVICE_FAMILY_MODEL.md`
+5. this file
+6. `RESULT_CONTRACT.md`
+7. `PROJECT_CONTEXT.md`
+8. `ENVIRONMENT.md`
+9. `RESEARCH_BASELINE.md`
+10. `README.md`
 
-`PROJECT_CONTEXT.md`, `ENVIRONMENT.md`, and `RESEARCH_BASELINE.md` provide context and starting assumptions, but they are not allowed to override the normative contract above them. `RESULT_CONTRACT.md` defines common persisted-result semantics but also remains subordinate to `AGENTS.md` and `GOAL.md`. Current authoritative upstream evidence or actual tool behavior may supersede a dated research baseline; record material changes in `STATUS.md` and provenance/evidence.
+Do not silently weaken a requirement. Record material departures and evidence in `STATUS.md`.
 
-Do not silently resolve a material conflict by dropping a harder requirement. Prefer the stricter interpretation and record the decision in `STATUS.md`.
+## 2. Continuation context: do not throw away solved v1 work
 
-## Expected initial execution environment
+v2 is expected to begin in the same WSL2/AlmaLinux working environment that successfully completed v1.0.0.
 
-The first unattended implementation run is expected to start with Codex CLI running directly inside WSL2 on AlmaLinux, with ngspice/OpenVAF not yet installed. Treat that as reported input, not validation.
+The implementation agent may have a compacted continuation of the v1 Codex session. Treat repository files as the authoritative contract, while retaining useful operational knowledge from the v1 run.
 
-Missing initial simulator/compiler tooling is expected M0 bootstrap work, not a blocker by itself.
+Before rebuilding anything, inventory the existing local project state:
 
-Do not create a nested container or alternate Linux VM merely to claim that the WSL2/EL9 release gate was satisfied. Containers may be useful supplementary checks, but the direct WSL2 + AlmaLinux environment is the primary reference environment and final clean-clone target.
+- `.apm/toolchain`;
+- generated OSDI artifacts;
+- `.venv`;
+- ngspice/OpenVAF/LLVM/Rust versions;
+- current `apm doctor` behavior;
+- current git status/origin/HEAD.
 
-## Startup sequence
+If the existing toolchain matches the validated v1 baseline and works, reuse it for v2 development. Do not rebuild ngspice 47/OpenVAF merely to reenact M0.
 
-Before implementation work:
+The final v2 release must still rebuild/validate from a genuinely fresh clone. Development reuse and release reproducibility are separate questions.
 
-1. Confirm the working repository origin is `https://github.com/ds54e/analog-process-models`.
-2. Read `AGENTS.md`, `GOAL.md`, `RESULT_CONTRACT.md`, `PROJECT_CONTEXT.md`, `ENVIRONMENT.md`, `RESEARCH_BASELINE.md`, `UNATTENDED_EXECUTION.md`, and `README.md` completely.
-3. Read `validation/release_gates.toml` and `STATUS.md` before deciding what is already complete.
-4. Inspect `git status` before changing anything.
-5. Preserve any pre-existing user changes. Never use destructive `git reset --hard`, `git clean -fdx`, force-push, or history rewriting to obtain a clean tree.
-6. Verify the actual WSL2/EL9 environment locally rather than trusting the reported initial state. Record the result in `STATUS.md` and validation evidence.
-7. Inventory installed simulator/compiler/tool versions before installing or upgrading anything.
-8. Bootstrap the required M0 toolchain when absent. For the initial target, this means Python >=3.9, ngspice 47 with OSDI, and OpenVAF-ReLoaded where Verilog-A-to-OSDI compilation is required.
-9. Begin actual model qualification with M0 from `GOAL.md`; do not start by inventing a generic framework.
+## 3. Startup sequence after v2 specification pull
 
-Use `PROJECT_CONTEXT.md` to understand settled rationale before reopening architecture questions. Use `RESEARCH_BASELINE.md` to avoid repeating already-completed discovery, but re-check authoritative upstream sources before pinning a revision or making a release claim. Preserve the common persisted-result semantics in `RESULT_CONTRACT.md` while implementing each kit so results remain comparable. A different implementation is acceptable when new authoritative evidence or actual tool behavior requires it, but record material departures and their evidence in `STATUS.md` rather than silently replacing the original design intent.
+1. Confirm repository origin is `https://github.com/ds54e/analog-process-models`.
+2. Inspect `git status`; preserve user changes.
+3. Read all required files listed in `AGENTS.md` completely.
+4. Confirm `STATUS.md` says v2 is not yet release-eligible and that v1 evidence is historical baseline only.
+5. Inventory/reuse the existing validated local toolchain.
+6. Run a lightweight baseline smoke such as current `apm doctor` if practical before large migration; record failures as v2 migration work rather than rebuilding blindly.
+7. Inspect current v1 code architecture and identify obsolete canonical SSOT that v2 will replace.
+8. Start V2-M0. Do not stop at a migration plan.
 
-## M0 toolchain bootstrap discipline
+The specification commit intentionally makes current `main` a v2-development branch while implementation still reflects v1. Existing v1 tests/release validation may fail until migrated. This is expected and must not be “fixed” by weakening v2 requirements.
 
-On the reported bare AlmaLinux environment, source-building required tools is an acceptable and expected path.
+## 4. v1 evidence handling
 
-For ngspice:
+Historical v1 evidence remains useful for:
 
-- target ngspice 47 with the OSDI/predictor support required by the project;
-- use authoritative source;
-- prefer a reproducible user-local/project-controlled install prefix when practical;
-- do not destructively replace unrelated system software solely for APM;
-- document dependencies, source version/hash, configure flags, compiler, prefix, and version output;
-- prove OSDI with actual loaded-model simulation.
+- toolchain versions/build methods;
+- known simulator quirks;
+- v1 model/provenance hashes;
+- current family baseline terminal behavior;
+- reproducible bootstrap knowledge.
 
-For OpenVAF-ReLoaded:
+It does **not** automatically validate:
 
-- use authoritative upstream binaries or source;
-- pin the actual revision/version used;
-- record the toolchain if building from source;
-- prove the selected tool by compiling the actual PSP103 and BSIM-CMG paths required by APM, not just a trivial example.
+- v2 manifests/domain architecture;
+- new LV/HV/Vt/THKOX families;
+- v2 Ion/Ioff/SS methodology;
+- v2 Benchmark Global/Local/All semantics;
+- v2 family-specific adapters;
+- v2 public device names/result schemas;
+- v2 clean-clone release.
 
-Do not modify user shell startup files as the required installation mechanism. Use explicit/project-managed paths or reproducible setup scripts/configuration.
+When reusing a v1 asset unchanged, explicitly bind v2 evidence to its unchanged hash/revision plus current v2 integration test rather than rerunning irrelevant research.
 
-## Milestone execution loop
+## 5. Milestone loop
 
-Treat M0–M10 in `GOAL.md` as durable checkpoints.
+For each V2-M0 through V2-M9 milestone:
 
-For each milestone:
+1. re-read the relevant `GOAL.md` section and `DEVICE_FAMILY_MODEL.md` boundary;
+2. re-check any dated upstream fact that becomes a new vendored file, frozen profile, generic target, or release claim;
+3. implement the smallest complete milestone design;
+4. run real simulator/tool checks as soon as meaningful;
+5. investigate failures rather than weakening properties;
+6. record compact evidence under `validation/evidence/` using clearly v2-labeled filenames;
+7. update `STATUS.md` with current milestone, evidence, blockers, and material decisions;
+8. commit a coherent checkpoint;
+9. continue unless there is a genuine blocker.
 
-1. Re-read the relevant `GOAL.md` requirements and relevant rationale in `PROJECT_CONTEXT.md`.
-2. Re-check any dated upstream fact from `RESEARCH_BASELINE.md` that will become a pinned dependency, vendored asset, or release claim.
-3. Implement the smallest complete design that satisfies the milestone and preserves the public and result contracts.
-4. Run milestone-level tests using the actual tools whenever available.
-5. Investigate failures rather than weakening assertions or changing requirements to match broken behavior.
-6. Record compact validation evidence under `validation/evidence/`.
-7. Update `STATUS.md` with the milestone result, exact evidence paths, blockers, and material decisions.
-8. Commit a coherent checkpoint before moving to the next milestone.
+Do not create a large narrative work log. `STATUS.md` is an index; evidence files hold reproducible claims.
 
-Parallel research is acceptable when it cannot create conflicting implementations, but dependent implementation milestones should preserve the order in `GOAL.md` unless evidence justifies a deviation.
+## 6. V2-M0 migration discipline
 
-Do not create large append-only work logs. `STATUS.md` should remain a compact current-state summary, and validation evidence should contain only information needed to reproduce or audit a result.
+Migrate architecture before multiplying family-specific code.
 
-## Evidence standard
+The target is a straightforward manifest-driven catalog, not a plugin framework.
 
-A requirement is not "validated" merely because code exists or a file parses visually.
+V2-M0 should:
 
-For each validation claim, record enough information to audit it later. Small committed evidence summaries should include, where applicable:
+- introduce semantic Technology/Family/Device/OperatingProfile/Validity structures;
+- introduce simulator Backend Binding data;
+- migrate the existing five representative v1 families first;
+- prove generic discovery and generic characterize dispatch;
+- preserve current numerical behavior sufficiently to detect migration regressions;
+- add fixture-based tests proving a normal new family does not require a new production technology loader.
 
-- gate or milestone identifier
-- date/time
-- git commit SHA or working-tree state
-- OS/distribution and architecture
-- relevant tool versions
-- exact command(s)
-- exit status
-- concise observed result
-- paths/hashes of important generated artifacts when useful
-- whether the result is `validated`, `structurally_checked`, `experimental_unverified`, or `blocked`
+Do not immediately add 13 special-case loaders and plan to “generalize later”.
 
-Raw simulation outputs, compiler products, downloaded archives, OSDI binaries, and large logs should normally remain untracked. Store only compact summaries needed for auditability.
+During migration, old and new structures may coexist temporarily. By v2 release, obsolete v1 canonical SSOT/aliases required to be removed by `GOAL.md` must be gone from current runtime.
 
-Never promote `structurally_checked` or `experimental_unverified` to `validated` without running the required real backend.
+## 7. Native-family implementation discipline
 
-## Source acquisition and licensing
+Implement APM130 LV/HV before generic multi-Vt variants because it stresses real architecture differences:
 
-Third-party model acquisition is a gated operation.
+- distinct gate-stack/operating profiles;
+- N/P-specific Lmin for HV;
+- upstream corners/statistical/mismatch;
+- same pinned IHP source lineage.
 
-Before copying a third-party model file into the repository:
+Then implement APM045 VTL/VTG/VTH/THKOX to establish real multi-Vt/gate-stack characterization.
 
-1. identify the authoritative upstream project/source;
-2. pin an exact revision, release, or commit whenever possible;
-3. inspect the exact file-level header and applicable upstream license/redistribution terms;
-4. record source URL, exact revision, imported path(s), license, modifications, and checksum(s) in provenance metadata;
-5. preserve required notices and license text;
-6. only then vendor the file.
+Do not decide generic APM022/APM016F Vt spacing before these native/open data exist.
 
-Search-engine snippets, mirrors with unclear provenance, blog posts, generated license summaries, or assumptions based only on a repository root license are not sufficient evidence for redistribution rights.
+## 8. Upstream acquisition/licensing
 
-If redistribution remains ambiguous after reasonable investigation, do not vendor the asset. Continue using a clearly redistributable alternative or an independently authored APM model as permitted by `GOAL.md`.
+Before adding a third-party family/model file:
 
-Do not publish PTM/PTM-MG model cards or use their numerical parameter decks as source material for APM022/APM016F.
+1. identify authoritative upstream source;
+2. prefer the already pinned v1 revision if the file exists there;
+3. inspect exact pinned file header/terms;
+4. hash the file;
+5. record provenance/license/notice requirements;
+6. vendor only if redistribution is clear.
 
-## APM-authored model discipline
+Repository-root licensing alone is insufficient when model-file provenance/terms may differ.
 
-For APM022 and the APM016F parameter deck:
+Do not upgrade IHP/FreePDK45 revisions merely for freshness. Upgrade only for a documented technical/licensing reason and rerun affected provenance/behavior validation.
 
-- write down the behavioral targets before tuning compact-model parameters;
-- keep public literature/model-specification inputs auditable;
-- distinguish published facts from engineering choices made by APM;
-- avoid unexplained parameter fitting;
-- retain model-generation notes/scripts needed to reproduce the committed parameter deck;
-- never claim foundry or silicon correlation.
+## 9. Research-dependent values
 
-Do not tune an APM-authored deck merely until a test stops failing. Tests and model targets must represent the documented intended behavior.
+The following are deliberate research tasks, not permission to choose convenient constants:
 
-## Benchmark variation discipline
+- THKOX operating profile;
+- common-overlap gate-stack bias;
+- SS extraction method/window;
+- generic APM022 Vt spacing;
+- generic APM016F Vt spacing/secondary adjustments;
+- v2 benchmark severity and adapter coefficients.
 
-The numerical benchmark-variation severities currently marked `TBD` are deliberately unfrozen.
+For each:
 
-Do not replace them with arbitrary convenient values.
+1. gather primary/open evidence;
+2. distinguish observed evidence from inference;
+3. characterize with current real-tool framework;
+4. surface plausible alternative choices;
+5. choose a simple documented value/method;
+6. freeze it in machine-readable config plus evidence;
+7. add tests for the frozen semantic contract.
 
-Freeze them only after representative model families are operational and the effect of proposed values has been characterized. Record the rationale and observed impact when freezing a value.
+No release-critical TBD may remain at v2.0.0.
 
-Keep process/global, mismatch/local, N/P, and R/C correlation semantics explicit. Do not introduce undocumented correlation.
+## 10. Generic APM variant discipline
 
-Development-time TBDs must not survive into release-critical model provenance, benchmark variation/passive configuration, or release metadata. The final release validator must treat unresolved release-critical placeholders as failure.
+### APM022
 
-## Environment and dependency changes
+Start from SVT. Define observable LVT/HVT targets before changing card parameters. Prefer threshold-isolated changes. Secondary changes require explicit evidence/rationale.
 
-Local installation of required development dependencies inside the designated WSL/EL9 environment is permitted.
+Do not use PTM cards as numeric source/fitting target.
 
-Prefer reproducible, documented setup over ad-hoc machine modification.
+### APM016F
 
-Do not:
+Start from SVT. Use PHIG/workfunction as dominant control. Validate terminal behavior. Make secondary changes only when necessary and justified. Do not copy ASAP7/PTM-MG numeric parameters.
 
-- modify unrelated host Windows settings;
-- overwrite user-global simulator configuration;
-- replace the user's shell configuration as an installation mechanism;
-- require `/mnt/c` for source/build/run data;
-- assume a tool feature exists without checking the installed version or authoritative documentation.
+For both technologies, tests should enforce intended nominal ordering for Vth/Ion/Ioff but must not invent universal monotonic ordering of every secondary metric.
 
-Use the distro package manager for ordinary build prerequisites when appropriate, but avoid replacing or removing unrelated user software. Prefer user-local prefixes for source-built simulator/compiler tooling when practical.
+## 11. Characterization-method freeze discipline
 
-Pin model-engine/upstream revisions where reproducibility requires it. Record actual validated tool versions rather than claiming compatibility with untested versions.
+Ion/Ioff definitions are already specified in `RESULT_CONTRACT.md`.
 
-## Blocker handling
+SS method is not yet frozen. Use APM130/APM045 real family curves to compare candidate methods. A good final method must:
 
-A blocker is not a reason to stop all useful work.
+- be deterministic;
+- be applicable across the required model families;
+- record its extraction window and quality diagnostics;
+- fail visibly when insufficient subthreshold range exists;
+- avoid device-specific silent window manipulation.
+
+Once chosen, freeze/version it and rerun all families.
+
+## 12. Benchmark v2 discipline
+
+Do not rename modes only cosmetically. Migrate sample/config/result semantics to Global/Local/All.
+
+Global:
+
+- draw technology/polarity observable latents;
+- share the latent across the technology’s relevant families;
+- resolve through family/device-specific calibrated adapters;
+- document that this is synthetic common stress, not real family correlation.
+
+Local:
+
+- instance-local;
+- deterministic Python sampling;
+- explicit matching-size law.
+
+All:
+
+- Global + Local with documented composition.
+
+Persist latents and resolved sample identity. Never introduce hidden correlation.
+
+Re-evaluate v1 sigma/corner strength only after enough family adapters exist. If retaining v1 values, record evidence that they remain sensible rather than treating history as proof.
+
+## 13. Tests/evidence standard
+
+A v2 requirement is not validated because:
+
+- old v1 evidence passed;
+- a manifest exists;
+- a model file visually parses;
+- a static Spectre check passed;
+- the agent says the behavior is plausible.
+
+Evidence should include as applicable:
+
+- milestone/gate ID;
+- date/time;
+- git commit/working state;
+- tool versions;
+- exact commands;
+- exit status;
+- concise measured observations;
+- report/artifact hashes;
+- evidence status (`validated`, `structurally_checked`, `experimental_unverified`, `blocked`).
+
+Large raw results stay untracked; commit compact summaries and reproducible source/config.
+
+## 14. Blockers
 
 When blocked:
 
-1. determine whether the blocker is local, upstream, licensing-related, environment-related, or a real contradiction in the goal;
-2. research authoritative alternatives;
-3. continue independent milestones that do not depend on the blocker;
-4. record the blocker clearly in `STATUS.md`;
-5. do not fake or downgrade the blocked requirement.
+- classify the blocker (licensing/upstream/model/runtime/spec contradiction);
+- investigate compliant alternatives;
+- continue independent work;
+- record exact blocker/evidence in `STATUS.md`;
+- never waive a gate because substantial work has already been done.
 
-Examples of genuine hard blockers include:
+Spectre real execution remains explicitly non-required; keep it experimental/unverified if unavailable.
 
-- required credentials unavailable to the execution environment;
-- unresolved redistribution rights where no compliant alternative can be found;
-- required real-tool validation impossible because the required tool/environment is unavailable and the Definition of Done explicitly requires it.
+## 15. Git discipline
 
-For Spectre, real validation is explicitly not a v1.0 release gate. If Spectre is unavailable, perform useful structural/static checks but keep the status `experimental_unverified` exactly as required by `GOAL.md`.
+- coherent milestone commits;
+- no force push/history rewrite;
+- preserve unrelated user work;
+- no repository visibility/security changes;
+- no generated OSDI/raw/log/cache commits unless intentionally required source evidence;
+- do not create a replacement repository.
 
-If a mandatory ngspice/WSL2 release gate cannot be validated, continue all other work but do **not** tag or declare v1.0.0 complete.
+## 16. Release-validator migration
 
-## Git discipline
+The authoritative v2 gate file is `validation/release_gates.toml`.
 
-Work in the existing repository and preserve reviewability.
+Current v1 release-validator code is expected to become stale immediately after the v2 specification commit. Migrate it deliberately.
 
-- Make coherent milestone commits.
-- Do not force-push or rewrite published history.
-- Do not delete unrelated files or user work.
-- Do not change repository visibility or security/account settings.
-- Do not create a replacement repository because setup is inconvenient.
-- Keep generated binaries, caches, downloaded archives, raw runs, and temporary fitting data out of git unless a small source artifact is intentionally part of the distribution.
+The final `apm validate --release` (or documented equivalent) must:
 
-A successful command is not sufficient reason to commit an artifact; commit only source, configuration, documentation, compact audit evidence, and legally redistributable model assets that belong in the distribution.
+- verify implemented required gate IDs exactly match required contract IDs;
+- fail on missing/skipped/unimplemented/evidence-free gates;
+- regenerate current real-tool family validation rather than trusting old milestone reports;
+- verify current v2 result/manifest schemas;
+- reject obsolete v1 canonical SSOT/public alias requirements forbidden by v2;
+- audit licensing/provenance/distribution/claims;
+- require exact-commit clean-clone attestation.
 
-## Release-gate behavior
+## 17. Final clean-clone protocol
 
-The stable machine-readable gate definition is `validation/release_gates.toml`.
+Before v2.0.0:
 
-During implementation, build the validation tooling so that a single release-oriented command, preferably:
+1. start from a genuinely fresh network clone on the WSL Linux filesystem;
+2. attest clean origin/path/commit/platform before bootstrap state exists;
+3. follow only documented setup;
+4. build/reconstruct required ngspice/OpenVAF/OSDI artifacts from source/cache rules allowed by release docs;
+5. run doctor;
+6. run complete tests/lint/REUSE/provenance/distribution audits;
+7. run full all-technology/all-family characterization and comparisons;
+8. run Benchmark Global/Local/All validations;
+9. run APM130 upstream LV/HV variation validation;
+10. run Spectre structural checks with explicit unverified boundary;
+11. run fail-closed `apm validate --release`;
+12. verify package/runtime/changelog version 2.0.0;
+13. verify no release-critical TBD/obsolete-v1 SSOT remains;
+14. verify README/claim review;
+15. only then tag `v2.0.0`.
 
-```text
-apm validate --release
-```
+## 18. Completion report
 
-can evaluate all automatically checkable mandatory gates and exits non-zero when any required automatically checkable gate fails.
+Leave `STATUS.md` concise and current with:
 
-Do not let that command report success merely because an unimplemented check was skipped. Required-but-manual gates must be represented separately and remain visibly incomplete until evidence exists.
+- v1 baseline reference;
+- v2 milestone states;
+- validated development/reference toolchain;
+- v2 release-gate status;
+- known limitations/deferred scope;
+- evidence index;
+- final release commit/tag state.
 
-The release-oriented validator must also reject at least:
-
-- unresolved release-critical `TBD`, placeholder, or candidate-only provenance state;
-- package/release metadata that does not identify the target as v1.0.0;
-- missing required license/provenance evidence;
-- a required gate with no evidence or an explicitly blocked status;
-- Spectre claims stronger than the available evidence allows.
-
-`STATUS.md` is a progress index, not proof. Evidence and actual test execution are proof.
-
-## Final clean-clone protocol
-
-Before v1.0.0 can be declared complete:
-
-1. ensure the working repository has no unintended local-only dependencies;
-2. create a genuinely fresh clone in a new directory on the WSL Linux filesystem;
-3. follow only the documented installation/build instructions;
-4. build required OSDI/model artifacts from source;
-5. run `apm doctor`;
-6. run the full automated validation suite;
-7. run `apm validate --release` or the final equivalent;
-8. run representative characterization/comparison commands for all five kits;
-9. verify the provenance/license audit from the clean clone;
-10. confirm no release-critical `TBD` or placeholder values remain;
-11. confirm package/release metadata and release notes identify v1.0.0 consistently;
-12. confirm README claims match actual evidence;
-13. confirm Spectre remains labeled experimental/unverified unless separately validated;
-14. confirm every mandatory `GOAL.md` gate has evidence;
-15. only then prepare/tag v1.0.0.
-
-If any mandatory gate fails, fix it and repeat the relevant clean-clone steps. Do not waive a gate solely because the run has already consumed substantial time.
-
-## Completion report
-
-At the end, leave the repository self-explanatory for a reviewer who did not observe development.
-
-`STATUS.md` should summarize:
-
-- final milestone states;
-- validated environment/tool versions;
-- release-gate result;
-- known limitations;
-- any explicitly deferred items allowed by `GOAL.md`;
-- evidence locations.
-
-The final result should be auditable from the repository without access to the agent's hidden reasoning or conversational history.
+The repository must be sufficient for a reviewer without access to conversational or hidden agent reasoning.

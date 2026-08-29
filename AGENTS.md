@@ -4,188 +4,259 @@ This file is mandatory repository policy for implementation agents.
 
 ## Repository identity
 
-This repository is:
+This repository is **Analog Process Models (APM)**:
 
-- **Name:** `analog-process-models`
-- **GitHub:** `https://github.com/ds54e/analog-process-models`
-- **Project acronym:** **APM = Analog Process Models**
+- repository: `https://github.com/ds54e/analog-process-models`
+- acronym: **APM = Analog Process Models**
 
-Within this repository, **APM always means this project, Analog Process Models**. It is a project-local acronym, not an external product, Microsoft technology, application-performance-monitoring product, package, or third-party framework.
+Within this repository, APM always means this project. Do not reinterpret it as an unrelated product, package, Microsoft technology, or application-performance-monitoring system.
 
-Do **not** web-search for a pre-existing software product named "APM" in order to implement this repository. When external research is needed, search for the specific compact model, process model, simulator, or upstream source named in `GOAL.md` (for example IHP SG13G2, FreePDK45, BSIM4, BSIM-CMG, ngspice, OpenVAF, Spectre).
+Work in this existing repository. Do not create or substitute another authoritative repository. Do not change repository visibility. Do not force-push or rewrite published history.
 
-The repository itself and `GOAL.md` are authoritative for the meaning and scope of APM.
-
-Work in this existing repository. Do not create, migrate to, or substitute another repository or fork as the project authority. Do not change repository visibility. Tag/release v1.0.0 only after the `GOAL.md` release gates are actually satisfied.
+The tagged `v1.0.0` release is the validated historical baseline. Current `main` is the breaking APM v2 development line. The v1 tag is immutable history, not a compatibility requirement for v2.
 
 ## Mission
 
-Implement `GOAL.md` faithfully and finish APM v1.0.0. Optimize for correctness, reproducibility, licensing clarity, and a small maintainable architecture.
+Implement the current `GOAL.md` faithfully and deliver **APM v2.0.0**.
 
-## Unattended execution
+Optimize for:
 
-Assume normal implementation may run for a long time without human supervision.
+- physically and semantically honest device-family modeling;
+- reproducible real-tool validation;
+- explicit provenance and licensing boundaries;
+- machine-readable result semantics;
+- a small manifest-driven architecture that can grow without technology-specific Python branches.
 
-Before substantive work, read all of:
+Completion is evidence-based. Do not tag or declare v2.0.0 complete unless every required gate in `validation/release_gates.toml` has actually passed with the required evidence.
+
+## Required reading before substantive work
+
+Read completely, in this order:
 
 1. `AGENTS.md`
 2. `GOAL.md`
-3. `PROJECT_CONTEXT.md`
-4. `UNATTENDED_EXECUTION.md`
-5. `README.md`
-6. `validation/release_gates.toml`
-7. `STATUS.md`
+3. `DEVICE_FAMILY_MODEL.md`
+4. `RESULT_CONTRACT.md`
+5. `PROJECT_CONTEXT.md`
+6. `ENVIRONMENT.md`
+7. `RESEARCH_BASELINE.md`
+8. `UNATTENDED_EXECUTION.md`
+9. `README.md`
+10. `validation/release_gates.toml`
+11. `STATUS.md`
 
-`PROJECT_CONTEXT.md` contains condensed design history and rationale from the project-definition work that preceded implementation. Use it to understand why apparently simpler alternatives were rejected and to avoid reopening settled architectural decisions without new evidence. It is informative, not normative: `AGENTS.md` and `GOAL.md` win on conflict.
+Authority on conflict:
 
-Follow `UNATTENDED_EXECUTION.md` as the required long-running execution procedure.
+1. applicable safety/security requirements and explicit user instructions
+2. `AGENTS.md`
+3. `GOAL.md`
+4. `DEVICE_FAMILY_MODEL.md`
+5. `UNATTENDED_EXECUTION.md`
+6. `RESULT_CONTRACT.md`
+7. `PROJECT_CONTEXT.md`
+8. `ENVIRONMENT.md`
+9. `RESEARCH_BASELINE.md`
+10. `README.md`
 
-Keep `STATUS.md` current at milestone boundaries so work can be safely resumed after interruption. `STATUS.md` is only a progress index; it never substitutes for actual validation evidence.
+Do not resolve a material conflict by silently dropping the harder requirement. Record material departures and evidence in `STATUS.md`.
 
-Write compact auditable validation summaries under `validation/evidence/` as milestones and release gates are completed. Do not mark missing, skipped, static-only, or unavailable real-tool checks as validated.
+## v1 baseline reuse versus v2 validation
 
-The machine-readable v1.0 release-gate contract is `validation/release_gates.toml`. Implementation may extend the validator around this file, but must not weaken or silently omit required gates.
+The v1.0.0 implementation established a useful validated development baseline: WSL2 + AlmaLinux/RHEL-compatible EL9 x86_64, ngspice 47 with OSDI, project-local OpenVAF-ReLoaded, PSP103 OSDI, BSIM-CMG OSDI, and a working Python environment.
 
-Design the final validation flow so a single release-oriented command, preferably `apm validate --release`, exits non-zero whenever any automatically checkable required gate fails or remains unimplemented.
+During v2 development, reuse the existing project-local `.apm` toolchain, generated OSDI artifacts, caches, and `.venv` when they are present and still match the recorded versions/hashes. Do not gratuitously rebuild ngspice/OpenVAF or rediscover solved bootstrap work.
 
-Do not declare or tag v1.0.0 merely because the agent has reached the end of its run. Completion is evidence-based.
+However:
 
-## Scope discipline
+- v1 validation evidence does **not** satisfy v2 release gates;
+- changed v2 model/family paths must be re-exercised with real tools;
+- the final v2 release still requires a genuinely fresh clone and documented clean-clone validation from source;
+- if the existing local toolchain is missing, corrupted, or incompatible with v2 changes, repair or rebuild it reproducibly rather than pretending it is valid.
 
-Do not expand v1.0 scope beyond `GOAL.md` unless a required item cannot be implemented correctly without a narrowly-scoped change.
+## Breaking redesign policy
 
-In particular, do not add layout, PCells, DRC, LVS, PEX, standard cells, MOS noise, RF devices, AMS, native Windows/macOS support, or Virtuoso automation.
+APM v2 is intentionally allowed to break v1 interfaces because v1 has not been publicly adopted as a compatibility contract.
 
-Do not replace deliberate TBDs with arbitrary convenient values. `PROJECT_CONTEXT.md`, `GOAL.md`, and the benchmark TOML files explain which values are intentionally unfrozen until real characterization exists. Release-critical TBDs must nevertheless be resolved with evidence before v1.0.0.
+Do not preserve obsolete v1 structures merely for compatibility. By v2 release, remove superseded canonical sources of truth, including where applicable:
 
-## Platform
+- one-family-per-technology `kit.toml` manifests;
+- technology-specific characterization loaders/branches that the v2 catalog makes unnecessary;
+- v1 public aliases such as unqualified `apm045_nmos` when a family-qualified v2 name replaces them;
+- v1 result schemas as the current runtime output contract;
+- v1 benchmark adapter/config schemas as the current benchmark contract.
 
-The validated reference environment is WSL2 + RHEL-compatible EL9 Linux, x86_64.
+Historical v1 source and evidence remain available from the `v1.0.0` tag. Do not maintain a dual-schema compatibility layer unless `GOAL.md` explicitly requires one.
 
-Keep project/build/run data on the Linux filesystem, not `/mnt/c`.
+## Device-family architecture
 
-Automated tests and characterization must be headless.
+Follow `DEVICE_FAMILY_MODEL.md`.
 
-Do not depend on xschem GUI state, `~/.spiceinit`, or other mutable user-global configuration.
+The core domain model is:
 
-A container or CI job running EL9 may supplement testing, but it does **not** replace the v1.0 clean-clone validation on the designated WSL2 + EL9 environment.
+`Technology -> Electrical Family -> Device`
 
-## Simulator architecture
+with these orthogonal concepts:
 
-ngspice is the validated v1.0 reference simulator.
+- Operating Profile
+- Backend Binding
+- Variation
+- Comparison Set
 
-Use native compact models where appropriate and OSDI for Verilog-A compact models where required.
+Do not collapse these concepts into one device-type string.
 
-Do not create unnecessary simulator abstraction layers before a second concrete backend requires them.
+Important boundaries:
 
-Spectre support is model-only, experimental, and unverified. Never state or imply that Spectre output has been validated unless it actually has been tested in a real Spectre environment.
+- Electrical Family means a distinct nominal electrical model/parameterization identity.
+- Family IDs are technology-local; cross-technology semantics come from explicit metadata.
+- `core`, `io`, `analog`, `rf`, `standard-cell`, and similar usage labels are not primary electrical-family identities.
+- gate-stack class, threshold class, operating voltage/profile, and isolation/layout view are distinct concepts.
+- do not require every family to contain both N and P devices;
+- do not treat an RF/layout/isolation view as a new electrical family without electrical-model evidence;
+- do not infer undocumented voltage limits, reliability/breakdown guarantees, or family-to-family statistical correlation.
 
-Virtuoso integration is user-managed. Do not implement SKILL, CDFs, symbols, OA libraries, ADE/Maestro setup, or OCEAN.
+The v2 implementation must be manifest-driven. Adding a normal new technology/family/device should not require a new technology-specific loader or large `if/elif` branch in characterization/benchmark code.
 
-## Model boundaries
+Avoid speculative plugin systems. The manifest-driven abstraction is justified by the concrete v2 family set; keep the implementation straightforward.
 
-Do not force BSIM3, PSP103, BSIM4, and BSIM-CMG into one fake common compact-model API.
+## Public model boundaries
 
-The stable cross-technology contract is terminal-level characterization and result semantics, not raw compact-model parameters.
+Do not force BSIM3, PSP103, BSIM4, and BSIM-CMG raw parameter APIs into a fake universal compact-model API.
 
-Do not expose multiplicity/finger semantics (`m`, `nf`, `ng`) in the common v1.0 public device interface.
+Commonize terminal characterization and result semantics, not compact-model knobs.
 
-Planar public sizing: `w`, `l`.
+Public sizing remains geometry-native:
 
-FinFET public sizing: `l`, `nfin`.
+- planar devices: `w`, `l`
+- FinFET devices: `l`, `nfin`
 
-Use explicit public names for model wrappers/devices; do not expose ambiguous upstream names as the APM user contract.
+Do not invent a universal effective width for FinFETs. Do not expose common `m`, `nf`, `ng`, or finger/layout semantics in the v2 common interface.
 
-## APM022 and APM016F independence
+Use APM-owned, family-qualified public wrapper names.
 
-APM022 and the APM016F parameter deck must be independently authored.
+## APM-authored family independence
 
-Do not copy, transcribe, numerically interpolate, optimize directly against, or derive parameter values from official PTM/PTM-MG model cards.
+APM022 and APM016F remain independently authored generic models.
 
-PTM/PTM-MG may only be used locally as non-redistributed sanity/comparison oracles.
+Official PTM/PTM-MG parameter cards must not be copied, transcribed, interpolated, optimized against as a numeric fitting target, or used as numeric source material for APM-authored decks/variants. They may be local, non-redistributed sanity oracles only.
 
-Use public literature, compact-model specifications, representative published characteristics, and explicit APM behavior contracts as model-development inputs.
+For generic multi-Vt families:
 
-Document model-generation inputs and decisions.
+- APM022 `lvt`/`hvt` are controlled APM-derived variants around the `svt` basis and must be documented as threshold-isolated generic variants, not foundry options.
+- APM016F `lvt`/`hvt` are workfunction-dominant generic variants around the `svt` basis. Start with gate-workfunction adjustment and permit only evidence-backed minimal secondary parameter changes when terminal behavior requires them.
 
-## Characterization
+Write behavioral targets before tuning parameters. Keep published facts separate from APM engineering choices. Never claim foundry or silicon correlation for APM-authored families.
 
-Canonical gm/gds are terminal finite-difference quantities. Internal simulator OP names are optional validation oracles only.
+## Characterization policy
 
-Canonical capacitance is derived from terminal AC admittance/Y data. Do not make internal `cgg/cgd/cgs` fields the stable API.
+Canonical gm/gds come from terminal finite differences. Internal simulator OP quantities are validation oracles only.
 
-Store enough raw data and metadata that derived metrics can be recalculated later.
+Canonical capacitance comes from the terminal AC Y matrix. Preserve all 16 complex entries and the measurement convention.
 
-Cross-process comparisons should prefer normalized coordinates such as `L/Lmin`, `VDS/VDD`, and `gm/Id` rather than identical absolute geometry/bias.
+Preserve raw signed simulator quantities separately from canonical positive-magnitude N/P comparison quantities.
 
-Preserve raw signed simulator terminal quantities. For cross-technology N/P comparison, use an explicitly documented effective-voltage/current-magnitude convention so PMOS/PFET metrics are not accidentally sign-inverted. Do not silently mix raw signed values with positive-magnitude comparison metrics.
+Required v2 characterization extends v1 with family-oriented metrics including Ion, Ioff, log10(Ion/Ioff), and subthreshold swing. Do not freeze a dubious SS extraction window merely to satisfy implementation progress; use native-family data to select and document a robust method before release.
 
-For Y-matrix extraction, document terminal order, excitation convention, current sign convention, reference node, frequency, and conversion from Y to reported capacitances. Raw complex Y data is authoritative.
+Use comparison modes appropriate to the question:
 
-## Variation
+- cross-technology anchor comparison;
+- equal-bias threshold-family comparison;
+- equal-inversion comparison, typically around documented gm/Id;
+- native-profile gate-stack comparison;
+- explicitly documented common-overlap-bias gate-stack comparison.
 
-Keep APM benchmark variation and PDK-native variation distinct in code, metadata, plots, and documentation.
+Do not compare unrelated voltage/gate-stack families as though a normalized VDD view alone removes all physical differences.
 
-APM benchmark variation must use observable intents (`vth_shift`, `drive_shift`) rather than pretending raw compact-model knobs are universal physical quantities.
+## Variation policy
 
-For ngspice benchmark MC, generate random samples in Python and run deterministic simulations. Persist seeds and resolved samples.
+Keep APM synthetic benchmark variation and upstream/native variation distinct in code, metadata, plots, and documentation.
 
-Do not make Verilog-A random functions a dependency of benchmark MC.
+APM v2 benchmark terminology is:
 
-Do not finalize benchmark sigma values without empirical characterization of representative kits.
+- **Benchmark Global** — synthetic die-wide/common observable stress;
+- **Benchmark Local** — synthetic instance-local mismatch stress;
+- **Benchmark All** — Global + Local.
 
-Do not invent undocumented statistical correlation. Benchmark process variables, mismatch variables, and R/C variation must have explicit correlation/independence semantics in the benchmark specification.
+These names deliberately avoid claiming that Benchmark Global represents a physically correct foundry process-correlation model.
 
-Spectre benchmark MC may use Spectre's own random sampling and therefore does not need seed-for-seed identity with the ngspice Python sampler in v1.0. The required contract is matching intended distributions, geometry scaling, and correlation semantics; fixed-sample cross-simulator conformance can be added later.
+Canonical MOS benchmark intents remain observable `vth_shift` and `drive_shift`, not universal raw compact-model parameters.
 
-## Licensing
+For v2 multi-family technologies, a technology/polarity benchmark Global latent stress is shared across its electrical families and each family uses its own calibrated raw adapter. This is a common comparison stress, not a claim of real full family-to-family correlation.
 
-License correctness is a release gate, not cleanup work.
+Do not invent numeric partial-correlation coefficients. Preserve a latent-variable namespace that can be extended later if evidence supports residual family-specific terms.
 
-Before vendoring any third-party model file, verify its exact file-level redistribution terms from authoritative sources.
+Benchmark Local remains per-instance with the explicit synthetic matching law. Upstream/native family-to-family correlation must not be invented when upstream does not provide it.
 
-Never infer that every file inherits a repository root license if model-specific headers or terms may differ.
+Generate ngspice benchmark randomness in Python, persist seeds/latents/resolved samples, and keep replay deterministic.
 
-Do not relicense third-party code/model files.
+## Licensing and provenance
 
-Preserve upstream notices and use SPDX/REUSE-compatible metadata where practical.
+License correctness is a release gate.
 
-If rights are ambiguous, do not ship the file. Find a clearly redistributable alternative or replace it with an independently authored APM asset.
+Before vendoring any new third-party family/model file:
+
+1. identify authoritative upstream source;
+2. pin exact revision;
+3. inspect exact file-level header and applicable license/redistribution terms;
+4. record source URL/revision/path/hash/modifications;
+5. preserve notices and license text;
+6. only then ship the asset.
+
+Do not infer file rights from a repository root license when model-specific terms may differ. Do not relicense third-party assets. If rights remain ambiguous, do not ship the file.
+
+Prefer preserving the already validated v1 upstream revisions when the required v2 family assets exist in the same pinned snapshots; avoid revision churn without a technical or licensing reason.
 
 Never commit proprietary PDK content, credentials, tokens, passwords, or user secrets.
 
-## Tests
+## Spectre boundary
 
-Prefer property/regression tests over fragile exact numerical snapshots.
+ngspice remains the validated reference backend.
 
-Do not weaken or delete a legitimate test simply to make CI pass.
+Spectre support remains model-only **experimental/unverified** unless a real Spectre environment actually validates it. Do not claim real Spectre parsing or numerical validation from static inspection.
 
-When a model/upstream revision changes results, investigate and document the cause.
+Virtuoso integration remains user-managed. Do not add SKILL, CDF, symbols, OA libraries, ADE/Maestro state, OCEAN, or Virtuoso automation in v2.
 
-Use exact snapshots only as secondary review signals unless a value is truly part of the public contract.
+## Scope exclusions
 
-## Implementation style
+Unless `GOAL.md` explicitly changes them, v2 still excludes:
 
-Keep the repository small and explicit.
+- layout/PCells/DRC/LVS/PEX;
+- standard cells;
+- RF-specific model/view support;
+- MOS noise as a required cross-family characterization metric;
+- APM016F thick-oxide/high-voltage I/O family;
+- native Windows/macOS reference support;
+- Virtuoso automation.
 
-Avoid speculative plugin systems, generic factories, framework layers, and premature abstraction.
+Do not expand scope because an upstream PDK happens to contain additional devices.
 
-When adding a new abstraction, point to at least two concrete use cases that require it.
+## Tests and evidence
 
-Prefer straightforward Python, TOML, SPICE/Spectre model files, and small shell helpers.
+Prefer property/regression tests over fragile exact snapshots.
 
-Generated OSDI binaries and large simulation results should normally remain untracked.
+Do not weaken legitimate tests to match broken behavior.
 
-## Autonomy
+Every validated milestone/gate must have compact auditable evidence under `validation/evidence/` or another explicitly documented v2 evidence path. Missing evidence is not pass.
 
-High autonomy is authorized for ordinary in-scope work: research, local dependency installation inside the designated WSL environment, implementation, testing, refactoring, debugging, documentation, commits, and pushes to this repository.
+A release-oriented command, preferably `apm validate --release`, must fail closed if any required v2 automatic gate is failed, skipped, unimplemented, or evidence-free.
 
-Stop/escalate only for a genuine blocker such as unresolved redistribution rights, unavailable required credentials, or an action that would modify unrelated user data.
+The existing v1 release validator may intentionally fail immediately after the v2 specification commit; that is expected until Codex migrates it. Do not weaken v2 gates merely to restore old v1 green status.
 
-Do not change repository visibility or security-sensitive repository/account settings as part of autonomous implementation.
+## Git and autonomy
+
+High autonomy is authorized for in-scope research, local dependency installation/repair, implementation, refactoring, simulations, tests, documentation, commits, and pushes.
+
+Keep coherent milestone commits. Do not force-push. Do not alter repository visibility/security settings.
+
+Stop/escalate only for a genuine blocker such as unresolved redistribution rights, unavailable required credentials, or a real contradiction in the normative v2 contract.
 
 ## Completion
 
-Do not declare v1.0 complete before every `GOAL.md` release gate is actually satisfied and the required release evidence is present.
+Do not tag v2.0.0 until:
 
-At release, all release-critical placeholder/TBD values in model provenance, benchmark variation/passive specifications, and release metadata must be resolved or explicitly removed because the corresponding feature was legitimately excluded by `GOAL.md`. The package/release version and release notes must identify the release as v1.0.0. Do not allow a validator to pass while the package still reports a development placeholder version such as `0.0.0`.
+- all v2 release gates pass with current evidence;
+- obsolete v1 canonical SSOT/compatibility artifacts forbidden by the v2 contract are removed from current main;
+- all release-critical research-dependent values are frozen with evidence or the corresponding feature is legitimately removed from scope;
+- package/runtime/release metadata consistently identify 2.0.0;
+- a fresh clone on the required WSL2/EL9 reference environment builds/validates from source;
+- README/release claims match evidence;
+- Spectre remains correctly bounded as experimental/unverified unless genuinely validated.
