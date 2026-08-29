@@ -30,14 +30,23 @@ The agent must inspect the actual system first (`/etc/os-release`, architecture,
 
 ngspice 47 is the intended v1.0 reference release. Linux upstream distribution does not need to provide a prebuilt current package; a reproducible source build is acceptable and expected if the distro package is absent, stale, or lacks the required OSDI capability.
 
+Authoritative ngspice OSDI documentation states that an OSDI-capable build should explicitly include:
+
+- `--enable-predictor`
+- `--enable-osdi`
+
 If building ngspice from source:
 
 - use an authoritative ngspice 47 source release;
 - determine and document the build prerequisites actually needed on AlmaLinux 9;
-- configure/build with the options required for the selected OSDI flow;
+- use the required OSDI/predictor configuration explicitly rather than assuming distro/default flags;
 - prefer a user-local or project-controlled prefix when practical rather than destructively replacing unrelated system software;
 - record source release/hash, configure flags, compiler versions, prefix, and `ngspice --version` output in M0 evidence;
 - prove OSDI by loading and simulating a real OSDI compact model, not only by checking build flags or shared-library presence.
+
+For hermetic APM runs, prefer batch execution that does not depend on user startup state. In particular, use ngspice's no-user-startup behavior where appropriate (for example the `-n` command-line option) and do not require `~/.spiceinit`.
+
+For model loading, prefer netlist-local `pre_osdi` where practical. Upstream ngspice documents that a relative path passed to `pre_osdi` is resolved relative to the netlist, which is useful for self-contained run directories.
 
 Do not silently downgrade to an older ngspice merely because it is easier to install.
 
