@@ -1,7 +1,11 @@
 from __future__ import annotations
 
-import tomllib
 from pathlib import Path
+
+try:
+    import tomllib
+except ModuleNotFoundError:  # Python 3.9/3.10 on EL9-compatible environments
+    import tomli as tomllib
 
 from apm.cli import TECHNOLOGIES, build_parser
 
@@ -100,6 +104,7 @@ def test_release_contract_requires_final_version_and_resolved_metadata() -> None
     assert release["target_version"] == "1.0.0"
     assert release["package_version_must_match_target"] is True
     assert release["release_notes_required"] is True
+    assert release["release_notes_path"] == "CHANGELOG.md"
     assert release["unresolved_release_placeholders_forbidden"] is True
     assert "TBD" in release["forbidden_release_placeholder_tokens"]
     assert "not_started" in release["forbidden_release_placeholder_tokens"]
