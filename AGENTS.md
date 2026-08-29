@@ -16,6 +16,8 @@ Do **not** web-search for a pre-existing software product named "APM" in order t
 
 The repository itself and `GOAL.md` are authoritative for the meaning and scope of APM.
 
+Work in this existing repository. Do not create, migrate to, or substitute another repository or fork as the project authority. Do not change repository visibility. Tag/release v1.0.0 only after the `GOAL.md` release gates are actually satisfied.
+
 ## Mission
 
 Implement `GOAL.md` faithfully and finish APM v1.0.0. Optimize for correctness, reproducibility, licensing clarity, and a small maintainable architecture.
@@ -35,6 +37,8 @@ Keep project/build/run data on the Linux filesystem, not `/mnt/c`.
 Automated tests and characterization must be headless.
 
 Do not depend on xschem GUI state, `~/.spiceinit`, or other mutable user-global configuration.
+
+A container or CI job running EL9 may supplement testing, but it does **not** replace the v1.0 clean-clone validation on the designated WSL2 + EL9 environment.
 
 ## Simulator architecture
 
@@ -60,6 +64,8 @@ Planar public sizing: `w`, `l`.
 
 FinFET public sizing: `l`, `nfin`.
 
+Use explicit public names for model wrappers/devices; do not expose ambiguous upstream names as the APM user contract.
+
 ## APM022 and APM016F independence
 
 APM022 and the APM016F parameter deck must be independently authored.
@@ -82,6 +88,10 @@ Store enough raw data and metadata that derived metrics can be recalculated late
 
 Cross-process comparisons should prefer normalized coordinates such as `L/Lmin`, `VDS/VDD`, and `gm/Id` rather than identical absolute geometry/bias.
 
+Preserve raw signed simulator terminal quantities. For cross-technology N/P comparison, use an explicitly documented effective-voltage/current-magnitude convention so PMOS/PFET metrics are not accidentally sign-inverted. Do not silently mix raw signed values with positive-magnitude comparison metrics.
+
+For Y-matrix extraction, document terminal order, excitation convention, current sign convention, reference node, frequency, and conversion from Y to reported capacitances. Raw complex Y data is authoritative.
+
 ## Variation
 
 Keep APM benchmark variation and PDK-native variation distinct in code, metadata, plots, and documentation.
@@ -93,6 +103,10 @@ For ngspice benchmark MC, generate random samples in Python and run deterministi
 Do not make Verilog-A random functions a dependency of benchmark MC.
 
 Do not finalize benchmark sigma values without empirical characterization of representative kits.
+
+Do not invent undocumented statistical correlation. Benchmark process variables, mismatch variables, and R/C variation must have explicit correlation/independence semantics in the benchmark specification.
+
+Spectre benchmark MC may use Spectre's own random sampling and therefore does not need seed-for-seed identity with the ngspice Python sampler in v1.0. The required contract is matching intended distributions, geometry scaling, and correlation semantics; fixed-sample cross-simulator conformance can be added later.
 
 ## Licensing
 
@@ -134,9 +148,11 @@ Generated OSDI binaries and large simulation results should normally remain untr
 
 ## Autonomy
 
-High autonomy is authorized for ordinary in-scope work: research, local dependency installation inside the designated WSL environment, implementation, testing, refactoring, debugging, documentation, and commits.
+High autonomy is authorized for ordinary in-scope work: research, local dependency installation inside the designated WSL environment, implementation, testing, refactoring, debugging, documentation, commits, and pushes to this repository.
 
 Stop/escalate only for a genuine blocker such as unresolved redistribution rights, unavailable required credentials, or an action that would modify unrelated user data.
+
+Do not change repository visibility or security-sensitive repository/account settings as part of autonomous implementation.
 
 ## Completion
 
