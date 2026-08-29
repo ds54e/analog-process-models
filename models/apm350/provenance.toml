@@ -1,0 +1,23 @@
+id = "apm350"
+technology_class = "0.35um-class"
+architecture = "planar_bulk"
+compact_model = "bsim3"
+model_origin = "generic_reference"
+model_lmin = "~0.4um; verify from selected source"
+foundry_correlated = false
+
+[source]
+status = "candidate-unvendored"
+project = "SCN4M_SUBM-class open generic model"
+preferred_repository = "silicon-vlsi-org/eda-technology"
+url = "https://github.com/silicon-vlsi-org/eda-technology"
+revision = "TBD"
+license = "TBD-file-level-verification-required"
+
+[redistribution]
+ship_in_repo = true
+condition = "Only after exact imported files and redistribution terms are verified"
+
+[validation]
+ngspice = "not_started"
+spectre = "experimental_unverified"
