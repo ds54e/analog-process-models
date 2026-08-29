@@ -20,7 +20,12 @@ Candidate: open generic SCN4M_SUBM-class model. Exact source files and license m
 
 ### APM130
 
-Source: IHP SG13G2 Open PDK simulation subset. Preserve Apache-2.0 and any model-specific upstream terms exactly.
+Pinned source: IHP SG13G2 Open PDK commit
+`331c00484213b13414777eec1336ef5c29b969bd`. The vendored subset contains only the
+low-voltage MOS ngspice cards (Apache-2.0) and the PSP 103.8.2/JUNCAP 200.6.2
+Verilog-A source package (`LicenseRef-Si2-PSP-103.8.2`). The model cards identify
+PSP 103.6; they have been tested with the newer backward-compatible engine. No
+vendored file was modified. Exact file hashes are in `models/apm130/provenance.toml`.
 
 ### APM045
 
@@ -32,7 +37,12 @@ APM-authored BSIM4 parameter deck. Public literature and compact-model specifica
 
 ### APM016F
 
-APM-authored parameter deck using a pinned redistributable BSIM-CMG implementation. Preserve the exact Berkeley/upstream license text of the chosen source revision. Official PTM-MG16 may be used only as a local non-redistributed sanity/comparison oracle and is not numeric source material for the deck.
+APM-authored parameter deck using UC Berkeley BSIM-CMG 112.1.0, released
+2026-04-28 and distributed under ECL-2.0. The exact upstream `LICENSE.txt`,
+`NOTICE.txt`, and Verilog-A engine sources are preserved without modification;
+the upstream archive SHA-256 is recorded in `models/apm016f/provenance.toml`.
+Official PTM-MG16 may be used only as a local, non-redistributed sanity/comparison
+oracle and is not numeric source material for the deck.
 
 ## Release requirement
 

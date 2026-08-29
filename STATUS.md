@@ -9,27 +9,27 @@ It is **not** evidence by itself. Validation claims must point to committed summ
 - Project: Analog Process Models (APM)
 - Repository: https://github.com/ds54e/analog-process-models
 - Target: v1.0.0
-- Current state: `NOT_STARTED`
-- Current milestone: `M0 Runtime qualification`
+- Current state: `IN_PROGRESS`
+- Current milestone: `M1 APM130`
 - Release eligible: `NO`
 
 ## Reported initial environment
 
-The following is user-reported starting context and has **not yet been validated by M0**:
+The following was the user-reported starting context before M0:
 
 - Codex CLI is running directly inside WSL2 on AlmaLinux.
 - ngspice is not currently installed.
 - OpenVAF-ReLoaded is not currently assumed to be installed.
 - PSP103 / BSIM-CMG OSDI build artifacts are not currently assumed to exist.
 
-See `ENVIRONMENT.md`. M0 must verify the actual environment and bootstrap the reproducible reference toolchain rather than treating missing tools as a project blocker.
+See `ENVIRONMENT.md`. M0 verified the host and bootstrapped the project-local reference toolchain without root access.
 
 ## Milestones
 
 | Milestone | Status | Evidence / notes |
 | --- | --- | --- |
-| M0 Runtime qualification | NOT_STARTED | Bootstrap and validate toolchain from reported bare AlmaLinux environment. |
-| M1 APM130 | NOT_STARTED | — |
+| M0 Runtime qualification | VALIDATED | `validation/evidence/m0-runtime.md`: reproducible project-local bootstrap and real native BSIM3/BSIM4, PSP103 OSDI, and BSIM-CMG OSDI simulations passed. |
+| M1 APM130 | IN_PROGRESS | Exact IHP low-voltage MOS and PSP source subset vendored with audited hashes/licenses; public wrappers and full characterization remain. |
 | M2 APM045 | NOT_STARTED | — |
 | M3 APM016F | NOT_STARTED | — |
 | M4 Benchmark R/C + variation | NOT_STARTED | — |
@@ -51,26 +51,29 @@ Do not mark a milestone `VALIDATED` when its required real-tool checks have not 
 
 ## Validated reference environment
 
-Not yet established.
+Reference environment and simulator runtime qualified on 2026-08-29 UTC:
 
 Record actual validated values when M0 runs:
 
-- WSL version / host context:
-- EL9 distribution and version:
-- architecture:
-- repository path/filesystem:
-- Python version:
-- ngspice version/build options/prefix:
-- OSDI load mechanism:
-- OpenVAF-ReLoaded version/revision:
-- PSP103 source/revision:
-- BSIM-CMG source/revision:
+- WSL version / host context: WSL2 kernel `6.18.33.2-microsoft-standard-WSL2`
+- EL9 distribution and version: AlmaLinux 9.7
+- architecture: x86_64
+- repository path/filesystem: `/home/admin/src/analog-process-models` on Linux ext4 (`/dev/sdd`), not `/mnt/c`
+- Python version: 3.9.25
+- ngspice version/build options/prefix: ngspice 47; `--enable-predictor --enable-osdi --with-x=no`; project-local `.apm/toolchain/ngspice-47`
+- OSDI load mechanism: ngspice `pre_osdi` inside a headless `.control` block
+- OpenVAF-ReLoaded version/revision: tag `v24.0.2mob`, commit `fdf2522b70f42793f64b1c72f0195c96dea0cc19`, source-built against AlmaLinux LLVM 20.1.8
+- PSP103 source/revision: PSP 103.8.2 / JUNCAP 200.6.2 from IHP commit `331c00484213b13414777eec1336ef5c29b969bd`; IHP parameter cards identify PSP 103.6
+- BSIM-CMG source/revision: UC Berkeley BSIM-CMG 112.1.0, upstream archive SHA-256 `9c70a7c9fcfafe66fb1582655bbfd36714b90ecba137a9dd83c76b3a0bd9e50a`
 
 ## Release-gate summary
 
 The normative gate definition is `validation/release_gates.toml`.
 
-Current summary: **no v1.0 release gates have been validated yet.**
+Validated gates: `runtime.wsl2_el9`, `runtime.ngspice_headless`,
+`runtime.psp103_osdi`, and `runtime.bsimcmg_osdi`.
+
+All remaining gates are unvalidated.
 
 Do not convert absence of evidence into PASS.
 
@@ -88,7 +91,8 @@ A blocker entry should state:
 
 ## Material decisions made during implementation
 
-None yet.
+- The official OpenVAF `v24.0.2mob` Linux binary requires glibc newer than EL9 and an unavailable `libLLVM.so.18.1`. The reproducible bootstrap therefore builds the pinned `openvaf-driver` source package against project-local AlmaLinux LLVM 20.1.8. This preserves the EL9 reference platform.
+- Current IHP upstream combines PSP 103.6 parameter cards with PSP 103.8.2 source. APM pins both exact assets, records the distinction, and has verified their nominal QS combination in real ngspice 47. No card values were translated or changed.
 
 Only record decisions that materially affect public API, model provenance/fidelity, characterization semantics, variation semantics, supported runtime, or release claims. Do not use this section as a verbose work diary.
 
@@ -96,7 +100,7 @@ When a material decision intentionally departs from `PROJECT_CONTEXT.md`, record
 
 ## Evidence index
 
-No implementation evidence yet. See `validation/evidence/README.md` for the evidence format.
+- `validation/evidence/m0-runtime.md` — reference host/toolchain and four real simulator runtime smokes.
 
 ## Final-review fields
 

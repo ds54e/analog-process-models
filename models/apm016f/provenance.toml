@@ -7,12 +7,33 @@ foundry_correlated = false
 ptm_mg_derived = false
 
 [source]
-status = "apm-authored-params-with-pinned-bsim-cmg-engine"
+status = "apm-authored-params-with-vendored-pinned-bsim-cmg-engine"
 parameter_project = "Analog Process Models"
 parameter_license = "Apache-2.0"
 engine_project = "UC Berkeley BSIM-CMG"
-engine_revision = "TBD"
-engine_license = "Preserve exact upstream license/agreement text for pinned source"
+engine_url = "https://www.bsim.berkeley.edu/wp-content/uploads/BSIMCMG/BSIM-CMG_112.1.0_04282026.tar.gz"
+engine_revision = "112.1.0, released 2026-04-28"
+engine_archive_sha256 = "9c70a7c9fcfafe66fb1582655bbfd36714b90ecba137a9dd83c76b3a0bd9e50a"
+engine_license = "ECL-2.0"
+retrieved_utc = "2026-08-29"
+
+[source.imported_files]
+"vendor/bsim-cmg-112.1.0/LICENSE.txt" = "4d202b27df0df53f021ad2ba5cb2d0e7e62a9025e6a9786952c67be7111edea8"
+"vendor/bsim-cmg-112.1.0/NOTICE.txt" = "c699eed1e04ff629348a5a6747405afacef35bfb5dab36ea834d31c2ca74209c"
+"vendor/bsim-cmg-112.1.0/code/bsimcmg.va" = "adde661d1b0473d22a7eeab9e68a223c140c4417dd31253ee2499896f581f578"
+"vendor/bsim-cmg-112.1.0/code/bsimcmg_body.include" = "442e58991a29c646171683648292cbd7edc55b8ab55c2346dc9486d3f7b68056"
+"vendor/bsim-cmg-112.1.0/code/bsimcmg_checking.include" = "1a12987819dc3c8be1f9f2d0edb7cdd5ed9a4c154a94acd5831062eeebb0ac44"
+"vendor/bsim-cmg-112.1.0/code/bsimcmg_initialization.include" = "d89a73ae8dbe79e4b0af3f4b61bb4ae24539bc5c90a8c5c4cbe713dfd6d05371"
+"vendor/bsim-cmg-112.1.0/code/bsimcmg_macros.include" = "434eeb89a141897b09bf26121016427926e3abf38db3e8d9c92d4cbf95f4e050"
+"vendor/bsim-cmg-112.1.0/code/bsimcmg_noise.include" = "46f293eacee1d1d251684ad36d504674f4448787025710a09197b353640a0646"
+"vendor/bsim-cmg-112.1.0/code/bsimcmg_parameters.include" = "4a74b58115eb4fe8ecafe85c5c09033e30f32126f723126a2418829a4e0c7976"
+"vendor/bsim-cmg-112.1.0/code/bsimcmg_variables.include" = "e41da286696b033a5e712117ffbff032913697acaacaffc5e890ec5b939239f7"
+
+[redistribution]
+ship_in_repo = true
+modifications = "none; exact upstream LICENSE, NOTICE, and code files copied into the vendor path"
+upstream_notices_preserved = true
+generated_osdi_committed = false
 
 [development]
 allowed_inputs = [
@@ -39,5 +60,5 @@ benchmark = true
 native = false
 
 [validation]
-ngspice = "not_started"
+ngspice = "M0 BSIM-CMG 112.1.0 engine OSDI smoke passed with synthetic runtime parameters; APM016F parameter-deck validation pending"
 spectre = "experimental_unverified"

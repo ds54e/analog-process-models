@@ -21,6 +21,7 @@ runs/
 results/
 work/
 .cache/
+.apm/
 
 # Local model-development/oracle data
 external/

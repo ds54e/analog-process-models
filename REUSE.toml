@@ -28,7 +28,27 @@ precedence = "aggregate"
 SPDX-FileCopyrightText = "APM contributors"
 SPDX-License-Identifier = "Apache-2.0"
 
-# Vendored model/source files under models/** are intentionally NOT covered by this
-# aggregate annotation except for the explicitly listed APM-authored provenance.toml
-# files above. Add file-level or narrowly scoped directory annotations only after exact
-# upstream license/provenance audit. Do not use this file to overwrite upstream licensing.
+[[annotations]]
+path = ["models/apm130/vendor/psp103/**"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = [
+  "NXP Semiconductors",
+  "Delft University of Technology",
+  "Commissariat a l'energie atomique et aux energies alternatives (CEA)"
+]
+SPDX-License-Identifier = "LicenseRef-Si2-PSP-103.8.2"
+
+[[annotations]]
+path = ["models/apm130/vendor/ihp-sg13g2-models/**"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2023 IHP PDK Authors"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = ["models/apm016f/vendor/bsim-cmg-112.1.0/**"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 University of California"
+SPDX-License-Identifier = "ECL-2.0"
+
+# Other future vendored model/source files under models/** remain intentionally
+# uncovered until their exact file-level terms and provenance have been audited.

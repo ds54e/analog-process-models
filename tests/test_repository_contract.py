@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 from pathlib import Path
 
 try:
@@ -8,7 +9,8 @@ except ModuleNotFoundError:  # Python 3.9/3.10 on EL9-compatible environments
     import tomli as tomllib
 
 from apm.cli import TECHNOLOGIES, build_parser
-
+from apm.doctor import _extract_observables
+from apm.model_build import MODEL_SOURCES
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_KITS = ("apm350", "apm130", "apm045", "apm022", "apm016f")
@@ -58,6 +60,33 @@ def test_all_provenance_files_match_kit_identity_and_model_family() -> None:
         assert provenance["id"] == kit
         assert provenance["compact_model"] == compact_model
         assert provenance["validation"]["spectre"] == "experimental_unverified"
+
+
+def test_audited_vendor_manifests_cover_exact_files_and_hashes() -> None:
+    for kit in ("apm130", "apm016f"):
+        provenance = load_toml(f"models/{kit}/provenance.toml")
+        expected = provenance["source"]["imported_files"]
+        vendor = ROOT / "models" / kit / "vendor"
+        actual_paths = {
+            str(path.relative_to(ROOT / "models" / kit))
+            for path in vendor.rglob("*")
+            if path.is_file()
+        }
+        assert set(expected) == actual_paths
+        for relative, expected_hash in expected.items():
+            payload = (ROOT / "models" / kit / relative).read_bytes()
+            assert hashlib.sha256(payload).hexdigest() == expected_hash
+
+
+def test_required_osdi_sources_are_self_contained() -> None:
+    assert set(MODEL_SOURCES) == {"psp103", "psp103-nqs", "bsimcmg-112.1.0"}
+    for source in MODEL_SOURCES.values():
+        assert (ROOT / source).is_file()
+
+
+def test_doctor_observable_parser_ignores_unrelated_equals_signs() -> None:
+    output = "TEMP = 27 and TNOM = 27\ni(vd) = -2.5e-4\n@m1[gm] = 4.0e-4\n"
+    assert _extract_observables(output) == {"i(vd)": -2.5e-4, "@m1[gm]": 4.0e-4}
 
 
 def test_apm_authored_scaled_models_are_explicitly_not_ptm_derived() -> None:

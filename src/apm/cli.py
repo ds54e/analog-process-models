@@ -1,7 +1,12 @@
 from __future__ import annotations
 
 import argparse
+import json
+import sys
 
+from .doctor import run_doctor
+from .model_build import build_models
+from .toolchain import ToolchainError
 
 TECHNOLOGIES = ("apm350", "apm130", "apm045", "apm022", "apm016f")
 
@@ -39,6 +44,18 @@ def build_parser() -> argparse.ArgumentParser:
 def main() -> int:
     parser = build_parser()
     args = parser.parse_args()
+    try:
+        if args.command == "build-models":
+            result = build_models()
+            print(json.dumps(result, indent=2, sort_keys=True))
+            return 0
+        if args.command == "doctor":
+            result = run_doctor()
+            print(json.dumps(result, indent=2, sort_keys=True))
+            return 0
+    except (FileNotFoundError, RuntimeError, ToolchainError) as error:
+        print(f"apm {args.command}: {error}", file=sys.stderr)
+        return 1
     mode = " --release" if args.command == "validate" and args.release else ""
     parser.error(
         f"'{args.command}{mode}' is part of the v1.0 contract but is not implemented yet; "
