@@ -1,0 +1,25 @@
+schema = "apm.release-review.v1"
+status = "complete"
+reviewed_utc = "2026-08-29T18:34:39Z"
+reviewer = "APM implementation agent"
+scope = [
+  "public installation and release behavior",
+  "all-kit model origin and fidelity boundaries",
+  "foundry, silicon, manufacturability, and signoff wording",
+  "benchmark-versus-native variation wording",
+  "Spectre structural-only evidence boundary",
+  "third-party redistribution summaries",
+]
+spectre_real_tool_run = false
+foundry_or_silicon_correlation_claimed = false
+repository_visibility_changed = false
+unresolved_claim_findings = []
+conclusion = "Public claims match the M0-M9 evidence and current M10 implementation. Spectre remains model-only experimental/unverified; APM is not a manufacturable PDK; generic APM-authored decks make no foundry or silicon-correlation claim."
+
+[reviewed_files]
+"README.md" = "7ae987b0e71b1b2d61bad105ba19555e3cfa3cbbf5fdb5e584fbf5be9ecd3470"
+"CHANGELOG.md" = "6df9ba2515fca12aef7f8545ff6738d928606607eb3528b2adc1ecbb033d4f8b"
+"STATUS.md" = "117d6a78b770c26ac2e8ace759897b67a4e44d7364d1c1d9170f9155afe27298"
+"THIRD_PARTY.md" = "69d2512583a4cb928f93540273ed877cc1293a60cc4db0be1d7f67ac85342fb7"
+"docs/spectre.md" = "46ffbe0cde6d6d359a4551a79a02b3238e925bd1e82daac15954f6ad03a0bf0d"
+"docs/release-validation.md" = "b3f5f81a735102682a76ab421f46ea0b8f8f3484aeccf4e892242d9b8f537f53"

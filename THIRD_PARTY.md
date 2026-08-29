@@ -12,7 +12,7 @@ APM v1.0 is intended to be self-contained, but it must not redistribute model as
 6. Official PTM/PTM-MG model cards are not to be redistributed in v1.0 unless a future authoritative redistribution review explicitly changes that packaging decision.
 7. **Separately from licensing**, APM022 and the APM016F parameter deck must remain independently authored as required by `GOAL.md` and `AGENTS.md`. Even if PTM/PTM-MG redistribution rights were later clarified, their numeric model-card parameters are not valid source material for those APM-authored v1.0 decks. PTM/PTM-MG may be used only as local, non-redistributed sanity/comparison oracles.
 
-## Planned provenance
+## V1.0 provenance
 
 ### APM350
 
@@ -41,6 +41,13 @@ values and notices, changes only the OpenVAF model-type name `psp103va` to the
 native Spectre name `psp103`, and fixes wrapper-only inputs. Its generator,
 transformation record, source hashes, and output hash are in
 `models/apm130/provenance.toml` and `docs/spectre.md`.
+
+The PSP/JUNCAP implementation is developed by NXP Semiconductors, Delft
+University of Technology, and CEA. APM acknowledges those developers as
+required by the preserved Si2 in-code terms; the upstream copyright,
+disclaimer, conditions, changelog, README, and release notes remain in the
+vendored source package, with the applicable terms reproduced under
+`LICENSES/LicenseRef-Si2-PSP-103.8.2.txt`.
 
 ### APM045
 
@@ -71,4 +78,8 @@ oracle and is not numeric source material for the deck.
 
 ## Release requirement
 
-`provenance.toml` for every kit must be complete before v1.0.0. Every vendored third-party asset must be covered by exact provenance and applicable license/notice handling; repository-level license assumptions are insufficient.
+`provenance.toml` for every v1.0 kit is complete. The release validator hashes
+every declared imported file, requires the vendored filesystem to match that
+manifest exactly, checks retained license/notice handling, and runs the
+repository-wide REUSE/SPDX audit. Repository-level license assumptions are not
+used as a substitute for the recorded file-level review.

@@ -19,6 +19,7 @@ from .compare import ComparisonError, compare_technologies, validate_all_charact
 from .doctor import run_doctor
 from .model_build import build_models
 from .native_variation import NativeVariationError, validate_apm130_native
+from .release_validate import ReleaseValidationError, validate_release, validate_repository
 from .spectre_validate import SpectreStructureError, validate_spectre
 from .toolchain import ToolchainError
 
@@ -51,6 +52,11 @@ def build_parser() -> argparse.ArgumentParser:
             "Evaluate the v1.0 release-gate contract; required unimplemented, skipped, "
             "or failed automatically-checkable gates must cause a non-zero exit status"
         ),
+    )
+    p_validate.add_argument(
+        "--output",
+        type=Path,
+        help="Validation evidence directory (default: a new UTC-stamped directory under .apm)",
     )
 
     p_compare = sub.add_parser("compare", help="Compare two technology kits")
@@ -116,6 +122,22 @@ def main() -> int:
             result = run_doctor()
             print(json.dumps(result, indent=2, sort_keys=True))
             return 0
+        if args.command == "validate":
+            result = (
+                validate_release(args.output) if args.release else validate_repository(args.output)
+            )
+            print(
+                json.dumps(
+                    {
+                        "status": result["status"],
+                        "output_directory": result["output_directory"],
+                        "report_path": result["report_path"],
+                    },
+                    indent=2,
+                    sort_keys=True,
+                )
+            )
+            return 0
         if args.command == "characterize":
             result = characterize(args.technology, args.output)
             print(json.dumps(result, indent=2, sort_keys=True))
@@ -143,9 +165,7 @@ def main() -> int:
                         "status": result["status"],
                         "output_directory": result["output_directory"],
                         "report_path": result["report_path"],
-                        "selected_upstream_profiles": result[
-                            "selected_upstream_profiles"
-                        ],
+                        "selected_upstream_profiles": result["selected_upstream_profiles"],
                         "checks": result["checks"],
                     },
                     indent=2,
@@ -160,9 +180,7 @@ def main() -> int:
                     {
                         "status": result["status"],
                         "backend_status": result["backend_status"],
-                        "real_tool_validation_performed": result[
-                            "real_tool_validation_performed"
-                        ],
+                        "real_tool_validation_performed": result["real_tool_validation_performed"],
                         "output_directory": result["output_directory"],
                         "report_path": result["report_path"],
                         "checks": result["checks"],
@@ -236,17 +254,14 @@ def main() -> int:
         json.JSONDecodeError,
         NativeVariationError,
         OSError,
+        ReleaseValidationError,
         RuntimeError,
         SpectreStructureError,
         ToolchainError,
     ) as error:
         print(f"apm {args.command}: {error}", file=sys.stderr)
         return 1
-    mode = " --release" if args.command == "validate" and args.release else ""
-    parser.error(
-        f"'{args.command}{mode}' is part of the v1.0 contract but is not implemented yet; "
-        "see GOAL.md and validation/release_gates.toml"
-    )
+    parser.error(f"unhandled command: {args.command}")
     return 2
 
 
