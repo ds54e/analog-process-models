@@ -54,5 +54,16 @@ precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 University of California"
 SPDX-License-Identifier = "ECL-2.0"
 
+[[annotations]]
+path = ["models/apm045/vendor/freepdk45/**"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = [
+  "2007 W. Rhett Davis, Paul Franzon, Michael Bucher, Sunil Basavarajaiah, North Carolina State University",
+  "2008 W. Rhett Davis, Michael Bucher, Sunil Basavarajaiah, North Carolina State University",
+  "2008 James Stine, Ivan Castellanos, Oklahoma State University",
+  "2011 W. Rhett Davis, Harun Demircioglu, North Carolina State University"
+]
+SPDX-License-Identifier = "Apache-2.0"
+
 # Other future vendored model/source files under models/** remain intentionally
 # uncovered until their exact file-level terms and provenance have been audited.

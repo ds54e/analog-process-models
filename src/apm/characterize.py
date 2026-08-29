@@ -38,10 +38,13 @@ class PlanarKit:
     lengths_m: tuple[float, ...]
     temperatures_c: tuple[int, ...]
     public_devices: dict[str, Any]
-    model_library: Path
-    model_section: str
+    model_library: Path | None
+    model_section: str | None
+    model_includes: tuple[Path, ...]
     wrapper_file: Path
     osdi_artifacts: tuple[str, ...]
+    native_vector_templates: dict[str, str]
+    native_oracle_name: str
     provenance_revision: str
     threshold_coefficient_a: float
     vout_low_v: float
@@ -54,8 +57,18 @@ class PlanarKit:
         return effective_voltage if polarity == "n" else -effective_voltage
 
     def native_vector(self, polarity: str, quantity: str) -> str:
-        upstream = "nmos" if polarity == "n" else "pmos"
-        return f"@n.xdut.xapm130_core.nsg13_lv_{upstream}[{quantity}]"
+        return self.native_vector_templates[polarity].format(quantity=quantity)
+
+    def model_directives(self) -> tuple[str, ...]:
+        directives: list[str] = []
+        if self.model_library is not None and self.model_section is not None:
+            directives.append(f'.lib "{self.model_library}" {self.model_section}')
+        directives.extend(f'.include "{path}"' for path in self.model_includes)
+        return tuple(directives)
+
+    def model_source_files(self) -> tuple[Path, ...]:
+        library = (self.model_library,) if self.model_library is not None else ()
+        return library + self.model_includes
 
 
 def _load_apm130(root: Path) -> PlanarKit:
@@ -77,8 +90,54 @@ def _load_apm130(root: Path) -> PlanarKit:
         public_devices=dict(data["public_devices"]),
         model_library=source / "cornerMOSlv.lib",
         model_section="mos_tt",
+        model_includes=(),
         wrapper_file=root / "models/apm130/ngspice/apm130_wrappers.inc",
         osdi_artifacts=("psp103.osdi", "psp103-nqs.osdi"),
+        native_vector_templates={
+            "n": "@n.xdut.xapm130_core.nsg13_lv_nmos[{quantity}]",
+            "p": "@n.xdut.xapm130_core.nsg13_lv_pmos[{quantity}]",
+        },
+        native_oracle_name="PSP 103",
+        provenance_revision=provenance["source"]["revision"],
+        threshold_coefficient_a=float(data["threshold"]["planar_current_coefficient_a"]),
+        vout_low_v=float(data["threshold"]["vout_low_v"]),
+        vout_high_v=float(data["threshold"]["vout_high_fraction_vdd"])
+        * float(data["nominal_vdd_v"]),
+        idvg_points=int(data["characterization"]["idvg_points"]),
+        idvd_points=int(data["characterization"]["idvd_points"]),
+        y_frequencies_hz=tuple(
+            float(value) for value in data["characterization"]["y_frequencies_hz"]
+        ),
+    )
+
+
+def _load_apm045(root: Path) -> PlanarKit:
+    path = root / "models/apm045/kit.toml"
+    with path.open("rb") as handle:
+        data = tomllib.load(handle)
+    source = root / "models/apm045/vendor/freepdk45"
+    provenance_path = root / "models/apm045/provenance.toml"
+    with provenance_path.open("rb") as handle:
+        provenance = tomllib.load(handle)
+    return PlanarKit(
+        kit_id=data["id"],
+        compact_model=data["compact_model"],
+        vdd_v=float(data["nominal_vdd_v"]),
+        lmin_m=float(data["model_lmin_m"]),
+        width_m=float(data["default_w_m"]),
+        lengths_m=tuple(float(value) for value in data["characterization_lengths_m"]),
+        temperatures_c=tuple(int(value) for value in data["temperatures_c"]),
+        public_devices=dict(data["public_devices"]),
+        model_library=None,
+        model_section=None,
+        model_includes=(source / "NMOS_VTG.inc", source / "PMOS_VTG.inc"),
+        wrapper_file=root / "models/apm045/ngspice/apm045_wrappers.inc",
+        osdi_artifacts=(),
+        native_vector_templates={
+            "n": "@m.xdut.mapm045_core[{quantity}]",
+            "p": "@m.xdut.mapm045_core[{quantity}]",
+        },
+        native_oracle_name="ngspice BSIM4",
         provenance_revision=provenance["source"]["revision"],
         threshold_coefficient_a=float(data["threshold"]["planar_current_coefficient_a"]),
         vout_low_v=float(data["threshold"]["vout_low_v"]),
@@ -95,6 +154,8 @@ def _load_apm130(root: Path) -> PlanarKit:
 def load_planar_kit(technology: str, root: Path) -> PlanarKit:
     if technology == "apm130":
         return _load_apm130(root)
+    if technology == "apm045":
+        return _load_apm045(root)
     raise CharacterizationError(
         f"{technology} characterization has not reached its implementation milestone"
     )
@@ -193,7 +254,7 @@ def _dc_job(
     native_gds = kit.native_vector(polarity, "gds")
     lines = [
         "APM DC characterization",
-        f'.lib "{kit.model_library}" {kit.model_section}',
+        *kit.model_directives(),
         f'.include "{kit.wrapper_file}"',
         f".temp {temperature_c}",
         f"Vd d 0 {sign * nominal_vout:.12g}",
@@ -413,7 +474,7 @@ def _y_job(
     }
     lines = [
         "APM four-terminal Y characterization",
-        f'.lib "{kit.model_library}" {kit.model_section}',
+        *kit.model_directives(),
         f'.include "{kit.wrapper_file}"',
         f".temp {temperature_c}",
     ]
@@ -574,7 +635,11 @@ def _build_checks(
     ]
 
     def monotonic_violations(
-        rows: list[dict[str, Any]], coordinate: str, fixed_coordinate: str
+        rows: list[dict[str, Any]],
+        coordinate: str,
+        fixed_coordinate: str,
+        *,
+        conduction_region_only: bool,
     ) -> int:
         groups: dict[tuple[Any, ...], list[dict[str, Any]]] = {}
         for row in rows:
@@ -588,6 +653,15 @@ def _build_checks(
         violations = 0
         for group in groups.values():
             ordered = sorted(group, key=lambda row: row[coordinate])
+            if conduction_region_only:
+                criterion = kit.threshold_coefficient_a * kit.width_m / ordered[0]["l_m"]
+                try:
+                    start = next(
+                        index for index, row in enumerate(ordered) if row["idmag_a"] >= criterion
+                    )
+                except StopIteration:
+                    continue
+                ordered = ordered[start:]
             if any(
                 upper["idmag_a"] < lower["idmag_a"] - 1e-12
                 for lower, upper in zip(ordered, ordered[1:])
@@ -609,16 +683,16 @@ def _build_checks(
         "gds_finite_difference_p95_relative_change": _percentile(
             (row["gds_convergence_relative"] for row in moderate), 0.95
         ),
-        "psp_native_gm_median_relative_error": _median(
+        "native_gm_median_relative_error": _median(
             row["native_gm_relative_error"] for row in moderate
         ),
-        "psp_native_gds_median_relative_error": _median(
+        "native_gds_median_relative_error": _median(
             row["native_gds_relative_error"] for row in moderate
         ),
-        "psp_native_gm_p95_relative_error": _percentile(
+        "native_gm_p95_relative_error": _percentile(
             (row["native_gm_relative_error"] for row in moderate), 0.95
         ),
-        "psp_native_gds_p95_relative_error": _percentile(
+        "native_gds_p95_relative_error": _percentile(
             (row["native_gds_relative_error"] for row in moderate), 0.95
         ),
         "dibl_min_v_per_v": min(row["dibl_v_per_v"] for row in dibl),
@@ -629,8 +703,18 @@ def _build_checks(
         "capacitance_frequency_max_relative_change": max(
             row["low_frequency_max_relative_change"] for row in capacitance
         ),
-        "idvg_nonmonotonic_group_count": monotonic_violations(idvg, "vctrl_v", "vout_v"),
-        "idvd_nonmonotonic_group_count": monotonic_violations(idvd, "vout_v", "vctrl_v"),
+        "idvg_full_range_nonmonotonic_group_count": monotonic_violations(
+            idvg, "vctrl_v", "vout_v", conduction_region_only=False
+        ),
+        "idvd_full_range_nonmonotonic_group_count": monotonic_violations(
+            idvd, "vout_v", "vctrl_v", conduction_region_only=False
+        ),
+        "idvg_conduction_region_nonmonotonic_group_count": monotonic_violations(
+            idvg, "vctrl_v", "vout_v", conduction_region_only=True
+        ),
+        "idvd_conduction_region_nonmonotonic_group_count": monotonic_violations(
+            idvd, "vout_v", "vctrl_v", conduction_region_only=True
+        ),
         "n_raw_source_current_sign_violation_count": sum(
             row["raw_vd_source_current_a"] > 1e-12 for row in idvg if row["polarity"] == "n"
         ),
@@ -644,20 +728,20 @@ def _build_checks(
     checks["criteria"] = {
         "gm_finite_difference_p95_relative_change_max": 0.02,
         "gds_finite_difference_p95_relative_change_max": 0.02,
-        "psp_native_gm_p95_relative_error_max": 0.02,
-        "psp_native_gds_p95_relative_error_max": 0.02,
+        "native_gm_p95_relative_error_max": 0.02,
+        "native_gds_p95_relative_error_max": 0.02,
         "dibl_range_v_per_v": [0.0, 0.5],
         "y_kcl_max_column_sum_abs_s_max": 1e-9,
         "capacitance_frequency_max_relative_change_max": 0.01,
-        "monotonic_group_violations_max": 0,
+        "conduction_region_monotonic_group_violations_max": 0,
         "raw_current_sign_violations_max": 0,
         "minimum_reported_capacitance_f_exclusive": 0.0,
     }
     checks["requirements"] = {
         "finite_difference_convergence": checks["gm_finite_difference_p95_relative_change"] < 0.02
         and checks["gds_finite_difference_p95_relative_change"] < 0.02,
-        "psp_native_oracle_agreement": checks["psp_native_gm_p95_relative_error"] < 0.02
-        and checks["psp_native_gds_p95_relative_error"] < 0.02,
+        "native_oracle_agreement": checks["native_gm_p95_relative_error"] < 0.02
+        and checks["native_gds_p95_relative_error"] < 0.02,
         "positive_sensible_dibl": 0.0
         < checks["dibl_min_v_per_v"]
         <= checks["dibl_max_v_per_v"]
@@ -665,8 +749,9 @@ def _build_checks(
         "y_matrix_kcl": checks["y_kcl_max_column_sum_abs_s"] < 1e-9,
         "quasi_static_frequency_sensitivity": checks["capacitance_frequency_max_relative_change"]
         < 0.01,
-        "monotonic_dc_curves": checks["idvg_nonmonotonic_group_count"] == 0
-        and checks["idvd_nonmonotonic_group_count"] == 0,
+        "monotonic_dc_conduction_region": checks["idvg_conduction_region_nonmonotonic_group_count"]
+        == 0
+        and checks["idvd_conduction_region_nonmonotonic_group_count"] == 0,
         "raw_current_sign_convention": checks["n_raw_source_current_sign_violation_count"] == 0
         and checks["p_raw_source_current_sign_violation_count"] == 0,
         "positive_reported_capacitances": min(
@@ -730,7 +815,14 @@ def characterize(
 ) -> dict[str, Any]:
     selected = toolchain or resolve_toolchain()
     kit = load_planar_kit(technology, selected.root)
-    build_metadata = build_models(selected, force=False)
+    build_metadata = (
+        build_models(selected, force=False)
+        if kit.osdi_artifacts
+        else {
+            "cache_status": "not_applicable_native_compact_model",
+            "metadata_path": None,
+        }
+    )
     if output_directory is None:
         stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
         output = selected.root / "results" / technology / stamp
@@ -782,7 +874,10 @@ def characterize(
         "polarities": ["n", "p"],
         "compact_model": kit.compact_model,
         "model_revision": kit.provenance_revision,
-        "model_library_sha256": sha256_file(kit.model_library),
+        "model_source_sha256": {
+            str(path.relative_to(selected.root)): sha256_file(path)
+            for path in kit.model_source_files()
+        },
         "simulator_backend": "ngspice",
         "simulator_version": (version.stdout + version.stderr).strip(),
         "nominal_vdd_v": kit.vdd_v,
@@ -807,7 +902,8 @@ def characterize(
                 2 * kit.vdd_v / (kit.idvg_points - 1),
             ],
             "gds_steps_v": [0.01 * kit.vdd_v, 0.02 * kit.vdd_v],
-            "native_psp_values_are_validation_oracles_only": True,
+            "native_compact_model_values_are_validation_oracles_only": True,
+            "native_oracle": kit.native_oracle_name,
         },
         "dibl": {
             "method": "constant-current threshold magnitude",

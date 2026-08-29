@@ -64,7 +64,7 @@ def test_all_provenance_files_match_kit_identity_and_model_family() -> None:
 
 
 def test_audited_vendor_manifests_cover_exact_files_and_hashes() -> None:
-    for kit in ("apm130", "apm016f"):
+    for kit in ("apm130", "apm045", "apm016f"):
         provenance = load_toml(f"models/{kit}/provenance.toml")
         expected = provenance["source"]["imported_files"]
         vendor = ROOT / "models" / kit / "vendor"
@@ -93,6 +93,21 @@ def test_apm130_public_wrapper_hides_upstream_multiplicity() -> None:
     wrapper = (ROOT / "models/apm130/ngspice/apm130_wrappers.inc").read_text()
     assert ".subckt apm130_nmos d g s b w=1u l=0.13u" in wrapper
     assert ".subckt apm130_pmos d g s b w=1u l=0.13u" in wrapper
+    for forbidden in (" m=", " nf=", " ng="):
+        assert forbidden not in wrapper.lower()
+
+
+def test_apm045_public_wrapper_and_model_basis_are_explicit() -> None:
+    kit = load_toml("models/apm045/kit.toml")
+    provenance = load_toml("models/apm045/provenance.toml")
+    assert kit["nominal_vdd_v"] == 1.0
+    assert kit["model_lmin_m"] == 5.0e-8
+    assert kit["public_devices"]["parameters"] == ["w", "l"]
+    assert provenance["source"]["revision"] == "688ee68ec5301e5fe11ebee5e53c1109d3cfd51d"
+    assert "PTM" in provenance["source"]["upstream_model_origin"]
+    wrapper = (ROOT / "models/apm045/ngspice/apm045_wrappers.inc").read_text()
+    assert ".subckt apm045_nmos d g s b w=1u l=0.05u" in wrapper
+    assert ".subckt apm045_pmos d g s b w=1u l=0.05u" in wrapper
     for forbidden in (" m=", " nf=", " ng="):
         assert forbidden not in wrapper.lower()
 

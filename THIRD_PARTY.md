@@ -29,7 +29,17 @@ vendored file was modified. Exact file hashes are in `models/apm130/provenance.t
 
 ### APM045
 
-Source: open-source-clean FreePDK45 simulation subset. Verify exact imported files and headers before release.
+Pinned source: FreePDK45 1.4 from the open-source-clean
+`Chips4Makers/freepdk45` Git mirror, commit
+`688ee68ec5301e5fe11ebee5e53c1109d3cfd51d`. The exact upstream root README
+states that all files are Apache-2.0 and records that SVRF-licensed files were
+removed. APM ships only the byte-identical nominal VTG NMOS/PMOS BSIM4 cards,
+that README, the Apache-2.0 license, and the model-basis manual. Exact hashes
+are in `models/apm045/provenance.toml`.
+
+The model cards state that they are customized PTM-derived 45 nm cards. That
+ancestry is disclosed for this deliberately upstream-derived predictive kit;
+the values are not source material for the independently authored APM022 deck.
 
 ### APM022
 

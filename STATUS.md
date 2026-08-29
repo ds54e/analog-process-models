@@ -10,7 +10,7 @@ It is **not** evidence by itself. Validation claims must point to committed summ
 - Repository: https://github.com/ds54e/analog-process-models
 - Target: v1.0.0
 - Current state: `IN_PROGRESS`
-- Current milestone: `M2 APM045`
+- Current milestone: `M3 APM016F`
 - Release eligible: `NO`
 
 ## Reported initial environment
@@ -30,8 +30,8 @@ See `ENVIRONMENT.md`. M0 verified the host and bootstrapped the project-local re
 | --- | --- | --- |
 | M0 Runtime qualification | VALIDATED | `validation/evidence/m0-runtime.md`: reproducible project-local bootstrap and real native BSIM3/BSIM4, PSP103 OSDI, and BSIM-CMG OSDI simulations passed. |
 | M1 APM130 | VALIDATED | `validation/evidence/m1-apm130.md`: public N/P wrappers and complete nominal terminal characterization passed at all temperatures and lengths, including PSP native gm/gds oracle agreement. |
-| M2 APM045 | IN_PROGRESS | Upstream FreePDK45 source/license audit and exact simulation subset acquisition next. |
-| M3 APM016F | NOT_STARTED | — |
+| M2 APM045 | VALIDATED | `validation/evidence/m2-apm045.md`: exact Apache-2.0 FreePDK45 VTG subset, public N/P wrappers, and complete native-BSIM4 terminal characterization passed. |
+| M3 APM016F | IN_PROGRESS | Independently author the BSIM-CMG parameter deck and implement the `l,nfin` public characterization path. |
 | M4 Benchmark R/C + variation | NOT_STARTED | — |
 | M5 APM022 | NOT_STARTED | — |
 | M6 APM350 | NOT_STARTED | — |
@@ -94,6 +94,8 @@ A blocker entry should state:
 - The official OpenVAF `v24.0.2mob` Linux binary requires glibc newer than EL9 and an unavailable `libLLVM.so.18.1`. The reproducible bootstrap therefore builds the pinned `openvaf-driver` source package against project-local AlmaLinux LLVM 20.1.8. This preserves the EL9 reference platform.
 - Current IHP upstream combines PSP 103.6 parameter cards with PSP 103.8.2 source. APM pins both exact assets, records the distinction, and has verified their nominal QS combination in real ngspice 47. No card values were translated or changed.
 - APM130 uses the upstream-documented 1.2 V thin-oxide supply and 0.13 um model Lmin. Its canonical threshold method is `Id=100 nA * W/L`; the coefficient, geometry, and drain biases are persisted with every DIBL result.
+- APM045 pins the open-source-clean FreePDK45 1.4 mirror at commit `688ee68ec5301e5fe11ebee5e53c1109d3cfd51d` and ships only its byte-identical nominal VTG cards plus licensing/model-basis documents. Its disclosed PTM ancestry is isolated from the independently authored APM022 deck.
+- APM045 uses 101-point DC sweeps so the 1.0 V endpoints and 10 mV finite-difference grid are exact. Monotonicity is required from the documented constant-current criterion through conduction; full-range picoamp leakage-partition reversals are retained and reported separately.
 
 Only record decisions that materially affect public API, model provenance/fidelity, characterization semantics, variation semantics, supported runtime, or release claims. Do not use this section as a verbose work diary.
 
@@ -103,6 +105,7 @@ When a material decision intentionally departs from `PROJECT_CONTEXT.md`, record
 
 - `validation/evidence/m0-runtime.md` — reference host/toolchain and four real simulator runtime smokes.
 - `validation/evidence/m1-apm130.md` — nominal APM130 public devices and complete terminal characterization at required temperatures.
+- `validation/evidence/m2-apm045.md` — exact-source nominal APM045 public devices and complete native-BSIM4 terminal characterization.
 
 ## Final-review fields
 

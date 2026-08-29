@@ -1,0 +1,40 @@
+schema = "apm.kit.v1"
+id = "apm045"
+technology_class = "45nm"
+architecture = "planar_bulk"
+compact_model = "bsim4"
+nominal_vdd_v = 1.0
+model_lmin_m = 5.0e-8
+default_w_m = 1.0e-6
+default_l_m = 5.0e-8
+characterization_lengths_m = [5.0e-8, 1.0e-7, 2.0e-7]
+temperatures_c = [-40, 27, 85, 125]
+
+[supply_basis]
+source = "FreePDK45 Manual and Santana.tech at pinned revision"
+statement = "The thin-oxide device supply is 1.0 V; the manual reports VTG behavior at 1.0 V."
+
+[geometry_basis]
+source = "FreePDK45 Santana.tech at pinned revision"
+valid_l_m = [5.0e-8, 1.0e-6]
+valid_w_m = [9.0e-8, 1.6e-5]
+
+[public_devices]
+n = "apm045_nmos"
+p = "apm045_pmos"
+terminals = ["d", "g", "s", "b"]
+parameters = ["w", "l"]
+
+[threshold]
+method = "constant_current"
+planar_current_coefficient_a = 1.0e-7
+normalization = "Id criterion = coefficient * W/L"
+vout_low_v = 0.05
+vout_high_fraction_vdd = 0.8
+
+[characterization]
+idvg_points = 101
+idvd_points = 101
+gm_gds_relative_perturbations = [0.01, 0.02]
+y_frequencies_hz = [1.0e5, 1.0e6]
+terminal_order = ["d", "g", "s", "b"]

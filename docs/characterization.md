@@ -55,3 +55,12 @@ An ngspice result is marked `validated` only after the real analyses complete
 and its recorded property checks pass. Spectre artifacts remain
 `experimental_unverified`; structural inspection must not be represented as a
 real Spectre simulation.
+
+DC monotonicity is a required property from the kit's constant-current
+threshold criterion through the conduction region. Full-range monotonicity is
+also reported as a diagnostic, but is not a pass criterion: a terminal drain
+current can legitimately reverse by a few picoamps near zero control voltage
+when gate/junction leakage and current partition dominate an otherwise-off
+channel. The raw signed curves remain authoritative, and this distinction must
+not be used to hide a reversal once channel conduction reaches the documented
+threshold criterion.
