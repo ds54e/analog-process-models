@@ -9,9 +9,10 @@ It is **not** evidence by itself. Validation claims must point to committed summ
 - Project: Analog Process Models (APM)
 - Repository: https://github.com/ds54e/analog-process-models
 - Target: v1.0.0
-- Current state: `IN_PROGRESS`
+- Current state: `RELEASE_READY`
 - Current milestone: `M10 License/provenance + clean-clone release review`
-- Release eligible: `NO`
+- Release eligible: `YES` — tag only after the exact evidence commit repeats
+  the attested fresh-clone release command successfully
 
 ## Reported initial environment
 
@@ -38,7 +39,7 @@ See `ENVIRONMENT.md`. M0 verified the host and bootstrapped the project-local re
 | M7 Common characterization completion | VALIDATED | `validation/evidence/m7-all-kits.md`: fresh all-kit execution, complete result-contract audits, normalized terminal comparison, and explicit planar-per-width versus FinFET-per-fin semantics passed. |
 | M8 IHP-native variation | VALIDATED | `validation/evidence/m8-apm130-native.md`: all five IHP corners plus 128-sample native process/mismatch cohorts, replay, global/local semantics, and geometry scaling passed in ngspice. |
 | M9 Spectre model-only compatibility | VALIDATED | `validation/evidence/m9-spectre.md`: all five kits, benchmark R/C, five corners, Process/Mismatch/All statistics, provenance, and model-only scope passed the required static gate; backend remains experimental/unverified with no Spectre parse claim. |
-| M10 License/provenance + clean-clone release review | IN_PROGRESS | Implement the release validator, finish metadata/claim/licensing audits, then execute the full fresh-clone release protocol. |
+| M10 License/provenance + clean-clone release review | VALIDATED | `validation/evidence/m10-release.md`: a genuinely fresh clone built the entire toolchain/model stack and passed all 16 fail-closed release gates plus focused planar and planar/FinFET comparisons. |
 
 Allowed milestone status values:
 
@@ -70,12 +71,17 @@ Record actual validated values when M0 runs:
 
 The normative gate definition is `validation/release_gates.toml`.
 
-Validated gates: `runtime.wsl2_el9`, `runtime.ngspice_headless`,
-`runtime.psp103_osdi`, `runtime.bsimcmg_osdi`, `models.all_kits`,
-`characterization.all_kits`, `passives.benchmark`, `variation.benchmark`,
-`variation.apm130_native`, `finfet.integrity`, and `spectre.model_only`.
+All 16 required gates are validated at release-candidate commit `74389a5`:
+`runtime.wsl2_el9`, `runtime.ngspice_headless`, `runtime.psp103_osdi`,
+`runtime.bsimcmg_osdi`, `models.all_kits`, `characterization.all_kits`,
+`passives.benchmark`, `variation.benchmark`, `variation.apm130_native`,
+`finfet.integrity`, `spectre.model_only`, `licensing.provenance`,
+`distribution.self_contained_models`, `release.metadata_complete`,
+`release.clean_clone`, and `release.claim_audit`.
 
-All remaining gates are unvalidated.
+The final evidence/status commit is intentionally re-run from another exact
+attested clone before the annotated tag is created; the tag message is the
+non-circular record of that final commit and report hash.
 
 Do not convert absence of evidence into PASS.
 
@@ -171,23 +177,30 @@ When a material decision intentionally departs from `PROJECT_CONTEXT.md`, record
 - `validation/evidence/m9-spectre.md` — structurally checked model-only files
   for all five kits, common corners/statistics/passives, exact adapter and
   provenance audits, and explicit experimental/unverified evidence boundary.
+- `validation/evidence/m10-release.md` — exact fresh-clone attestation,
+  source-built toolchain/model artifacts, 16/16 release-gate report, complete
+  license/provenance/claim/distribution audits, and focused comparisons.
 
 ## Final-review fields
 
-Complete these only during M10:
-
-- clean clone path/environment:
-- clean-clone setup result:
-- `apm doctor` result:
-- complete test-suite result:
-- `apm validate --release` result:
-- all-five-kit comparison result:
-- provenance/license audit result:
-- README claim audit result:
-- release-critical placeholder/TBD scan result:
-- package version (`pyproject.toml`) = 1.0.0:
-- runtime `__version__` = 1.0.0:
-- `CHANGELOG.md` v1.0.0 release entry present:
-- Spectre status confirmed experimental/unverified:
-- final release commit:
-- v1.0.0 tag created: NO
+- clean clone path/environment: new clone under
+  `/home/admin/src/apm-v1-clean-IN1XjOZk`, WSL2 + AlmaLinux 9.7 x86_64 on ext4
+- clean-clone setup result: PASS; exact origin/commit and pre-bootstrap state
+  attested before a source-only bootstrap
+- `apm doctor` result: PASS; native BSIM3/BSIM4, PSP103 OSDI, and BSIM-CMG OSDI
+- complete test-suite result: PASS; 58 tests plus Ruff
+- `apm validate --release` result: PASS; 16/16 required gates
+- all-five-kit comparison result: PASS; five technologies, both polarities,
+  10 normalized rows, plus focused planar and planar/FinFET pairs
+- provenance/license audit result: PASS; exact manifests and complete REUSE
+  coverage
+- README claim audit result: PASS; hash-bound manual review
+- release-critical placeholder scan result: PASS
+- package version (`pyproject.toml`) = `1.0.0`: PASS
+- installed distribution and runtime `__version__` = `1.0.0`: PASS
+- `CHANGELOG.md` v1.0.0 release entry present: PASS
+- Spectre status confirmed `experimental_unverified`: PASS
+- final release commit: the commit targeted by annotated tag `v1.0.0`; the tag
+  message records its exact post-evidence clean-clone validation hash
+- v1.0.0 tag: created only after that exact-commit validation, without moving
+  or rewriting the validated commit

@@ -73,6 +73,7 @@ REQUIRED_REVIEWED_FILES = frozenset(
         "THIRD_PARTY.md",
         "docs/spectre.md",
         "docs/release-validation.md",
+        "validation/evidence/m10-release.md",
     }
 )
 TRACKED_FORBIDDEN_PARTS = {
