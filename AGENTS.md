@@ -2,6 +2,20 @@
 
 This file is mandatory repository policy for implementation agents.
 
+## Repository identity
+
+This repository is:
+
+- **Name:** `analog-process-models`
+- **GitHub:** `https://github.com/ds54e/analog-process-models`
+- **Project acronym:** **APM = Analog Process Models**
+
+Within this repository, **APM always means this project, Analog Process Models**. It is a project-local acronym, not an external product, Microsoft technology, application-performance-monitoring product, package, or third-party framework.
+
+Do **not** web-search for a pre-existing software product named "APM" in order to implement this repository. When external research is needed, search for the specific compact model, process model, simulator, or upstream source named in `GOAL.md` (for example IHP SG13G2, FreePDK45, BSIM4, BSIM-CMG, ngspice, OpenVAF, Spectre).
+
+The repository itself and `GOAL.md` are authoritative for the meaning and scope of APM.
+
 ## Mission
 
 Implement `GOAL.md` faithfully and finish APM v1.0.0. Optimize for correctness, reproducibility, licensing clarity, and a small maintainable architecture.
