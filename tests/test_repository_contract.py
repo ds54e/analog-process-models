@@ -76,6 +76,12 @@ def test_benchmark_variation_contract_remains_unfrozen_initially() -> None:
     assert variation["requirements"]["all_mode"] is True
     assert variation["requirements"]["python_rng_for_ngspice"] is True
     assert variation["requirements"]["spectre_statistics_for_spectre"] is True
+    assert variation["requirements"]["explicit_sign_semantics"] is True
+    assert variation["requirements"]["explicit_correlation_semantics"] is True
+    assert "larger |Vth|" in variation["mos"]["intent"]["vth_shift"]
+    assert "larger |Id|" in variation["mos"]["intent"]["drive_shift"]
+    assert variation["mos"]["intent"]["raw_parameter_sign_is_not_canonical"] is True
+    assert variation["mos"]["intent"]["adapter_must_map_sign_per_model_and_polarity"] is True
 
 
 def test_benchmark_passive_contract_is_technology_neutral() -> None:
@@ -84,6 +90,10 @@ def test_benchmark_passive_contract_is_technology_neutral() -> None:
     assert passives["capacitor"]["public_name"] == "Cbench"
     assert passives["requirements"]["match_size_is_dimensionless"] is True
     assert passives["requirements"]["technology_neutral"] is True
+    assert passives["requirements"]["explicit_sign_semantics"] is True
+    assert passives["requirements"]["explicit_correlation_semantics"] is True
+    assert "increases resolved resistance" in passives["resistor"]["positive_scale_semantic"]
+    assert "increases resolved capacitance" in passives["capacitor"]["positive_scale_semantic"]
 
 
 def test_release_validation_flag_is_part_of_cli_contract() -> None:
@@ -130,6 +140,23 @@ def test_project_context_exists_and_is_explicitly_informative() -> None:
     assert "PTM/PTM-MG" in text
     assert "ngspice 47" in text
     assert "AlmaLinux 9" in text
+
+
+def test_initial_environment_is_explicitly_unvalidated_bootstrap_input() -> None:
+    text = (ROOT / "ENVIRONMENT.md").read_text(encoding="utf-8")
+    assert "ngspice is **not currently installed**" in text
+    assert "M0 Runtime qualification" in text
+    assert "--enable-osdi" in text
+    assert "pre_osdi" in text
+
+
+def test_research_baseline_is_dated_and_non_normative() -> None:
+    text = (ROOT / "RESEARCH_BASELINE.md").read_text(encoding="utf-8")
+    assert "2026-08-29" in text
+    assert "not immutable policy" in text
+    assert "BSIM-CMG" in text
+    assert "112.1.0" in text
+    assert "PSP 103.6" in text
 
 
 def test_unattended_protocol_requires_project_context_and_status() -> None:
