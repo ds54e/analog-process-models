@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+dist/
+build/
+*.egg-info/
+
+# Simulator/build artifacts
+*.osdi
+*.raw
+*.log
+*.csv
+*.dat
+*.out
+runs/
+results/
+work/
+.cache/
+
+# Local model-development/oracle data
+external/
+local/
+scratch/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+*~
