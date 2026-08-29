@@ -1,0 +1,43 @@
+id = "apm016f"
+technology_class = "16nm-class"
+architecture = "finfet"
+compact_model = "bsim_cmg"
+model_origin = "apm_generic"
+foundry_correlated = false
+ptm_mg_derived = false
+
+[source]
+status = "apm-authored-params-with-pinned-bsim-cmg-engine"
+parameter_project = "Analog Process Models"
+parameter_license = "Apache-2.0"
+engine_project = "UC Berkeley BSIM-CMG"
+engine_revision = "TBD"
+engine_license = "Preserve exact upstream license/agreement text for pinned source"
+
+[development]
+allowed_inputs = [
+  "public literature",
+  "BSIM-CMG specifications",
+  "published representative FinFET characteristics",
+  "explicit APM behavior contracts"
+]
+forbidden_numeric_source = "Official PTM-MG16 model-card parameters"
+ptm_mg_usage = "local non-redistributed sanity/comparison oracle only"
+
+[behavior_contract]
+requirements = [
+  "genuine BSIM-CMG execution",
+  "NFIN-based discrete sizing",
+  "Id scales sensibly with NFIN",
+  "gm scales sensibly with NFIN",
+  "improved electrostatic control relative to APM022",
+  "sensible Vth roll-off, DIBL, output conductance, and capacitance"
+]
+
+[variation]
+benchmark = true
+native = false
+
+[validation]
+ngspice = "not_started"
+spectre = "experimental_unverified"
