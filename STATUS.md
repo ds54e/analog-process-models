@@ -10,7 +10,7 @@ It is **not** evidence by itself. Validation claims must point to committed summ
 - Repository: https://github.com/ds54e/analog-process-models
 - Target: v1.0.0
 - Current state: `IN_PROGRESS`
-- Current milestone: `M8 IHP-native variation`
+- Current milestone: `M9 Spectre model-only compatibility`
 - Release eligible: `NO`
 
 ## Reported initial environment
@@ -36,8 +36,8 @@ See `ENVIRONMENT.md`. M0 verified the host and bootstrapped the project-local re
 | M5 APM022 | VALIDATED | `validation/evidence/m5-apm022.md`: independent non-PTM BSIM4 cards, explicit behavior contracts, complete terminal characterization, APM045/APM016F comparisons, and benchmark adapter/corners passed. |
 | M6 APM350 | VALIDATED | `validation/evidence/m6-apm350.md`: independently authored open generic BSIM3 cards, rejected-source license audit, complete terminal characterization, and fifth benchmark adapter passed. |
 | M7 Common characterization completion | VALIDATED | `validation/evidence/m7-all-kits.md`: fresh all-kit execution, complete result-contract audits, normalized terminal comparison, and explicit planar-per-width versus FinFET-per-fin semantics passed. |
-| M8 IHP-native variation | IN_PROGRESS | Validate selected available IHP SG13G2 native corners/process/mismatch in ngspice, kept distinct from APM benchmark variation. |
-| M9 Spectre model-only compatibility | NOT_STARTED | — |
+| M8 IHP-native variation | VALIDATED | `validation/evidence/m8-apm130-native.md`: all five IHP corners plus 128-sample native process/mismatch cohorts, replay, global/local semantics, and geometry scaling passed in ngspice. |
+| M9 Spectre model-only compatibility | IN_PROGRESS | Add model-only artifacts for all five kits with benchmark Process/Mismatch/All statistics and explicit experimental/unverified status. |
 | M10 License/provenance + clean-clone release review | NOT_STARTED | — |
 
 Allowed milestone status values:
@@ -71,8 +71,9 @@ Record actual validated values when M0 runs:
 The normative gate definition is `validation/release_gates.toml`.
 
 Validated gates: `runtime.wsl2_el9`, `runtime.ngspice_headless`,
-`runtime.psp103_osdi`, `runtime.bsimcmg_osdi`, `passives.benchmark`, and
-`finfet.integrity`.
+`runtime.psp103_osdi`, `runtime.bsimcmg_osdi`, `models.all_kits`,
+`characterization.all_kits`, `passives.benchmark`, `variation.benchmark`,
+`variation.apm130_native`, and `finfet.integrity`.
 
 All remaining gates are unvalidated.
 
@@ -123,6 +124,12 @@ A blocker entry should state:
   available gate-grid point nearest `gm/Id=15 1/V`. Planar current/gm/
   capacitance remain per micrometre of drawn width and FinFET quantities remain
   per fin; cross-basis current and capacitance ratios are intentionally absent.
+- APM130's selected native flow retains the five upstream `mos_*` corners,
+  `mos_tt_stat`, and `mos_tt_mismatch` identities and uses
+  ngspice-native seeded random evaluation. It has no stochastic native `all`
+  profile because upstream provides none. The sole 1e-9 relative PMOS
+  `dphiblw` process entry is persisted but explicitly classified as effectively
+  fixed at ngspice 47 expanded-deck precision; 33 process fields vary measurably.
 
 Only record decisions that materially affect public API, model provenance/fidelity, characterization semantics, variation semantics, supported runtime, or release claims. Do not use this section as a verbose work diary.
 
@@ -146,6 +153,9 @@ When a material decision intentionally departs from `PROJECT_CONTEXT.md`, record
 - `validation/evidence/m7-all-kits.md` — fresh five-kit characterization,
   persisted result-contract audit, normalized terminal table, and safe
   planar-to-FinFET comparison semantics.
+- `validation/evidence/m8-apm130-native.md` — five pinned IHP corner profiles,
+  model-global native process sampling, instance-local native mismatch,
+  deterministic replay, and upstream geometry scaling in real ngspice.
 
 ## Final-review fields
 

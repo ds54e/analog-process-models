@@ -18,6 +18,7 @@ from .characterize import CharacterizationError, characterize
 from .compare import ComparisonError, compare_technologies, validate_all_characterizations
 from .doctor import run_doctor
 from .model_build import build_models
+from .native_variation import NativeVariationError, validate_apm130_native
 from .toolchain import ToolchainError
 
 TECHNOLOGIES = ("apm350", "apm130", "apm045", "apm022", "apm016f")
@@ -87,6 +88,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_benchmark.add_argument("--output", type=Path, required=True)
 
+    p_native = sub.add_parser(
+        "apm130-native-check",
+        help="Run selected IHP-native corner, process, and mismatch validation",
+    )
+    p_native.add_argument("--output", type=Path, required=True)
+
     return parser
 
 
@@ -114,6 +121,24 @@ def main() -> int:
                         "status": result["status"],
                         "output_directory": result["output_directory"],
                         "report_path": result["report_path"],
+                        "checks": result["checks"],
+                    },
+                    indent=2,
+                    sort_keys=True,
+                )
+            )
+            return 0
+        if args.command == "apm130-native-check":
+            result = validate_apm130_native(args.output)
+            print(
+                json.dumps(
+                    {
+                        "status": result["status"],
+                        "output_directory": result["output_directory"],
+                        "report_path": result["report_path"],
+                        "selected_upstream_profiles": result[
+                            "selected_upstream_profiles"
+                        ],
                         "checks": result["checks"],
                     },
                     indent=2,
@@ -183,6 +208,7 @@ def main() -> int:
         ComparisonError,
         FileNotFoundError,
         json.JSONDecodeError,
+        NativeVariationError,
         OSError,
         RuntimeError,
         ToolchainError,

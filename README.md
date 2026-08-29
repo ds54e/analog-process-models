@@ -36,11 +36,15 @@ Technology-neutral benchmark resistor and capacitor models are included in scope
 
 The benchmark variation/passive framework is implemented and real-tool
 validated across all five kits and the BSIM3, PSP103, BSIM4, and BSIM-CMG
-families.
-It uses observable `vth_shift`/`drive_shift` intents, persisted NumPy PCG64
-samples, fixed common corners, and native simulator R/C primitives. See
+families. It uses observable `vth_shift`/`drive_shift` intents, persisted NumPy
+PCG64 samples, fixed common corners, and native simulator R/C primitives. See
 [`docs/benchmark-variation.md`](docs/benchmark-variation.md) for the exact
 statistical, matching, sign, replay, and native-versus-benchmark semantics.
+
+APM130 separately validates IHP's native `mos_tt/mos_ss/mos_ff/mos_sf/mos_fs`
+corners, `mos_tt_stat` process profile, and `mos_tt_mismatch` local profile.
+Those results retain exact upstream identities and are never translated into
+benchmark labels. See [`docs/native-variation.md`](docs/native-variation.md).
 
 ## Backend status
 
@@ -86,10 +90,11 @@ For complete nominal characterization and normalized comparisons:
 apm characterize apm045 --output results/apm045
 apm characterization-check --output results/all-kits
 apm compare apm022 apm016f --output results/apm022-vs-apm016f
+apm apm130-native-check --output results/apm130-native
 ```
 
-The repository remains under active v1.0 implementation. M0 through M7 are
-validated; IHP-native variation, experimental Spectre model files, final
-release validation, and clean-clone gates remain open. Do not interpret an
-implemented model as a foundry or silicon-correlation claim. `STATUS.md` and
-committed evidence identify the exact current boundary.
+The repository remains under active v1.0 implementation. M0 through M8 are
+validated; experimental Spectre model files, final release validation, and
+clean-clone gates remain open. Do not interpret an implemented model as a
+foundry or silicon-correlation claim. `STATUS.md` and committed evidence
+identify the exact current boundary.

@@ -10,7 +10,9 @@ substitute for a kit's native variation. The frozen v1 values live in
 Every persisted benchmark result uses `variation_origin = "benchmark"`.
 PDK/model-native results use `variation_origin = "native"` and retain their
 actual upstream corner/profile identity. The two systems must not be overlaid or
-silently translated into one another.
+silently translated into one another. APM130's selected IHP-native profiles,
+native ngspice seed semantics, and separate result layout are documented in
+[`native-variation.md`](native-variation.md).
 
 ## Observable MOS intents
 

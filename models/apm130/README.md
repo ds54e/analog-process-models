@@ -44,8 +44,21 @@ distinction, licenses, imported files, and SHA-256 hashes are recorded in
 
 The upstream library also contains `mos_ss`, `mos_ff`, `mos_sf`, `mos_fs`,
 statistical, and mismatch sections. They remain explicitly IHP-native behavior,
-not APM benchmark variation. Their M8 validation is separate from the nominal
-M1 result.
+not APM benchmark variation. Run the real-tool native regression with:
+
+```text
+apm apm130-native-check --output <new-result-directory>
+```
+
+The selected profiles are the five `mos_*` corners, `mos_tt_stat` process, and
+`mos_tt_mismatch` local mismatch. Native random expressions are evaluated by
+ngspice with explicit seeds, not by the APM benchmark Python sampler. The
+mismatch run includes `apm130_native_mismatch_wrappers.inc` instead of the
+nominal wrapper; it preserves the same public names and `w,l` interface while
+fixing upstream `mm_ok=1` internally. No native stochastic process+mismatch
+`all` profile is exposed because the selected upstream deck provides none.
+See [`docs/native-variation.md`](../../docs/native-variation.md) for exact
+semantics and result files.
 
 ## Characterization
 
@@ -59,6 +72,7 @@ in `RESULT_CONTRACT.md`; see `docs/characterization.md` for the concrete file
 layout. Generated OSDI binaries and full result directories are deliberately
 untracked.
 
-Spectre support is experimental/unverified and is handled separately. Nothing
+Spectre support is experimental/unverified and is handled separately. IHP-native
+Spectre Monte Carlo is not claimed. Nothing
 in this kit provides Virtuoso integration, layout, PCells, DRC, LVS, PEX, or
 foundry signoff.

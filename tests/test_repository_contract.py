@@ -94,6 +94,7 @@ def test_required_osdi_sources_are_self_contained() -> None:
 
 def test_apm130_public_wrapper_hides_upstream_multiplicity() -> None:
     kit = load_toml("models/apm130/kit.toml")
+    provenance = load_toml("models/apm130/provenance.toml")
     assert kit["nominal_vdd_v"] == 1.2
     assert kit["model_lmin_m"] == 1.3e-7
     assert kit["public_devices"]["parameters"] == ["w", "l"]
@@ -102,6 +103,12 @@ def test_apm130_public_wrapper_hides_upstream_multiplicity() -> None:
     assert ".subckt apm130_pmos d g s b w=1u l=0.13u" in wrapper
     for forbidden in (" m=", " nf=", " ng="):
         assert forbidden not in wrapper.lower()
+    assert provenance["variation"]["native_process_profile"] == "mos_tt_stat"
+    assert provenance["variation"]["native_mismatch_profile"] == "mos_tt_mismatch"
+    assert provenance["variation"]["native_combined_all_profile"] is False
+    for relative, expected_hash in provenance["source"]["apm_authored_files"].items():
+        payload = (ROOT / "models/apm130" / relative).read_bytes()
+        assert hashlib.sha256(payload).hexdigest() == expected_hash
 
 
 def test_apm045_public_wrapper_and_model_basis_are_explicit() -> None:

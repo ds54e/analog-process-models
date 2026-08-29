@@ -42,6 +42,10 @@ model_card_license = "Apache-2.0"
 "vendor/ihp-sg13g2-models/sg13g2_moslv_parm.lib" = "cbf10b8453a18bb70b8ad0d6e40faa0937338e699b5460947a94900db6c92a6e"
 "vendor/ihp-sg13g2-models/sg13g2_moslv_stat.lib" = "8d807e0ae41be381e655bf51f0eecf72269c8eaa022a2da59a1c90b0772e229a"
 
+[source.apm_authored_files]
+"ngspice/apm130_wrappers.inc" = "779335d18ad8fce7b3b2c4df66cdcb617759842609299aeff7fba0954f0d7a97"
+"ngspice/apm130_native_mismatch_wrappers.inc" = "598448e47d358ebd2e427170a6bd48cff587c94e7b5812f0e4a7fcf12964fddc"
+
 [redistribution]
 ship_in_repo = true
 selection = "PSP/JUNCAP Verilog-A package and IHP low-voltage MOS ngspice files only"
@@ -57,8 +61,12 @@ benchmark = true
 native_corners = true
 native_process = true
 native_mismatch = true
+native_corner_profiles = ["mos_tt", "mos_ss", "mos_ff", "mos_sf", "mos_fs"]
+native_process_profile = "mos_tt_stat"
+native_mismatch_profile = "mos_tt_mismatch"
+native_combined_all_profile = false
 spectre_native_mc_claimed = false
 
 [validation]
-ngspice = "M1 nominal public-kit characterization validated; see validation/evidence/m1-apm130.md"
+ngspice = "M1 nominal and M8 IHP-native corner/process/mismatch flows validated; see validation/evidence/m1-apm130.md and validation/evidence/m8-apm130-native.md"
 spectre = "experimental_unverified"
