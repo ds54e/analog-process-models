@@ -19,9 +19,10 @@ The planned v1.0 spans:
 The validated reference flow targeted for v1.0 is:
 
 - WSL2
-- RHEL-compatible EL9 Linux, x86_64
-- ngspice with OSDI support
+- AlmaLinux 9 / RHEL-compatible EL9 Linux, x86_64
+- ngspice 47 with OSDI support
 - Python
+- OpenVAF-ReLoaded where Verilog-A-to-OSDI compilation is required
 - xschem as an optional interactive frontend
 
 APM is **not a manufacturable PDK** and does not provide layout rules, PCells, DRC, LVS, PEX, foundry signoff, or silicon-correlation guarantees.
@@ -34,7 +35,7 @@ Technology-neutral benchmark resistor and capacitor models are included in scope
 
 | Backend / frontend | v1.0 status target |
 | --- | --- |
-| ngspice | **Validated reference backend** |
+| ngspice 47 + OSDI | **Validated reference backend** |
 | xschem | Optional, example-supported frontend |
 | Spectre | **Experimental / unverified**, model-only compatibility |
 | Virtuoso | User-managed; no APM integration layer |
@@ -50,6 +51,7 @@ The repository is designed so a long-running implementation agent can work witho
 - [`GOAL.md`](GOAL.md) — authoritative v1.0 implementation requirements and Definition of Done.
 - [`AGENTS.md`](AGENTS.md) — mandatory repository-wide engineering and safety/quality constraints.
 - [`PROJECT_CONTEXT.md`](PROJECT_CONTEXT.md) — condensed design history and rationale behind the v1.0 contract; informative, not normative.
+- [`ENVIRONMENT.md`](ENVIRONMENT.md) — known starting WSL2/AlmaLinux state and M0 bootstrap expectations; reported state must be locally verified.
 - [`UNATTENDED_EXECUTION.md`](UNATTENDED_EXECUTION.md) — required procedure for long-running autonomous implementation, checkpointing, blockers, and final clean-clone validation.
 - [`STATUS.md`](STATUS.md) — compact persistent progress index; never evidence by itself.
 - [`validation/release_gates.toml`](validation/release_gates.toml) — machine-readable v1.0 release-gate contract.
