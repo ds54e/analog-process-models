@@ -1,0 +1,192 @@
+schema = "apm.release-gates.v1"
+target = "v1.0.0"
+status = "authoritative-gate-definition"
+
+[policy]
+missing_evidence_is_failure = true
+required_skipped_check_is_failure = true
+spectre_real_validation_required = false
+repository_visibility_may_change = false
+clean_clone_required = true
+clean_clone_platform = "WSL2 + RHEL-compatible EL9 Linux + x86_64"
+reference_simulator = "ngspice"
+
+[kits]
+required = ["apm350", "apm130", "apm045", "apm022", "apm016f"]
+
+[public_devices]
+planar_parameters = ["w", "l"]
+finfet_parameters = ["l", "nfin"]
+terminals = ["d", "g", "s", "b"]
+forbidden_common_parameters = ["m", "nf", "ng"]
+
+[characterization]
+required_metrics = [
+  "id_vg",
+  "id_vd",
+  "gm_over_id",
+  "gm_over_gds",
+  "length_scaling",
+  "dibl",
+  "terminal_y_matrix",
+  "capacitance",
+  "temperature",
+]
+required_temperatures_c = [-40, 27, 85, 125]
+raw_y_matrix_required = true
+finite_difference_convergence_required = true
+
+[benchmark_variation]
+required_modes = ["process", "mismatch", "all"]
+required_intents = ["vth_shift", "drive_shift"]
+seed_reproducibility_ngspice = true
+explicit_correlation_semantics = true
+benchmark_vs_native_separation_required = true
+
+[benchmark_passives]
+required = ["Rbench", "Cbench"]
+match_size_dimensionless = true
+mismatch_scaling = "1/sqrt(match_size)"
+
+[apm130_native]
+required_ngspice_capabilities = ["corners", "process_variation", "mismatch_variation"]
+required_spectre_native_mc = false
+
+[apm016f]
+bsim_cmg_required = true
+nfin_scaling_required = true
+planar_substitute_forbidden = true
+
+[spectre]
+artifacts_required_for_all_kits = true
+model_only = true
+benchmark_mc_required = true
+required_modes = ["process", "mismatch", "all"]
+status = "experimental_unverified"
+real_tool_validation_required = false
+virtuoso_integration_required = false
+
+[licensing]
+exact_provenance_per_vendored_file = true
+ambiguous_redistribution_forbidden = true
+third_party_relicensing_forbidden = true
+reuse_spdx_audit_required = true
+ptm_parameter_redistribution_forbidden = true
+ptm_numeric_derivation_for_apm022_apm016f_forbidden = true
+
+[distribution]
+separate_transistor_model_download_required = false
+generated_osdi_committed = false
+large_raw_results_committed = false
+
+[documentation]
+required_topics = [
+  "scope",
+  "installation",
+  "model_provenance",
+  "model_fidelity_limitations",
+  "benchmark_vs_native_variation",
+  "benchmark_passives",
+  "comparison_methodology",
+  "spectre_status",
+  "not_a_manufacturable_pdk",
+]
+
+[final_validation]
+apm_doctor_required = true
+full_test_suite_required = true
+release_validator_required = true
+all_five_kit_representative_comparison_required = true
+license_provenance_audit_required = true
+readme_claim_audit_required = true
+fresh_clone_from_repository_required = true
+
+[[gate]]
+id = "runtime.wsl2_el9"
+required = true
+validation = "real_environment"
+summary = "Fresh-clone reference flow executes on WSL2 + EL9-compatible x86_64 Linux."
+
+[[gate]]
+id = "runtime.ngspice_headless"
+required = true
+validation = "real_tool"
+summary = "Headless ngspice reference simulation executes successfully."
+
+[[gate]]
+id = "runtime.psp103_osdi"
+required = true
+validation = "real_tool"
+summary = "PSP103 model compiles/loads through the selected OSDI flow and simulates a device."
+
+[[gate]]
+id = "runtime.bsimcmg_osdi"
+required = true
+validation = "real_tool"
+summary = "Pinned BSIM-CMG implementation compiles/loads through OSDI and simulates a FinFET device."
+
+[[gate]]
+id = "models.all_kits"
+required = true
+validation = "tests_and_audit"
+summary = "All five required N/P model kits exist, are usable, and satisfy their public interfaces."
+
+[[gate]]
+id = "characterization.all_kits"
+required = true
+validation = "real_tool"
+summary = "Every required characterization metric completes for every kit at required temperatures."
+
+[[gate]]
+id = "passives.benchmark"
+required = true
+validation = "tests"
+summary = "Rbench and Cbench implement the common benchmark contract and variation scaling."
+
+[[gate]]
+id = "variation.benchmark"
+required = true
+validation = "tests_and_real_tool"
+summary = "Every kit supports benchmark corners plus process, mismatch, and all Monte Carlo semantics."
+
+[[gate]]
+id = "variation.apm130_native"
+required = true
+validation = "real_tool"
+summary = "Selected available IHP-native corners/process/mismatch flow is validated with ngspice."
+
+[[gate]]
+id = "finfet.integrity"
+required = true
+validation = "tests_and_real_tool"
+summary = "APM016F genuinely executes BSIM-CMG and demonstrates sensible NFIN scaling."
+
+[[gate]]
+id = "spectre.model_only"
+required = true
+validation = "structural"
+summary = "All kits provide model-only Spectre artifacts with benchmark MC and explicit experimental/unverified status."
+
+[[gate]]
+id = "licensing.provenance"
+required = true
+validation = "audit"
+summary = "Every shipped third-party asset has auditable redistribution rights and provenance; all license checks pass."
+
+[[gate]]
+id = "distribution.self_contained_models"
+required = true
+validation = "clean_clone"
+summary = "No separate transistor-model download is required after cloning the repository."
+
+[[gate]]
+id = "release.clean_clone"
+required = true
+validation = "clean_clone"
+summary = "Documented setup/build/doctor/tests/release validation succeed from a genuinely fresh clone."
+
+[[gate]]
+id = "release.claim_audit"
+required = true
+validation = "manual_audit"
+summary = "README/release claims match evidence and do not overstate foundry, silicon, or Spectre validation."
