@@ -13,11 +13,22 @@ It is **not** evidence by itself. Validation claims must point to committed summ
 - Current milestone: `M0 Runtime qualification`
 - Release eligible: `NO`
 
+## Reported initial environment
+
+The following is user-reported starting context and has **not yet been validated by M0**:
+
+- Codex CLI is running directly inside WSL2 on AlmaLinux.
+- ngspice is not currently installed.
+- OpenVAF-ReLoaded is not currently assumed to be installed.
+- PSP103 / BSIM-CMG OSDI build artifacts are not currently assumed to exist.
+
+See `ENVIRONMENT.md`. M0 must verify the actual environment and bootstrap the reproducible reference toolchain rather than treating missing tools as a project blocker.
+
 ## Milestones
 
 | Milestone | Status | Evidence / notes |
 | --- | --- | --- |
-| M0 Runtime qualification | NOT_STARTED | — |
+| M0 Runtime qualification | NOT_STARTED | Bootstrap and validate toolchain from reported bare AlmaLinux environment. |
 | M1 APM130 | NOT_STARTED | — |
 | M2 APM045 | NOT_STARTED | — |
 | M3 APM016F | NOT_STARTED | — |
@@ -47,9 +58,11 @@ Record actual validated values when M0 runs:
 - WSL version / host context:
 - EL9 distribution and version:
 - architecture:
+- repository path/filesystem:
 - Python version:
-- ngspice version/build options:
-- OpenVAF-ReLoaded version:
+- ngspice version/build options/prefix:
+- OSDI load mechanism:
+- OpenVAF-ReLoaded version/revision:
 - PSP103 source/revision:
 - BSIM-CMG source/revision:
 
@@ -63,7 +76,7 @@ Do not convert absence of evidence into PASS.
 
 ## Current blockers
 
-None recorded yet.
+None recorded yet. Missing initial simulator/compiler installations are expected M0 bootstrap work, not blockers by themselves.
 
 A blocker entry should state:
 
