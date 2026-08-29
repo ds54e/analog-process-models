@@ -1,0 +1,26 @@
+id = "apm045"
+technology_class = "45nm"
+architecture = "planar_bulk"
+compact_model = "bsim4"
+model_origin = "predictive_open"
+foundry_correlated = false
+
+[source]
+status = "planned-vendor-subset"
+project = "FreePDK45"
+preferred_repository = "Chips4Makers/freepdk45"
+url = "https://gitlab.com/Chips4Makers/freepdk45"
+revision = "TBD"
+license = "Apache-2.0 expected for clean mirror; verify exact imported files"
+
+[redistribution]
+ship_in_repo = true
+exclude = ["SVRF", "Calibre", "layout/physical-design assets not needed by APM"]
+
+[variation]
+benchmark = true
+native_corners_optional = true
+
+[validation]
+ngspice = "not_started"
+spectre = "experimental_unverified"
