@@ -27,7 +27,12 @@ path = [
   "models/*/README.md",
   "models/*/parameter_generation.md",
   "models/*/kit.toml",
-  "models/*/ngspice/**"
+  "models/*/ngspice/**",
+  "models/apm350/spectre/apm350.scs",
+  "models/apm130/spectre/apm130.scs",
+  "models/apm045/spectre/apm045.scs",
+  "models/apm022/spectre/apm022.scs",
+  "models/apm016f/spectre/apm016f.scs"
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "APM contributors"

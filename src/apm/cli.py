@@ -19,6 +19,7 @@ from .compare import ComparisonError, compare_technologies, validate_all_charact
 from .doctor import run_doctor
 from .model_build import build_models
 from .native_variation import NativeVariationError, validate_apm130_native
+from .spectre_validate import SpectreStructureError, validate_spectre
 from .toolchain import ToolchainError
 
 TECHNOLOGIES = ("apm350", "apm130", "apm045", "apm022", "apm016f")
@@ -94,6 +95,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_native.add_argument("--output", type=Path, required=True)
 
+    p_spectre = sub.add_parser(
+        "spectre-check",
+        help="Audit experimental/unverified model-only Spectre artifacts structurally",
+    )
+    p_spectre.add_argument("--output", type=Path, required=True)
+
     return parser
 
 
@@ -139,6 +146,25 @@ def main() -> int:
                         "selected_upstream_profiles": result[
                             "selected_upstream_profiles"
                         ],
+                        "checks": result["checks"],
+                    },
+                    indent=2,
+                    sort_keys=True,
+                )
+            )
+            return 0
+        if args.command == "spectre-check":
+            result = validate_spectre(args.output)
+            print(
+                json.dumps(
+                    {
+                        "status": result["status"],
+                        "backend_status": result["backend_status"],
+                        "real_tool_validation_performed": result[
+                            "real_tool_validation_performed"
+                        ],
+                        "output_directory": result["output_directory"],
+                        "report_path": result["report_path"],
                         "checks": result["checks"],
                     },
                     indent=2,
@@ -211,6 +237,7 @@ def main() -> int:
         NativeVariationError,
         OSError,
         RuntimeError,
+        SpectreStructureError,
         ToolchainError,
     ) as error:
         print(f"apm {args.command}: {error}", file=sys.stderr)

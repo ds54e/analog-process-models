@@ -1,0 +1,37 @@
+// SPDX-FileCopyrightText: APM contributors
+// SPDX-License-Identifier: Apache-2.0
+//
+// APM Spectre model-only compatibility
+// EXPERIMENTAL / UNVERIFIED
+//
+// Static structural checks only; no Spectre parse or numerical validation.
+// Native Spectre BSIM4 is selected through the SPICE level-54 mapping.
+// Include variation/spectre/benchmark_variation.scs with exactly one section.
+
+simulator lang=spice
+.include "../ngspice/apm022_models.inc"
+simulator lang=spectre
+
+subckt apm022_nmos (d g s b)
+parameters w=1u l=25n
+parameters apm__match_size=(w*l)/(1u*50n)
+parameters apm__vth_a=1.0738212166880654 apm__vth_b=-0.04378353001341257
+parameters apm__drive_a=1.000697311928817 apm__drive_b=-0.017515051956367187
+parameters apm__vth_intent=0.012*apm_bench_n_vth_process_z+0.008*apm__mos_vth_local_z/sqrt(apm__match_size)
+parameters apm__drive_intent=(1+0.04*apm_bench_n_drive_process_z)*(1+0.025*apm__mos_drive_local_z/sqrt(apm__match_size))-1
+parameters apm__vth_raw=2*apm__vth_intent/(apm__vth_a+sqrt(apm__vth_a*apm__vth_a+4*apm__vth_b*apm__vth_intent))
+parameters apm__drive_raw=1+2*apm__drive_intent/(apm__drive_a+sqrt(apm__drive_a*apm__drive_a+4*apm__drive_b*apm__drive_intent))
+Mapm022_core (d g s b) apm022_ncore w=w l=l delvto=apm__vth_raw mulu0=apm__drive_raw
+ends apm022_nmos
+
+subckt apm022_pmos (d g s b)
+parameters w=1u l=25n
+parameters apm__match_size=(w*l)/(1u*50n)
+parameters apm__vth_a=-1.080947326903536 apm__vth_b=-0.027335390338690292
+parameters apm__drive_a=1.012129720318809 apm__drive_b=0.0009833847008120682
+parameters apm__vth_intent=0.012*apm_bench_p_vth_process_z+0.008*apm__mos_vth_local_z/sqrt(apm__match_size)
+parameters apm__drive_intent=(1+0.04*apm_bench_p_drive_process_z)*(1+0.025*apm__mos_drive_local_z/sqrt(apm__match_size))-1
+parameters apm__vth_raw=2*apm__vth_intent/(apm__vth_a-sqrt(apm__vth_a*apm__vth_a+4*apm__vth_b*apm__vth_intent))
+parameters apm__drive_raw=1+2*apm__drive_intent/(apm__drive_a+sqrt(apm__drive_a*apm__drive_a+4*apm__drive_b*apm__drive_intent))
+Mapm022_core (d g s b) apm022_pcore w=w l=l delvto=apm__vth_raw mulu0=apm__drive_raw
+ends apm022_pmos

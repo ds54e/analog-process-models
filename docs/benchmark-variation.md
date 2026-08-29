@@ -189,5 +189,6 @@ Benchmark severities are comparison knobs, not assertions of silicon fidelity.
 Mappings characterize the documented reference point and measured raw ranges;
 they do not make compact models interchangeable away from that point. The
 ngspice path uses deterministic resolved samples. Spectre benchmark statistics
-are a separate model-only deliverable and remain experimental/unverified until
-tested in a real Spectre environment.
+are a separate model-only deliverable, documented in
+[`spectre.md`](spectre.md), and remain experimental/unverified until tested in
+a real Spectre environment.

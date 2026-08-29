@@ -23,6 +23,9 @@ license_basis = "The exact upstream root README states that all files are Apache
 "vendor/freepdk45/PMOS_VTG.inc" = "a7d95a2631897134d2f52a9fa8469aef4e7c6dd2a2b5a499fc08645da3465d4a"
 "vendor/freepdk45/UPSTREAM-README.txt" = "269392f454dcf92521d4d4174d4b80d1702a752571d5f924a403960703c8e972"
 
+[source.apm_authored_files]
+"spectre/apm045.scs" = "9b25d7b129f71d2775a2d6b54ad48a89997b05a4f4df22cfa5de67974ca156e6"
+
 [redistribution]
 ship_in_repo = true
 selection = "Nominal general-threshold NMOS/PMOS BSIM4 cards plus licensing and model-basis documentation"
@@ -51,3 +54,9 @@ native_corners_optional = true
 [validation]
 ngspice = "M2 nominal public-kit characterization validated; see validation/evidence/m2-apm045.md"
 spectre = "experimental_unverified"
+
+[spectre]
+status = "experimental_unverified"
+artifact = "spectre/apm045.scs"
+model_route = "native Spectre BSIM4 through SPICE level-54 mapping"
+real_tool_validation = false

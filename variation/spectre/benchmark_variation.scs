@@ -1,0 +1,116 @@
+// SPDX-FileCopyrightText: APM contributors
+// SPDX-License-Identifier: Apache-2.0
+//
+// APM Spectre model-only compatibility
+// EXPERIMENTAL / UNVERIFIED
+//
+// This file has received static structural checks only. It has not been parsed
+// or simulated by Cadence Spectre. Select exactly one section when including it.
+// The bench_mc section supports Spectre montecarlo variations=process,
+// variations=mismatch, and variations=all; analyses/testbenches are user-owned.
+
+simulator lang=spectre
+
+library apm_benchmark_variation_v1
+
+section bench_mc
+parameters apm_bench_n_vth_process_z=0
+parameters apm_bench_n_drive_process_z=0
+parameters apm_bench_p_vth_process_z=0
+parameters apm_bench_p_drive_process_z=0
+parameters apm_bench_r_process_z=0
+parameters apm_bench_c_process_z=0
+parameters apm__mos_vth_local_z=0
+parameters apm__mos_drive_local_z=0
+parameters apm__r_local_z=0
+parameters apm__c_local_z=0
+
+statistics {
+  process {
+    vary apm_bench_n_vth_process_z dist=gauss std=1 percent=no
+    vary apm_bench_n_drive_process_z dist=gauss std=1 percent=no
+    vary apm_bench_p_vth_process_z dist=gauss std=1 percent=no
+    vary apm_bench_p_drive_process_z dist=gauss std=1 percent=no
+    vary apm_bench_r_process_z dist=gauss std=1 percent=no
+    vary apm_bench_c_process_z dist=gauss std=1 percent=no
+  }
+  mismatch {
+    vary apm__mos_vth_local_z dist=gauss std=1 percent=no
+    vary apm__mos_drive_local_z dist=gauss std=1 percent=no
+    vary apm__r_local_z dist=gauss std=1 percent=no
+    vary apm__c_local_z dist=gauss std=1 percent=no
+  }
+}
+endsection bench_mc
+
+// Nominal APM benchmark vector.
+section bench_tt
+parameters apm_bench_n_vth_process_z=0
+parameters apm_bench_n_drive_process_z=0
+parameters apm_bench_p_vth_process_z=0
+parameters apm_bench_p_drive_process_z=0
+parameters apm_bench_r_process_z=0
+parameters apm_bench_c_process_z=0
+parameters apm__mos_vth_local_z=0
+parameters apm__mos_drive_local_z=0
+parameters apm__r_local_z=0
+parameters apm__c_local_z=0
+endsection bench_tt
+
+// Lower |Vth| and higher drive for N and P: +/-3 benchmark process sigma.
+section bench_ff
+parameters apm_bench_n_vth_process_z=-3
+parameters apm_bench_n_drive_process_z=3
+parameters apm_bench_p_vth_process_z=-3
+parameters apm_bench_p_drive_process_z=3
+parameters apm_bench_r_process_z=0
+parameters apm_bench_c_process_z=0
+parameters apm__mos_vth_local_z=0
+parameters apm__mos_drive_local_z=0
+parameters apm__r_local_z=0
+parameters apm__c_local_z=0
+endsection bench_ff
+
+// Higher |Vth| and lower drive for N and P: +/-3 benchmark process sigma.
+section bench_ss
+parameters apm_bench_n_vth_process_z=3
+parameters apm_bench_n_drive_process_z=-3
+parameters apm_bench_p_vth_process_z=3
+parameters apm_bench_p_drive_process_z=-3
+parameters apm_bench_r_process_z=0
+parameters apm_bench_c_process_z=0
+parameters apm__mos_vth_local_z=0
+parameters apm__mos_drive_local_z=0
+parameters apm__r_local_z=0
+parameters apm__c_local_z=0
+endsection bench_ss
+
+// Fast N and slow P.
+section bench_fs
+parameters apm_bench_n_vth_process_z=-3
+parameters apm_bench_n_drive_process_z=3
+parameters apm_bench_p_vth_process_z=3
+parameters apm_bench_p_drive_process_z=-3
+parameters apm_bench_r_process_z=0
+parameters apm_bench_c_process_z=0
+parameters apm__mos_vth_local_z=0
+parameters apm__mos_drive_local_z=0
+parameters apm__r_local_z=0
+parameters apm__c_local_z=0
+endsection bench_fs
+
+// Slow N and fast P.
+section bench_sf
+parameters apm_bench_n_vth_process_z=3
+parameters apm_bench_n_drive_process_z=-3
+parameters apm_bench_p_vth_process_z=-3
+parameters apm_bench_p_drive_process_z=3
+parameters apm_bench_r_process_z=0
+parameters apm_bench_c_process_z=0
+parameters apm__mos_vth_local_z=0
+parameters apm__mos_drive_local_z=0
+parameters apm__r_local_z=0
+parameters apm__c_local_z=0
+endsection bench_sf
+
+endlibrary apm_benchmark_variation_v1

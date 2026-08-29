@@ -22,6 +22,7 @@ research_retrieved_utc = "2026-08-29"
 "ngspice/apm022_models.inc" = "4556a5901940eb0a2a3c130b4a843a1fe53fecbd36acb5e5d8b1ef4e82c70ff0"
 "ngspice/apm022_wrappers.inc" = "e55dd185cdfc5047c9d01dd6f0244ab49496601f1b6fafc018ead17a45a8d83e"
 "parameter_generation.md" = "87047bf4ec587c75b933942671e74e7e924ba86b425b816c84e98bf75b3b368c"
+"spectre/apm022.scs" = "ddf97554eea15759a52793048e95975426a3e92494630548598b2f31e6831011"
 
 [[source.research_inputs]]
 title = "Performance and Yield Benefits of Quasi-Planar Bulk CMOS Technology for 6-T SRAM at the 22-nm Node"
@@ -78,3 +79,9 @@ native = false
 [validation]
 ngspice = "M5 complete nominal terminal characterization and benchmark-adapter validation passed; see validation/evidence/m5-apm022.md"
 spectre = "experimental_unverified"
+
+[spectre]
+status = "experimental_unverified"
+artifact = "spectre/apm022.scs"
+model_route = "native Spectre BSIM4 through SPICE level-54 mapping"
+real_tool_validation = false

@@ -1,0 +1,38 @@
+// SPDX-FileCopyrightText: APM contributors
+// SPDX-License-Identifier: Apache-2.0
+//
+// APM Spectre model-only compatibility
+// EXPERIMENTAL / UNVERIFIED
+//
+// Static structural checks only; no Spectre parse or numerical validation.
+// Native Spectre BSIM4 is selected through the SPICE level-54 mapping.
+// Include variation/spectre/benchmark_variation.scs with exactly one section.
+
+simulator lang=spice
+.include "../vendor/freepdk45/NMOS_VTG.inc"
+.include "../vendor/freepdk45/PMOS_VTG.inc"
+simulator lang=spectre
+
+subckt apm045_nmos (d g s b)
+parameters w=1u l=50n
+parameters apm__match_size=(w*l)/(1u*100n)
+parameters apm__vth_a=1.08077503626816 apm__vth_b=0.00938311874173147
+parameters apm__drive_a=0.857363479940225 apm__drive_b=-0.124769466526922
+parameters apm__vth_intent=0.012*apm_bench_n_vth_process_z+0.008*apm__mos_vth_local_z/sqrt(apm__match_size)
+parameters apm__drive_intent=(1+0.04*apm_bench_n_drive_process_z)*(1+0.025*apm__mos_drive_local_z/sqrt(apm__match_size))-1
+parameters apm__vth_raw=2*apm__vth_intent/(apm__vth_a+sqrt(apm__vth_a*apm__vth_a+4*apm__vth_b*apm__vth_intent))
+parameters apm__drive_raw=1+2*apm__drive_intent/(apm__drive_a+sqrt(apm__drive_a*apm__drive_a+4*apm__drive_b*apm__drive_intent))
+Mapm045_core (d g s b) NMOS_VTG w=w l=l delvto=apm__vth_raw mulu0=apm__drive_raw
+ends apm045_nmos
+
+subckt apm045_pmos (d g s b)
+parameters w=1u l=50n
+parameters apm__match_size=(w*l)/(1u*100n)
+parameters apm__vth_a=-1.07320794892593 apm__vth_b=-0.0230269516238703
+parameters apm__drive_a=0.895264857069204 apm__drive_b=-0.10003411312335
+parameters apm__vth_intent=0.012*apm_bench_p_vth_process_z+0.008*apm__mos_vth_local_z/sqrt(apm__match_size)
+parameters apm__drive_intent=(1+0.04*apm_bench_p_drive_process_z)*(1+0.025*apm__mos_drive_local_z/sqrt(apm__match_size))-1
+parameters apm__vth_raw=2*apm__vth_intent/(apm__vth_a-sqrt(apm__vth_a*apm__vth_a+4*apm__vth_b*apm__vth_intent))
+parameters apm__drive_raw=1+2*apm__drive_intent/(apm__drive_a+sqrt(apm__drive_a*apm__drive_a+4*apm__drive_b*apm__drive_intent))
+Mapm045_core (d g s b) PMOS_VTG w=w l=l delvto=apm__vth_raw mulu0=apm__drive_raw
+ends apm045_pmos

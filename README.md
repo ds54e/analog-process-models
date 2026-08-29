@@ -55,7 +55,12 @@ benchmark labels. See [`docs/native-variation.md`](docs/native-variation.md).
 | Spectre | **Experimental / unverified**, model-only compatibility |
 | Virtuoso | User-managed; no APM integration layer |
 
-Spectre compatibility includes model files, benchmark corners, and benchmark Monte Carlo statistics, but is not considered validated until tested in a real Spectre environment.
+Spectre compatibility includes model files for all five kits, benchmark R/C,
+five benchmark corners, and `statistics` blocks for Process, Mismatch, and All.
+It has passed the required static structural gate only and is not considered
+validated until tested in a real Spectre environment. See
+[`docs/spectre.md`](docs/spectre.md) for exact inclusion, distribution,
+geometry, correlation, translation, and claim boundaries.
 
 Virtuoso libraries, symbols, CDFs, SKILL, ADE/Maestro setup, and other Virtuoso integration are user-managed and out of scope.
 
@@ -91,10 +96,12 @@ apm characterize apm045 --output results/apm045
 apm characterization-check --output results/all-kits
 apm compare apm022 apm016f --output results/apm022-vs-apm016f
 apm apm130-native-check --output results/apm130-native
+apm spectre-check --output results/spectre-structural
 ```
 
-The repository remains under active v1.0 implementation. M0 through M8 are
-validated; experimental Spectre model files, final release validation, and
-clean-clone gates remain open. Do not interpret an implemented model as a
-foundry or silicon-correlation claim. `STATUS.md` and committed evidence
-identify the exact current boundary.
+The repository remains under active v1.0 implementation. M0 through M8 have
+real-tool evidence; M9's model-only Spectre gate is structurally checked while
+the backend remains explicitly experimental/unverified. Final release,
+licensing, claim-audit, and clean-clone gates remain open. Do not interpret an
+implemented model as a foundry or silicon-correlation claim. `STATUS.md` and
+committed evidence identify the exact current boundary.

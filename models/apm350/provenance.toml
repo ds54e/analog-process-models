@@ -22,7 +22,8 @@ research_retrieved_utc = "2026-08-30"
 "ngspice/apm350_models.inc" = "2cd8e7fd7bd9dbec3e269959b2342d6d7a1a1609c6198c89931de676d47c8dc1"
 "ngspice/apm350_wrappers.inc" = "d410758e2101f9da0b3be463b4ad2e4a96e613d6640e27a03d72deef0fbf147b"
 "parameter_generation.md" = "e44b8a4eab54e922367ceba4b4c81cf21b25cf758d12bfd4d44498c7474004cc"
-"README.md" = "1d8c25f4d616f0646d0fbeeb6e681da2af10e26619a03b6d826da6be36152b82"
+"README.md" = "057f5c284a411751099ff9be4d95781c3911bef65bbead7e23c4aa8b96612b4e"
+"spectre/apm350.scs" = "a655397c7287a878ddc67fcac01f9bc371406509affe013320199e0c4cf172d1"
 
 [[source.research_inputs]]
 title = "Technology: MOSIS Scalable CMOS / SCN4M_SUBM class description"
@@ -79,3 +80,9 @@ native = false
 [validation]
 ngspice = "M6 nominal terminal characterization and benchmark-adapter validation passed; see validation/evidence/m6-apm350.md"
 spectre = "experimental_unverified"
+
+[spectre]
+status = "experimental_unverified"
+artifact = "spectre/apm350.scs"
+model_route = "native Spectre BSIM3v3 through SPICE level-49 mapping"
+real_tool_validation = false

@@ -23,3 +23,8 @@ Xp d g s b apm016f_pfet l=16n nfin=2
 The supported characterization set uses `l` = 16, 32, or 64 nm and `nfin` = 1,
 2, or 4. See [parameter_generation.md](parameter_generation.md) for input
 sources, authored choices, and model limitations.
+
+The model-only Spectre artifact is `spectre/apm016f.scs`. It preserves the same
+public names and discrete `l,nfin` sizing and selects native Spectre BSIM-CMG.
+It is **experimental/unverified**; confirm local model-version support with
+`spectre -h bsimcmg` and see [`docs/spectre.md`](../../docs/spectre.md).

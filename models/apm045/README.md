@@ -48,6 +48,8 @@ temperatures -40, 27, 85, and 125 degC. Outputs follow the terminal conventions
 in `RESULT_CONTRACT.md`; see `docs/characterization.md` for the concrete file
 layout. Full result directories are deliberately untracked.
 
-Spectre support is experimental/unverified and handled separately. This kit
-does not provide layout, PCells, DRC, LVS, PEX, standard cells, or Virtuoso
-integration.
+The model-only Spectre artifact is `spectre/apm045.scs`. It preserves the same
+public names and `w,l` sizing and selects native Spectre BSIM4 through the
+SPICE level-54 mapping. It is **experimental/unverified**; see
+[`docs/spectre.md`](../../docs/spectre.md). This kit does not provide layout,
+PCells, DRC, LVS, PEX, standard cells, or Virtuoso integration.

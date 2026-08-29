@@ -10,7 +10,7 @@ It is **not** evidence by itself. Validation claims must point to committed summ
 - Repository: https://github.com/ds54e/analog-process-models
 - Target: v1.0.0
 - Current state: `IN_PROGRESS`
-- Current milestone: `M9 Spectre model-only compatibility`
+- Current milestone: `M10 License/provenance + clean-clone release review`
 - Release eligible: `NO`
 
 ## Reported initial environment
@@ -37,8 +37,8 @@ See `ENVIRONMENT.md`. M0 verified the host and bootstrapped the project-local re
 | M6 APM350 | VALIDATED | `validation/evidence/m6-apm350.md`: independently authored open generic BSIM3 cards, rejected-source license audit, complete terminal characterization, and fifth benchmark adapter passed. |
 | M7 Common characterization completion | VALIDATED | `validation/evidence/m7-all-kits.md`: fresh all-kit execution, complete result-contract audits, normalized terminal comparison, and explicit planar-per-width versus FinFET-per-fin semantics passed. |
 | M8 IHP-native variation | VALIDATED | `validation/evidence/m8-apm130-native.md`: all five IHP corners plus 128-sample native process/mismatch cohorts, replay, global/local semantics, and geometry scaling passed in ngspice. |
-| M9 Spectre model-only compatibility | IN_PROGRESS | Add model-only artifacts for all five kits with benchmark Process/Mismatch/All statistics and explicit experimental/unverified status. |
-| M10 License/provenance + clean-clone release review | NOT_STARTED | — |
+| M9 Spectre model-only compatibility | VALIDATED | `validation/evidence/m9-spectre.md`: all five kits, benchmark R/C, five corners, Process/Mismatch/All statistics, provenance, and model-only scope passed the required static gate; backend remains experimental/unverified with no Spectre parse claim. |
+| M10 License/provenance + clean-clone release review | IN_PROGRESS | Implement the release validator, finish metadata/claim/licensing audits, then execute the full fresh-clone release protocol. |
 
 Allowed milestone status values:
 
@@ -73,7 +73,7 @@ The normative gate definition is `validation/release_gates.toml`.
 Validated gates: `runtime.wsl2_el9`, `runtime.ngspice_headless`,
 `runtime.psp103_osdi`, `runtime.bsimcmg_osdi`, `models.all_kits`,
 `characterization.all_kits`, `passives.benchmark`, `variation.benchmark`,
-`variation.apm130_native`, and `finfet.integrity`.
+`variation.apm130_native`, `finfet.integrity`, and `spectre.model_only`.
 
 All remaining gates are unvalidated.
 
@@ -130,6 +130,18 @@ A blocker entry should state:
   profile because upstream provides none. The sole 1e-9 relative PMOS
   `dphiblw` process entry is persisted but explicitly classified as effectively
   fixed at ngspice 47 expanded-deck precision; 33 process fields vary measurably.
+- Spectre v1 artifacts are a model-only, static-checked layer with one common
+  variation library: five deterministic benchmark sections and a `bench_mc`
+  section whose normal Spectre `process`/`mismatch` blocks support user-selected
+  Process, Mismatch, or All. Six process variables are independent/global;
+  four mismatch variables are independent and referenced within regular
+  device/passive subcircuits for per-instance sampling. Public sizing remains
+  planar `w,l` or FinFET `l,nfin`; no testbench or Virtuoso asset is shipped.
+- APM130's Spectre nominal card is a deterministic Apache-2.0 translation of
+  the pinned IHP TT QS subset. It preserves the selected 34 global and two N/P
+  model-block parameter values, changes only `psp103va` to native `psp103`, and
+  fixes upstream wrapper-scope inputs. IHP-native Spectre MC, Spectre parsing,
+  and numerical conformance remain explicitly unclaimed.
 
 Only record decisions that materially affect public API, model provenance/fidelity, characterization semantics, variation semantics, supported runtime, or release claims. Do not use this section as a verbose work diary.
 
@@ -156,6 +168,9 @@ When a material decision intentionally departs from `PROJECT_CONTEXT.md`, record
 - `validation/evidence/m8-apm130-native.md` — five pinned IHP corner profiles,
   model-global native process sampling, instance-local native mismatch,
   deterministic replay, and upstream geometry scaling in real ngspice.
+- `validation/evidence/m9-spectre.md` — structurally checked model-only files
+  for all five kits, common corners/statistics/passives, exact adapter and
+  provenance audits, and explicit experimental/unverified evidence boundary.
 
 ## Final-review fields
 

@@ -26,3 +26,8 @@ See [parameter_generation.md](parameter_generation.md) for the rejected-source
 license audit, independent parameter choices, terminal behavior contract, and
 limitations. Regenerate nominal evidence with
 `apm characterize apm350 --output DIR`.
+
+The model-only Spectre artifact is `spectre/apm350.scs`. It preserves the same
+public names and `w,l` sizing and selects native Spectre BSIM3v3 through the
+SPICE level-49 mapping. It is **experimental/unverified**; see
+[`docs/spectre.md`](../../docs/spectre.md).

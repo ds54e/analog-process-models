@@ -45,11 +45,15 @@ model_card_license = "Apache-2.0"
 [source.apm_authored_files]
 "ngspice/apm130_wrappers.inc" = "779335d18ad8fce7b3b2c4df66cdcb617759842609299aeff7fba0954f0d7a97"
 "ngspice/apm130_native_mismatch_wrappers.inc" = "598448e47d358ebd2e427170a6bd48cff587c94e7b5812f0e4a7fcf12964fddc"
+"spectre/apm130.scs" = "fc783a1e3c963a5bdaf6db92700f67621e2fdaefaa67e8ac8d3cee9b6272cdea"
+
+[source.transformed_files]
+"spectre/sg13g2_lv_psp103_tt.sp" = "338936fe4fe8a6bbbf26b83941fa75a86aec77bfc697ece7d9c0dc44deabb752"
 
 [redistribution]
 ship_in_repo = true
-selection = "PSP/JUNCAP Verilog-A package and IHP low-voltage MOS ngspice files only"
-modifications = "none; exact upstream bytes copied into shortened vendor paths"
+selection = "PSP/JUNCAP Verilog-A package, IHP low-voltage MOS ngspice files, and a generated TT QS Spectre-native PSP103 translation"
+modifications = "vendored upstream bytes are unmodified; generated Spectre card selects the 34 TT globals and two QS blocks, changes only psp103va to psp103, and fixes wrapper-scope ng/pre_layout/SWSOA values"
 upstream_notices_preserved = true
 
 [device_scope]
@@ -70,3 +74,13 @@ spectre_native_mc_claimed = false
 [validation]
 ngspice = "M1 nominal and M8 IHP-native corner/process/mismatch flows validated; see validation/evidence/m1-apm130.md and validation/evidence/m8-apm130-native.md"
 spectre = "experimental_unverified"
+
+[spectre]
+status = "experimental_unverified"
+artifact = "spectre/apm130.scs"
+translated_model_artifact = "spectre/sg13g2_lv_psp103_tt.sp"
+generator = "tools/generate_spectre_psp.py"
+generator_sha256 = "fefb6ecf6856ef6b9e93094e83c23762760d2421f6de0d6e52de0e063758a9bd"
+model_route = "native Spectre PSP103 using deterministic IHP TT-card translation"
+ihp_native_mc_claimed = false
+real_tool_validation = false

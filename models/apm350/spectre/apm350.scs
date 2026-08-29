@@ -1,0 +1,37 @@
+// SPDX-FileCopyrightText: APM contributors
+// SPDX-License-Identifier: Apache-2.0
+//
+// APM Spectre model-only compatibility
+// EXPERIMENTAL / UNVERIFIED
+//
+// Static structural checks only; no Spectre parse or numerical validation.
+// Native Spectre BSIM3v3 is selected through the SPICE level-49 mapping.
+// Include variation/spectre/benchmark_variation.scs with exactly one section.
+
+simulator lang=spice
+.include "../ngspice/apm350_models.inc"
+simulator lang=spectre
+
+subckt apm350_nmos (d g s b)
+parameters w=1u l=400n
+parameters apm__match_size=(w*l)/(1u*800n)
+parameters apm__vth_a=1.0065191151254738 apm__vth_b=0.003824214540348056
+parameters apm__drive_a=0.9790745600099618 apm__drive_b=-0.035149267076114946
+parameters apm__vth_intent=0.012*apm_bench_n_vth_process_z+0.008*apm__mos_vth_local_z/sqrt(apm__match_size)
+parameters apm__drive_intent=(1+0.04*apm_bench_n_drive_process_z)*(1+0.025*apm__mos_drive_local_z/sqrt(apm__match_size))-1
+parameters apm__vth_raw=2*apm__vth_intent/(apm__vth_a+sqrt(apm__vth_a*apm__vth_a+4*apm__vth_b*apm__vth_intent))
+parameters apm__drive_raw=1+2*apm__drive_intent/(apm__drive_a+sqrt(apm__drive_a*apm__drive_a+4*apm__drive_b*apm__drive_intent))
+Mapm350_core (d g s b) apm350_ncore w=w l=l ad=w*400n as=w*400n pd=2*w+800n ps=2*w+800n delvto=apm__vth_raw mulu0=apm__drive_raw
+ends apm350_nmos
+
+subckt apm350_pmos (d g s b)
+parameters w=1u l=400n
+parameters apm__match_size=(w*l)/(1u*800n)
+parameters apm__vth_a=-1.0080210302566797 apm__vth_b=0.0044834531758709455
+parameters apm__drive_a=1.0099635741452764 apm__drive_b=-0.011411120200580464
+parameters apm__vth_intent=0.012*apm_bench_p_vth_process_z+0.008*apm__mos_vth_local_z/sqrt(apm__match_size)
+parameters apm__drive_intent=(1+0.04*apm_bench_p_drive_process_z)*(1+0.025*apm__mos_drive_local_z/sqrt(apm__match_size))-1
+parameters apm__vth_raw=2*apm__vth_intent/(apm__vth_a-sqrt(apm__vth_a*apm__vth_a+4*apm__vth_b*apm__vth_intent))
+parameters apm__drive_raw=1+2*apm__drive_intent/(apm__drive_a+sqrt(apm__drive_a*apm__drive_a+4*apm__drive_b*apm__drive_intent))
+Mapm350_core (d g s b) apm350_pcore w=w l=l ad=w*400n as=w*400n pd=2*w+800n ps=2*w+800n delvto=apm__vth_raw mulu0=apm__drive_raw
+ends apm350_pmos

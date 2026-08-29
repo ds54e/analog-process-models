@@ -72,7 +72,10 @@ in `RESULT_CONTRACT.md`; see `docs/characterization.md` for the concrete file
 layout. Generated OSDI binaries and full result directories are deliberately
 untracked.
 
-Spectre support is experimental/unverified and is handled separately. IHP-native
-Spectre Monte Carlo is not claimed. Nothing
-in this kit provides Virtuoso integration, layout, PCells, DRC, LVS, PEX, or
+The model-only Spectre artifact is `spectre/apm130.scs`, backed by the
+deterministically translated native-PSP103 TT card in the same directory. It
+preserves the public names and `w,l` sizing and supports APM benchmark
+statistics only. It is **experimental/unverified**; IHP-native Spectre Monte
+Carlo is not claimed. See [`docs/spectre.md`](../../docs/spectre.md). Nothing in
+this kit provides Virtuoso integration, layout, PCells, DRC, LVS, PEX, or
 foundry signoff.

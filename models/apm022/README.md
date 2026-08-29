@@ -24,3 +24,8 @@ See [parameter_generation.md](parameter_generation.md) for the independent
 input sources, authored parameter decisions, measured behavior contract, and
 limitations. Use `apm characterize apm022 --output DIR` to regenerate the
 complete nominal terminal-characterization evidence.
+
+The model-only Spectre artifact is `spectre/apm022.scs`. It preserves the same
+public names and `w,l` sizing and selects native Spectre BSIM4 through the
+SPICE level-54 mapping. It is **experimental/unverified**; see
+[`docs/spectre.md`](../../docs/spectre.md).

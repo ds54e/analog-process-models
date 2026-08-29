@@ -23,6 +23,7 @@ retrieved_utc = "2026-08-29"
 "ngspice/apm016f_models.inc" = "afd4b6905d4176e4f0f7802d8f0434fd6f2d51a2dd40abf28cddaa8fe104a323"
 "ngspice/apm016f_wrappers.inc" = "4bbcb2bb7c8573e51fdad316e686b885c1d32614151cf0a38bb258059607ceea"
 "parameter_generation.md" = "5a14e7b8a0a8169de9439c44ba0b15d114813b7b8991ca1c7e2bb3922fb967ac"
+"spectre/apm016f.scs" = "7e372cd832a86ee87554a744b1998d37407d291606fdba56a586858a4b2b0b4f"
 
 [source.imported_files]
 "vendor/bsim-cmg-112.1.0/LICENSE.txt" = "4d202b27df0df53f021ad2ba5cb2d0e7e62a9025e6a9786952c67be7111edea8"
@@ -69,3 +70,9 @@ native = false
 [validation]
 ngspice = "M3 complete nominal terminal characterization passed with BSIM-CMG 112.1.0 OSDI at NFIN 1, 2, and 4; see validation/evidence/m3-apm016f.md"
 spectre = "experimental_unverified"
+
+[spectre]
+status = "experimental_unverified"
+artifact = "spectre/apm016f.scs"
+model_route = "native Spectre BSIM-CMG"
+real_tool_validation = false

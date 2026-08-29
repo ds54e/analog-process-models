@@ -34,8 +34,13 @@ Pinned source: IHP SG13G2 Open PDK commit
 `331c00484213b13414777eec1336ef5c29b969bd`. The vendored subset contains only the
 low-voltage MOS ngspice cards (Apache-2.0) and the PSP 103.8.2/JUNCAP 200.6.2
 Verilog-A source package (`LicenseRef-Si2-PSP-103.8.2`). The model cards identify
-PSP 103.6; they have been tested with the newer backward-compatible engine. No
-vendored file was modified. Exact file hashes are in `models/apm130/provenance.toml`.
+PSP 103.6; they have been tested with the newer backward-compatible engine.
+Vendored upstream files remain byte-identical. A generated Apache-2.0 Spectre
+derivative selects the IHP TT N/P QS blocks, preserves all selected parameter
+values and notices, changes only the OpenVAF model-type name `psp103va` to the
+native Spectre name `psp103`, and fixes wrapper-only inputs. Its generator,
+transformation record, source hashes, and output hash are in
+`models/apm130/provenance.toml` and `docs/spectre.md`.
 
 ### APM045
 

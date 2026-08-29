@@ -1,0 +1,23 @@
+// SPDX-FileCopyrightText: APM contributors
+// SPDX-License-Identifier: Apache-2.0
+//
+// APM Spectre model-only compatibility
+// EXPERIMENTAL / UNVERIFIED
+//
+// Static structural checks only; no Spectre parse or numerical validation.
+// Include variation/spectre/benchmark_variation.scs with exactly one section
+// before this file so the global process parameters are defined.
+
+simulator lang=spectre
+
+subckt Rbench (p n)
+parameters value=1k tc1=0 match_size=1
+parameters apm__r_scale=(1+0.02*apm_bench_r_process_z)*(1+0.01*apm__r_local_z/sqrt(match_size))
+Rbench_core (p n) resistor r=value*apm__r_scale tc1=tc1 tnom=27
+ends Rbench
+
+subckt Cbench (p n)
+parameters value=1p tc1=0 match_size=1
+parameters apm__c_scale=(1+0.02*apm_bench_c_process_z)*(1+0.01*apm__c_local_z/sqrt(match_size))
+Cbench_core (p n) capacitor c=value*apm__c_scale tc1=tc1 tnom=27
+ends Cbench
