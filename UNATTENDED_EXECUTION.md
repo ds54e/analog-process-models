@@ -12,12 +12,13 @@ Use this order when repository instructions appear to conflict:
 2. `AGENTS.md` — mandatory repository policy and guardrails
 3. `GOAL.md` — authoritative v1.0 scope, requirements, and Definition of Done
 4. this file — unattended execution procedure
-5. `PROJECT_CONTEXT.md` — informative design history and rationale
-6. `ENVIRONMENT.md` — reported initial environment and M0 bootstrap expectations
-7. `RESEARCH_BASELINE.md` — dated external-research baseline
-8. `README.md` — public-facing project description
+5. `RESULT_CONTRACT.md` — stable v1 result semantics subordinate to the goal/policy
+6. `PROJECT_CONTEXT.md` — informative design history and rationale
+7. `ENVIRONMENT.md` — reported initial environment and M0 bootstrap expectations
+8. `RESEARCH_BASELINE.md` — dated external-research baseline
+9. `README.md` — public-facing project description
 
-`PROJECT_CONTEXT.md`, `ENVIRONMENT.md`, and `RESEARCH_BASELINE.md` provide context and starting assumptions, but they are not allowed to override the normative contract above them. Current authoritative upstream evidence or actual tool behavior may supersede a dated research baseline; record material changes in `STATUS.md` and provenance/evidence.
+`PROJECT_CONTEXT.md`, `ENVIRONMENT.md`, and `RESEARCH_BASELINE.md` provide context and starting assumptions, but they are not allowed to override the normative contract above them. `RESULT_CONTRACT.md` defines common persisted-result semantics but also remains subordinate to `AGENTS.md` and `GOAL.md`. Current authoritative upstream evidence or actual tool behavior may supersede a dated research baseline; record material changes in `STATUS.md` and provenance/evidence.
 
 Do not silently resolve a material conflict by dropping a harder requirement. Prefer the stricter interpretation and record the decision in `STATUS.md`.
 
@@ -34,7 +35,7 @@ Do not create a nested container or alternate Linux VM merely to claim that the 
 Before implementation work:
 
 1. Confirm the working repository origin is `https://github.com/ds54e/analog-process-models`.
-2. Read `AGENTS.md`, `GOAL.md`, `PROJECT_CONTEXT.md`, `ENVIRONMENT.md`, `RESEARCH_BASELINE.md`, `UNATTENDED_EXECUTION.md`, and `README.md` completely.
+2. Read `AGENTS.md`, `GOAL.md`, `RESULT_CONTRACT.md`, `PROJECT_CONTEXT.md`, `ENVIRONMENT.md`, `RESEARCH_BASELINE.md`, `UNATTENDED_EXECUTION.md`, and `README.md` completely.
 3. Read `validation/release_gates.toml` and `STATUS.md` before deciding what is already complete.
 4. Inspect `git status` before changing anything.
 5. Preserve any pre-existing user changes. Never use destructive `git reset --hard`, `git clean -fdx`, force-push, or history rewriting to obtain a clean tree.
@@ -43,7 +44,7 @@ Before implementation work:
 8. Bootstrap the required M0 toolchain when absent. For the initial target, this means Python >=3.9, ngspice 47 with OSDI, and OpenVAF-ReLoaded where Verilog-A-to-OSDI compilation is required.
 9. Begin actual model qualification with M0 from `GOAL.md`; do not start by inventing a generic framework.
 
-Use `PROJECT_CONTEXT.md` to understand settled rationale before reopening architecture questions. Use `RESEARCH_BASELINE.md` to avoid repeating already-completed discovery, but re-check authoritative upstream sources before pinning a revision or making a release claim. A different implementation is acceptable when new authoritative evidence or actual tool behavior requires it, but record material departures and their evidence in `STATUS.md` rather than silently replacing the original design intent.
+Use `PROJECT_CONTEXT.md` to understand settled rationale before reopening architecture questions. Use `RESEARCH_BASELINE.md` to avoid repeating already-completed discovery, but re-check authoritative upstream sources before pinning a revision or making a release claim. Preserve the common persisted-result semantics in `RESULT_CONTRACT.md` while implementing each kit so results remain comparable. A different implementation is acceptable when new authoritative evidence or actual tool behavior requires it, but record material departures and their evidence in `STATUS.md` rather than silently replacing the original design intent.
 
 ## M0 toolchain bootstrap discipline
 
@@ -75,7 +76,7 @@ For each milestone:
 
 1. Re-read the relevant `GOAL.md` requirements and relevant rationale in `PROJECT_CONTEXT.md`.
 2. Re-check any dated upstream fact from `RESEARCH_BASELINE.md` that will become a pinned dependency, vendored asset, or release claim.
-3. Implement the smallest complete design that satisfies the milestone and preserves the public contract.
+3. Implement the smallest complete design that satisfies the milestone and preserves the public and result contracts.
 4. Run milestone-level tests using the actual tools whenever available.
 5. Investigate failures rather than weakening assertions or changing requirements to match broken behavior.
 6. Record compact validation evidence under `validation/evidence/`.
