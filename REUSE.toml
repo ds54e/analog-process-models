@@ -1,0 +1,22 @@
+version = 1
+
+[[annotations]]
+path = [
+  "README.md",
+  "GOAL.md",
+  "AGENTS.md",
+  ".gitignore",
+  "pyproject.toml",
+  "src/**",
+  "variation/**",
+  "passives/**",
+  "examples/**",
+  "tools/**",
+  "tests/**"
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "APM contributors"
+SPDX-License-Identifier = "Apache-2.0"
+
+# Vendored model files are intentionally NOT covered by this aggregate annotation.
+# Add file-level or directory-level annotations only after exact upstream license audit.
