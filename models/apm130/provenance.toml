@@ -60,5 +60,5 @@ native_mismatch = true
 spectre_native_mc_claimed = false
 
 [validation]
-ngspice = "M0 nominal PSP103 OSDI smoke passed; full M1 characterization pending"
+ngspice = "M1 nominal public-kit characterization validated; see validation/evidence/m1-apm130.md"
 spectre = "experimental_unverified"

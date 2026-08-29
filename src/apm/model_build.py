@@ -34,9 +34,43 @@ def _source_manifest(source: Path) -> dict[str, str]:
     }
 
 
-def build_models(toolchain: Toolchain | None = None) -> dict[str, Any]:
+def _cached_build(toolchain: Toolchain) -> dict[str, Any] | None:
+    metadata_path = toolchain.osdi_directory / "build.json"
+    if not metadata_path.is_file():
+        return None
+    try:
+        metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+        if metadata.get("schema") != "apm.model-build.v1":
+            return None
+        if metadata.get("openvaf_sha256") != sha256_file(toolchain.openvaf):
+            return None
+        artifacts = {item["model_id"]: item for item in metadata["artifacts"]}
+        if set(artifacts) != set(MODEL_SOURCES):
+            return None
+        for model_id, relative_source in MODEL_SOURCES.items():
+            source = toolchain.root / relative_source
+            artifact = artifacts[model_id]
+            output = toolchain.osdi_directory / f"{model_id}.osdi"
+            if Path(artifact["output"]).resolve() != output.resolve():
+                return None
+            if artifact["source_manifest_sha256"] != _source_manifest(source):
+                return None
+            if not output.is_file() or artifact["output_sha256"] != sha256_file(output):
+                return None
+    except (KeyError, OSError, TypeError, ValueError, json.JSONDecodeError):
+        return None
+    metadata["metadata_path"] = str(metadata_path)
+    metadata["cache_status"] = "verified_reuse"
+    return metadata
+
+
+def build_models(toolchain: Toolchain | None = None, *, force: bool = True) -> dict[str, Any]:
     selected = toolchain or resolve_toolchain()
     selected.osdi_directory.mkdir(parents=True, exist_ok=True)
+    if not force:
+        cached = _cached_build(selected)
+        if cached is not None:
+            return cached
     compiler_version = run_checked(
         [selected.openvaf, "--version"], environment=selected.environment()
     )
@@ -87,4 +121,5 @@ def build_models(toolchain: Toolchain | None = None) -> dict[str, Any]:
         json.dumps(metadata, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     metadata["metadata_path"] = str(metadata_path)
+    metadata["cache_status"] = "rebuilt"
     return metadata

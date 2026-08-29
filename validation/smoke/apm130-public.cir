@@ -1,0 +1,23 @@
+* SPDX-FileCopyrightText: APM contributors
+* SPDX-License-Identifier: Apache-2.0
+* APM130 public-wrapper nominal smoke
+
+.lib ../../models/apm130/vendor/ihp-sg13g2-models/cornerMOSlv.lib mos_tt
+.include ../../models/apm130/ngspice/apm130_wrappers.inc
+
+Vnd nd 0 1.0
+Vng ng 0 1.0
+Xn nd ng 0 0 apm130_nmos w=1u l=0.13u
+
+Vpd pd 0 -1.0
+Vpg pg 0 -1.0
+Xp pd pg 0 0 apm130_pmos w=1u l=0.13u
+
+.control
+pre_osdi ../../.apm/build/osdi/psp103.osdi
+pre_osdi ../../.apm/build/osdi/psp103-nqs.osdi
+op
+print i(vnd) i(vpd)
+quit
+.endc
+.end

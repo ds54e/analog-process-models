@@ -20,9 +20,13 @@ path = [
   "passives/**",
   "validation/**",
   "examples/**",
+  "docs/**",
   "tools/**",
   "tests/**",
-  "models/*/provenance.toml"
+  "models/*/provenance.toml",
+  "models/*/README.md",
+  "models/*/kit.toml",
+  "models/*/ngspice/**"
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "APM contributors"

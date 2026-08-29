@@ -3,7 +3,9 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from pathlib import Path
 
+from .characterize import CharacterizationError, characterize
 from .doctor import run_doctor
 from .model_build import build_models
 from .toolchain import ToolchainError
@@ -23,6 +25,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_char = sub.add_parser("characterize", help="Characterize one technology kit")
     p_char.add_argument("technology", choices=TECHNOLOGIES)
+    p_char.add_argument(
+        "--output",
+        type=Path,
+        help="Result directory (default: a new UTC-stamped directory below results/<technology>)",
+    )
 
     p_validate = sub.add_parser("validate", help="Run repository validation/regression checks")
     p_validate.add_argument(
@@ -53,7 +60,11 @@ def main() -> int:
             result = run_doctor()
             print(json.dumps(result, indent=2, sort_keys=True))
             return 0
-    except (FileNotFoundError, RuntimeError, ToolchainError) as error:
+        if args.command == "characterize":
+            result = characterize(args.technology, args.output)
+            print(json.dumps(result, indent=2, sort_keys=True))
+            return 0
+    except (CharacterizationError, FileNotFoundError, RuntimeError, ToolchainError) as error:
         print(f"apm {args.command}: {error}", file=sys.stderr)
         return 1
     mode = " --release" if args.command == "validate" and args.release else ""

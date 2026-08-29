@@ -8,6 +8,7 @@ try:
 except ModuleNotFoundError:  # Python 3.9/3.10 on EL9-compatible environments
     import tomli as tomllib
 
+from apm.characterize import _capacitance_rows, _threshold_crossing
 from apm.cli import TECHNOLOGIES, build_parser
 from apm.doctor import _extract_observables
 from apm.model_build import MODEL_SOURCES
@@ -84,9 +85,57 @@ def test_required_osdi_sources_are_self_contained() -> None:
         assert (ROOT / source).is_file()
 
 
+def test_apm130_public_wrapper_hides_upstream_multiplicity() -> None:
+    kit = load_toml("models/apm130/kit.toml")
+    assert kit["nominal_vdd_v"] == 1.2
+    assert kit["model_lmin_m"] == 1.3e-7
+    assert kit["public_devices"]["parameters"] == ["w", "l"]
+    wrapper = (ROOT / "models/apm130/ngspice/apm130_wrappers.inc").read_text()
+    assert ".subckt apm130_nmos d g s b w=1u l=0.13u" in wrapper
+    assert ".subckt apm130_pmos d g s b w=1u l=0.13u" in wrapper
+    for forbidden in (" m=", " nf=", " ng="):
+        assert forbidden not in wrapper.lower()
+
+
 def test_doctor_observable_parser_ignores_unrelated_equals_signs() -> None:
     output = "TEMP = 27 and TNOM = 27\ni(vd) = -2.5e-4\n@m1[gm] = 4.0e-4\n"
     assert _extract_observables(output) == {"i(vd)": -2.5e-4, "@m1[gm]": 4.0e-4}
+
+
+def test_constant_current_threshold_is_linearly_interpolated() -> None:
+    curve = [
+        {"vctrl_v": 0.3, "idmag_a": 1.0e-7},
+        {"vctrl_v": 0.4, "idmag_a": 3.0e-7},
+    ]
+    assert _threshold_crossing(curve, 2.0e-7) == 0.35
+
+
+def test_capacitance_derivation_uses_raw_gate_y_terms() -> None:
+    import math
+
+    frequency = 1.0e6
+    omega = 2.0 * math.pi * frequency
+    imag = [[0.0] * 4 for _ in range(4)]
+    imag[1][1] = omega * 2.0e-15
+    imag[1][0] = -omega * 3.0e-16
+    imag[1][2] = -omega * 4.0e-16
+    record = {
+        "kit_id": "apm130",
+        "public_device": "apm130_nmos",
+        "polarity": "n",
+        "temperature_c": 27,
+        "w_m": 1.0e-6,
+        "l_m": 1.3e-7,
+        "l_over_lmin": 1.0,
+        "vctrl_v": 0.6,
+        "vout_v": 0.6,
+        "frequency_hz": frequency,
+        "y_imag_s": imag,
+    }
+    row = _capacitance_rows([record])[0]
+    assert math.isclose(row["cgg_f"], 2.0e-15)
+    assert math.isclose(row["cgd_f"], 3.0e-16)
+    assert math.isclose(row["cgs_f"], 4.0e-16)
 
 
 def test_apm_authored_scaled_models_are_explicitly_not_ptm_derived() -> None:
