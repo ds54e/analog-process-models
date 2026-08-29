@@ -1,0 +1,28 @@
+id = "apm130"
+technology_class = "130nm"
+architecture = "planar_bulk"
+compact_model = "psp103"
+model_origin = "foundry_derived_open"
+foundry_correlated = "upstream-derived; APM makes no silicon-correlation guarantee"
+
+[source]
+status = "planned-vendor-subset"
+project = "IHP SG13G2 Open PDK"
+url = "https://github.com/IHP-GmbH/IHP-Open-PDK"
+revision = "TBD"
+license = "Apache-2.0 plus exact model-source terms to preserve"
+
+[device_scope]
+include = ["low-voltage NMOS", "low-voltage PMOS"]
+exclude_v1 = ["HBT", "high-voltage MOS", "RF devices"]
+
+[variation]
+benchmark = true
+native_corners = true
+native_process = true
+native_mismatch = true
+spectre_native_mc_claimed = false
+
+[validation]
+ngspice = "not_started"
+spectre = "experimental_unverified"
