@@ -15,6 +15,7 @@ reference_simulator = "ngspice"
 target_version = "1.0.0"
 package_version_must_match_target = true
 release_notes_required = true
+release_notes_path = "CHANGELOG.md"
 unresolved_release_placeholders_forbidden = true
 placeholder_scan_paths = [
   "models/*/provenance.toml",
@@ -203,7 +204,7 @@ summary = "No separate transistor-model download is required after cloning the r
 id = "release.metadata_complete"
 required = true
 validation = "tests_and_audit"
-summary = "Package/version metadata identifies v1.0.0, release notes exist, and no release-critical TBD/candidate/not-started placeholders remain."
+summary = "Package/version metadata identifies v1.0.0, CHANGELOG.md contains the release notes, and no release-critical TBD/candidate/not-started placeholders remain."
 
 [[gate]]
 id = "release.clean_clone"
