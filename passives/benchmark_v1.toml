@@ -8,6 +8,7 @@ process_sigma = "TBD"
 mismatch_sigma_ref = "TBD"
 mismatch_scaling_law = "sigma_ref/sqrt(match_size)"
 implementation = "resolved concrete SPICE resistor value"
+positive_scale_semantic = "positive perturbation increases resolved resistance"
 
 [capacitor]
 public_name = "Cbench"
@@ -16,8 +17,18 @@ process_sigma = "TBD"
 mismatch_sigma_ref = "TBD"
 mismatch_scaling_law = "sigma_ref/sqrt(match_size)"
 implementation = "resolved concrete SPICE capacitor value"
+positive_scale_semantic = "positive perturbation increases resolved capacitance"
+
+[variation]
+process_scope = "global per passive class within one benchmark sample"
+mismatch_scope = "local per APM passive instance"
+process_vs_mismatch = "independent_by_default"
+resistor_vs_capacitor_process = "independent_by_default"
+composition = "multiplicative scale factors applied to nominal value"
 
 [requirements]
 match_size_is_dimensionless = true
 technology_neutral = true
 native_passives_optional = true
+explicit_sign_semantics = true
+explicit_correlation_semantics = true
