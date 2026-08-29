@@ -92,3 +92,31 @@ def test_reference_clean_clone_is_required_and_visibility_change_forbidden() -> 
     assert policy["repository_visibility_may_change"] is False
     assert policy["missing_evidence_is_failure"] is True
     assert policy["required_skipped_check_is_failure"] is True
+
+
+def test_release_contract_requires_final_version_and_resolved_metadata() -> None:
+    gates = load_toml("validation/release_gates.toml")
+    release = gates["release_metadata"]
+    assert release["target_version"] == "1.0.0"
+    assert release["package_version_must_match_target"] is True
+    assert release["release_notes_required"] is True
+    assert release["unresolved_release_placeholders_forbidden"] is True
+    assert "TBD" in release["forbidden_release_placeholder_tokens"]
+    assert "not_started" in release["forbidden_release_placeholder_tokens"]
+    gate_ids = {gate["id"] for gate in gates["gate"]}
+    assert "release.metadata_complete" in gate_ids
+
+
+def test_project_context_exists_and_is_explicitly_informative() -> None:
+    text = (ROOT / "PROJECT_CONTEXT.md").read_text(encoding="utf-8")
+    assert "informative, not normative" in text
+    assert "Commonize the characterization contract, not the compact-model API" in text
+    assert "PTM/PTM-MG" in text
+
+
+def test_unattended_protocol_requires_project_context_and_status() -> None:
+    text = (ROOT / "UNATTENDED_EXECUTION.md").read_text(encoding="utf-8")
+    assert "PROJECT_CONTEXT.md" in text
+    assert "STATUS.md" in text
+    assert "apm validate --release" in text
+    assert "fresh clone" in text.lower()
