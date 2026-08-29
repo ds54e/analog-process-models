@@ -25,6 +25,7 @@ path = [
   "tests/**",
   "models/*/provenance.toml",
   "models/*/README.md",
+  "models/*/parameter_generation.md",
   "models/*/kit.toml",
   "models/*/ngspice/**"
 ]

@@ -11,7 +11,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Union
 
 try:
     import tomllib
@@ -26,6 +26,63 @@ TERMINALS = ("d", "g", "s", "b")
 
 class CharacterizationError(RuntimeError):
     """A terminal characterization run could not be completed or audited."""
+
+
+@dataclass(frozen=True)
+class PlanarGeometry:
+    l_m: float
+    w_m: float
+
+    def netlist_parameters(self) -> str:
+        return f"w={self.w_m:.12g} l={self.l_m:.12g}"
+
+    def result_fields(self, lmin_m: float) -> dict[str, float]:
+        return {
+            "w_m": self.w_m,
+            "l_m": self.l_m,
+            "l_over_lmin": self.l_m / lmin_m,
+        }
+
+    def threshold_current_a(self, coefficient_a: float) -> float:
+        return coefficient_a * self.w_m / self.l_m
+
+    def job_token(self) -> str:
+        return f"l_{_float_token(self.l_m)}_w_{_float_token(self.w_m)}"
+
+    def matches(self, row: dict[str, Any]) -> bool:
+        return row.get("l_m") == self.l_m and row.get("w_m") == self.w_m
+
+
+@dataclass(frozen=True)
+class FinFETGeometry:
+    l_m: float
+    nfin: int
+
+    def __post_init__(self) -> None:
+        if isinstance(self.nfin, bool) or not isinstance(self.nfin, int) or self.nfin <= 0:
+            raise CharacterizationError("APM FinFET nfin must be a positive integer")
+
+    def netlist_parameters(self) -> str:
+        return f"l={self.l_m:.12g} nfin={self.nfin}"
+
+    def result_fields(self, lmin_m: float) -> dict[str, float | int]:
+        return {
+            "l_m": self.l_m,
+            "nfin": self.nfin,
+            "l_over_lmin": self.l_m / lmin_m,
+        }
+
+    def threshold_current_a(self, coefficient_a: float) -> float:
+        return coefficient_a * self.nfin
+
+    def job_token(self) -> str:
+        return f"l_{_float_token(self.l_m)}_nfin_{self.nfin}"
+
+    def matches(self, row: dict[str, Any]) -> bool:
+        return row.get("l_m") == self.l_m and row.get("nfin") == self.nfin
+
+
+DeviceGeometry = Union[PlanarGeometry, FinFETGeometry]
 
 
 @dataclass(frozen=True)
@@ -69,6 +126,81 @@ class PlanarKit:
     def model_source_files(self) -> tuple[Path, ...]:
         library = (self.model_library,) if self.model_library is not None else ()
         return library + self.model_includes
+
+    def geometries(self) -> tuple[PlanarGeometry, ...]:
+        return tuple(PlanarGeometry(length, self.width_m) for length in self.lengths_m)
+
+    def geometry_metadata(self) -> dict[str, Any]:
+        return {
+            "architecture": "planar_bulk",
+            "w_m": self.width_m,
+            "lengths_m": list(self.lengths_m),
+            "model_lmin_m": self.lmin_m,
+        }
+
+    @property
+    def threshold_normalization(self) -> str:
+        return "coefficient * W/L"
+
+
+@dataclass(frozen=True)
+class FinFETKit:
+    kit_id: str
+    compact_model: str
+    vdd_v: float
+    lmin_m: float
+    lengths_m: tuple[float, ...]
+    nfin_values: tuple[int, ...]
+    temperatures_c: tuple[int, ...]
+    public_devices: dict[str, Any]
+    model_includes: tuple[Path, ...]
+    wrapper_file: Path
+    osdi_artifacts: tuple[str, ...]
+    native_vector_templates: dict[str, str]
+    native_oracle_name: str
+    provenance_revision: str
+    threshold_coefficient_a: float
+    vout_low_v: float
+    vout_high_v: float
+    idvg_points: int
+    idvd_points: int
+    y_frequencies_hz: tuple[float, ...]
+    behavior_targets: dict[str, Any]
+
+    def raw_voltage(self, polarity: str, effective_voltage: float) -> float:
+        return effective_voltage if polarity == "n" else -effective_voltage
+
+    def native_vector(self, polarity: str, quantity: str) -> str:
+        return self.native_vector_templates[polarity].format(quantity=quantity)
+
+    def model_directives(self) -> tuple[str, ...]:
+        return tuple(f'.include "{path}"' for path in self.model_includes)
+
+    def model_source_files(self) -> tuple[Path, ...]:
+        return self.model_includes
+
+    def geometries(self) -> tuple[FinFETGeometry, ...]:
+        return tuple(
+            FinFETGeometry(length, nfin)
+            for length in self.lengths_m
+            for nfin in self.nfin_values
+        )
+
+    def geometry_metadata(self) -> dict[str, Any]:
+        return {
+            "architecture": "finfet",
+            "lengths_m": list(self.lengths_m),
+            "model_lmin_m": self.lmin_m,
+            "nfin_values": list(self.nfin_values),
+            "nfin_semantics": "positive integer fin count; no public effective-width field",
+        }
+
+    @property
+    def threshold_normalization(self) -> str:
+        return "coefficient * NFIN"
+
+
+CharacterizationKit = Union[PlanarKit, FinFETKit]
 
 
 def _load_apm130(root: Path) -> PlanarKit:
@@ -151,11 +283,58 @@ def _load_apm045(root: Path) -> PlanarKit:
     )
 
 
-def load_planar_kit(technology: str, root: Path) -> PlanarKit:
+def _load_apm016f(root: Path) -> FinFETKit:
+    path = root / "models/apm016f/kit.toml"
+    with path.open("rb") as handle:
+        data = tomllib.load(handle)
+    provenance_path = root / "models/apm016f/provenance.toml"
+    with provenance_path.open("rb") as handle:
+        provenance = tomllib.load(handle)
+    raw_nfin_values = data["characterization_nfin"]
+    if any(
+        isinstance(value, bool) or not isinstance(value, int) or value <= 0
+        for value in raw_nfin_values
+    ):
+        raise CharacterizationError("APM016F characterization_nfin must contain positive integers")
+    nfin_values = tuple(raw_nfin_values)
+    return FinFETKit(
+        kit_id=data["id"],
+        compact_model=data["compact_model"],
+        vdd_v=float(data["nominal_vdd_v"]),
+        lmin_m=float(data["model_lmin_m"]),
+        lengths_m=tuple(float(value) for value in data["characterization_lengths_m"]),
+        nfin_values=nfin_values,
+        temperatures_c=tuple(int(value) for value in data["temperatures_c"]),
+        public_devices=dict(data["public_devices"]),
+        model_includes=(root / "models/apm016f/ngspice/apm016f_models.inc",),
+        wrapper_file=root / "models/apm016f/ngspice/apm016f_wrappers.inc",
+        osdi_artifacts=("bsimcmg-112.1.0.osdi",),
+        native_vector_templates={
+            "n": "@n.xdut.napm016f_core[{quantity}]",
+            "p": "@n.xdut.napm016f_core[{quantity}]",
+        },
+        native_oracle_name="BSIM-CMG 112.1.0",
+        provenance_revision=provenance["source"]["parameter_revision"],
+        threshold_coefficient_a=float(data["threshold"]["fin_current_coefficient_a"]),
+        vout_low_v=float(data["threshold"]["vout_low_v"]),
+        vout_high_v=float(data["threshold"]["vout_high_fraction_vdd"])
+        * float(data["nominal_vdd_v"]),
+        idvg_points=int(data["characterization"]["idvg_points"]),
+        idvd_points=int(data["characterization"]["idvd_points"]),
+        y_frequencies_hz=tuple(
+            float(value) for value in data["characterization"]["y_frequencies_hz"]
+        ),
+        behavior_targets=dict(data["behavior_targets"]),
+    )
+
+
+def load_kit(technology: str, root: Path) -> CharacterizationKit:
     if technology == "apm130":
         return _load_apm130(root)
     if technology == "apm045":
         return _load_apm045(root)
+    if technology == "apm016f":
+        return _load_apm016f(root)
     raise CharacterizationError(
         f"{technology} characterization has not reached its implementation milestone"
     )
@@ -216,19 +395,19 @@ def _write_csv(path: Path, fieldnames: list[str], rows: Iterable[dict[str, Any]]
 
 
 def _dc_job(
-    kit: PlanarKit,
+    kit: CharacterizationKit,
     toolchain: Toolchain,
     output: Path,
     temperature_c: int,
     polarity: str,
-    length_m: float,
+    geometry: DeviceGeometry,
 ) -> tuple[
     list[dict[str, Any]], list[dict[str, Any]], dict[tuple[str, float], list[dict[str, Any]]]
 ]:
     raw_dir = output / "raw"
     netlist_dir = output / "netlists"
     log_dir = output / "logs"
-    job = f"dc_{polarity}_{temperature_c}_{_float_token(length_m)}"
+    job = f"dc_{polarity}_{temperature_c}_{geometry.job_token()}"
     netlist = netlist_dir / f"{job}.cir"
     log = log_dir / f"{job}.log"
     sign = 1.0 if polarity == "n" else -1.0
@@ -261,7 +440,7 @@ def _dc_job(
         "Vg g 0 0",
         "Vs s 0 0",
         "Vb b 0 0",
-        f"Xdut d g s b {device} w={kit.width_m:.12g} l={length_m:.12g}",
+        f"Xdut d g s b {device} {geometry.netlist_parameters()}",
         ".control",
         *[f"pre_osdi {toolchain.osdi_directory / item}" for item in kit.osdi_artifacts],
         "set wr_vecnames",
@@ -302,9 +481,7 @@ def _dc_job(
         "polarity": polarity,
         "compact_model": kit.compact_model,
         "temperature_c": temperature_c,
-        "w_m": kit.width_m,
-        "l_m": length_m,
-        "l_over_lmin": length_m / kit.lmin_m,
+        **geometry.result_fields(kit.lmin_m),
         "variation_origin": "none",
         "variation_mode": "nominal",
     }
@@ -344,10 +521,10 @@ def _relative_difference(first: float, second: float, floor: float = 1e-30) -> f
 
 
 def _derive_operating_metrics(
-    kit: PlanarKit,
+    kit: CharacterizationKit,
     temperature_c: int,
     polarity: str,
-    length_m: float,
+    geometry: DeviceGeometry,
     curves: dict[tuple[str, float], list[dict[str, Any]]],
 ) -> list[dict[str, Any]]:
     nominal_vout = 0.5 * kit.vdd_v
@@ -376,9 +553,7 @@ def _derive_operating_metrics(
                 "polarity": polarity,
                 "compact_model": kit.compact_model,
                 "temperature_c": temperature_c,
-                "w_m": kit.width_m,
-                "l_m": length_m,
-                "l_over_lmin": length_m / kit.lmin_m,
+                **geometry.result_fields(kit.lmin_m),
                 "vctrl_v": center["vctrl_v"],
                 "vout_v": nominal_vout,
                 "idmag_a": current,
@@ -418,13 +593,13 @@ def _threshold_crossing(curve: list[dict[str, Any]], target_a: float) -> float:
 
 
 def _derive_dibl(
-    kit: PlanarKit,
+    kit: CharacterizationKit,
     temperature_c: int,
     polarity: str,
-    length_m: float,
+    geometry: DeviceGeometry,
     curves: dict[tuple[str, float], list[dict[str, Any]]],
 ) -> dict[str, Any]:
-    criterion = kit.threshold_coefficient_a * kit.width_m / length_m
+    criterion = geometry.threshold_current_a(kit.threshold_coefficient_a)
     low_threshold = _threshold_crossing(curves[("idvg", kit.vout_low_v)], criterion)
     high_threshold = _threshold_crossing(curves[("idvg", kit.vout_high_v)], criterion)
     dibl = (low_threshold - high_threshold) / (kit.vout_high_v - kit.vout_low_v)
@@ -433,12 +608,10 @@ def _derive_dibl(
         "public_device": kit.public_devices[polarity],
         "polarity": polarity,
         "temperature_c": temperature_c,
-        "w_m": kit.width_m,
-        "l_m": length_m,
-        "l_over_lmin": length_m / kit.lmin_m,
+        **geometry.result_fields(kit.lmin_m),
         "criterion_a": criterion,
         "criterion_coefficient_a": kit.threshold_coefficient_a,
-        "criterion_normalization": "coefficient * W/L",
+        "criterion_normalization": kit.threshold_normalization,
         "vout_low_v": kit.vout_low_v,
         "vout_high_v": kit.vout_high_v,
         "vth_low_magnitude_v": low_threshold,
@@ -450,14 +623,14 @@ def _derive_dibl(
 
 
 def _y_job(
-    kit: PlanarKit,
+    kit: CharacterizationKit,
     toolchain: Toolchain,
     output: Path,
     temperature_c: int,
     polarity: str,
-    length_m: float,
+    geometry: DeviceGeometry,
 ) -> list[dict[str, Any]]:
-    job = f"y_{polarity}_{temperature_c}_{_float_token(length_m)}"
+    job = f"y_{polarity}_{temperature_c}_{geometry.job_token()}"
     netlist = output / "netlists" / f"{job}.cir"
     log = output / "logs" / f"{job}.log"
     raw_paths = {
@@ -490,7 +663,7 @@ def _y_job(
             vector_names.append(f"i({source_name})")
         lines.append(
             f"X{excitation} {nodes['d']} {nodes['g']} {nodes['s']} {nodes['b']} "
-            f"{kit.public_devices[polarity]} w={kit.width_m:.12g} l={length_m:.12g}"
+            f"{kit.public_devices[polarity]} {geometry.netlist_parameters()}"
         )
     lines.extend(
         [
@@ -538,9 +711,7 @@ def _y_job(
                     "polarity": polarity,
                     "compact_model": kit.compact_model,
                     "temperature_c": temperature_c,
-                    "w_m": kit.width_m,
-                    "l_m": length_m,
-                    "l_over_lmin": length_m / kit.lmin_m,
+                    **geometry.result_fields(kit.lmin_m),
                     "raw_dc_vgs_v": raw_bias["g"],
                     "raw_dc_vds_v": raw_bias["d"],
                     "vctrl_v": vctrl,
@@ -572,9 +743,13 @@ def _capacitance_rows(y_records: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 "public_device": record["public_device"],
                 "polarity": record["polarity"],
                 "temperature_c": record["temperature_c"],
-                "w_m": record["w_m"],
                 "l_m": record["l_m"],
                 "l_over_lmin": record["l_over_lmin"],
+                **(
+                    {"w_m": record["w_m"]}
+                    if "w_m" in record
+                    else {"nfin": record["nfin"]}
+                ),
                 "vctrl_v": record["vctrl_v"],
                 "vout_v": record["vout_v"],
                 "frequency_hz": record["frequency_hz"],
@@ -587,7 +762,13 @@ def _capacitance_rows(y_records: list[dict[str, Any]]) -> list[dict[str, Any]]:
         )
     grouped: dict[tuple[Any, ...], list[dict[str, Any]]] = {}
     for row in rows:
-        key = (row["polarity"], row["temperature_c"], row["l_m"])
+        key = (
+            row["polarity"],
+            row["temperature_c"],
+            row["l_m"],
+            row.get("w_m"),
+            row.get("nfin"),
+        )
         grouped.setdefault(key, []).append(row)
     for group in grouped.values():
         group.sort(key=lambda row: row["frequency_hz"])
@@ -618,19 +799,26 @@ def _percentile(values: Iterable[float], fraction: float) -> float:
     return finite[lower] * (1.0 - weight) + finite[upper] * weight
 
 
+def _threshold_criterion_for_row(kit: CharacterizationKit, row: dict[str, Any]) -> float:
+    if isinstance(kit, PlanarKit):
+        return kit.threshold_coefficient_a * row["w_m"] / row["l_m"]
+    return kit.threshold_coefficient_a * row["nfin"]
+
+
 def _build_checks(
-    kit: PlanarKit,
+    kit: CharacterizationKit,
     idvg: list[dict[str, Any]],
     idvd: list[dict[str, Any]],
     derived: list[dict[str, Any]],
     dibl: list[dict[str, Any]],
     y_records: list[dict[str, Any]],
     capacitance: list[dict[str, Any]],
+    nfin_scaling: list[dict[str, Any]],
 ) -> dict[str, Any]:
     moderate = [
         row
         for row in derived
-        if row["idmag_a"] > kit.threshold_coefficient_a * kit.width_m / row["l_m"]
+        if row["idmag_a"] > _threshold_criterion_for_row(kit, row)
         and 0.25 * kit.vdd_v <= row["vctrl_v"] <= 0.9 * kit.vdd_v
     ]
 
@@ -647,6 +835,8 @@ def _build_checks(
                 row["polarity"],
                 row["temperature_c"],
                 row["l_m"],
+                row.get("w_m"),
+                row.get("nfin"),
                 row[fixed_coordinate],
             )
             groups.setdefault(key, []).append(row)
@@ -654,7 +844,7 @@ def _build_checks(
         for group in groups.values():
             ordered = sorted(group, key=lambda row: row[coordinate])
             if conduction_region_only:
-                criterion = kit.threshold_coefficient_a * kit.width_m / ordered[0]["l_m"]
+                criterion = _threshold_criterion_for_row(kit, ordered[0])
                 try:
                     start = next(
                         index for index, row in enumerate(ordered) if row["idmag_a"] >= criterion
@@ -759,21 +949,121 @@ def _build_checks(
         )
         > 0.0,
     }
+    if isinstance(kit, FinFETKit):
+        targets = kit.behavior_targets
+        nominal_lmin = [
+            row
+            for row in dibl
+            if row["temperature_c"] == 27 and row["l_m"] == kit.lmin_m
+        ]
+        vth_target = targets["nominal_lmin_vth_magnitude_v"]
+        dibl_target = targets["nominal_lmin_dibl_v_per_v"]
+        capacitance_spreads: dict[str, float] = {}
+        for field in ("cgg_f", "cgd_f", "cgs_f"):
+            groups: dict[tuple[Any, ...], list[float]] = {}
+            for row in capacitance:
+                key = (
+                    row["polarity"],
+                    row["temperature_c"],
+                    row["l_m"],
+                    row["frequency_hz"],
+                )
+                groups.setdefault(key, []).append(row[field] / row["nfin"])
+            capacitance_spreads[field] = max(
+                _relative_spread(values) for values in groups.values()
+            )
+        checks.update(
+            {
+                "nominal_lmin_vth_high_min_magnitude_v": min(
+                    row["vth_high_magnitude_v"] for row in nominal_lmin
+                ),
+                "nominal_lmin_vth_high_max_magnitude_v": max(
+                    row["vth_high_magnitude_v"] for row in nominal_lmin
+                ),
+                "nominal_lmin_dibl_min_v_per_v": min(
+                    row["dibl_v_per_v"] for row in nominal_lmin
+                ),
+                "nominal_lmin_dibl_max_v_per_v": max(
+                    row["dibl_v_per_v"] for row in nominal_lmin
+                ),
+                "nfin_normalized_id_max_relative_spread": max(
+                    row["normalized_id_relative_spread"] for row in nfin_scaling
+                ),
+                "nfin_normalized_gm_max_relative_spread": max(
+                    row["normalized_gm_relative_spread"] for row in nfin_scaling
+                ),
+                "nfin_normalized_capacitance_max_relative_spread": max(
+                    capacitance_spreads.values()
+                ),
+                "nfin_normalized_capacitance_relative_spread_by_metric": capacitance_spreads,
+                "nfin_gm_over_id_max_relative_spread": max(
+                    row["gm_over_id_relative_spread"] for row in nfin_scaling
+                ),
+                "nfin_gm_over_gds_max_relative_spread": max(
+                    row["gm_over_gds_relative_spread"] for row in nfin_scaling
+                ),
+            }
+        )
+        checks["criteria"].update(
+            {
+                "nominal_lmin_vth_magnitude_v": vth_target,
+                "nominal_lmin_dibl_v_per_v": dibl_target,
+                "nfin_normalized_id_relative_spread_max": targets[
+                    "nfin_normalized_id_relative_spread_max"
+                ],
+                "nfin_normalized_gm_relative_spread_max": targets[
+                    "nfin_normalized_gm_relative_spread_max"
+                ],
+                "nfin_normalized_capacitance_relative_spread_max": targets[
+                    "nfin_normalized_capacitance_relative_spread_max"
+                ],
+                "nfin_gm_over_id_relative_spread_max": targets[
+                    "nfin_gm_over_id_relative_spread_max"
+                ],
+                "nfin_gm_over_gds_relative_spread_max": targets[
+                    "nfin_gm_over_gds_relative_spread_max"
+                ],
+            }
+        )
+        checks["requirements"]["nfin_scaling"] = (
+            checks["nfin_normalized_id_max_relative_spread"]
+            <= targets["nfin_normalized_id_relative_spread_max"]
+            and checks["nfin_normalized_gm_max_relative_spread"]
+            <= targets["nfin_normalized_gm_relative_spread_max"]
+            and checks["nfin_gm_over_id_max_relative_spread"]
+            <= targets["nfin_gm_over_id_relative_spread_max"]
+            and checks["nfin_gm_over_gds_max_relative_spread"]
+            <= targets["nfin_gm_over_gds_relative_spread_max"]
+        )
+        checks["requirements"]["nfin_capacitance_scaling"] = (
+            checks["nfin_normalized_capacitance_max_relative_spread"]
+            <= targets["nfin_normalized_capacitance_relative_spread_max"]
+        )
+        checks["requirements"]["nominal_lmin_threshold_target"] = (
+            vth_target[0] <= checks["nominal_lmin_vth_high_min_magnitude_v"]
+            and checks["nominal_lmin_vth_high_max_magnitude_v"] <= vth_target[1]
+        )
+        checks["requirements"]["nominal_lmin_dibl_target"] = (
+            dibl_target[0] < checks["nominal_lmin_dibl_min_v_per_v"]
+            and checks["nominal_lmin_dibl_max_v_per_v"] <= dibl_target[1]
+        )
     checks["overall_pass"] = all(checks["requirements"].values())
     return checks
 
 
-def _length_scaling_rows(kit: PlanarKit, derived: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def _length_scaling_rows(
+    kit: CharacterizationKit, derived: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for temperature in kit.temperatures_c:
         for polarity in ("n", "p"):
-            for length in kit.lengths_m:
+            for geometry in kit.geometries():
                 candidates = [
                     row
                     for row in derived
                     if row["temperature_c"] == temperature
                     and row["polarity"] == polarity
-                    and row["l_m"] == length
+                    and geometry.matches(row)
                 ]
                 fixed = min(candidates, key=lambda row: abs(row["vctrl_v"] - 0.8 * kit.vdd_v))
                 moderate = min(
@@ -790,9 +1080,7 @@ def _length_scaling_rows(kit: PlanarKit, derived: list[dict[str, Any]]) -> list[
                         "public_device": kit.public_devices[polarity],
                         "polarity": polarity,
                         "temperature_c": temperature,
-                        "w_m": kit.width_m,
-                        "l_m": length,
-                        "l_over_lmin": length / kit.lmin_m,
+                        **geometry.result_fields(kit.lmin_m),
                         "fixed_vctrl_v": fixed["vctrl_v"],
                         "fixed_vout_v": fixed["vout_v"],
                         "fixed_idmag_a": fixed["idmag_a"],
@@ -808,13 +1096,84 @@ def _length_scaling_rows(kit: PlanarKit, derived: list[dict[str, Any]]) -> list[
     return rows
 
 
+def _relative_spread(values: Iterable[float], floor: float = 1e-30) -> float:
+    finite = [value for value in values if math.isfinite(value)]
+    if not finite:
+        return math.nan
+    return (max(finite) - min(finite)) / max(abs(statistics.median(finite)), floor)
+
+
+def _nfin_scaling_rows(
+    kit: CharacterizationKit, derived: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    if not isinstance(kit, FinFETKit):
+        return []
+    rows: list[dict[str, Any]] = []
+    for temperature in kit.temperatures_c:
+        for polarity in ("n", "p"):
+            for length in kit.lengths_m:
+                group: list[dict[str, Any]] = []
+                for nfin in kit.nfin_values:
+                    candidates = [
+                        row
+                        for row in derived
+                        if row["temperature_c"] == temperature
+                        and row["polarity"] == polarity
+                        and row["l_m"] == length
+                        and row["nfin"] == nfin
+                    ]
+                    fixed = min(
+                        candidates, key=lambda row: abs(row["vctrl_v"] - 0.8 * kit.vdd_v)
+                    )
+                    group.append(
+                        {
+                            "kit_id": kit.kit_id,
+                            "public_device": kit.public_devices[polarity],
+                            "polarity": polarity,
+                            "temperature_c": temperature,
+                            "l_m": length,
+                            "l_over_lmin": length / kit.lmin_m,
+                            "nfin": nfin,
+                            "vctrl_v": fixed["vctrl_v"],
+                            "vout_v": fixed["vout_v"],
+                            "idmag_a": fixed["idmag_a"],
+                            "gm_s": fixed["gm_s"],
+                            "gds_s": fixed["gds_s"],
+                            "id_per_fin_a": fixed["idmag_a"] / nfin,
+                            "gm_per_fin_s": fixed["gm_s"] / nfin,
+                            "gm_over_id_per_v": fixed["gm_over_id_per_v"],
+                            "gm_over_gds": fixed["gm_over_gds"],
+                            "variation_origin": "none",
+                            "variation_mode": "nominal",
+                        }
+                    )
+                spreads = {
+                    "normalized_id_relative_spread": _relative_spread(
+                        row["id_per_fin_a"] for row in group
+                    ),
+                    "normalized_gm_relative_spread": _relative_spread(
+                        row["gm_per_fin_s"] for row in group
+                    ),
+                    "gm_over_id_relative_spread": _relative_spread(
+                        row["gm_over_id_per_v"] for row in group
+                    ),
+                    "gm_over_gds_relative_spread": _relative_spread(
+                        row["gm_over_gds"] for row in group
+                    ),
+                }
+                for row in group:
+                    row.update(spreads)
+                    rows.append(row)
+    return rows
+
+
 def characterize(
     technology: str,
     output_directory: Path | None = None,
     toolchain: Toolchain | None = None,
 ) -> dict[str, Any]:
     selected = toolchain or resolve_toolchain()
-    kit = load_planar_kit(technology, selected.root)
+    kit = load_kit(technology, selected.root)
     build_metadata = (
         build_models(selected, force=False)
         if kit.osdi_artifacts
@@ -841,20 +1200,30 @@ def characterize(
     y_records: list[dict[str, Any]] = []
     for temperature in kit.temperatures_c:
         for polarity in ("n", "p"):
-            for length in kit.lengths_m:
-                idvg, idvd, curves = _dc_job(kit, selected, output, temperature, polarity, length)
+            for geometry in kit.geometries():
+                idvg, idvd, curves = _dc_job(
+                    kit, selected, output, temperature, polarity, geometry
+                )
                 idvg_rows.extend(idvg)
                 idvd_rows.extend(idvd)
                 derived_rows.extend(
-                    _derive_operating_metrics(kit, temperature, polarity, length, curves)
+                    _derive_operating_metrics(kit, temperature, polarity, geometry, curves)
                 )
-                dibl_rows.append(_derive_dibl(kit, temperature, polarity, length, curves))
-                y_records.extend(_y_job(kit, selected, output, temperature, polarity, length))
+                dibl_rows.append(_derive_dibl(kit, temperature, polarity, geometry, curves))
+                y_records.extend(_y_job(kit, selected, output, temperature, polarity, geometry))
 
     capacitance_rows = _capacitance_rows(y_records)
     length_rows = _length_scaling_rows(kit, derived_rows)
+    nfin_rows = _nfin_scaling_rows(kit, derived_rows)
     checks = _build_checks(
-        kit, idvg_rows, idvd_rows, derived_rows, dibl_rows, y_records, capacitance_rows
+        kit,
+        idvg_rows,
+        idvd_rows,
+        derived_rows,
+        dibl_rows,
+        y_records,
+        capacitance_rows,
+        nfin_rows,
     )
     _write_csv(output / "idvg.csv", list(idvg_rows[0]), idvg_rows)
     _write_csv(output / "idvd.csv", list(idvd_rows[0]), idvd_rows)
@@ -862,6 +1231,8 @@ def characterize(
     _write_csv(output / "dibl.csv", list(dibl_rows[0]), dibl_rows)
     _write_csv(output / "capacitance.csv", list(capacitance_rows[0]), capacitance_rows)
     _write_csv(output / "length_scaling.csv", list(length_rows[0]), length_rows)
+    if nfin_rows:
+        _write_csv(output / "nfin_scaling.csv", list(nfin_rows[0]), nfin_rows)
     (output / "y_matrix.json").write_text(
         json.dumps(y_records, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
@@ -882,12 +1253,7 @@ def characterize(
         "simulator_version": (version.stdout + version.stderr).strip(),
         "nominal_vdd_v": kit.vdd_v,
         "temperatures_c": list(kit.temperatures_c),
-        "geometry": {
-            "architecture": "planar_bulk",
-            "w_m": kit.width_m,
-            "lengths_m": list(kit.lengths_m),
-            "model_lmin_m": kit.lmin_m,
-        },
+        "geometry": kit.geometry_metadata(),
         "variation_origin": "none",
         "variation_mode": "nominal",
         "raw_current_convention": "ngspice voltage-source branch current is retained; current entering the device drain is its negative",
@@ -908,7 +1274,7 @@ def characterize(
         "dibl": {
             "method": "constant-current threshold magnitude",
             "coefficient_a": kit.threshold_coefficient_a,
-            "normalization": "coefficient * W/L",
+            "normalization": kit.threshold_normalization,
             "vout_low_v": kit.vout_low_v,
             "vout_high_v": kit.vout_high_v,
         },
@@ -927,10 +1293,19 @@ def characterize(
             "y_matrix": len(y_records),
             "capacitance": len(capacitance_rows),
             "length_scaling": len(length_rows),
+            "nfin_scaling": len(nfin_rows),
         },
         "checks": checks,
         "model_build_metadata": build_metadata["metadata_path"],
     }
+    if isinstance(kit, FinFETKit):
+        metadata["finfet_contract"] = {
+            "public_sizing": ["l", "nfin"],
+            "nfin_is_discrete_positive_integer": True,
+            "effective_width_is_not_public_or_reported": True,
+            "self_heating_enabled": False,
+            "behavior_targets": kit.behavior_targets,
+        }
     metadata_path = output / "metadata.json"
     metadata_path.write_text(
         json.dumps(metadata, indent=2, sort_keys=True) + "\n", encoding="utf-8"

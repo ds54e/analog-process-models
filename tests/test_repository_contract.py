@@ -3,12 +3,19 @@ from __future__ import annotations
 import hashlib
 from pathlib import Path
 
+import pytest
+
 try:
     import tomllib
 except ModuleNotFoundError:  # Python 3.9/3.10 on EL9-compatible environments
     import tomli as tomllib
 
-from apm.characterize import _capacitance_rows, _threshold_crossing
+from apm.characterize import (
+    CharacterizationError,
+    FinFETGeometry,
+    _capacitance_rows,
+    _threshold_crossing,
+)
 from apm.cli import TECHNOLOGIES, build_parser
 from apm.doctor import _extract_observables
 from apm.model_build import MODEL_SOURCES
@@ -110,6 +117,35 @@ def test_apm045_public_wrapper_and_model_basis_are_explicit() -> None:
     assert ".subckt apm045_pmos d g s b w=1u l=0.05u" in wrapper
     for forbidden in (" m=", " nf=", " ng="):
         assert forbidden not in wrapper.lower()
+
+
+def test_apm016f_public_wrapper_preserves_discrete_fin_semantics() -> None:
+    kit = load_toml("models/apm016f/kit.toml")
+    provenance = load_toml("models/apm016f/provenance.toml")
+    assert kit["nominal_vdd_v"] == 0.8
+    assert kit["model_lmin_m"] == 1.6e-8
+    assert kit["public_devices"]["parameters"] == ["l", "nfin"]
+    assert kit["characterization_nfin"] == [1, 2, 4]
+    wrapper = (ROOT / "models/apm016f/ngspice/apm016f_wrappers.inc").read_text()
+    assert ".subckt apm016f_nfet d g s b l=16n nfin=1" in wrapper
+    assert ".subckt apm016f_pfet d g s b l=16n nfin=1" in wrapper
+    assert " w=" not in wrapper.lower()
+    for forbidden in (" m=", " nf=", " ng="):
+        assert forbidden not in wrapper.lower()
+    for relative, expected_hash in provenance["source"]["authored_files"].items():
+        payload = (ROOT / "models/apm016f" / relative).read_bytes()
+        assert hashlib.sha256(payload).hexdigest() == expected_hash
+
+
+def test_finfet_result_geometry_never_invents_width() -> None:
+    geometry = FinFETGeometry(l_m=16e-9, nfin=2)
+    assert geometry.netlist_parameters() == "l=1.6e-08 nfin=2"
+    assert geometry.threshold_current_a(100e-9) == 200e-9
+    fields = geometry.result_fields(16e-9)
+    assert fields == {"l_m": 16e-9, "nfin": 2, "l_over_lmin": 1.0}
+    assert "w_m" not in fields
+    with pytest.raises(CharacterizationError, match="positive integer"):
+        FinFETGeometry(l_m=16e-9, nfin=1.5)  # type: ignore[arg-type]
 
 
 def test_doctor_observable_parser_ignores_unrelated_equals_signs() -> None:

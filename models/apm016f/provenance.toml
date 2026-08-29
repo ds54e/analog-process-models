@@ -9,6 +9,7 @@ ptm_mg_derived = false
 [source]
 status = "apm-authored-params-with-vendored-pinned-bsim-cmg-engine"
 parameter_project = "Analog Process Models"
+parameter_revision = "apm016f-params-v1-2026-08-30"
 parameter_license = "Apache-2.0"
 engine_project = "UC Berkeley BSIM-CMG"
 engine_url = "https://www.bsim.berkeley.edu/wp-content/uploads/BSIMCMG/BSIM-CMG_112.1.0_04282026.tar.gz"
@@ -16,6 +17,12 @@ engine_revision = "112.1.0, released 2026-04-28"
 engine_archive_sha256 = "9c70a7c9fcfafe66fb1582655bbfd36714b90ecba137a9dd83c76b3a0bd9e50a"
 engine_license = "ECL-2.0"
 retrieved_utc = "2026-08-29"
+
+[source.authored_files]
+"kit.toml" = "b606294c5075dd40a12cf36de0c333c55fb9e8aa97202cd9b70d9eb165175332"
+"ngspice/apm016f_models.inc" = "afd4b6905d4176e4f0f7802d8f0434fd6f2d51a2dd40abf28cddaa8fe104a323"
+"ngspice/apm016f_wrappers.inc" = "4bbcb2bb7c8573e51fdad316e686b885c1d32614151cf0a38bb258059607ceea"
+"parameter_generation.md" = "5a14e7b8a0a8169de9439c44ba0b15d114813b7b8991ca1c7e2bb3922fb967ac"
 
 [source.imported_files]
 "vendor/bsim-cmg-112.1.0/LICENSE.txt" = "4d202b27df0df53f021ad2ba5cb2d0e7e62a9025e6a9786952c67be7111edea8"
@@ -60,5 +67,5 @@ benchmark = true
 native = false
 
 [validation]
-ngspice = "M0 BSIM-CMG 112.1.0 engine OSDI smoke passed with synthetic runtime parameters; APM016F parameter-deck validation pending"
+ngspice = "M3 complete nominal terminal characterization passed with BSIM-CMG 112.1.0 OSDI at NFIN 1, 2, and 4; see validation/evidence/m3-apm016f.md"
 spectre = "experimental_unverified"

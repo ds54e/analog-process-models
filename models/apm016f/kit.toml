@@ -1,0 +1,56 @@
+schema = "apm.kit.v1"
+id = "apm016f"
+technology_class = "16nm-class"
+architecture = "finfet"
+compact_model = "bsim_cmg"
+nominal_vdd_v = 0.8
+model_lmin_m = 1.6e-8
+default_l_m = 1.6e-8
+default_nfin = 1
+characterization_lengths_m = [1.6e-8, 3.2e-8, 6.4e-8]
+characterization_nfin = [1, 2, 4]
+temperatures_c = [-40, 27, 85, 125]
+
+[supply_basis]
+source = "TSMC 16 nm second-generation FinFET IEDM 2014 paper"
+statement = "Published device data use VDD = 0.8 V; APM016F adopts that representative public operating point without claiming foundry correlation."
+
+[geometry_basis]
+source = "Open 16 nm bulk-HKMG FinFET study plus IEDM 2014 TSMC 16 nm paper"
+fin_height_m = 3.2e-8
+fin_thickness_m = 8.0e-9
+fin_pitch_m = 4.8e-8
+eot_m = 1.0e-9
+fin_pitch_source = "DOI 10.1109/IEDM.2014.7046970"
+other_dimensions_source = "DOI 10.1186/s11671-015-0739-0"
+valid_l_m = [1.6e-8, 6.4e-8]
+legal_nfin = [1, 2, 4]
+
+[public_devices]
+n = "apm016f_nfet"
+p = "apm016f_pfet"
+terminals = ["d", "g", "s", "b"]
+parameters = ["l", "nfin"]
+
+[threshold]
+method = "constant_current"
+fin_current_coefficient_a = 1.0e-7
+normalization = "Id criterion = coefficient * NFIN"
+vout_low_v = 0.05
+vout_high_fraction_vdd = 0.8
+
+[characterization]
+idvg_points = 161
+idvd_points = 81
+gm_gds_relative_perturbations = [0.01, 0.02]
+y_frequencies_hz = [1.0e5, 1.0e6]
+terminal_order = ["d", "g", "s", "b"]
+
+[behavior_targets]
+nominal_lmin_vth_magnitude_v = [0.20, 0.35]
+nominal_lmin_dibl_v_per_v = [0.0, 0.08]
+nfin_normalized_id_relative_spread_max = 0.02
+nfin_normalized_gm_relative_spread_max = 0.02
+nfin_normalized_capacitance_relative_spread_max = 0.02
+nfin_gm_over_id_relative_spread_max = 0.02
+nfin_gm_over_gds_relative_spread_max = 0.05
