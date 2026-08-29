@@ -110,6 +110,7 @@ class PlanarKit:
     idvd_points: int
     y_frequencies_hz: tuple[float, ...]
     behavior_targets: dict[str, Any]
+    model_origin: str
 
     def raw_voltage(self, polarity: str, effective_voltage: float) -> float:
         return effective_voltage if polarity == "n" else -effective_voltage
@@ -242,6 +243,7 @@ def _load_apm130(root: Path) -> PlanarKit:
             float(value) for value in data["characterization"]["y_frequencies_hz"]
         ),
         behavior_targets={},
+        model_origin=provenance["model_origin"],
     )
 
 
@@ -283,6 +285,7 @@ def _load_apm045(root: Path) -> PlanarKit:
             float(value) for value in data["characterization"]["y_frequencies_hz"]
         ),
         behavior_targets={},
+        model_origin=provenance["model_origin"],
     )
 
 
@@ -325,6 +328,50 @@ def _load_apm022(root: Path) -> PlanarKit:
             float(value) for value in data["characterization"]["y_frequencies_hz"]
         ),
         behavior_targets=dict(data["behavior_targets"]),
+        model_origin=provenance["model_origin"],
+    )
+
+
+def _load_apm350(root: Path) -> PlanarKit:
+    path = root / "models/apm350/kit.toml"
+    with path.open("rb") as handle:
+        data = tomllib.load(handle)
+    provenance_path = root / "models/apm350/provenance.toml"
+    with provenance_path.open("rb") as handle:
+        provenance = tomllib.load(handle)
+    return PlanarKit(
+        kit_id=data["id"],
+        compact_model=data["compact_model"],
+        vdd_v=float(data["nominal_vdd_v"]),
+        lmin_m=float(data["model_lmin_m"]),
+        width_m=float(data["default_w_m"]),
+        lengths_m=tuple(float(value) for value in data["characterization_lengths_m"]),
+        temperatures_c=tuple(int(value) for value in data["temperatures_c"]),
+        public_devices=dict(data["public_devices"]),
+        model_library=None,
+        model_section=None,
+        model_includes=(root / "models/apm350/ngspice/apm350_models.inc",),
+        wrapper_file=root / "models/apm350/ngspice/apm350_wrappers.inc",
+        osdi_artifacts=(),
+        native_vector_templates={
+            "n": "@m.xdut.mapm350_core[{quantity}]",
+            "p": "@m.xdut.mapm350_core[{quantity}]",
+        },
+        native_oracle_name="ngspice BSIM3",
+        provenance_revision=provenance["source"].get(
+            "parameter_revision", "apm350-development"
+        ),
+        threshold_coefficient_a=float(data["threshold"]["planar_current_coefficient_a"]),
+        vout_low_v=float(data["threshold"]["vout_low_v"]),
+        vout_high_v=float(data["threshold"]["vout_high_fraction_vdd"])
+        * float(data["nominal_vdd_v"]),
+        idvg_points=int(data["characterization"]["idvg_points"]),
+        idvd_points=int(data["characterization"]["idvd_points"]),
+        y_frequencies_hz=tuple(
+            float(value) for value in data["characterization"]["y_frequencies_hz"]
+        ),
+        behavior_targets=dict(data["behavior_targets"]),
+        model_origin=provenance["model_origin"],
     )
 
 
@@ -374,6 +421,8 @@ def _load_apm016f(root: Path) -> FinFETKit:
 
 
 def load_kit(technology: str, root: Path) -> CharacterizationKit:
+    if technology == "apm350":
+        return _load_apm350(root)
     if technology == "apm130":
         return _load_apm130(root)
     if technology == "apm045":
@@ -1535,7 +1584,7 @@ def characterize(
         metadata["generic_planar_contract"] = {
             "public_sizing": ["w", "l"],
             "behavior_targets": kit.behavior_targets,
-            "model_origin": "apm_generic",
+            "model_origin": kit.model_origin,
             "terminal_characterization_is_authoritative": True,
         }
     metadata_path = output / "metadata.json"

@@ -10,7 +10,7 @@ It is **not** evidence by itself. Validation claims must point to committed summ
 - Repository: https://github.com/ds54e/analog-process-models
 - Target: v1.0.0
 - Current state: `IN_PROGRESS`
-- Current milestone: `M6 APM350`
+- Current milestone: `M7 Common characterization completion`
 - Release eligible: `NO`
 
 ## Reported initial environment
@@ -34,8 +34,8 @@ See `ENVIRONMENT.md`. M0 verified the host and bootstrapped the project-local re
 | M3 APM016F | VALIDATED | `validation/evidence/m3-apm016f.md`: independent APM cards, genuine BSIM-CMG OSDI, discrete `l,nfin` public results, and complete nominal terminal/NFIN characterization passed. |
 | M4 Benchmark R/C + variation | VALIDATED | `validation/evidence/m4-benchmark.md`: frozen synthetic severities, measured PSP/BSIM4/BSIM-CMG intent adapters, deterministic PCG64 samples/replay, five common corners, and native R/C value/noise checks passed. |
 | M5 APM022 | VALIDATED | `validation/evidence/m5-apm022.md`: independent non-PTM BSIM4 cards, explicit behavior contracts, complete terminal characterization, APM045/APM016F comparisons, and benchmark adapter/corners passed. |
-| M6 APM350 | IN_PROGRESS | Add the redistributable mature-planar BSIM3 anchor and calibrate its benchmark adapter. |
-| M7 Common characterization completion | NOT_STARTED | — |
+| M6 APM350 | VALIDATED | `validation/evidence/m6-apm350.md`: independently authored open generic BSIM3 cards, rejected-source license audit, complete terminal characterization, and fifth benchmark adapter passed. |
+| M7 Common characterization completion | IN_PROGRESS | Integrate all five result sets, comparisons, common result-contract checks, and regression evidence. |
 | M8 IHP-native variation | NOT_STARTED | — |
 | M9 Spectre model-only compatibility | NOT_STARTED | — |
 | M10 License/provenance + clean-clone release review | NOT_STARTED | — |
@@ -104,6 +104,12 @@ A blocker entry should state:
   explicitly disables the unevidenced BSIM pocket-length default, and terminal
   gates enforce monotonic threshold/gain increase, monotonic DIBL decrease,
   minimum-length behavior ranges, and the required APM045/APM016F comparisons.
+- APM350 does not vendor the preferred SCN4M_SUBM candidate card because its
+  exact file has no original-source or file-level rights statement. It instead
+  uses an independently authored Apache-2.0 BSIM3 generic reference, while the
+  pinned MIT README supplies only class-level 0.4 um Lmin, 0.6 um Wmin, and 5 V
+  statements. The technology label remains 0.35 um-class and the actual model
+  minimum is recorded honestly as 0.4 um.
 - APM benchmark variation uses frozen synthetic sigmas only after real PSP103,
   BSIM4, and BSIM-CMG calibration. Canonical positive threshold shift means
   larger `|Vth|` for N/P even though raw signs differ; canonical positive drive
@@ -130,6 +136,9 @@ When a material decision intentionally departs from `PROJECT_CONTEXT.md`, record
 - `validation/evidence/m5-apm022.md` — independent scaled-planar cards,
   terminal behavior and cross-kit comparisons, plus the calibrated APM022
   benchmark adapter and deterministic variation rerun.
+- `validation/evidence/m6-apm350.md` — rejected-candidate provenance audit,
+  independent mature-planar BSIM3 characterization, and the completed
+  five-kit benchmark adapter/corner/Monte Carlo validation.
 
 ## Final-review fields
 

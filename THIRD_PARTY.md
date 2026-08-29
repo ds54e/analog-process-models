@@ -16,7 +16,17 @@ APM v1.0 is intended to be self-contained, but it must not redistribute model as
 
 ### APM350
 
-Candidate: open generic SCN4M_SUBM-class model. Exact source files and license must be verified before vendoring.
+The preferred `silicon-vlsi-org/eda-technology` SCN4M_SUBM parameter file was
+audited at commit `70c89ecac61bf3409322355463650775f5b29f5e` and rejected. The
+repository has an MIT root license, but the exact model card contains no
+author, original-source, copyright, or file-level permission statement. It is
+not vendored and none of its parameters was used.
+
+APM350 instead ships an independently authored Apache-2.0 generic BSIM3 deck.
+The pinned candidate repository README is used only for its MIT-licensed
+class-level Lmin, Wmin, and VDD statements. The complete audit and exact
+rejected-file hash are in `models/apm350/provenance.toml` and
+`models/apm350/parameter_generation.md`; APM350 has no third-party files.
 
 ### APM130
 

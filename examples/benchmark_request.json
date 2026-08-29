@@ -3,6 +3,26 @@
   "instances": {
     "mos": [
       {
+        "id": "mn350",
+        "kit_id": "apm350",
+        "polarity": "n",
+        "geometry": {
+          "w_m": 1e-06,
+          "l_m": 8e-07
+        },
+        "ngspice_instance": "xmn350"
+      },
+      {
+        "id": "mp350",
+        "kit_id": "apm350",
+        "polarity": "p",
+        "geometry": {
+          "w_m": 1e-06,
+          "l_m": 8e-07
+        },
+        "ngspice_instance": "xmp350"
+      },
+      {
         "id": "mn130",
         "kit_id": "apm130",
         "polarity": "n",

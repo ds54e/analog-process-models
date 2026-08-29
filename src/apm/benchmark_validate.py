@@ -23,7 +23,7 @@ from .model_build import build_models, sha256_file
 from .toolchain import Toolchain, resolve_toolchain, run_checked
 
 VALIDATION_SEED = 20260830
-VALIDATED_KITS = ("apm130", "apm045", "apm022", "apm016f")
+VALIDATED_KITS = ("apm350", "apm130", "apm045", "apm022", "apm016f")
 BOLTZMANN_J_PER_K = 1.380649e-23
 VTH_CALIBRATION_RAW_VALUES = tuple(index / 100.0 for index in range(-4, 5))
 DRIVE_CALIBRATION_RAW_VALUES = tuple(0.8 + index * 0.05 for index in range(9))
@@ -88,6 +88,7 @@ def _adapter_calibration(
     vth_parameter = adapter["vth_raw_parameter"]
     drive_parameter = adapter["drive_raw_parameter"]
     vdd = float(adapter["vdd_v"])
+    vth_sweep_intervals = max(240, math.ceil(vdd / 0.005))
     vth_vout = 0.8 * vdd
     raw_paths = [
         output / "calibration" / f"adapter_{kit_id}_{polarity}_vth_{index}.dat"
@@ -113,7 +114,10 @@ def _adapter_calibration(
         lines.extend(
             [
                 f"alter {device_path}[{vth_parameter}] = {raw_value:.17g}",
-                f"dc Vg 0 {sign * vdd:.17g} {sign * vdd / 240.0:.17g}",
+                (
+                    f"dc Vg 0 {sign * vdd:.17g} "
+                    f"{sign * vdd / vth_sweep_intervals:.17g}"
+                ),
                 f"wrdata {raw_path} v(g) i(vd)",
             ]
         )
@@ -195,6 +199,7 @@ def _adapter_calibration(
         "compact_model": kit.compact_model,
         "public_device": kit.public_devices[polarity],
         "temperature_c": 27.0,
+        "vth_sweep_step_v": vdd / vth_sweep_intervals,
         "geometry": geometry,
         "vth_reference": {
             "vout_v": vth_vout,

@@ -3,21 +3,79 @@ technology_class = "0.35um-class"
 architecture = "planar_bulk"
 compact_model = "bsim3"
 model_origin = "generic_reference"
-model_lmin = "~0.4um; verify from selected source"
+model_lmin_m = 4.0e-7
 foundry_correlated = false
 
 [source]
-status = "candidate-unvendored"
-project = "SCN4M_SUBM-class open generic model"
-preferred_repository = "silicon-vlsi-org/eda-technology"
-url = "https://github.com/silicon-vlsi-org/eda-technology"
-revision = "TBD"
-license = "TBD-file-level-verification-required"
+status = "apm-authored-open-generic-reference"
+parameter_project = "Analog Process Models"
+parameter_revision = "apm350-params-v1-2026-08-30"
+parameter_license = "Apache-2.0"
+model_semantics_project = "UC Berkeley BSIM3"
+model_semantics_url = "https://www.bsim.berkeley.edu/models/bsim3/"
+model_semantics_revision = "BSIM3 3.3.0"
+simulator_engine = "native BSIM3 in ngspice 47"
+research_retrieved_utc = "2026-08-30"
+
+[source.authored_files]
+"kit.toml" = "bd438bc18e594e7f97a23895602fea4583877e203897e1b70b0841089903cb40"
+"ngspice/apm350_models.inc" = "2cd8e7fd7bd9dbec3e269959b2342d6d7a1a1609c6198c89931de676d47c8dc1"
+"ngspice/apm350_wrappers.inc" = "d410758e2101f9da0b3be463b4ad2e4a96e613d6640e27a03d72deef0fbf147b"
+"parameter_generation.md" = "e44b8a4eab54e922367ceba4b4c81cf21b25cf758d12bfd4d44498c7474004cc"
+"README.md" = "1d8c25f4d616f0646d0fbeeb6e681da2af10e26619a03b6d826da6be36152b82"
+
+[[source.research_inputs]]
+title = "Technology: MOSIS Scalable CMOS / SCN4M_SUBM class description"
+repository = "silicon-vlsi-org/eda-technology"
+url = "https://github.com/silicon-vlsi-org/eda-technology/blob/70c89ecac61bf3409322355463650775f5b29f5e/README.md"
+revision = "70c89ecac61bf3409322355463650775f5b29f5e"
+license = "MIT"
+usage = "class-level Lmin=0.4 um, Wmin=0.6 um, and VDD=5 V statements only"
+redistributed = false
+
+[[source.research_inputs]]
+title = "UC Berkeley BSIM3 model releases and technical manual"
+url = "https://www.bsim.berkeley.edu/models/bsim3/"
+revision = "BSIM3 3.3.0"
+usage = "compact-model equations, units, parameter semantics, and documented defaults only"
+redistributed = false
+
+[source.rejected_candidate]
+repository = "silicon-vlsi-org/eda-technology"
+revision = "70c89ecac61bf3409322355463650775f5b29f5e"
+path = "scn4m_subm/models/scn4m_cnrs_bsim3v1.lib"
+sha256 = "7c7ec1d43149b84ac9f7eb859e62cced62fc3f74efc6dfe929558541eb16f19c"
+repository_license = "MIT"
+file_level_license = "absent"
+file_level_original_source = "absent"
+decision = "not shipped and not used as a numeric source because exact parameter-file redistribution provenance is insufficient under APM policy"
+redistributed = false
+numeric_parameter_use = "none"
 
 [redistribution]
 ship_in_repo = true
-condition = "Only after exact imported files and redistribution terms are verified"
+authorship = "all shipped APM350 kit, parameter, wrapper, and generation files are APM-authored"
+third_party_files = []
+generated_binaries_committed = false
+
+[device_scope]
+include = ["generic nominal NMOS", "generic nominal PMOS"]
+public_parameters = ["w", "l"]
+internal_geometry = "source/drain area and perimeter derived from public w using a fixed 0.4 um diffusion extension"
+
+[behavior_contract]
+requirements = [
+  "honest 0.35 um technology-class versus 0.4 um actual model minimum distinction",
+  "mature planar threshold, DIBL, intrinsic-gain, and drive ranges",
+  "threshold and intrinsic gain rise with length",
+  "DIBL falls with length",
+  "sensible Id-Vg, Id-Vd, temperature, and terminal capacitance behavior"
+]
+
+[variation]
+benchmark = true
+native = false
 
 [validation]
-ngspice = "not_started"
+ngspice = "M6 nominal terminal characterization and benchmark-adapter validation passed; see validation/evidence/m6-apm350.md"
 spectre = "experimental_unverified"

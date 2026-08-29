@@ -15,6 +15,47 @@ canonical_vth_sign = "positive observable vth_shift means larger |Vth| for N and
 canonical_drive_sign = "positive observable drive_shift means larger |Id| at the reference bias for N and P"
 application = "resolved raw instance values are applied deterministically with ngspice alter commands before analysis"
 
+[kit.apm350]
+architecture = "planar_bulk"
+compact_model = "bsim3"
+reference_l_m = 8.0e-7
+reference_w_m = 1.0e-6
+threshold_coefficient_a = 1.0e-7
+threshold_normalization = "coefficient * W/L"
+vdd_v = 5.0
+vout_reference_v = 2.5
+vth_raw_parameter = "delvto"
+drive_raw_parameter = "mulu0"
+drive_raw_nominal = 1.0
+
+[kit.apm350.n]
+public_device = "apm350_nmos"
+vctrl_reference_v = 0.64
+nominal_gm_over_id_per_v = 15.380207244297058
+nominal_reference_id_a = 1.51696622614252e-6
+nominal_threshold_magnitude_v = 0.4866277783040621
+vth_fit_linear = 1.0065191151254738
+vth_fit_quadratic = 0.003824214540348056
+vth_fit_max_residual_v = 4.94941233830648e-10
+drive_fit_linear = 0.9790745600099618
+drive_fit_quadratic = -0.035149267076114946
+drive_fit_max_residual_fraction = 3.1208611145638887e-6
+ngspice_device_path_template = "@m.{instance}.mapm350_core"
+
+[kit.apm350.p]
+public_device = "apm350_pmos"
+vctrl_reference_v = 0.74
+nominal_gm_over_id_per_v = 14.326957466141264
+nominal_reference_id_a = 6.50743427183526e-7
+nominal_threshold_magnitude_v = 0.6175826300330974
+vth_fit_linear = -1.0080210302566797
+vth_fit_quadratic = 0.0044834531758709455
+vth_fit_max_residual_v = 5.968870397943249e-10
+drive_fit_linear = 1.0099635741452764
+drive_fit_quadratic = -0.011411120200580464
+drive_fit_max_residual_fraction = 1.4319065763879202e-5
+ngspice_device_path_template = "@m.{instance}.mapm350_core"
+
 [kit.apm130]
 architecture = "planar_bulk"
 compact_model = "psp103"

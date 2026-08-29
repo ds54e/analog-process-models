@@ -119,6 +119,34 @@ def test_apm045_public_wrapper_and_model_basis_are_explicit() -> None:
         assert forbidden not in wrapper.lower()
 
 
+def test_apm350_public_wrapper_and_model_basis_are_explicit() -> None:
+    kit = load_toml("models/apm350/kit.toml")
+    provenance = load_toml("models/apm350/provenance.toml")
+    assert kit["technology_class"] == "0.35um-class"
+    assert kit["model_lmin_m"] == 4.0e-7
+    assert kit["nominal_vdd_v"] == 5.0
+    assert kit["public_devices"]["parameters"] == ["w", "l"]
+    assert provenance["model_origin"] == "generic_reference"
+    assert provenance["foundry_correlated"] is False
+    assert provenance["redistribution"]["third_party_files"] == []
+    assert provenance["source"]["parameter_revision"] == "apm350-params-v1-2026-08-30"
+    rejected = provenance["source"]["rejected_candidate"]
+    assert rejected["redistributed"] is False
+    assert rejected["numeric_parameter_use"] == "none"
+    assert rejected["file_level_license"] == "absent"
+    wrapper = (ROOT / "models/apm350/ngspice/apm350_wrappers.inc").read_text()
+    assert ".subckt apm350_nmos d g s b w=1u l=0.4u" in wrapper
+    assert ".subckt apm350_pmos d g s b w=1u l=0.4u" in wrapper
+    for forbidden in (" m=", " nf=", " ng="):
+        assert forbidden not in wrapper.lower()
+    model = (ROOT / "models/apm350/ngspice/apm350_models.inc").read_text()
+    assert "level=49 version=3.3.0" in model
+    assert "0.4964448" not in model
+    for relative, expected_hash in provenance["source"]["authored_files"].items():
+        payload = (ROOT / "models/apm350" / relative).read_bytes()
+        assert hashlib.sha256(payload).hexdigest() == expected_hash
+
+
 def test_apm022_public_wrapper_and_authored_provenance_are_explicit() -> None:
     kit = load_toml("models/apm022/kit.toml")
     provenance = load_toml("models/apm022/provenance.toml")

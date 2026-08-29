@@ -1,0 +1,52 @@
+schema = "apm.kit.v1"
+id = "apm350"
+technology_class = "0.35um-class"
+architecture = "planar_bulk"
+compact_model = "bsim3"
+nominal_vdd_v = 5.0
+model_lmin_m = 4.0e-7
+default_w_m = 1.0e-6
+default_l_m = 4.0e-7
+characterization_lengths_m = [4.0e-7, 8.0e-7, 1.6e-6]
+temperatures_c = [-40, 27, 85, 125]
+
+[supply_basis]
+source = "silicon-vlsi-org/eda-technology README at pinned commit"
+statement = "The open SCN4M_SUBM class description identifies 5 V operation; APM350 uses that class-level supply without importing the ambiguously sourced parameter card."
+
+[geometry_basis]
+source = "silicon-vlsi-org/eda-technology README at pinned commit"
+technology_class_m = 3.5e-7
+model_minimum_l_m = 4.0e-7
+published_minimum_w_m = 6.0e-7
+valid_l_m = [4.0e-7, 1.0e-5]
+valid_w_m = [6.0e-7, 1.0e-4]
+
+[public_devices]
+n = "apm350_nmos"
+p = "apm350_pmos"
+terminals = ["d", "g", "s", "b"]
+parameters = ["w", "l"]
+
+[threshold]
+method = "constant_current"
+planar_current_coefficient_a = 1.0e-7
+normalization = "Id criterion = coefficient * W/L"
+vout_low_v = 0.05
+vout_high_fraction_vdd = 0.8
+
+[characterization]
+idvg_points = 251
+idvd_points = 251
+gm_gds_relative_perturbations = [0.01, 0.02]
+y_frequencies_hz = [1.0e5, 1.0e6]
+terminal_order = ["d", "g", "s", "b"]
+
+[behavior_targets]
+nominal_lmin_vth_magnitude_v = [0.35, 0.90]
+nominal_lmin_dibl_v_per_v = [0.0, 0.08]
+nominal_lmin_gm_over_gds_at_gm_over_id_15 = [15.0, 250.0]
+nominal_lmin_on_current_n_a_per_um = [2.0e-4, 3.0e-3]
+nominal_lmin_on_current_p_a_per_um = [1.0e-4, 2.0e-3]
+length_scaling_requires_lower_dibl_and_higher_intrinsic_gain = true
+length_scaling_requires_higher_vth = true

@@ -63,7 +63,7 @@ def test_modes_share_draws_but_apply_only_the_documented_components() -> None:
     mismatch = resolve_monte_carlo(request, mode="mismatch", seed=77, root=ROOT)
     combined = resolve_monte_carlo(request, mode="all", seed=77, root=ROOT)
     assert process["draw_order"] == mismatch["draw_order"] == combined["draw_order"]
-    assert len(combined["draw_order"]) == 24  # six globals, two per MOS, one per passive
+    assert len(combined["draw_order"]) == 28  # six globals, two per MOS, one per passive
     process_mos = by_id(process, "mos_instances")
     mismatch_mos = by_id(mismatch, "mos_instances")
     combined_mos = by_id(combined, "mos_instances")
@@ -137,8 +137,12 @@ def test_fourfold_matching_size_halves_local_sigma_for_the_same_draw() -> None:
     request["instances"]["mos"] = [request["instances"]["mos"][0]]
     request["instances"]["resistors"] = []
     request["instances"]["capacitors"] = []
+    unit_geometry = request["instances"]["mos"][0]["geometry"]
     unit = resolve_monte_carlo(request, mode="mismatch", seed=1234, root=ROOT)
-    request["instances"]["mos"][0]["geometry"] = {"w_m": 2.0e-6, "l_m": 5.2e-7}
+    request["instances"]["mos"][0]["geometry"] = {
+        "w_m": 2.0 * unit_geometry["w_m"],
+        "l_m": 2.0 * unit_geometry["l_m"],
+    }
     quadruple = resolve_monte_carlo(request, mode="mismatch", seed=1234, root=ROOT)
     unit_instance = unit["mos_instances"][0]
     quadruple_instance = quadruple["mos_instances"][0]
@@ -160,6 +164,8 @@ def test_corner_semantics_map_canonical_polarity_to_measured_raw_signs() -> None
         assert result["total_intents"]["vth_shift_v"] == pytest.approx(-0.036)
         assert result["total_intents"]["drive_shift_fraction"] == pytest.approx(0.12)
         assert result["raw_adapter"]["drive_value"] > 1.0
+    assert results["mn350"]["raw_adapter"]["vth_value"] < 0.0
+    assert results["mp350"]["raw_adapter"]["vth_value"] > 0.0
     assert results["mn130"]["raw_adapter"]["vth_value"] < 0.0
     assert results["mp130"]["raw_adapter"]["vth_value"] < 0.0
     assert results["mn045"]["raw_adapter"]["vth_value"] < 0.0
@@ -211,7 +217,7 @@ def test_resolved_sample_hash_detects_tampering_and_write_is_non_destructive(tmp
 @pytest.mark.parametrize(
     ("change", "message"),
     [
-        (lambda request: request["instances"]["mos"][6]["geometry"].update(nfin=1.5), "nfin"),
+        (lambda request: request["instances"]["mos"][8]["geometry"].update(nfin=1.5), "nfin"),
         (
             lambda request: request["instances"]["resistors"][0].update(match_size=0.0),
             "match_size",
