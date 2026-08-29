@@ -28,12 +28,15 @@ Assume normal implementation may run for a long time without human supervision.
 
 Before substantive work, read all of:
 
-1. `GOAL.md`
-2. `AGENTS.md`
-3. `UNATTENDED_EXECUTION.md`
-4. `README.md`
-5. `validation/release_gates.toml`
-6. `STATUS.md`
+1. `AGENTS.md`
+2. `GOAL.md`
+3. `PROJECT_CONTEXT.md`
+4. `UNATTENDED_EXECUTION.md`
+5. `README.md`
+6. `validation/release_gates.toml`
+7. `STATUS.md`
+
+`PROJECT_CONTEXT.md` contains condensed design history and rationale from the project-definition work that preceded implementation. Use it to understand why apparently simpler alternatives were rejected and to avoid reopening settled architectural decisions without new evidence. It is informative, not normative: `AGENTS.md` and `GOAL.md` win on conflict.
 
 Follow `UNATTENDED_EXECUTION.md` as the required long-running execution procedure.
 
@@ -52,6 +55,8 @@ Do not declare or tag v1.0.0 merely because the agent has reached the end of its
 Do not expand v1.0 scope beyond `GOAL.md` unless a required item cannot be implemented correctly without a narrowly-scoped change.
 
 In particular, do not add layout, PCells, DRC, LVS, PEX, standard cells, MOS noise, RF devices, AMS, native Windows/macOS support, or Virtuoso automation.
+
+Do not replace deliberate TBDs with arbitrary convenient values. `PROJECT_CONTEXT.md`, `GOAL.md`, and the benchmark TOML files explain which values are intentionally unfrozen until real characterization exists. Release-critical TBDs must nevertheless be resolved with evidence before v1.0.0.
 
 ## Platform
 
@@ -182,3 +187,5 @@ Do not change repository visibility or security-sensitive repository/account set
 ## Completion
 
 Do not declare v1.0 complete before every `GOAL.md` release gate is actually satisfied and the required release evidence is present.
+
+At release, all release-critical placeholder/TBD values in model provenance, benchmark variation/passive specifications, and release metadata must be resolved or explicitly removed because the corresponding feature was legitimately excluded by `GOAL.md`. The package/release version and release notes must identify the release as v1.0.0. Do not allow a validator to pass while the package still reports a development placeholder version such as `0.0.0`.
