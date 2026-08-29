@@ -49,6 +49,7 @@ The repository is designed so a long-running implementation agent can work witho
 
 - [`GOAL.md`](GOAL.md) — authoritative v1.0 implementation requirements and Definition of Done.
 - [`AGENTS.md`](AGENTS.md) — mandatory repository-wide engineering and safety/quality constraints.
+- [`PROJECT_CONTEXT.md`](PROJECT_CONTEXT.md) — condensed design history and rationale behind the v1.0 contract; informative, not normative.
 - [`UNATTENDED_EXECUTION.md`](UNATTENDED_EXECUTION.md) — required procedure for long-running autonomous implementation, checkpointing, blockers, and final clean-clone validation.
 - [`STATUS.md`](STATUS.md) — compact persistent progress index; never evidence by itself.
 - [`validation/release_gates.toml`](validation/release_gates.toml) — machine-readable v1.0 release-gate contract.
