@@ -11,13 +11,13 @@ This is the compact persistent progress index. It is not validation evidence by 
 - v2 post-release exact-tag requalification: complete, 20/20 required gates passed
 - Current development line: post-v2 `main`
 - Current target: v3 stationary small-signal MOS-noise characterization
-- Completed milestones: `V3-N0 Four-engine noise spike`; `V3-N1 Noise acquisition and fit-method qualification`
-- Current milestone: `V3-N2 Catalog-wide noise dataset and comparison qualification`
-- State: `V3_N2_IMPLEMENTATION_AND_REAL_TOOL_QUALIFICATION_IN_PROGRESS`
+- Completed milestones: `V3-N0 Four-engine noise spike`; `V3-N1 Noise acquisition and fit-method qualification`; `V3-N2 Catalog-wide noise dataset and comparison qualification`
+- Current milestone: `V3-N2 COMPLETE`; next recommended milestone is v3 release hardening
+- State: `V3_N2_COMPLETE_EXACT_IMPLEMENTATION_COMMIT_QUALIFIED`
 - v3 release eligible: NO
-- Blockers: none recorded before V3-N2 implementation
+- Blockers: none
 
-APM v2.0.0 is immutable. V3-N0 and V3-N1 are complete. V3-N2 begins catalog-wide application of the already qualified noise measurement/acquisition/fitting method.
+APM v2.0.0 is immutable. V3-N0, V3-N1, and V3-N2 are complete. V3-N2 applies the qualified noise measurement/acquisition/fitting method to the entire public MOS catalog without changing model cards or claiming a v3 release.
 
 ## Reference toolchain
 
@@ -273,12 +273,19 @@ At minimum the exact implementation commit must demonstrate:
 13. final coverage/fit/adaptive-stop/comparison summary in `STATUS.md`;
 14. an evidence-based recommendation for the next milestone.
 
-## Current next action
+## V3-N2 exact-commit qualification
 
-The manifest-driven N2 planner and strict execution/resume/comparison layer are
-implemented in the working tree. Development qualification passes 16/16 using
-real ngspice/OpenVAF/OSDI. The deterministic plan contains 376 logical
-memberships deduplicated to 290 physical requests:
+The coherent implementation commit is:
+
+`ca977af3ba08b9dfdee8556e5781f647f99cabdd`
+
+It was rerun from a fresh empty output directory with a clean worktree on the
+documented WSL2 / AlmaLinux 9.7 x86_64 environment using ngspice 47, OpenVAF
+Re-Loaded v24.0.2mob, and the normal Sparse `.noise` solver. The fresh run and
+strict all-reuse run each pass all 16 N2 checks.
+
+The manifest-derived plan contains 376 logical memberships deduplicated to 290
+physical requests:
 
 ```text
 temperature     104
@@ -289,73 +296,68 @@ threshold views  36
 anchor views     10
 ```
 
-Development output:
+Exact unique terminal states are 261 `validated`, 29
+`target_not_reachable`, and zero `simulation_failed`. The unreachable points
+remain explicit bracketed results; none was clipped. Logical dataset coverage
+is temperature 97/7, inversion 110/20, length 72/6, and NFIN 18/0
+(validated/unreachable). All 36 threshold-view and ten anchor memberships are
+validated.
 
-`.apm/results/v3-n2-development-2-36dba0f`
+Adaptive selected stops for the 261 valid spectra are 124 at 100 MHz, 96 at
+1 GHz, 37 at 10 GHz, and four at 100 GHz. The four cap cases are APM045
+VTL/VTG/VTH/THKOX NMOS at gm/Id=5 1/V; each observes a valid white region.
+All 261 white fits are valid. Flicker and corner fits are valid for 234, with
+27 explicit `invalid_not_observed` nulls.
 
-Observed unique terminal states:
+All 12 threshold-family comparison groups are complete. APM022/APM016F
+equal-inversion results are identical across the controlled generic threshold
+variants, while their equal-bias results differ. APM045 differs in both views.
+No universal noise ordering is imposed, and the generic APM022/APM016F results
+are not presented as foundry multi-Vt truth.
 
-```text
-validated             261
-target_not_reachable   29
-simulation_failed       0
-```
+Both polarity-separated five-anchor groups are complete. Their exact hashed
+comparison artifact provides 1 Hz, 1 kHz, 1 MHz, and 10 MHz values, all valid
+fit metrics, and 1 Hz–10 MHz gate-referred integration with explicit geometry.
+No planar-per-width versus FinFET-per-fin ratio is produced.
 
-The 29 unreachable physical requests remain explicit bracketed results. Across
-logical dataset memberships, temperature is 97 validated / 7 unreachable,
-inversion is 110 / 20, length is 72 / 6, and NFIN is 18 / 0. All 18
-threshold equal-inversion, all 18 threshold equal-bias, and all ten N/P anchor
-members are validated.
+Strict resume qualification passes the exact, request-mismatch, artifact-tamper,
+and incomplete-result cases 4/4. The exact unchanged rerun safely reused
+290/290 with zero fresh catalog simulations. A separate real stale-result
+exercise quarantined a deliberately mismatched result, reused 289, and reran
+only the rejected request.
 
-Adaptive selected stops for the 261 valid spectra:
-
-```text
-100 MHz   124
-1 GHz      96
-10 GHz     37
-100 GHz     4
-```
-
-The four 100 GHz cases are APM045 NMOS VTL/VTG/VTH/THKOX at gm/Id=5 1/V;
-each found a valid white region at the cap. White fits are valid for all 261
-spectra. Flicker and corner fits are valid for 234; the remaining 27 are
-explicit `invalid_not_observed` nulls rather than forced fits.
-
-Threshold comparisons show no imposed universal ordering. APM022/APM016F
-equal-inversion results are identical across their controlled generic Vt
-variants at the resolved common inversion, while equal-bias results differ as
-their actual Id/gm/gm/Id move with threshold/workfunction. These remain generic
-model experiments, not foundry multi-Vt noise truth. APM045 sibling results
-show model-predicted differences in both views without a manufactured ordering.
-
-Both polarity-separated five-anchor groups are complete. They retain explicit
-planar W versus FinFET NFIN geometry and provide common-frequency values plus
-1 Hz–10 MHz gate-referred integrals; no cross-basis drain-noise ratios exist.
-
-Resume qualification passed in three ways:
-
-- automated exact/mismatched/tampered/incomplete validator cases: 4/4;
-- an unchanged real resume safely reused 290/290 catalog results; and
-- a deliberately mismatched request hash was quarantined, 289 exact results
-  were reused, and only the rejected request was freshly rerun.
-
-Development report/hash index:
+Exact report/hash index:
 
 ```text
-fresh report            40208ef79ab286dcbf73b637064c9662947cac844aab8cd68f431977a473c37e
-all-reuse report        a6710d7e1d5311078c67d7e7b0443e879ea7d75f0906d45e92114b0ef399534b
-stale-rejection report  809f934bd5921c1f6fe80129629431bb47668e56f3d49b7858bf84f9b3219eaf
-plan payload             fc13a0fb8b703aad1a5d1ea34f84cf328539fbc9c4794f5755033ff7acfd005f
-coverage                 f22a96302af591295205b907ecb1966466f84c44cd4b6031c26d04ea879085aa
-comparisons              b550cf91911e9e2e891a019c7f12de1ba076cb70536650fa3e1ee6d3e7c7466a
-scaling observations     240a94688a50297cdc228e062f8a8b0a9cbb018816d3a327fe70db46361a47a9
-resume qualification     c70c7e8f496ac7685da1128a0f3b57bbb8b1f29fa3115bb9ce8cff470b8fb086
-V3-N1 regression         35bc5a6a5c1d4f5de0b1cd943fbfa57d2fe1e5adcccee9c6cc3e088480c937c7
-nested V3-N0             757a618eff518e045a055e4a26573c50d3f0998f5b4cd54605c7159786072bcd
+fresh catalog report    dc95641e451829a2711b23a116292786414b7f5d520e2c0e3b030137db3e59c2
+all-reuse report        f99cc9993cf09f2869d51120a152181bd3a2167b9fcbc8390bfcbf845bf7c700
+plan file               434012583652ff57ca4c6bf01ab73668a0c2c56c380955dd315f6cd6e4238a3a
+plan semantic hash      b4e8d792de5b2da9f7bc8612a79333b501693f83162987560c5df8af1c00cc6d
+coverage                ef9ef3f0b780fe4cbab69793fd3d5df09c6f55604c9ffa81922de076aca87bb0
+comparisons             521bd982077e800139595be3682540551aa1fca60de9cbc48783baa44bac2c55
+scaling observations    240a94688a50297cdc228e062f8a8b0a9cbb018816d3a327fe70db46361a47a9
+resume qualification    d1357ce97f6001b5ac7dacea02c1d6365807258f00da7c15a8371626b6ecb3c3
+V3-N1 regression        50eae0cd8e6777c74a746b3fd5c8445a6dea5a6294b33f6cbcf456b8345baa8f
+nested V3-N0            4c22eadbc97dda592ed1b728aed30a021697ecfb0dcbfabf05c6f1d4f74d4132
+provenance              4c8fd79cc0b4835105016f9312398f3a9bd16b869e0a37fba10b65c71a1c7635
+static validation       7fbab3f2a10bc7f793a84abbec37890148babc37f1621eb5dfbd387d39e1e1b9
+tracked compact evidence a33ad320671e2611aa6b31ac7a833a4f7bf3385880655a2462f5c894796b68bc
 ```
 
-APM350/APM022/APM016F card hashes remain identical to `v2.0.0`; required
-noise jobs use Sparse and no KLU. These are development observations, not the
-required exact-implementation-commit evidence. The next action is the complete
-test/lint/REUSE/provenance/static audit, coherent implementation commit, and
-fresh exact-commit N2 rerun before committing compact evidence.
+V3-N0 passes 13/13, V3-N1 passes 10/10, pytest passes 88 tests, Ruff passes,
+REUSE passes 240/240 files, provenance passes, repository static validation
+passes, and `apm doctor` passes all native/OSDI smokes. APM350/APM022/APM016F
+model cards remain byte-identical to `v2.0.0`; no process-noise coefficient was
+tuned or added.
+
+Tracked compact evidence:
+
+`validation/evidence/v3_n2_noise_catalog.json`
+
+## Current next action
+
+Proceed to a separately specified v3 release-hardening milestone. Do not begin
+process-noise calibration from N2 alone: generic APM-authored calibration would
+require separately authorized, defensible external silicon or literature
+targets. V3-N2 does not change package version, create a v3 tag, or make the
+repository v3-release eligible by itself.
