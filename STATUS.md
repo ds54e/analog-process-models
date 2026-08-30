@@ -10,17 +10,18 @@ This is the compact persistent progress index. It is not validation evidence by 
 - Released tag commit: `3cc6cfea4932cc40f2d693784d0a569926cdf399`
 - v2 post-release exact-tag requalification: complete, 20/20 required gates passed
 - Current development line: post-v2 `main`
-- Current target: v3 stationary small-signal MOS-noise characterization foundation
-- Current milestone: `V3-N0 Four-engine noise spike`
-- State: `V3_N0_COMPLETE`
+- Current target: v3 stationary small-signal MOS-noise characterization
+- Completed milestone: `V3-N0 Four-engine noise spike`
+- Current milestone: `V3-N1 Noise acquisition and fit-method qualification`
+- State: `V3_N1_NOT_STARTED`
 - v3 release eligible: NO
-- Blockers: none
+- Blockers: none recorded before V3-N1 implementation
 
-APM v2.0.0 is immutable history and remains the validated electrical/DC/Y/capacitance/variation baseline. Current v3 work does not invalidate or modify the v2 release.
+APM v2.0.0 is immutable. V3-N0 is complete and does not modify the released v2 model-card baseline.
 
-## Reference toolchain to reuse
+## Reference toolchain
 
-Validated v2 development/reference environment:
+Reuse the validated environment unless evidence requires repair:
 
 - WSL2
 - AlmaLinux 9.7 x86_64
@@ -33,57 +34,36 @@ Validated v2 development/reference environment:
 - PSP103 OSDI
 - BSIM-CMG 112.1.0 OSDI
 
-The v3 noise spike reused this environment and the verified existing OSDI build
-cache; it did not rebuild solved infrastructure without reason.
+Required `.noise` reference jobs use the normal Sparse solver, not KLU.
 
-Required `.noise` reference runs use the normal Sparse solver path, not KLU.
+## V3-N0 retained baseline
 
-## Released v2 family matrix
+Normative base specification:
 
-| Technology | Families | v2 state |
-| --- | --- | --- |
-| APM350 | `general` | released/validated |
-| APM130 | `lv`, `hv` | released/validated |
-| APM045 | `vtl`, `vtg`, `vth`, `thkox` | released/validated |
-| APM022 | `lvt`, `svt`, `hvt` | released/validated |
-| APM016F | `lvt`, `svt`, `hvt` | released/validated |
-
-Catalog total: five technologies, 13 Electrical Families, 26 public family-qualified MOS devices.
-
-## v3 noise design state
-
-Normative design:
-
-- `GOAL.md`
 - `NOISE_CHARACTERIZATION.md`
 
-Current design decisions:
+Exact implementation commit:
 
-- keep `apm.characterization.v2` intact;
-- add an independent noise domain, preferred schema `apm.noise-characterization.v1`;
-- stationary small-signal noise only for the initial phase;
-- ngspice remains the validated reference backend;
-- Spectre remains model-only experimental/unverified;
-- canonical common result is external drain-terminal total short-circuit current-noise PSD, not compact-model internal `sid`;
-- persist gate-referred PSD using actual small-signal transfer;
-- persist parameter-level effective noise-model provenance;
-- distinguish backend execution capability from physical/calibration claims;
-- do not tune new APM350/APM022/APM016F process-noise coefficients during the initial spike;
-- do not add noise variation/mismatch/correlation models in the initial phase;
-- do not create/tag v3.0.0 from the spike alone.
+`9c9f5b132829bda0e06045981e34e0dd2a41deb4`
 
-## V3-N0 required four-engine spike
+Compact exact-commit evidence:
 
-Required model paths:
+`validation/evidence/v3_n0_noise_spike.json`
 
-| Engine | Selector |
-| --- | --- |
-| native BSIM3 | `apm350/general/nmos` |
-| PSP103 OSDI | `apm130/lv/nmos` |
-| native BSIM4 | `apm045/vtg/nmos` |
-| BSIM-CMG OSDI | `apm016f/svt/nfet` |
+V3-N0 status:
 
-Provisional common operating point:
+- acceptance: 13/13 pass;
+- repository regression: 68 tests passed;
+- Ruff / REUSE / provenance / static validation passed;
+- resistor `4*k*T/R` reference passed;
+- 1-ohm CCVS current probe demonstrated transparent/noiseless behavior;
+- OpenVAF -> OSDI white/flicker fixtures passed;
+- internal correlated-noise fixture matched the correlated result and decisively rejected the independent interpretation;
+- native BSIM3, PSP103 OSDI, native BSIM4, and BSIM-CMG OSDI all completed the canonical four-engine spike;
+- parameter-level effective-noise provenance was captured;
+- APM350/APM022/APM016F model cards remained unchanged from `v2.0.0`.
+
+Canonical V3-N0 point:
 
 ```text
 T = 27 degC
@@ -92,143 +72,115 @@ Planar W = family/device default
 FinFET NFIN = 1
 VOUT = 0.5 * reference_vdd
 gm/Id target = 15 1/V
-frequency = 1 Hz ... 100 MHz
+1 Hz -> 100 MHz
 20 points/decade
 ```
 
-The gm/Id point must be actively resolved/revalidated rather than taken from the nearest old DC sweep row.
+Representative V3-N0 observations:
 
-## V3-N0 harness validation required before MOS acceptance
+| Engine / selector | gm/Id | Provisional fit result |
+| --- | ---: | --- |
+| BSIM3 `apm350/general/nmos` | 14.99089 | white valid; flicker/corner not observed |
+| PSP103 `apm130/lv/nmos` | 14.99458 | white/flicker/corner valid; corner about 2.77 MHz |
+| BSIM4 `apm045/vtg/nmos` | 15.00039 | flicker valid; white/corner not observed by 100 MHz |
+| BSIM-CMG `apm016f/svt/nfet` | 14.99705 | white/flicker/corner valid; corner about 569 kHz |
 
-1. analytic resistor current-noise reference;
-2. candidate 1-ohm CCVS/current-probe transparency;
-3. OpenVAF/OSDI white-noise fixture;
-4. OpenVAF/OSDI flicker-noise fixture;
-5. analytic correlated internal-noise network through OpenVAF -> OSDI -> ngspice.
+The BSIM4 result is the primary reason V3-N1 must qualify the acquisition/fitting method before all-device expansion.
 
-The correlated fixture is intended to decide capability from real evidence rather than from OSDI-version assumptions.
+## V3-N1 normative contract
 
-## V3-N0 exact-commit qualification
+Current goal:
 
-The implementation commit was qualified with fresh output on 2026-08-30:
+- `GOAL.md`
+- `NOISE_N1.md`
 
-```console
-.venv/bin/apm doctor
-.venv/bin/apm validate --output .apm/results/v3-n0-exact-static-9c9f5b1
-.venv/bin/apm noise-check --output .apm/results/v3-n0-exact-9c9f5b1
-```
+V3-N1 preserves the V3-N0 measurement semantics and resolves the remaining method questions.
 
-- exact implementation commit: `9c9f5b132829bda0e06045981e34e0dd2a41deb4`;
-- exact noise-spike report SHA-256: `53a28597a01fd850c3d23ca74a534ea5c8d9ed2180ef90f85105734eedec9b6f`;
-- exact static-validation report SHA-256: `d24ef660407debf86764634fe2e2f5dcef0b3ba08dfd7217331b605fc2049ee6`;
-- doctor report SHA-256: `67c368b602e688dbf1fa018e40f76eb34c5a03f274a77b4334923adbee836c60`;
-- compact evidence: `validation/evidence/v3_n0_noise_spike.json`;
-- compact evidence SHA-256: `1ee217a9b4763c993969245ab47b0fc34392204f5aac7574099cda12e3b8dcec`;
-- acceptance result: 13/13 pass;
-- repository regression: 68 tests passed; Ruff, REUSE 233/233, provenance, and complete static validation passed;
-- all required jobs attested the normal Sparse solver and no required job used KLU;
-- resistor `4*k*T/R` maximum relative error: `3.4954e-7`;
-- probe DC current/voltage error: zero; gain-two PSD ratio: `4.000000006`; noise-free run PSD: zero;
-- white fixture maximum relative error: zero;
-- flicker fixture exponent: `1.25`; maximum relative error: `3.2134e-9`;
-- correlated fixture observed the correlated result to `3.01e-16` relative error and decisively rejected the independent interpretation by a ratio of `181`.
+### Acquisition policy to implement/qualify
 
-| Engine / selector | Achieved gm/Id | Relative target error | Drain PSD range (A^2/Hz) | Provisional fit observation |
-| --- | ---: | ---: | ---: | --- |
-| BSIM3 `apm350/general/nmos` | 14.99089 | 0.06071% | `3.397e-25` .. `3.397e-25` | white valid; flicker/corner not observed |
-| PSP103 `apm130/lv/nmos` | 14.99458 | 0.03610% | `9.827e-25` .. `2.898e-18` | white/flicker/corner valid |
-| BSIM4 `apm045/vtg/nmos` | 15.00039 | 0.002602% | `5.744e-24` .. `4.138e-17` | flicker valid; white/corner not observed |
-| BSIM-CMG `apm016f/svt/nfet` | 14.99705 | 0.01969% | `1.240e-24` .. `7.130e-19` | white/flicker/corner valid |
-
-Every run retained 161 points from 1 Hz through 100 MHz, the canonical
-gate-referred PSD and complex transfer, raw backend source names, complete
-refined finite-difference diagnostics, and an effective parameter snapshot.
-All gm/gds step-convergence and native-oracle comparisons were below the
-existing 2% v2 tolerances.
-
-## Noise provenance findings
-
-### APM130
-
-OSDI `showmod` returned effective values for the 16 audited PSP103 noise
-parameters. The snapshot distinguishes matching upstream card values from
-pinned Verilog-A defaults. Native PSP oracles were finite and trend-consistent:
-`sid=9.496017e-25 A^2/Hz`, `sfl=2.898328e-18 A^2/Hz` at 1 Hz, and
-`cigid=0.4988225`; they are not treated as equal-by-contract to the external
-terminal total.
-
-### APM045
-
-Native ngspice `showmod` resolved 16 of 17 audited BSIM4 values and kept card
-selectors distinct from backend defaults. ngspice 47 returns an error sentinel
-for BSIM4 `LINTNOI`; the adapter records the narrowly documented runtime
-default `0` fallback. Selector-inactive correlation coefficients remain
-explicitly not-applicable rather than invented.
-
-### APM350 / APM022 / APM016F
-
-Native BSIM3 `showmod` resolved nine audited backend defaults. OSDI `showmod`
-plus pinned BSIM-CMG declarations resolved 20 explicit/default values. The
-APM350, APM022, and APM016F model-card paths remain byte-for-byte unchanged
-from `v2.0.0`; no spike-driven process-noise coefficient was added or tuned.
-
-The analytic internal-node fixture proves correlation preservation through the
-current OpenVAF-Re-Loaded -> OSDI -> ngspice Sparse path. Production PSP103
-exercised nonzero `igig`/`idid` sources with `cigid`. A separate BSIM-CMG
-diagnostic changed `TNOIMOD` from the production value 0 to 1 only at runtime,
-observed nonzero `corl` and `id` sources, and verified the production card hash
-was unchanged.
-
-## V3-N0 implemented output contract
-
-Preferred per-run artifacts:
+Every canonical job begins at:
 
 ```text
-metadata.json
-operating_points.csv
-noise_spectrum.csv
-noise_metrics.csv
-source_breakdown.json
-noise_model_snapshot.json
+1 Hz -> 100 MHz
+20 points/decade
 ```
 
-Canonical spectrum fields include:
+If a valid white region is not observed, rerun the complete spectrum using bounded upper-frequency extension:
 
 ```text
-s_idrain_terminal_a2_per_hz
-s_vgate_equivalent_v2_per_hz
-y_dg_real_s
-y_dg_imag_s
+1 GHz
+10 GHz
+100 GHz
 ```
 
-Derived metrics such as flicker exponent, white floor, flicker corner, `gamma_eff_total`, and integrated noise are secondary to raw spectra and must be null/invalid when fitting is not justified.
+Stop at the first valid white region. If no valid white region appears by 100 GHz, preserve an explicit null result; do not force a fit.
 
-## Evidence-based next-milestone recommendations
+The intended long-term model is adaptive acquisition rather than forcing every technology to one unnecessarily large common frequency endpoint.
 
-- Keep 1 Hz and 20 points/decade provisionally. Do not freeze 100 MHz as the common upper endpoint: the APM045/VTG spectrum did not expose a white region in the fixed 10-100 MHz review window. Run a bounded higher-frequency diagnostic first.
-- Replace the spike's versioned fixed review windows with a predeclared contiguous-region detector using slope, span, point-count, and quality rules. Preserve fail-closed nulls and refit the retained raw spectra without rerunning when possible.
-- Treat the current internal-node correlation construction as demonstrated through PSP103 and a BSIM-CMG `TNOIMOD=1` diagnostic on this exact OSDI path. Do not generalize backend source names or claim production APM016F correlation when its unchanged selector is 0.
-- Use `showmod` final values for native BSIM3/BSIM4, with only the documented BSIM4 `LINTNOI=0` fallback. For PSP103/BSIM-CMG, bind OSDI `showmod` values to explicit card occurrences or pinned Verilog-A default declarations.
-- Do not expand to all 26 devices until the upper-frequency diagnostic and fit-region method are frozen. The raw schema and four engine paths are otherwise ready for catalog orchestration.
-- Add a small low-VDS diagnostic before all-device expansion; the canonical `VOUT=0.5*VDD` point alone does not exercise linear-region thermal/correlation behavior.
-- Consider generic APM-authored noise calibration only in a later evidence-backed milestone. Do not tune now: unchanged APM350 defaults produce no flicker (`KF=0`), while unchanged APM016F defaults produce strong flicker.
-- Keep a full terminal noise-correlation matrix as a possible later extension, not a prerequisite for the next milestone.
+### Fit method to implement/qualify
 
-## V3-N0 evidence retained
+Preferred identity:
 
-The compact exact-commit evidence is:
+`apm.noise-fit.contiguous-regions@1.0.0`
 
-`validation/evidence/v3_n0_noise_spike.json`
+Required properties:
 
-The full 130-file simulator result remains intentionally ignored under
-`.apm/results/v3-n0-exact-9c9f5b1/` and is reproducible from the evidence
-command. V3-N0 is complete as a development spike only: the package remains
-2.0.0, no v3 tag exists, and no v3 release is claimed.
+- local log-slope classification;
+- contiguous flicker/white regions;
+- minimum logarithmic spans and point counts;
+- whole-region fit/flatness quality gates;
+- deterministic candidate selection;
+- support for an interior white plateau before later high-frequency shaping;
+- fail-closed null metrics when no valid region exists;
+- no silent movement of windows to manufacture a result.
 
-## v2 release evidence retained
+The V3-N0 fixed-window method remains historical/provisional evidence only.
 
-The immutable `v2.0.0` tag independently passed the documented exact-commit fresh-clone release flow on WSL2 + AlmaLinux 9.7 x86_64. The post-release evidence remains:
+### Low-VDS diagnostics
 
-`validation/evidence/v2_post_release_requalification.json`
+Run all four representative engines at:
 
-The existing `validation/release_gates.toml` remains the historical/current implementation of the v2 release-gate contract until a later v3 release goal introduces separate v3 release gates. Do not rewrite it merely to start the spike.
+```text
+VOUT = 50 mV effective
+gm/Id = 15 1/V within 1%
+T = 27 degC
+L/Lmin = 2
+```
+
+Also run one diagnostic-only BSIM-CMG low-VDS case with runtime `TNOIMOD=1`, without editing the production APM016F card.
+
+## V3-N1 required completion evidence
+
+V3-N1 is not complete until the exact implementation commit demonstrates:
+
+1. V3-N0 regression remains green;
+2. deterministic synthetic tests qualify the new region detector;
+3. four canonical engines use bounded adaptive acquisition;
+4. APM045/VTG receives the required >100 MHz diagnostic when necessary;
+5. four low-VDS diagnostics complete with explicit raw/status evidence;
+6. diagnostic BSIM-CMG `TNOIMOD=1` low-VDS capability is exercised without card modification;
+7. effective parameter provenance remains complete;
+8. Sparse/no-KLU requirements remain satisfied;
+9. pytest, Ruff, REUSE, provenance, and static validation pass;
+10. compact exact-commit evidence is committed, preferred path `validation/evidence/v3_n1_noise_method.json`;
+11. the resulting method/acquisition policy is frozen in repository documentation;
+12. an evidence-based V3-N2 all-26-device readiness decision is recorded.
+
+## Current exclusions
+
+V3-N1 does not include:
+
+- all 26-device noise expansion;
+- process-noise coefficient tuning/calibration;
+- noise variation/Monte Carlo;
+- transient noise;
+- RTS/RTN;
+- PSS/PNoise;
+- oscillator phase noise;
+- full terminal noise-correlation matrices;
+- real Spectre validation;
+- package version bump or v3 tag.
+
+## Current next action
+
+Implement `GOAL.md` completely using `NOISE_N1.md` as the V3-N1 technical contract, produce real-tool evidence, then decide whether V3-N2 may expand the frozen method to all 26 public MOS devices.
