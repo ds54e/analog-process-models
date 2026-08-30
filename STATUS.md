@@ -11,9 +11,9 @@ This is the compact persistent progress index. It is not validation evidence by 
 - v2 post-release exact-tag requalification: complete, 20/20 required gates passed
 - Current development line: post-v2 `main`
 - Current target: v3 stationary small-signal MOS-noise characterization
-- Completed milestone: `V3-N0 Four-engine noise spike`
-- Current milestone: `V3-N1 Noise acquisition and fit-method qualification`
-- State: `V3_N1_IMPLEMENTED_DEVELOPMENT_QUALIFICATION_PASS_EXACT_COMMIT_PENDING`
+- Completed milestones: `V3-N0 Four-engine noise spike`; `V3-N1 Noise acquisition and fit-method qualification`
+- Current milestone: `V3-N1 complete`; V3-N2 has not started
+- State: `V3_N1_COMPLETE`
 - v3 release eligible: NO
 - Blockers: none
 
@@ -149,9 +149,9 @@ L/Lmin = 2
 
 Also run one diagnostic-only BSIM-CMG low-VDS case with runtime `TNOIMOD=1`, without editing the production APM016F card.
 
-## V3-N1 required completion evidence
+## V3-N1 completion criteria (satisfied)
 
-V3-N1 is not complete until the exact implementation commit demonstrates:
+The exact implementation commit was required to demonstrate, and did demonstrate:
 
 1. V3-N0 regression remains green;
 2. deterministic synthetic tests qualify the new region detector;
@@ -181,9 +181,21 @@ V3-N1 does not include:
 - real Spectre validation;
 - package version bump or v3 tag.
 
-## V3-N1 implementation progress
+## V3-N1 completion freeze
 
-Implemented locally:
+Exact implementation commit:
+
+`0aab87b98697bd8806d13d244595a989cd81a0e3`
+
+Compact exact-commit evidence:
+
+`validation/evidence/v3_n1_noise_method.json`
+
+Evidence SHA-256:
+
+`687841b8f912812e511be7af741cf90ed283325808b4926b816969c78967a5f7`
+
+Frozen implementation:
 
 - fit identity `apm.noise-fit.contiguous-regions@1.0.0`;
 - centered approximately 0.5-decade local log-slope estimator (11 points at
@@ -201,8 +213,9 @@ Implemented locally:
   deterministic synthetic cases, four canonical adaptive runs, four 50 mV
   VOUT adaptive runs, and the low-VDS BSIM-CMG `TNOIMOD=1` diagnostic.
 
-The current pre-commit real-tool development run passed all 10 N1 checks and
-the nested V3-N0 regression passed 13/13. Preliminary deterministic results:
+The fresh-output exact-implementation-commit run passed all 10 N1 checks, the
+nested V3-N0 regression passed 13/13, and the deterministic synthetic fit
+qualification passed 8/8. Exact results:
 
 | Selector | Canonical selected stop | 50 mV selected stop | Canonical white result | 50 mV white result |
 | --- | ---: | ---: | --- | --- |
@@ -214,20 +227,51 @@ the nested V3-N0 regression passed 13/13. Preliminary deterministic results:
 APM045 canonical acquisition did not expose an eligible plateau in the
 100 MHz or 1 GHz attempts. The 10 GHz attempt selected the first eligible
 interior plateau, approximately 79.43 MHz through 5.623 GHz, and stopped
-without a 100 GHz run. The preliminary white floor was about
+without a 100 GHz run. The white floor was about
 `5.392e-24 A^2/Hz` and the fitted corner about 9.28 MHz.
 
-All four preliminary low-VDS biases resolved within 0.071% of gm/Id=15 1/V.
+All four low-VDS biases resolved within 0.071% of gm/Id=15 1/V.
 The runtime-only low-VDS BSIM-CMG diagnostic changed effective `TNOIMOD` from
 the production value 0 to 1, exposed a nonzero `corl` source, used Sparse, and
 left the production APM016F card hash unchanged.
 
-These observations remain development evidence until a coherent
-implementation commit is created and the complete qualification is rerun from
-fresh output at that exact commit.
+Exact generated-report hashes:
+
+- V3-N1 full report:
+  `b986f93b9844628627ccbd4e8446f58fb4552e2e7a4662904e747f497f6442dd`;
+- nested V3-N0 report:
+  `8f6e723069ce94d32deb112cfa232109d4c8f6b0766c07b2973ea80274d6fa46`;
+- retained V3-N0 harness report:
+  `78ee676ffda3eb17520c23505350c9b0737b122886c2159ff0b519a039c8ff70`;
+- synthetic fit report:
+  `a0eaa991f8de7fe111d9f272f737aea764f92373e370c68bd15bd502e52df2ac`;
+- exact static validation:
+  `591037e3c3db60c95c52d68a6ccff685aa1d09f1d1e7fa50627e978a8dfd0811`;
+- exact provenance validation:
+  `cebed1aecf4b55b4a3e946f9d674283758ae939047ec001cd877dc72ef473c63`;
+- exact doctor report:
+  `de97c84171d304b1362c5f21bd1dfd9498d74b9f8efd60fe0eb37c47f76d0f4f`.
+
+Exact-commit repository validation also passed 79 tests, Ruff, REUSE 236/236,
+provenance, claim/distribution/catalog/migration audits, and static Spectre
+structure. Every required acquisition attempt attested normal Sparse, no
+attempt selected KLU, and no critical simulator diagnostic was retained.
+
+Parameter interrogation remains frozen per engine: targeted final `showmod`
+values for native BSIM3/BSIM4 (with only the documented ngspice-47 BSIM4
+`LINTNOI=0` query fallback), and OSDI `showmod` values bound to explicit card
+occurrences or pinned Verilog-A defaults for PSP103/BSIM-CMG. Raw backend
+source names remain model-specific and are not mapped into a fake universal
+taxonomy.
+
+The N1 method is ready for V3-N2 expansion to all 26 public MOS devices. That
+recommendation covers characterization of existing compact-model predictions;
+it does not authorize process-noise coefficient tuning or a silicon accuracy
+claim. Retain the 50 mV VOUT case as a diagnostic profile, not a replacement
+for the canonical half-VDD point.
 
 ## Current next action
 
-Commit the coherent V3-N1 implementation, rerun real-tool and static
-qualification from fresh output at that exact commit, then commit the compact
-`validation/evidence/v3_n1_noise_method.json` summary and final status freeze.
+Await the next repository goal for V3-N2 all-device expansion. Do not change
+package version, create a v3 tag, or begin process-noise calibration from the
+V3-N1 capability result alone.
