@@ -1,0 +1,32 @@
+// SPDX-FileCopyrightText: APM contributors
+// SPDX-License-Identifier: Apache-2.0
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+// This fixture deliberately uses one internal white-noise source and routes
+// its voltage through two deterministic, nearly cancelling output paths.  It
+// mirrors the internal-node construction used by PSP103 and BSIM-CMG without
+// claiming that their model-specific source names have common semantics.
+module apm_noise_correlated(p, n);
+    inout p, n;
+    electrical p, n;
+    electrical common_noise;
+    electrical copied_noise;
+
+    parameter real common_psd = 1.0e-18 from [0.0:inf);
+    parameter real direct_gain_s = 1.0;
+    parameter real copied_gain_s = -0.9;
+
+    analog begin
+        // A 1 S noiseless shunt turns the internal current PSD into an equal
+        // voltage PSD.  The second 1 S equation copies that internal voltage
+        // through another internal node, ensuring this is a network-path test.
+        I(common_noise) <+ V(common_noise);
+        I(common_noise) <+ white_noise(common_psd, "apm_common");
+        I(copied_noise) <+ V(copied_noise) - V(common_noise);
+
+        I(p, n) <+ direct_gain_s * V(common_noise);
+        I(p, n) <+ copied_gain_s * V(copied_noise);
+    end
+endmodule

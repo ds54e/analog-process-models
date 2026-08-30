@@ -1,0 +1,17 @@
+// SPDX-FileCopyrightText: APM contributors
+// SPDX-License-Identifier: Apache-2.0
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+module apm_noise_flicker(p, n);
+    inout p, n;
+    electrical p, n;
+
+    parameter real psd_at_1hz = 9.0e-18 from [0.0:inf);
+    parameter real exponent = 1.25 from (0.0:inf);
+
+    analog begin
+        I(p, n) <+ flicker_noise(psd_at_1hz, exponent, "apm_flicker");
+    end
+endmodule

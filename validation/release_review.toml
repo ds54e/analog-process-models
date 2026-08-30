@@ -1,6 +1,6 @@
 schema = "apm.release-review.v2"
 status = "complete"
-reviewed_utc = "2026-08-30T02:20:12Z"
+reviewed_utc = "2026-08-30T04:39:08Z"
 reviewer = "APM implementation agent"
 scope = [
   "v2.0.0 installation, runtime, and release-condition wording",
@@ -12,18 +12,19 @@ scope = [
   "Spectre structural-only evidence boundary",
   "third-party redistribution and independent-authorship summaries",
   "release-readiness evidence and exact-commit clean-clone condition",
+  "post-v2 V3-N0 noise-development capability and non-release/non-calibration claim boundaries",
 ]
 spectre_real_tool_run = false
 foundry_or_silicon_correlation_claimed = false
 benchmark_physical_family_correlation_claimed = false
 repository_visibility_changed = false
 unresolved_claim_findings = []
-conclusion = "Public v2 claims match the implemented development evidence and preserve the conditional exact-commit release requirement. Spectre remains model-only experimental/unverified; APM is not a manufacturable PDK; generic APM-authored decks make no foundry or silicon-correlation claim; Benchmark Global is not asserted as physical family correlation."
+conclusion = "Public v2 claims remain unchanged and preserve the exact-commit release record. Post-v2 V3-N0 wording is limited to stationary-noise development capability and explicitly makes neither a v3 release nor silicon-calibration claim. Spectre remains model-only experimental/unverified; APM is not a manufacturable PDK; generic APM-authored decks make no foundry or silicon-correlation claim; Benchmark Global is not asserted as physical family correlation."
 
 [reviewed_files]
-"README.md" = "75492ce4a367319c28f790b8b1f949241a19dab0a439219cb60ce8b19f76cc30"
-"CHANGELOG.md" = "c549437bf6bbbf7f8ea1c154f3ac54fb19c97cc19829d706d7e4898677a17fd8"
-"STATUS.md" = "adbb16c6232f31f312e1b19090f2b1ec578385b4ace4a40042199f706c90c979"
+"README.md" = "1795a061d17b9f09999963e483e08172f5e63f3ade07553accfba59969bb83bb"
+"CHANGELOG.md" = "7ca3b2bd0190337494d2ac775f3a86cfa00019bcf8ddc3db6f9768f4c6c659ff"
+"STATUS.md" = "20409f9072448989b9d46675461281a56c27b984ffc96553ce57f7a3111d9d6e"
 "THIRD_PARTY.md" = "24cf582a44a170285545cfa2ae3556360a805367f81742459a2feba36b3b5a0e"
 "docs/benchmark-variation.md" = "71911c1474324a8529cd7754f98dd9afe26b231ca7bf8a04cc57a8ddba76fbe6"
 "docs/characterization.md" = "1e684b948ad89bdecb276c8bfce23c2eeadb2df09e082a50f4cbc2a0e55924eb"

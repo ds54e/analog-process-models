@@ -12,9 +12,9 @@ This is the compact persistent progress index. It is not validation evidence by 
 - Current development line: post-v2 `main`
 - Current target: v3 stationary small-signal MOS-noise characterization foundation
 - Current milestone: `V3-N0 Four-engine noise spike`
-- State: `V3_NOISE_FOUNDATION_NOT_STARTED`
+- State: `V3_N0_IMPLEMENTED_DEVELOPMENT_QUALIFICATION_PASS`
 - v3 release eligible: NO
-- Blockers: none recorded before implementation
+- Blockers: none; final exact-implementation-commit rerun and compact committed evidence remain before milestone closure
 
 APM v2.0.0 is immutable history and remains the validated electrical/DC/Y/capacitance/variation baseline. Current v3 work does not invalidate or modify the v2 release.
 
@@ -33,7 +33,8 @@ Validated v2 development/reference environment:
 - PSP103 OSDI
 - BSIM-CMG 112.1.0 OSDI
 
-The v3 noise spike should inventory and reuse this environment rather than rebuild solved infrastructure without reason.
+The v3 noise spike reused this environment and the verified existing OSDI build
+cache; it did not rebuild solved infrastructure without reason.
 
 Required `.noise` reference runs use the normal Sparse solver path, not KLU.
 
@@ -107,21 +108,75 @@ The gm/Id point must be actively resolved/revalidated rather than taken from the
 
 The correlated fixture is intended to decide capability from real evidence rather than from OSDI-version assumptions.
 
-## Noise provenance baseline to verify during implementation
+## V3-N0 development qualification
+
+A pre-commit integrated real-tool qualification completed on 2026-08-30:
+
+```console
+.venv/bin/apm doctor
+.venv/bin/apm noise-check --output .apm/v3-n0-dev-check
+```
+
+- development report SHA-256: `a31d5db1ff1faf021edb2cda54fa5cf84f1e2237bc11724e9983e00f73746039`;
+- acceptance result: 13/13 pass;
+- all required jobs attested the normal Sparse solver and no required job used KLU;
+- resistor `4*k*T/R` maximum relative error: `3.4954e-7`;
+- probe DC current/voltage error: zero; gain-two PSD ratio: `4.000000006`; noise-free run PSD: zero;
+- white fixture maximum relative error: zero;
+- flicker fixture exponent: `1.25`; maximum relative error: `3.2134e-9`;
+- correlated fixture observed the correlated result to `3.01e-16` relative error and decisively rejected the independent interpretation by a ratio of `181`.
+
+This development report was generated before the implementation commit and is
+not the final committed milestone evidence. The same flow must be rerun after
+the implementation commit before V3-N0 is marked complete.
+
+| Engine / selector | Achieved gm/Id | Relative target error | Drain PSD range (A^2/Hz) | Provisional fit observation |
+| --- | ---: | ---: | ---: | --- |
+| BSIM3 `apm350/general/nmos` | 14.99089 | 0.06071% | `3.397e-25` .. `3.397e-25` | white valid; flicker/corner not observed |
+| PSP103 `apm130/lv/nmos` | 14.99458 | 0.03610% | `9.827e-25` .. `2.898e-18` | white/flicker/corner valid |
+| BSIM4 `apm045/vtg/nmos` | 15.00039 | 0.002602% | `5.744e-24` .. `4.138e-17` | flicker valid; white/corner not observed |
+| BSIM-CMG `apm016f/svt/nfet` | 14.99705 | 0.01969% | `1.240e-24` .. `7.130e-19` | white/flicker/corner valid |
+
+Every run retained 161 points from 1 Hz through 100 MHz, the canonical
+gate-referred PSD and complex transfer, raw backend source names, complete
+refined finite-difference diagnostics, and an effective parameter snapshot.
+All gm/gds step-convergence and native-oracle comparisons were below the
+existing 2% v2 tolerances.
+
+## Noise provenance findings
 
 ### APM130
 
-Pinned IHP PSP cards contain explicit family-specific noise parameters. Treat as upstream-explicit parameterization, but do not overstate silicon calibration without stronger authoritative evidence.
+OSDI `showmod` returned effective values for the 16 audited PSP103 noise
+parameters. The snapshot distinguishes matching upstream card values from
+pinned Verilog-A defaults. Native PSP oracles were finite and trend-consistent:
+`sid=9.496017e-25 A^2/Hz`, `sfl=2.898328e-18 A^2/Hz` at 1 Hz, and
+`cigid=0.4988225`; they are not treated as equal-by-contract to the external
+terminal total.
 
 ### APM045
 
-Pinned FreePDK45 BSIM4 cards explicitly select some noise modes such as `FNOIMOD`/`TNOIMOD`, while some coefficients may resolve from BSIM defaults. Provenance therefore needs to be parameter-level.
+Native ngspice `showmod` resolved 16 of 17 audited BSIM4 values and kept card
+selectors distinct from backend defaults. ngspice 47 returns an error sentinel
+for BSIM4 `LINTNOI`; the adapter records the narrowly documented runtime
+default `0` fallback. Selector-inactive correlation coefficients remain
+explicitly not-applicable rather than invented.
 
 ### APM350 / APM022 / APM016F
 
-Current APM-authored cards were not intentionally process-noise calibrated. Compact-model default noise behavior may still produce valid simulator spectra; such results must be labeled compact-model-default predictions rather than APM process-noise calibration.
+Native BSIM3 `showmod` resolved nine audited backend defaults. OSDI `showmod`
+plus pinned BSIM-CMG declarations resolved 20 explicit/default values. The
+APM350, APM022, and APM016F model-card paths remain byte-for-byte unchanged
+from `v2.0.0`; no spike-driven process-noise coefficient was added or tuned.
 
-## V3-N0 planned output contract
+The analytic internal-node fixture proves correlation preservation through the
+current OpenVAF-Re-Loaded -> OSDI -> ngspice Sparse path. Production PSP103
+exercised nonzero `igig`/`idid` sources with `cigid`. A separate BSIM-CMG
+diagnostic changed `TNOIMOD` from the production value 0 to 1 only at runtime,
+observed nonzero `corl` and `id` sources, and verified the production card hash
+was unchanged.
+
+## V3-N0 implemented output contract
 
 Preferred per-run artifacts:
 
@@ -145,19 +200,16 @@ y_dg_imag_s
 
 Derived metrics such as flicker exponent, white floor, flicker corner, `gamma_eff_total`, and integrated noise are secondary to raw spectra and must be null/invalid when fitting is not justified.
 
-## Decisions intentionally unfrozen until V3-N0 evidence
+## Evidence-based next-milestone recommendations
 
-- final required frequency range;
-- final points/decade;
-- final white/flicker fitting method and thresholds;
-- exact PSP/BSIM-CMG correlated-noise support claim through current OSDI path;
-- reliable effective-parameter interrogation mechanism per engine;
-- whether all 26 devices can use one required frequency profile;
-- whether a low-VDS diagnostic profile becomes required;
-- whether APM-authored generic noise coefficients should be researched later;
-- whether a full terminal noise-correlation matrix is worth a later extension.
-
-Do not resolve these by guesswork before the spike.
+- Keep 1 Hz and 20 points/decade provisionally. Do not freeze 100 MHz as the common upper endpoint: the APM045/VTG spectrum did not expose a white region in the fixed 10-100 MHz review window. Run a bounded higher-frequency diagnostic first.
+- Replace the spike's versioned fixed review windows with a predeclared contiguous-region detector using slope, span, point-count, and quality rules. Preserve fail-closed nulls and refit the retained raw spectra without rerunning when possible.
+- Treat the current internal-node correlation construction as demonstrated through PSP103 and a BSIM-CMG `TNOIMOD=1` diagnostic on this exact OSDI path. Do not generalize backend source names or claim production APM016F correlation when its unchanged selector is 0.
+- Use `showmod` final values for native BSIM3/BSIM4, with only the documented BSIM4 `LINTNOI=0` fallback. For PSP103/BSIM-CMG, bind OSDI `showmod` values to explicit card occurrences or pinned Verilog-A default declarations.
+- Do not expand to all 26 devices until the upper-frequency diagnostic and fit-region method are frozen. The raw schema and four engine paths are otherwise ready for catalog orchestration.
+- Add a small low-VDS diagnostic before all-device expansion; the canonical `VOUT=0.5*VDD` point alone does not exercise linear-region thermal/correlation behavior.
+- Consider generic APM-authored noise calibration only in a later evidence-backed milestone. Do not tune now: unchanged APM350 defaults produce no flicker (`KF=0`), while unchanged APM016F defaults produce strong flicker.
+- Keep a full terminal noise-correlation matrix as a possible later extension, not a prerequisite for the next milestone.
 
 ## v2 release evidence retained
 

@@ -27,6 +27,8 @@ from .compare import (
 from .doctor import run_doctor
 from .model_build import build_models
 from .native_variation import NativeVariationError, validate_apm130_native
+from .noise import NoiseCharacterizationError, characterize_noise_selector
+from .noise_validate import NoiseValidationError, validate_noise_spike
 from .paths import repository_root
 from .provenance_validate import ProvenanceValidationError, validate_provenance
 from .release_validate import ReleaseValidationError, validate_release, validate_repository
@@ -157,6 +159,22 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_provenance.add_argument("--output", type=Path, required=True)
 
+    p_noise = sub.add_parser(
+        "noise", help="Run stationary small-signal noise characterization for one public device"
+    )
+    p_noise.add_argument("selector")
+    p_noise.add_argument(
+        "--profile",
+        help="Operating-profile ID (default: the family manifest's default profile)",
+    )
+    p_noise.add_argument("--output", type=Path, required=True)
+
+    p_noise_check = sub.add_parser(
+        "noise-check",
+        help="Qualify the analytic noise harness and run the V3-N0 four-engine spike",
+    )
+    p_noise_check.add_argument("--output", type=Path, required=True)
+
     return parser
 
 
@@ -282,6 +300,31 @@ def main() -> int:
                 )
             )
             return 0
+        if args.command == "noise":
+            result = characterize_noise_selector(
+                args.selector,
+                args.output,
+                operating_profile_id=args.profile,
+            )
+            print(json.dumps(result, indent=2, sort_keys=True))
+            return 0
+        if args.command == "noise-check":
+            result = validate_noise_spike(args.output)
+            print(
+                json.dumps(
+                    {
+                        "status": result["status"],
+                        "milestone": result["milestone"],
+                        "acceptance_result": result["acceptance_result"],
+                        "output_directory": result["output_directory"],
+                        "report_path": result["report_path"],
+                        "report_sha256": result["report_sha256"],
+                    },
+                    indent=2,
+                    sort_keys=True,
+                )
+            )
+            return 0
         if args.command == "characterization-check":
             result = validate_all_characterizations(args.output)
             print(
@@ -354,6 +397,8 @@ def main() -> int:
         FileNotFoundError,
         json.JSONDecodeError,
         NativeVariationError,
+        NoiseCharacterizationError,
+        NoiseValidationError,
         OSError,
         ProvenanceValidationError,
         ReleaseValidationError,

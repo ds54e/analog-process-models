@@ -4,6 +4,7 @@ version = 1
 path = [
   "README.md",
   "GOAL.md",
+  "NOISE_CHARACTERIZATION.md",
   "AGENTS.md",
   "DEVICE_FAMILY_MODEL.md",
   "PROJECT_CONTEXT.md",

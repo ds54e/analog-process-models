@@ -2,6 +2,25 @@
 
 All notable changes to Analog Process Models (APM) are documented here.
 
+## Post-v2 development — V3-N0 stationary MOS-noise foundation
+
+- added the independent `apm.noise-characterization.v1` domain without
+  changing released `apm.characterization.v2` behavior;
+- added precise gm/Id bias refinement, canonical external drain/gate-referred
+  PSD and complex transfer persistence, raw source breakdown, and
+  engine-specific effective-parameter provenance;
+- qualified the 1-ohm current probe with analytic resistor, APM-owned OSDI
+  white/flicker, and decisive correlated-network fixtures using ngspice's
+  normal Sparse solver;
+- exercised native BSIM3, PSP103 OSDI, native BSIM4, and BSIM-CMG OSDI at the
+  provisional four-engine spike point; and
+- added fail-closed provisional spectrum fitting and explicit next-milestone
+  recommendations without tuning APM-authored process-noise coefficients.
+
+V3-N0 is a development milestone, not a v3.0.0 release or a silicon-noise
+calibration claim. The package remains version 2.0.0 and `v2.0.0` remains
+immutable.
+
 ## [2.0.0] - 2026-08-30
 
 APM 2.0.0 is an intentional breaking release that replaces the v1

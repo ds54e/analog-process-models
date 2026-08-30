@@ -1,0 +1,16 @@
+// SPDX-FileCopyrightText: APM contributors
+// SPDX-License-Identifier: Apache-2.0
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+module apm_noise_white(p, n);
+    inout p, n;
+    electrical p, n;
+
+    parameter real white_psd = 4.0e-20 from [0.0:inf);
+
+    analog begin
+        I(p, n) <+ white_noise(white_psd, "apm_white");
+    end
+endmodule
