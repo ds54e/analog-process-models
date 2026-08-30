@@ -8,8 +8,9 @@ within it, APM always means Analog Process Models.
 Version **2.0.0** introduces first-class electrical families, 13 characterized
 families across five technologies, and a fail-closed 20-gate release flow.
 Post-v2 `main` also contains the V3-N0 stationary small-signal MOS-noise
-characterization foundation. V3-N0 is a development milestone, not a v3.0.0
-release or a silicon-noise calibration claim.
+foundation and the V3-N1 acquisition/fit-method qualification. These are
+development milestones, not a v3.0.0 release or a silicon-noise calibration
+claim.
 
 ## Scope
 
@@ -20,8 +21,8 @@ technology-neutral benchmark R/C devices, and exact model provenance.
 APM is **not a manufacturable PDK**. It does not provide layout, PCells, DRC,
 LVS, PEX, standard cells, signoff, reliability qualification, foundry
 correlation, yield prediction, RF devices, silicon-calibrated process-noise
-models, AMS integration, or Virtuoso automation. V3-N0 characterizes the noise
-predictions already present in the compact models and preserves their
+models, AMS integration, or Virtuoso automation. V3-N0/V3-N1 characterize the
+noise predictions already present in the compact models and preserve their
 parameter provenance.
 
 ## Device-family domain model
@@ -121,29 +122,40 @@ Those bases are never silently equated. See
 ## Stationary noise characterization
 
 The independent `apm.noise-characterization.v1` domain preserves the released
-`apm.characterization.v2` DC/Y/capacitance behavior. Run one public device or
-the complete V3-N0 four-engine qualification with:
+`apm.characterization.v2` DC/Y/capacitance behavior. Run one public device,
+the V3-N0 harness/four-engine regression, or the complete V3-N1 method
+qualification with:
 
 ```console
 .venv/bin/apm noise apm130/lv/nmos --output .apm/results/noise-apm130-lv-nmos
 .venv/bin/apm noise-check --output .apm/results/v3-n0-noise-spike
+.venv/bin/apm noise-method-check --output .apm/results/v3-n1-noise-method
 ```
 
 The spike first qualifies the 1-ohm drain-current probe against an analytic
 resistor, APM-owned OSDI white/flicker fixtures, and a decisive correlated
 internal-noise network. It then runs native BSIM3, PSP103 OSDI, native BSIM4,
-and BSIM-CMG OSDI with ngspice's normal Sparse solver. The provisional point is
-27 °C, `L/Lmin=2`, `VOUT/VDD=0.5`, and resolved `gm/Id=15 1/V`; the provisional
-sweep is 1 Hz through 100 MHz at 20 points/decade.
+and BSIM-CMG OSDI with ngspice's normal Sparse solver. The canonical point is
+27 °C, `L/Lmin=2`, `VOUT/VDD=0.5`, and resolved `gm/Id=15 1/V`. V3-N1 freezes
+the starting sweep at 1 Hz through 100 MHz and 20 points/decade, then repeats
+the complete sweep with bounded upper endpoints of 1 GHz, 10 GHz, and 100 GHz
+only while no valid white region is observed. Absence at the 100 GHz cap
+remains an explicit null result rather than a fabricated fit.
 
 Each result preserves the exact refined bias, finite-difference gm/gds, raw
 spectrum, complex external gate-to-drain transfer, backend source names, and
 parameter-level effective noise provenance. Canonical spectrum fields are
 `s_idrain_terminal_a2_per_hz`, `s_vgate_equivalent_v2_per_hz`,
 `y_dg_real_s`, and `y_dg_imag_s`. Fits are secondary, versioned, and fail
-closed when a white or flicker region is not observed. See
-[`NOISE_CHARACTERIZATION.md`](NOISE_CHARACTERIZATION.md) for the normative
-contract and claim boundaries.
+closed when a white or flicker region is not observed. The frozen
+`apm.noise-fit.contiguous-regions@1.0.0` method uses an approximately
+half-decade centered local log-slope, deterministic contiguous-region
+selection, span/point/quality gates, and can select an interior white plateau
+before later high-frequency shaping. V3-N1 also retains four-engine 50 mV
+VOUT diagnostics and a runtime-only BSIM-CMG `TNOIMOD=1` capability check
+without modifying the production card. See
+[`NOISE_CHARACTERIZATION.md`](NOISE_CHARACTERIZATION.md) and
+[`NOISE_N1.md`](NOISE_N1.md) for the normative contracts and claim boundaries.
 
 ## Comparison methodology
 
@@ -221,9 +233,9 @@ attestation captured immediately after cloning on the designated WSL2 + EL9
 host. See [`docs/release-validation.md`](docs/release-validation.md) for the
 complete sequence. Historical v1 evidence does not satisfy a v2 gate.
 
-V3-N0 does not change this released v2 contract, the package version, or any
-release tag. Its separate `apm noise-check` command validates the development
-spike and is not a substitute for `apm validate --release`.
+V3-N0/V3-N1 do not change this released v2 contract, the package version, or
+any release tag. Their separate noise qualification commands validate
+development milestones and are not substitutes for `apm validate --release`.
 
 Repository policy, implementation scope, and result semantics are defined by
 [`AGENTS.md`](AGENTS.md), [`GOAL.md`](GOAL.md), and

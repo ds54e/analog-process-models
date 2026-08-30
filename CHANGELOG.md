@@ -2,6 +2,28 @@
 
 All notable changes to Analog Process Models (APM) are documented here.
 
+## Post-v2 development — V3-N1 noise method qualification
+
+- replaced provisional fixed review windows with the versioned
+  `apm.noise-fit.contiguous-regions@1.0.0` detector, including centered local
+  log-slope classification, deterministic contiguous-region selection,
+  explicit quality gates, and fail-closed null metrics;
+- added bounded complete-sweep acquisition at 100 MHz, 1 GHz, 10 GHz, and
+  100 GHz, stopping at the first valid white region and retaining every
+  attempt's raw spectrum, fit diagnostics, model/source provenance, and
+  Sparse/no-KLU attestation;
+- qualified deterministic pure-white, pure-flicker, known-corner,
+  interior-plateau/high-frequency-rise, truncated, no-flicker,
+  insufficient-span, and malformed-input cases;
+- added four-engine 50 mV VOUT diagnostics and a runtime-only BSIM-CMG
+  `TNOIMOD=1` correlated-noise capability run without modifying the production
+  APM016F card; and
+- added `apm noise-method-check` for combined V3-N0 regression and V3-N1
+  real-tool qualification.
+
+V3-N1 does not expand to all 26 devices, tune process-noise coefficients,
+change package version, or create a v3 release/tag.
+
 ## Post-v2 development — V3-N0 stationary MOS-noise foundation
 
 - added the independent `apm.noise-characterization.v1` domain without

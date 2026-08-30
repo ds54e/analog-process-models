@@ -439,7 +439,7 @@ def _cmg_correlation_diagnostic(
     log = directory / "diagnostic.log"
     raw = directory / "noise.dat"
     lines = [
-        "APM BSIM-CMG TNOIMOD=1 diagnostic; production card remains unchanged",
+        "APM BSIM-CMG TNOIMOD=1 capability diagnostic; production card remains unchanged",
         *resolved.kit.model_directives(),
         f'.include "{resolved.kit.wrapper_file}"',
         ".options klu=0",
@@ -464,7 +464,7 @@ def _cmg_correlation_diagnostic(
         "set wr_singlescale",
         "op",
         "showmod n : tnoimod rnoia rnoib rnoic",
-        "noise v(nout) Vg dec 10 100000 10000000 1",
+        "noise v(nout) Vg dec 20 1 100000000 1",
         "setplot noise1",
         f"wrdata {raw} all",
         "quit",
@@ -502,6 +502,11 @@ def _cmg_correlation_diagnostic(
         "purpose": "representative diagnostic exercise of the existing BSIM-CMG internal correlated-noise mode",
         "baseline_production_tnoimod": baseline_tnoimod,
         "diagnostic_tnoimod": int(float(tnoimod_match.group(1))) if tnoimod_match else None,
+        "effective_vout_v": float(operating_point["vout_v"]),
+        "gm_over_id_per_v": float(operating_point["gm_over_id_per_v"]),
+        "frequency_start_hz": 1.0,
+        "frequency_stop_hz": 1.0e8,
+        "points_per_decade": 20,
         "production_card": str(production_card.relative_to(root)),
         "production_card_sha256_before": card_hash_before,
         "production_card_sha256_after": card_hash_after,
@@ -540,6 +545,8 @@ def _psp_correlation_diagnostic(baseline_directory: Path) -> dict[str, Any]:
         spectrum = list(csv.DictReader(handle))
     external_low = float(spectrum[0]["s_idrain_terminal_a2_per_hz"])
     external_high = float(spectrum[-1]["s_idrain_terminal_a2_per_hz"])
+    external_low_frequency_hz = float(spectrum[0]["frequency_hz"])
+    external_high_frequency_hz = float(spectrum[-1]["frequency_hz"])
     oracle_values_valid = all(
         isinstance(value, (int, float)) and math.isfinite(value) and value > 0.0
         for value in (sid, sfl)
@@ -573,10 +580,12 @@ def _psp_correlation_diagnostic(baseline_directory: Path) -> dict[str, Any]:
         "native_sfl_at_1hz_a2_per_hz": sfl,
         "native_oracle_assessment": {
             "status": "pass" if oracle_trend_pass else "fail",
-            "external_total_at_1hz_a2_per_hz": external_low,
-            "external_total_at_100mhz_a2_per_hz": external_high,
+            "external_total_at_lowest_frequency_a2_per_hz": external_low,
+            "external_total_at_highest_frequency_a2_per_hz": external_high,
+            "external_lowest_frequency_hz": external_low_frequency_hz,
+            "external_highest_frequency_hz": external_high_frequency_hz,
             "external_1hz_to_native_sfl_ratio": low_to_sfl,
-            "external_100mhz_to_native_sid_ratio": high_to_sid,
+            "external_highest_frequency_to_native_sid_ratio": high_to_sid,
             "checks": {
                 "native_values_finite_positive": oracle_values_valid,
                 "native_and_external_low_to_high_trends_consistent": bool(

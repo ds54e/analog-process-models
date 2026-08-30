@@ -13,9 +13,9 @@ This is the compact persistent progress index. It is not validation evidence by 
 - Current target: v3 stationary small-signal MOS-noise characterization
 - Completed milestone: `V3-N0 Four-engine noise spike`
 - Current milestone: `V3-N1 Noise acquisition and fit-method qualification`
-- State: `V3_N1_NOT_STARTED`
+- State: `V3_N1_IMPLEMENTED_DEVELOPMENT_QUALIFICATION_PASS_EXACT_COMMIT_PENDING`
 - v3 release eligible: NO
-- Blockers: none recorded before V3-N1 implementation
+- Blockers: none
 
 APM v2.0.0 is immutable. V3-N0 is complete and does not modify the released v2 model-card baseline.
 
@@ -181,6 +181,53 @@ V3-N1 does not include:
 - real Spectre validation;
 - package version bump or v3 tag.
 
+## V3-N1 implementation progress
+
+Implemented locally:
+
+- fit identity `apm.noise-fit.contiguous-regions@1.0.0`;
+- centered approximately 0.5-decade local log-slope estimator (11 points at
+  20 points/decade);
+- exact flicker and white thresholds from `NOISE_N1.md`, deterministic
+  contiguous-run selection, candidate diagnostics, median white floor,
+  boundary-checked corner, and fail-closed null metrics;
+- frozen acquisition policy
+  `apm.noise-acquisition.bounded-white-search@1.0.0` with complete sweeps at
+  100 MHz, 1 GHz, 10 GHz, and 100 GHz, stopping at the first valid white
+  region;
+- per-attempt raw spectrum, source breakdown, parameter snapshot, fit
+  diagnostics, hashes, and Sparse/no-KLU audit;
+- `apm noise-method-check` combining the retained V3-N0 regression, eight
+  deterministic synthetic cases, four canonical adaptive runs, four 50 mV
+  VOUT adaptive runs, and the low-VDS BSIM-CMG `TNOIMOD=1` diagnostic.
+
+The current pre-commit real-tool development run passed all 10 N1 checks and
+the nested V3-N0 regression passed 13/13. Preliminary deterministic results:
+
+| Selector | Canonical selected stop | 50 mV selected stop | Canonical white result | 50 mV white result |
+| --- | ---: | ---: | --- | --- |
+| `apm350/general/nmos` | 100 MHz | 100 MHz | valid | valid |
+| `apm130/lv/nmos` | 1 GHz | 1 GHz | valid | valid |
+| `apm045/vtg/nmos` | 10 GHz | 1 GHz | valid | valid |
+| `apm016f/svt/nfet` | 100 MHz | 100 MHz | valid | valid |
+
+APM045 canonical acquisition did not expose an eligible plateau in the
+100 MHz or 1 GHz attempts. The 10 GHz attempt selected the first eligible
+interior plateau, approximately 79.43 MHz through 5.623 GHz, and stopped
+without a 100 GHz run. The preliminary white floor was about
+`5.392e-24 A^2/Hz` and the fitted corner about 9.28 MHz.
+
+All four preliminary low-VDS biases resolved within 0.071% of gm/Id=15 1/V.
+The runtime-only low-VDS BSIM-CMG diagnostic changed effective `TNOIMOD` from
+the production value 0 to 1, exposed a nonzero `corl` source, used Sparse, and
+left the production APM016F card hash unchanged.
+
+These observations remain development evidence until a coherent
+implementation commit is created and the complete qualification is rerun from
+fresh output at that exact commit.
+
 ## Current next action
 
-Implement `GOAL.md` completely using `NOISE_N1.md` as the V3-N1 technical contract, produce real-tool evidence, then decide whether V3-N2 may expand the frozen method to all 26 public MOS devices.
+Commit the coherent V3-N1 implementation, rerun real-tool and static
+qualification from fresh output at that exact commit, then commit the compact
+`validation/evidence/v3_n1_noise_method.json` summary and final status freeze.

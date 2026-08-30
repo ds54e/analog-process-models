@@ -28,6 +28,7 @@ from .doctor import run_doctor
 from .model_build import build_models
 from .native_variation import NativeVariationError, validate_apm130_native
 from .noise import NoiseCharacterizationError, characterize_noise_selector
+from .noise_method_validate import NoiseMethodValidationError, validate_noise_method
 from .noise_validate import NoiseValidationError, validate_noise_spike
 from .paths import repository_root
 from .provenance_validate import ProvenanceValidationError, validate_provenance
@@ -174,6 +175,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Qualify the analytic noise harness and run the V3-N0 four-engine spike",
     )
     p_noise_check.add_argument("--output", type=Path, required=True)
+
+    p_noise_method_check = sub.add_parser(
+        "noise-method-check",
+        help="Run the complete V3-N1 noise acquisition and fit-method qualification",
+    )
+    p_noise_method_check.add_argument("--output", type=Path, required=True)
 
     return parser
 
@@ -325,6 +332,23 @@ def main() -> int:
                 )
             )
             return 0
+        if args.command == "noise-method-check":
+            result = validate_noise_method(args.output)
+            print(
+                json.dumps(
+                    {
+                        "status": result["status"],
+                        "milestone": result["milestone"],
+                        "acceptance_result": result["acceptance_result"],
+                        "output_directory": result["output_directory"],
+                        "report_path": result["report_path"],
+                        "report_sha256": result["report_sha256"],
+                    },
+                    indent=2,
+                    sort_keys=True,
+                )
+            )
+            return 0
         if args.command == "characterization-check":
             result = validate_all_characterizations(args.output)
             print(
@@ -398,6 +422,7 @@ def main() -> int:
         json.JSONDecodeError,
         NativeVariationError,
         NoiseCharacterizationError,
+        NoiseMethodValidationError,
         NoiseValidationError,
         OSError,
         ProvenanceValidationError,

@@ -11,6 +11,8 @@ import pytest
 
 from apm.cli import build_parser
 from apm.noise import (
+    ACQUISITION_POLICY_ID,
+    ADAPTIVE_FREQUENCY_STOPS_HZ,
     NOISE_SCHEMA,
     NoiseCharacterizationError,
     _noise_wrdata,
@@ -19,7 +21,8 @@ from apm.noise import (
     resolve_gm_over_id_bias,
     resolve_noise_device,
 )
-from apm.noise_fit import NoiseFitError, fit_noise_spectrum
+from apm.noise_fit import FIT_METHOD_IDENTITY, NoiseFitError, fit_noise_spectrum
+from apm.noise_method_validate import LOW_VDS_EFFECTIVE_V, qualify_synthetic_fit_method
 from apm.noise_provenance import ENGINE_PARAMETERS, parse_showmod_values
 from apm.noise_validate import SPIKE_SELECTORS
 
@@ -52,6 +55,11 @@ def test_noise_geometry_preserves_native_planar_and_finfet_semantics() -> None:
     fields = finfet.geometry.result_fields(finfet.device.lmin_m)
     assert fields == {"l_m": 3.2e-8, "nfin": 1, "l_over_lmin": 2.0}
     assert "w_m" not in fields
+    low_vds = resolve_noise_device(
+        "apm016f/svt/nfet", ROOT, vout_v=LOW_VDS_EFFECTIVE_V
+    )
+    assert low_vds.vout_v == LOW_VDS_EFFECTIVE_V
+    assert low_vds.vout_mode == "explicit_diagnostic"
 
 
 def test_canonical_probe_conversion_preserves_sign_scale_and_psd_units() -> None:
@@ -156,6 +164,116 @@ def test_flat_spectrum_records_no_flicker_but_valid_white_region() -> None:
         fit_noise_spectrum(frequencies, [-1.0] * len(frequencies), gm_s=1e-3, temperature_c=27)
 
 
+def test_contiguous_method_recovers_known_flicker_white_corner() -> None:
+    frequencies = _log_grid(stop=1.0e10)
+    flicker_a = 1.0e-18
+    white_floor = 1.0e-24
+    expected_corner = flicker_a / white_floor
+    result = fit_noise_spectrum(
+        frequencies,
+        [flicker_a / frequency + white_floor for frequency in frequencies],
+        gm_s=1.0e-3,
+        temperature_c=27,
+    )
+    assert result["method_identity"] == FIT_METHOD_IDENTITY
+    assert result["local_slope_estimator"]["window_point_count"] == 11
+    assert result["flicker_fit"]["status"] == "valid"
+    assert result["flicker_fit"]["alpha"] == pytest.approx(1.0, abs=0.05)
+    assert result["white_fit"]["status"] == "valid"
+    assert result["white_fit"]["floor_a2_per_hz"] == pytest.approx(
+        white_floor, rel=0.02
+    )
+    assert result["flicker_corner"]["status"] == "valid"
+    assert result["flicker_corner"]["frequency_hz"] == pytest.approx(
+        expected_corner, rel=0.30
+    )
+
+
+def test_contiguous_method_selects_interior_plateau_before_high_frequency_rise() -> None:
+    frequencies = _log_grid(stop=1.0e11)
+    white_floor = 1.0e-24
+    rise_scale = 1.0e9
+    result = fit_noise_spectrum(
+        frequencies,
+        [
+            1.0e-18 / frequency
+            + white_floor
+            + white_floor * (frequency / rise_scale) ** 2
+            for frequency in frequencies
+        ],
+        gm_s=1.0e-3,
+        temperature_c=27,
+    )
+    assert result["white_fit"]["status"] == "valid"
+    assert result["white_fit"]["window_max_hz"] < rise_scale
+    assert result["white_fit"]["window_max_hz"] < frequencies[-1] / 10.0
+    assert result["white_fit"]["floor_a2_per_hz"] == pytest.approx(
+        white_floor, rel=0.10
+    )
+
+
+def test_contiguous_method_rejects_insufficient_candidate_span() -> None:
+    frequencies = _log_grid(stop=10.0)
+    result = fit_noise_spectrum(
+        frequencies,
+        [1.0e-18 / frequency for frequency in frequencies],
+        gm_s=1.0e-3,
+        temperature_c=27,
+    )
+    assert result["flicker_fit"]["status"] == "invalid_not_observed"
+    assert result["white_fit"]["status"] == "invalid_not_observed"
+    assert result["candidate_regions"]["flicker"]
+    assert all(not item["eligible"] for item in result["candidate_regions"]["flicker"])
+
+
+@pytest.mark.parametrize(
+    ("frequencies", "values", "message"),
+    [
+        ([1.0, math.inf], [1.0, 1.0], "finite and positive"),
+        ([1.0, 2.0], [1.0, math.nan], "finite and non-negative"),
+        ([1.0, 1.0], [1.0, 1.0], "strictly increasing"),
+        ([1.0, 2.0], [1.0, -1.0], "finite and non-negative"),
+        ([1.0, 2.0], [1.0], "same non-trivial length"),
+    ],
+)
+def test_contiguous_method_rejects_malformed_input(
+    frequencies: list[float], values: list[float], message: str
+) -> None:
+    with pytest.raises(NoiseFitError, match=message):
+        fit_noise_spectrum(frequencies, values, gm_s=1.0e-3, temperature_c=27)
+
+
+def test_zero_psd_is_preserved_but_log_fits_fail_closed() -> None:
+    result = fit_noise_spectrum(
+        [1.0, 10.0, 100.0], [0.0, 0.0, 0.0], gm_s=1.0e-3, temperature_c=27
+    )
+    assert result["zero_psd_point_count"] == 3
+    assert result["flicker_fit"]["status"] == "invalid_not_observed"
+    assert result["white_fit"]["status"] == "invalid_not_observed"
+    assert result["white_fit"]["floor_a2_per_hz"] is None
+
+
+def test_normative_synthetic_qualification_covers_all_eight_cases() -> None:
+    report = qualify_synthetic_fit_method()
+    assert report["status"] == "pass"
+    assert report["acceptance_result"] == "8/8"
+    assert {item["id"] for item in report["cases"]} == {
+        "pure_white",
+        "pure_flicker",
+        "known_flicker_white_corner",
+        "interior_white_plateau_before_high_frequency_rise",
+        "truncated_no_white_plateau",
+        "no_flicker_component",
+        "insufficient_candidate_span",
+        "zero_non_finite_and_malformed_fail_closed",
+    }
+
+
+def test_bounded_acquisition_policy_is_exact_and_versioned() -> None:
+    assert ACQUISITION_POLICY_ID == "apm.noise-acquisition.bounded-white-search"
+    assert ADAPTIVE_FREQUENCY_STOPS_HZ == (1.0e8, 1.0e9, 1.0e10, 1.0e11)
+
+
 def test_showmod_parser_requires_parameter_level_values_and_preserves_sentinels() -> None:
     lines = ["APM_NOISE_SHOWMOD_BEGIN"]
     for name, _role in ENGINE_PARAMETERS["bsim4"]:
@@ -208,4 +326,8 @@ def test_noise_cli_contracts_do_not_change_release_version() -> None:
     assert noise.selector == "apm130/lv/nmos"
     check = parser.parse_args(["noise-check", "--output", "/tmp/apm-noise-check-test"])
     assert check.command == "noise-check"
+    method = parser.parse_args(
+        ["noise-method-check", "--output", "/tmp/apm-noise-method-check-test"]
+    )
+    assert method.command == "noise-method-check"
     assert (ROOT / "src/apm/__init__.py").read_text(encoding="utf-8").count('"2.0.0"') == 1

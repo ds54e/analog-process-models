@@ -5,6 +5,7 @@ path = [
   "README.md",
   "GOAL.md",
   "NOISE_CHARACTERIZATION.md",
+  "NOISE_N1.md",
   "AGENTS.md",
   "DEVICE_FAMILY_MODEL.md",
   "PROJECT_CONTEXT.md",

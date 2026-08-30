@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: APM contributors
 # SPDX-License-Identifier: Apache-2.0
 
-"""Stationary small-signal MOS-noise characterization for the V3-N0 spike."""
+"""Stationary small-signal MOS-noise characterization for the APM v3 line."""
 
 from __future__ import annotations
 
@@ -9,6 +9,7 @@ import csv
 import json
 import math
 import re
+import shutil
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -23,7 +24,7 @@ from .characterize import (
     load_family,
 )
 from .model_build import build_models, sha256_file
-from .noise_fit import fit_noise_spectrum, integrate_psd
+from .noise_fit import FIT_METHOD_IDENTITY, fit_noise_spectrum, integrate_psd
 from .noise_provenance import (
     SHOWMOD_BEGIN,
     SHOWMOD_END,
@@ -40,7 +41,9 @@ PROBE_METHOD_ID = "apm.ccvs-current-probe-1ohm"
 PROBE_METHOD_VERSION = "1.0.0"
 BIAS_METHOD_ID = "apm.gm-id-bounded-secant-finite-difference"
 BIAS_METHOD_VERSION = "1.0.0"
-FREQUENCY_PROFILE_ID = "v3-n0-provisional-1hz-100mhz-20ppd"
+FREQUENCY_PROFILE_ID = "v3-n1-adaptive-1hz-100mhz-through-100ghz-20ppd"
+ACQUISITION_POLICY_ID = "apm.noise-acquisition.bounded-white-search"
+ACQUISITION_POLICY_VERSION = "1.0.0"
 DEFAULT_TEMPERATURE_C = 27
 DEFAULT_GM_OVER_ID_TARGET = 15.0
 DEFAULT_GM_OVER_ID_RELATIVE_TOLERANCE = 0.01
@@ -49,6 +52,8 @@ DEFAULT_L_OVER_LMIN = 2.0
 DEFAULT_FREQUENCY_START_HZ = 1.0
 DEFAULT_FREQUENCY_STOP_HZ = 1.0e8
 DEFAULT_POINTS_PER_DECADE = 20
+ADAPTIVE_FREQUENCY_STOPS_HZ = (1.0e8, 1.0e9, 1.0e10, 1.0e11)
+ADAPTIVE_SEARCH_CAP_HZ = ADAPTIVE_FREQUENCY_STOPS_HZ[-1]
 MAX_BIAS_ITERATIONS = 20
 FINITE_DIFFERENCE_RELATIVE_TOLERANCE = 0.02
 NATIVE_ORACLE_RELATIVE_TOLERANCE = 0.02
@@ -71,6 +76,7 @@ class ResolvedNoiseDevice:
     geometry: NoiseGeometry
     temperature_c: int
     vout_v: float
+    vout_mode: str
 
 
 def _utc_now() -> str:
@@ -199,6 +205,7 @@ def resolve_noise_device(
     *,
     operating_profile_id: str | None = None,
     temperature_c: int = DEFAULT_TEMPERATURE_C,
+    vout_v: float | None = None,
 ) -> ResolvedNoiseDevice:
     catalog = load_catalog(root)
     resolved = catalog.resolve(selector)
@@ -221,6 +228,11 @@ def resolve_noise_device(
         raise NoiseCharacterizationError(
             f"{selector}: unsupported geometry kind {resolved.geometry_kind!r}"
         )
+    resolved_vout = DEFAULT_VOUT_FRACTION * kit.vdd_v if vout_v is None else float(vout_v)
+    if not math.isfinite(resolved_vout) or not 0.0 < resolved_vout <= kit.vdd_v:
+        raise NoiseCharacterizationError(
+            f"{selector}: effective VOUT must be finite and within (0, {kit.vdd_v:g}] V"
+        )
     return ResolvedNoiseDevice(
         selector=selector,
         family=family,
@@ -229,7 +241,8 @@ def resolve_noise_device(
         polarity=resolved.polarity,
         geometry=geometry,
         temperature_c=temperature_c,
-        vout_v=DEFAULT_VOUT_FRACTION * kit.vdd_v,
+        vout_v=resolved_vout,
+        vout_mode="canonical_half_vdd" if vout_v is None else "explicit_diagnostic",
     )
 
 
@@ -247,6 +260,15 @@ def _control_osdi(resolved: ResolvedNoiseDevice, toolchain: Toolchain) -> list[s
         f"pre_osdi {toolchain.osdi_directory / artifact}"
         for artifact in resolved.kit.osdi_artifacts
     ]
+
+
+def _operating_point_id(resolved: ResolvedNoiseDevice, target_per_v: float) -> str:
+    target = f"{target_per_v:g}".replace(".", "p")
+    if resolved.vout_mode == "canonical_half_vdd":
+        # Preserve the completed V3-N0 canonical identifier exactly.
+        return "gm-id-15" if target_per_v == DEFAULT_GM_OVER_ID_TARGET else f"gm-id-{target}"
+    millivolts = f"{resolved.vout_v * 1.0e3:g}".replace(".", "p")
+    return f"gm-id-{target}-vout-{millivolts}mv"
 
 
 def _coarse_bias_sweep(
@@ -667,6 +689,7 @@ def _run_mos_noise(
     points_per_decade: int,
 ) -> dict[str, Any]:
     final = bias["final"]
+    operating_point_id = _operating_point_id(resolved, bias["target_per_v"])
     netlist = output / "netlists" / "noise_spectrum.cir"
     log = output / "logs" / "noise_spectrum.log"
     raw_noise = output / "raw" / "noise_all_vectors.dat"
@@ -683,7 +706,7 @@ def _run_mos_noise(
             ),
         }
     lines = [
-        "APM V3-N0 stationary MOS noise",
+        "APM V3 stationary MOS noise",
         *_netlist_prefix(resolved),
         f"Vd d 0 DC {raw_vd:.12g}",
         f"Vg g 0 DC {raw_vg:.12g} AC 1",
@@ -747,7 +770,7 @@ def _run_mos_noise(
         input_ref_relative_errors.append(relative_error)
         spectrum.append(
             {
-                "operating_point_id": "gm-id-15",
+                "operating_point_id": operating_point_id,
                 "frequency_hz": frequency,
                 **canonical,
                 "backend_inoise_spectrum_v2_per_hz": backend_input,
@@ -832,7 +855,7 @@ def _operating_point_row(
 ) -> dict[str, Any]:
     final = bias["final"]
     return {
-        "operating_point_id": "gm-id-15",
+        "operating_point_id": _operating_point_id(resolved, bias["target_per_v"]),
         "technology_id": resolved.device.technology_id,
         "family_id": resolved.device.family_id,
         "device_id": resolved.device.device_id,
@@ -870,14 +893,18 @@ def _operating_point_row(
 
 
 def _metrics_row(
-    metrics: dict[str, Any], gate_integral: float, frequency_start: float, frequency_stop: float
+    metrics: dict[str, Any],
+    gate_integral: float,
+    frequency_start: float,
+    frequency_stop: float,
+    operating_point_id: str,
 ) -> dict[str, Any]:
     flicker = metrics["flicker_fit"]
     white = metrics["white_fit"]
     corner = metrics["flicker_corner"]
     gamma = metrics["gamma_eff_total"]
     return {
-        "operating_point_id": "gm-id-15",
+        "operating_point_id": operating_point_id,
         "fit_method_id": metrics["method_id"],
         "fit_method_version": metrics["method_version"],
         "fit_method_status": metrics["method_status"],
@@ -891,6 +918,11 @@ def _metrics_row(
             "coefficient_a2_per_hz_at_1hz"
         ],
         "flicker_r_squared": flicker["r_squared"],
+        "flicker_residual_rms_log": flicker["residual_rms_log"],
+        "flicker_residual_max_abs_log": flicker["residual_max_abs_log"],
+        "flicker_candidate_count": flicker["candidate_count"],
+        "flicker_eligible_candidate_count": flicker["eligible_candidate_count"],
+        "flicker_selected_candidate_id": flicker["selected_candidate_id"],
         "white_fit_status": white["status"],
         "white_fit_reason": white["reason"],
         "white_window_min_hz": white["window_min_hz"],
@@ -899,7 +931,11 @@ def _metrics_row(
         "white_floor_a2_per_hz": white["floor_a2_per_hz"],
         "white_log_slope": white["log_slope"],
         "white_max_to_min_ratio": white["max_to_min_ratio"],
+        "white_candidate_count": white["candidate_count"],
+        "white_eligible_candidate_count": white["eligible_candidate_count"],
+        "white_selected_candidate_id": white["selected_candidate_id"],
         "flicker_corner_status": corner["status"],
+        "flicker_corner_reason": corner["reason"],
         "flicker_corner_hz": corner["frequency_hz"],
         "gamma_eff_total_status": gamma["status"],
         "gamma_eff_total": gamma["value"],
@@ -917,9 +953,11 @@ def characterize_noise_selector(
     operating_profile_id: str | None = None,
     temperature_c: int = DEFAULT_TEMPERATURE_C,
     gm_over_id_target: float = DEFAULT_GM_OVER_ID_TARGET,
+    vout_v: float | None = None,
     frequency_start_hz: float = DEFAULT_FREQUENCY_START_HZ,
     frequency_stop_hz: float = DEFAULT_FREQUENCY_STOP_HZ,
     points_per_decade: int = DEFAULT_POINTS_PER_DECADE,
+    adaptive_white_search: bool = True,
     root: Path | None = None,
     toolchain: Toolchain | None = None,
 ) -> dict[str, Any]:
@@ -931,6 +969,7 @@ def characterize_noise_selector(
         resolved_root,
         operating_profile_id=operating_profile_id,
         temperature_c=temperature_c,
+        vout_v=vout_v,
     )
     if resolved.kit.osdi_artifacts:
         build_models(selected_toolchain, force=False)
@@ -947,28 +986,152 @@ def characterize_noise_selector(
         result_directory,
         target_per_v=gm_over_id_target,
     )
-    noise = _run_mos_noise(
-        resolved,
-        selected_toolchain,
-        result_directory,
-        bias,
-        frequency_start_hz=frequency_start_hz,
-        frequency_stop_hz=frequency_stop_hz,
-        points_per_decade=points_per_decade,
-    )
     operating_point = _operating_point_row(resolved, bias)
     _csv_write(result_directory / "operating_points.csv", list(operating_point), [operating_point])
+    if adaptive_white_search:
+        if (
+            frequency_start_hz != DEFAULT_FREQUENCY_START_HZ
+            or frequency_stop_hz != DEFAULT_FREQUENCY_STOP_HZ
+            or points_per_decade != DEFAULT_POINTS_PER_DECADE
+        ):
+            raise NoiseCharacterizationError(
+                "the frozen adaptive policy requires 1 Hz, 100 MHz base stop, and 20 points/decade"
+            )
+        attempt_stops = ADAPTIVE_FREQUENCY_STOPS_HZ
+    else:
+        attempt_stops = (frequency_stop_hz,)
+    attempts: list[dict[str, Any]] = []
+    selected_noise: dict[str, Any] | None = None
+    selected_metrics: dict[str, Any] | None = None
+    selected_directory: Path | None = None
+    for attempt_number, stop_hz in enumerate(attempt_stops, start=1):
+        stop_token = f"{stop_hz:.0e}".replace("+", "").replace(".", "p")
+        attempt_id = f"attempt-{attempt_number:02d}-stop-{stop_token}hz"
+        attempt_directory = _prepare_output(
+            result_directory / "acquisition_attempts" / attempt_id
+        )
+        noise = _run_mos_noise(
+            resolved,
+            selected_toolchain,
+            attempt_directory,
+            bias,
+            frequency_start_hz=frequency_start_hz,
+            frequency_stop_hz=stop_hz,
+            points_per_decade=points_per_decade,
+        )
+        frequencies = [row["frequency_hz"] for row in noise["spectrum"]]
+        drain_psd = [row["s_idrain_terminal_a2_per_hz"] for row in noise["spectrum"]]
+        metrics = fit_noise_spectrum(
+            frequencies,
+            drain_psd,
+            gm_s=operating_point["gm_s"],
+            temperature_c=temperature_c,
+        )
+        _json_write(attempt_directory / "fit_diagnostics.json", metrics)
+        white_observed = metrics["white_fit"]["status"] == "valid"
+        at_cap = stop_hz >= ADAPTIVE_SEARCH_CAP_HZ
+        if white_observed:
+            action_reason = "white_region_observed_stop"
+        elif adaptive_white_search and not at_cap:
+            action_reason = "white_region_not_observed_extend"
+        elif adaptive_white_search:
+            action_reason = "white_region_not_observed_within_search_cap"
+        else:
+            action_reason = "single_sweep_complete_without_adaptive_search"
+        relative_attempt = attempt_directory.relative_to(result_directory)
+        attempts.append(
+            {
+                "attempt_id": attempt_id,
+                "attempt_number": attempt_number,
+                "start_hz": frequency_start_hz,
+                "stop_hz": stop_hz,
+                "points_per_decade": points_per_decade,
+                "retained_point_count": len(noise["spectrum"]),
+                "spectrum_path": str(relative_attempt / "noise_spectrum.csv"),
+                "spectrum_sha256": sha256_file(attempt_directory / "noise_spectrum.csv"),
+                "fit_diagnostics_path": str(relative_attempt / "fit_diagnostics.json"),
+                "fit_diagnostics_sha256": sha256_file(
+                    attempt_directory / "fit_diagnostics.json"
+                ),
+                "flicker_fit_status": metrics["flicker_fit"]["status"],
+                "flicker_fit_reason": metrics["flicker_fit"]["reason"],
+                "white_fit_status": metrics["white_fit"]["status"],
+                "white_fit_reason": metrics["white_fit"]["reason"],
+                "corner_fit_status": metrics["flicker_corner"]["status"],
+                "white_region_observed": white_observed,
+                "action_reason": action_reason,
+                "required_solver": noise["log_audit"]["required_solver"],
+                "sparse_attestation_count": len(
+                    noise["log_audit"]["sparse_attestations"]
+                ),
+                "klu_attestation_count": len(noise["log_audit"]["klu_attestations"]),
+                "log_critical_diagnostic_count": len(
+                    noise["log_audit"]["critical_diagnostics"]
+                ),
+                "source_breakdown_path": str(relative_attempt / "source_breakdown.json"),
+                "noise_model_snapshot_path": str(
+                    relative_attempt / "noise_model_snapshot.json"
+                ),
+            }
+        )
+        selected_noise = noise
+        selected_metrics = metrics
+        selected_directory = attempt_directory
+        if white_observed or not adaptive_white_search:
+            break
+    if selected_noise is None or selected_metrics is None or selected_directory is None:
+        raise NoiseCharacterizationError("noise acquisition produced no attempt")
+    noise = selected_noise
+    metrics = selected_metrics
+    selected_attempt = attempts[-1]
+    selected_relative = selected_directory.relative_to(result_directory)
+    for artifact in (
+        "noise_spectrum.csv",
+        "source_breakdown.json",
+        "noise_model_snapshot.json",
+        "fit_diagnostics.json",
+    ):
+        shutil.copyfile(selected_directory / artifact, result_directory / artifact)
+    acquisition = {
+        "schema": "apm.noise-acquisition.v1",
+        "policy_id": ACQUISITION_POLICY_ID,
+        "policy_version": ACQUISITION_POLICY_VERSION,
+        "policy_status": "frozen_v3_n1" if adaptive_white_search else "explicit_single_sweep",
+        "base_start_hz": DEFAULT_FREQUENCY_START_HZ,
+        "base_stop_hz": DEFAULT_FREQUENCY_STOP_HZ,
+        "points_per_decade": points_per_decade,
+        "extension_stop_sequence_hz": list(ADAPTIVE_FREQUENCY_STOPS_HZ),
+        "attempts": attempts,
+        "selected_attempt": selected_attempt["attempt_id"],
+        "selected_attempt_number": selected_attempt["attempt_number"],
+        "selected_stop_hz": selected_attempt["stop_hz"],
+        "search_cap_hz": ADAPTIVE_SEARCH_CAP_HZ,
+        "search_cap_reached": selected_attempt["stop_hz"] >= ADAPTIVE_SEARCH_CAP_HZ,
+        "white_region_observed": selected_attempt["white_region_observed"],
+        "white_region_status": (
+            "observed"
+            if selected_attempt["white_region_observed"]
+            else "white_region_not_observed_within_search_cap"
+            if adaptive_white_search and selected_attempt["stop_hz"] >= ADAPTIVE_SEARCH_CAP_HZ
+            else "not_observed_in_explicit_single_sweep"
+        ),
+        "fit_method_id": metrics["method_id"],
+        "fit_method_version": metrics["method_version"],
+        "fit_method_identity": FIT_METHOD_IDENTITY,
+        "stop_at_first_valid_white_region": adaptive_white_search,
+    }
+    _json_write(result_directory / "acquisition.json", acquisition)
     frequencies = [row["frequency_hz"] for row in noise["spectrum"]]
     drain_psd = [row["s_idrain_terminal_a2_per_hz"] for row in noise["spectrum"]]
     gate_psd = [row["s_vgate_equivalent_v2_per_hz"] for row in noise["spectrum"]]
-    metrics = fit_noise_spectrum(
-        frequencies,
-        drain_psd,
-        gm_s=operating_point["gm_s"],
-        temperature_c=temperature_c,
-    )
     gate_integral = integrate_psd(frequencies, gate_psd)
-    metrics_row = _metrics_row(metrics, gate_integral, frequency_start_hz, frequency_stop_hz)
+    metrics_row = _metrics_row(
+        metrics,
+        gate_integral,
+        frequency_start_hz,
+        selected_attempt["stop_hz"],
+        operating_point["operating_point_id"],
+    )
     _csv_write(result_directory / "noise_metrics.csv", list(metrics_row), [metrics_row])
     ngspice_version = run_checked([selected_toolchain.ngspice, "--version"]).stdout.strip()
     openvaf_version = run_checked(
@@ -992,8 +1155,9 @@ def characterize_noise_selector(
         "operating_profile": {
             "id": resolved.kit.operating_profile_id,
             "reference_vdd_v": resolved.kit.vdd_v,
-            "resolved_vout_fraction": DEFAULT_VOUT_FRACTION,
+            "resolved_vout_fraction": resolved.vout_v / resolved.kit.vdd_v,
             "resolved_vout_v": resolved.vout_v,
+            "resolved_vout_mode": resolved.vout_mode,
         },
         "geometry": resolved.geometry.result_fields(resolved.device.lmin_m),
         "temperature_c": temperature_c,
@@ -1031,17 +1195,32 @@ def characterize_noise_selector(
         },
         "frequency_profile": {
             "id": FREQUENCY_PROFILE_ID,
-            "status": "provisional",
+            "status": "frozen_v3_n1" if adaptive_white_search else "explicit_single_sweep",
             "start_hz": frequency_start_hz,
-            "stop_hz": frequency_stop_hz,
+            "base_stop_hz": frequency_stop_hz,
+            "selected_stop_hz": selected_attempt["stop_hz"],
             "points_per_decade": points_per_decade,
             "retained_point_count": len(noise["spectrum"]),
+        },
+        "acquisition": {
+            "path": "acquisition.json",
+            "sha256": sha256_file(result_directory / "acquisition.json"),
+            "policy_id": acquisition["policy_id"],
+            "policy_version": acquisition["policy_version"],
+            "selected_attempt": acquisition["selected_attempt"],
+            "white_region_status": acquisition["white_region_status"],
         },
         "solver": {
             "required": "Sparse",
             "netlist_option": "klu=0",
             "validated": bool(noise["log_audit"]["sparse_attestations"]),
             "klu_used": False,
+            "all_acquisition_attempts_sparse": all(
+                item["sparse_attestation_count"] > 0 for item in attempts
+            ),
+            "all_acquisition_attempts_no_klu": all(
+                item["klu_attestation_count"] == 0 for item in attempts
+            ),
         },
         "log_audit": noise["log_audit"],
         "backend_capability": {
@@ -1095,10 +1274,11 @@ def characterize_noise_selector(
         },
         "execution": {
             "noise_command": noise["command"],
-            "noise_netlist": noise["netlist"],
-            "noise_log": noise["log"],
-            "raw_noise": noise["raw_noise"],
-            "raw_ac_transfer": noise["raw_ac"],
+            "selected_attempt_directory": str(selected_relative),
+            "noise_netlist": str(selected_relative / noise["netlist"]),
+            "noise_log": str(selected_relative / noise["log"]),
+            "raw_noise": str(selected_relative / noise["raw_noise"]),
+            "raw_ac_transfer": str(selected_relative / noise["raw_ac"]),
         },
         "native_noise_oracles": noise["native_oracles"],
         "transfer_validation": {
@@ -1121,6 +1301,8 @@ def characterize_noise_selector(
             "source_breakdown": "source_breakdown.json",
             "noise_model_snapshot": "noise_model_snapshot.json",
             "bias_resolution": "bias_resolution.json",
+            "fit_diagnostics": "fit_diagnostics.json",
+            "acquisition": "acquisition.json",
         },
     }
     _json_write(result_directory / "metadata.json", metadata)
@@ -1137,6 +1319,9 @@ def characterize_noise_selector(
         "native_gm_relative_error": bias["final"]["native_gm_relative_error"],
         "native_gds_relative_error": bias["final"]["native_gds_relative_error"],
         "frequency_point_count": len(noise["spectrum"]),
+        "selected_frequency_stop_hz": selected_attempt["stop_hz"],
+        "acquisition_attempt_count": len(attempts),
+        "acquisition_white_region_status": acquisition["white_region_status"],
         "minimum_drain_psd_a2_per_hz": min(drain_psd),
         "maximum_drain_psd_a2_per_hz": max(drain_psd),
         "fit_status": {
