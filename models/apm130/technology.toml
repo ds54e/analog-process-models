@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: APM contributors
+# SPDX-License-Identifier: Apache-2.0
+
+schema = "apm.technology.v2"
+id = "apm130"
+display_name = "APM130"
+technology_class = "130nm"
+description = "IHP SG13G2 PSP103 electrical families."
+cross_process_anchor = "lv"
+
+[[comparison_set]]
+id = "gate_stack"
+kind = "gate_stack"
+members = ["lv", "hv"]
+anchor = "lv"
+common_overlap_profile = "common_overlap_1v2"

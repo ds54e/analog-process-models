@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: APM contributors
+# SPDX-License-Identifier: Apache-2.0
+
+schema = "apm.technology.v2"
+id = "apm045"
+display_name = "APM045"
+technology_class = "45nm"
+description = "FreePDK45 native BSIM4 electrical families."
+cross_process_anchor = "vtg"
+
+[[comparison_set]]
+id = "threshold"
+kind = "threshold_family"
+members = ["vtl", "vtg", "vth"]
+anchor = "vtg"
+
+[[comparison_set]]
+id = "gate_stack"
+kind = "gate_stack"
+members = ["vtg", "thkox"]
+anchor = "vtg"
+common_overlap_profile = "common_overlap_1v0"

@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "analog-process-models"
-version = "1.0.0"
-description = "Open analog compact-model technology kits and cross-process characterization framework"
+version = "2.0.0"
+description = "Open analog compact-model electrical families and terminal-characterization framework"
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "Apache-2.0" }

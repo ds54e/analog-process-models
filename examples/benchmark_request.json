@@ -1,11 +1,10 @@
 {
-  "schema": "apm.benchmark-request.v1",
+  "schema": "apm.benchmark-request.v2",
   "instances": {
     "mos": [
       {
         "id": "mn350",
-        "kit_id": "apm350",
-        "polarity": "n",
+        "selector": "apm350/general/nmos",
         "geometry": {
           "w_m": 1e-06,
           "l_m": 8e-07
@@ -14,8 +13,7 @@
       },
       {
         "id": "mp350",
-        "kit_id": "apm350",
-        "polarity": "p",
+        "selector": "apm350/general/pmos",
         "geometry": {
           "w_m": 1e-06,
           "l_m": 8e-07
@@ -24,8 +22,7 @@
       },
       {
         "id": "mn130",
-        "kit_id": "apm130",
-        "polarity": "n",
+        "selector": "apm130/lv/nmos",
         "geometry": {
           "w_m": 1e-06,
           "l_m": 2.6e-07
@@ -34,8 +31,7 @@
       },
       {
         "id": "mp130",
-        "kit_id": "apm130",
-        "polarity": "p",
+        "selector": "apm130/lv/pmos",
         "geometry": {
           "w_m": 1e-06,
           "l_m": 2.6e-07
@@ -44,8 +40,7 @@
       },
       {
         "id": "mn045",
-        "kit_id": "apm045",
-        "polarity": "n",
+        "selector": "apm045/vtg/nmos",
         "geometry": {
           "w_m": 1e-06,
           "l_m": 1e-07
@@ -54,8 +49,7 @@
       },
       {
         "id": "mp045",
-        "kit_id": "apm045",
-        "polarity": "p",
+        "selector": "apm045/vtg/pmos",
         "geometry": {
           "w_m": 1e-06,
           "l_m": 1e-07
@@ -64,8 +58,7 @@
       },
       {
         "id": "mn022",
-        "kit_id": "apm022",
-        "polarity": "n",
+        "selector": "apm022/svt/nmos",
         "geometry": {
           "w_m": 1e-06,
           "l_m": 5e-08
@@ -74,8 +67,7 @@
       },
       {
         "id": "mp022",
-        "kit_id": "apm022",
-        "polarity": "p",
+        "selector": "apm022/svt/pmos",
         "geometry": {
           "w_m": 1e-06,
           "l_m": 5e-08
@@ -84,8 +76,7 @@
       },
       {
         "id": "mn016f",
-        "kit_id": "apm016f",
-        "polarity": "n",
+        "selector": "apm016f/svt/nfet",
         "geometry": {
           "l_m": 3.2e-08,
           "nfin": 1
@@ -94,8 +85,7 @@
       },
       {
         "id": "mp016f",
-        "kit_id": "apm016f",
-        "polarity": "p",
+        "selector": "apm016f/svt/pfet",
         "geometry": {
           "l_m": 3.2e-08,
           "nfin": 1

@@ -1,7 +1,7 @@
 * SPDX-FileCopyrightText: APM contributors
 * SPDX-License-Identifier: Apache-2.0
 *
-* Technology-neutral benchmark passives. Python resolves process/mismatch into
+* Technology-neutral benchmark passives. Python resolves Global/Local/All into
 * the concrete value passed here; match_size remains explicit result identity.
 
 .subckt Rbench p n value=1k tc1=0 match_size=1

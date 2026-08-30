@@ -19,23 +19,49 @@ license_basis = "The exact upstream root README states that all files are Apache
 [source.imported_files]
 "vendor/freepdk45/FreePDK45_Manual.txt" = "d3ddfc7697b8e0223e6c974c2edc57c0484b01b4e40cc88aeba5ffde009d51c9"
 "vendor/freepdk45/LICENSE.txt" = "59899c6091b540582ed617e8eeaac4919dc985ccfc35459ee9752b699be5205b"
+"vendor/freepdk45/NMOS_THKOX.inc" = "302d7e4d88a72840ebd88077a12186a67028478c4d842d8294f1d67860c4d75f"
 "vendor/freepdk45/NMOS_VTG.inc" = "3cb730470427d99b6d22ab4d029493fa949daa1040d2ed51179118263682a14c"
+"vendor/freepdk45/NMOS_VTH.inc" = "f869d191bd3d173491dec6d8b5d31c0a35a60b6e75a86e9644515a8efa92566f"
+"vendor/freepdk45/NMOS_VTL.inc" = "e5a86b413e3c58c0d4f1fc6e3e0388e49d0ad040ba72f4593d2364a177786ad6"
+"vendor/freepdk45/PMOS_THKOX.inc" = "fdaee8972a4fdce1d3e29d397adea973d3a840df099cc360d7115bbe5d532b22"
 "vendor/freepdk45/PMOS_VTG.inc" = "a7d95a2631897134d2f52a9fa8469aef4e7c6dd2a2b5a499fc08645da3465d4a"
+"vendor/freepdk45/PMOS_VTH.inc" = "3cf2067bdbe27fb574bba97292e254c7769e9d706e7bfd9692e951f505b2c19a"
+"vendor/freepdk45/PMOS_VTL.inc" = "97fc614d8e96884ed31ea9c25509919edecd80fec06270ec17b661e6dfdbb8eb"
 "vendor/freepdk45/UPSTREAM-README.txt" = "269392f454dcf92521d4d4174d4b80d1702a752571d5f924a403960703c8e972"
 
 [source.apm_authored_files]
-"spectre/apm045.scs" = "9b25d7b129f71d2775a2d6b54ad48a89997b05a4f4df22cfa5de67974ca156e6"
+"technology.toml" = "5592f1c75fc7b6dfcb4219714e768140927dbd75b3874a00cd87bb7409661ccc"
+"families/vtl/family.toml" = "9875155c21a9e951b9887196ab47381cc6c8a2e9860acc70ed8db859bb661278"
+"families/vtl/ngspice/binding.toml" = "11aad1c1346390fc562ea07e95987d00308da1c49ee44a28f552dd6c826b141e"
+"families/vtl/ngspice/wrapper.inc" = "14dc7db5637f845dbf89b563854103483ffdc1808406c7cd09226defad588771"
+"families/vtl/spectre/binding.toml" = "9d3bd002176794bf11e12473a7de93cb6affc6a50e6732314c55556e6ab22a5a"
+"families/vtl/spectre/model.scs" = "6447d4360b045717525f2d2f121ef8f5e952b502e2ce72507145a83bbf66e84b"
+"families/vtg/family.toml" = "04ed71e41192850eb0d83ef1f7d5671485f8c472e7d1c86755207e7680bcbd76"
+"families/vtg/ngspice/binding.toml" = "352405ce05159767aa4064d89ba944d3451a3780e79d53b2ef45ce2339abbaf3"
+"families/vtg/ngspice/wrapper.inc" = "a51aa8d116f2a837343b02fc3ff077947eef8ff5110de1738e547e345066d95c"
+"families/vtg/spectre/binding.toml" = "4b3cb4575c91e2dc8e7a61d3f4d2b516cdd0b47974f0a5e2d77798406a496e71"
+"families/vtg/spectre/model.scs" = "7d1b9100db4b19875adf99ea794db1ef11382fde98dec86e1b5f3d00d3df5a24"
+"families/vth/family.toml" = "9379dfba193227b5b941cbc5342d1427a18219e28ebb680ce722919ad79d6050"
+"families/vth/ngspice/binding.toml" = "f25fb1e0c61786138b06970e7a2d0c39f6e2a2c14c51f9dad7cf7a513bd811f0"
+"families/vth/ngspice/wrapper.inc" = "51644f1190b970f80b8262957001d0c15a2f4544c2cc2207e781f335bd16f11b"
+"families/vth/spectre/binding.toml" = "6fb4547edf1fe3eb4da872035a8e376cb56d06336152e1aa8acb7a261e14a64f"
+"families/vth/spectre/model.scs" = "33028df50bf23e1be2e0d3d2e147c9ed407849b1a7743ba49c37e88dbab56cbb"
+"families/thkox/family.toml" = "d2144028bc9f2bbf2bb567b7345243c077ec80cbc5f8d252a8617cc4ad9136fc"
+"families/thkox/ngspice/binding.toml" = "b8a218b2add99ed619504a294794f690d5fad713da73b5d1d1df8d5095378798"
+"families/thkox/ngspice/wrapper.inc" = "170e7ebb0a8342b77babb2456034479386fb4eb3b221a59e3fb06c205564eed7"
+"families/thkox/spectre/binding.toml" = "6e7bd0e0f786aeeec0d0f6db3a6da840c9ce781c6c0a3a0e2962c92ee5244840"
+"families/thkox/spectre/model.scs" = "609fc30d4219440e5c6aaca60b2b8a27b6b25dc0a7a07c59bd18dc6438248a56"
 
 [redistribution]
 ship_in_repo = true
-selection = "Nominal general-threshold NMOS/PMOS BSIM4 cards plus licensing and model-basis documentation"
+selection = "Exact VTL, VTG, VTH, and THKOX N/P BSIM4 cards plus licensing and model-basis documentation"
 modifications = "none; exact upstream bytes copied into a shortened vendor path"
 upstream_notices_preserved = true
-excluded = ["SVRF and other files removed by the upstream open-source-clean mirror", "layout and physical-design assets", "VTL, VTH, THKOX, FF, and SS model cards"]
+excluded = ["SVRF and other files removed by the upstream open-source-clean mirror", "layout and physical-design assets", "native FF and SS statistical model cards"]
 
 [device_scope]
-include = ["nominal VTG NMOS", "nominal VTG PMOS"]
-exclude_v1 = ["VTL", "VTH", "THKOX", "native FF/SS corners"]
+include = ["VTL N/P", "VTG N/P", "VTH N/P", "THKOX N/P"]
+exclude_v2 = ["native FF/SS statistical modes", "layout/physical-design assets"]
 
 [model_basis]
 nominal_vdd_v = 1.0
@@ -52,11 +78,16 @@ native_corners_included = false
 native_corners_optional = true
 
 [validation]
-ngspice = "M2 nominal public-kit characterization validated; see validation/evidence/m2-apm045.md"
+ngspice = "v2 VTL/VTG/VTH/THKOX characterization, threshold/gate-stack comparison, and eight benchmark adapters passed"
 spectre = "experimental_unverified"
 
 [spectre]
 status = "experimental_unverified"
-artifact = "spectre/apm045.scs"
+artifacts = [
+  "families/vtl/spectre/model.scs",
+  "families/vtg/spectre/model.scs",
+  "families/vth/spectre/model.scs",
+  "families/thkox/spectre/model.scs"
+]
 model_route = "native Spectre BSIM4 through SPICE level-54 mapping"
 real_tool_validation = false

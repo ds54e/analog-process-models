@@ -1,23 +1,19 @@
 // SPDX-FileCopyrightText: APM contributors
 // SPDX-License-Identifier: Apache-2.0
-//
-// APM Spectre model-only compatibility
+// APM v2 model-only Spectre benchmark passives
 // EXPERIMENTAL / UNVERIFIED
-//
-// Static structural checks only; no Spectre parse or numerical validation.
-// Include variation/spectre/benchmark_variation.scs with exactly one section
-// before this file so the global process parameters are defined.
+// Not parsed or simulated by Cadence Spectre.
 
 simulator lang=spectre
 
 subckt Rbench (p n)
 parameters value=1k tc1=0 match_size=1
-parameters apm__r_scale=(1+0.02*apm_bench_r_process_z)*(1+0.01*apm__r_local_z/sqrt(match_size))
-Rbench_core (p n) resistor r=value*apm__r_scale tc1=tc1 tnom=27
+parameters apm__r_scale=(1+0.02*apm_bench_r_global_z)*(1+0.01*apm__r_local_z/sqrt(match_size))
+Rapm__core (p n) resistor r=value*apm__r_scale tc1=tc1 tnom=27
 ends Rbench
 
 subckt Cbench (p n)
 parameters value=1p tc1=0 match_size=1
-parameters apm__c_scale=(1+0.02*apm_bench_c_process_z)*(1+0.01*apm__c_local_z/sqrt(match_size))
-Cbench_core (p n) capacitor c=value*apm__c_scale tc1=tc1 tnom=27
+parameters apm__c_scale=(1+0.02*apm_bench_c_global_z)*(1+0.01*apm__c_local_z/sqrt(match_size))
+Capm__core (p n) capacitor c=value*apm__c_scale tc1=tc1 tnom=27
 ends Cbench

@@ -1,0 +1,15 @@
+# SPDX-FileCopyrightText: APM contributors
+# SPDX-License-Identifier: Apache-2.0
+
+schema = "apm.technology.v2"
+id = "apm016f"
+display_name = "APM016F"
+technology_class = "16nm-class"
+description = "Independently authored generic BSIM-CMG multi-Vt FinFET technology."
+cross_process_anchor = "svt"
+
+[[comparison_set]]
+id = "threshold"
+kind = "threshold_family"
+members = ["lvt", "svt", "hvt"]
+anchor = "svt"

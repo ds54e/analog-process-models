@@ -56,8 +56,8 @@ scale with `NFIN`, and `SHMOD=0` disables self-heating.
 | Saturation velocity | 1.0e5 / 0.8e5 m/s, N/P | Representative silicon transport scale, selected independently. |
 | Short-channel terms | explicit `CDSC`, `DVT0`, `DVT1`, `ETA0`, `DSUB` | Adjusted only against the documented APM threshold-rolloff and DIBL ranges. |
 | Output terms | explicit `PCLM`, `PDIBL1`, `PDIBL2` | Adjusted only against positive finite output conductance and sensible intrinsic gain. |
-| Parasitic and leakage selectors | intrinsic CV; optional gate/GIDL/II effects off | Keeps v1 focused on stable terminal DC and intrinsic admittance behavior. |
-| Self-heating | off (`SHMOD=0`) | Required APM v1 boundary. |
+| Parasitic and leakage selectors | intrinsic CV; optional gate/GIDL/II effects off | Keeps v2 focused on stable terminal DC and intrinsic admittance behavior. |
+| Self-heating | off (`SHMOD=0`) | Required APM v2 boundary. |
 
 The N and P cards share physical geometry and electrostatic coefficients, but
 their work function, mobility, and velocity are separately authored. No hidden

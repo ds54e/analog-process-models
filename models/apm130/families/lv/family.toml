@@ -1,0 +1,81 @@
+# SPDX-FileCopyrightText: APM contributors
+# SPDX-License-Identifier: Apache-2.0
+
+schema = "apm.family.v2"
+technology_id = "apm130"
+id = "lv"
+architecture = "planar_bulk"
+compact_model = "psp103"
+gate_stack_id = "thin_oxide"
+gate_stack_class = "thin"
+threshold_class = "standard"
+origin = "upstream_model"
+upstream_flavor = "sg13_lv"
+typical_uses = ["low_voltage_logic", "analog"]
+default_operating_profile = "nominal"
+provenance = "models/apm130/provenance.toml"
+backend_bindings = ["models/apm130/families/lv/ngspice/binding.toml", "models/apm130/families/lv/spectre/binding.toml"]
+
+[[operating_profile]]
+id = "nominal"
+reference_vdd_v = 1.2
+origin = "upstream"
+purpose = "release characterization"
+evidence = "Pinned IHP SG13G2 documentation identifies thin-gate MOS for 1.2 V logic."
+temperatures_c = [-40, 27, 85, 125]
+
+[[operating_profile]]
+id = "common_overlap_1v2"
+reference_vdd_v = 1.2
+origin = "apm_selected"
+purpose = "APM130 LV/HV common-overlap gate-stack comparison"
+evidence = "1.2 V is the LV native profile and is below the HV model header's 3.3 V maximum-VDS statement; this is a model-characterization overlap, not a reliability qualification."
+temperatures_c = [-40, 27, 85, 125]
+
+[[device]]
+id = "nmos"
+polarity = "n"
+public_name = "apm130_lv_nmos"
+terminals = ["d", "g", "s", "b"]
+geometry_kind = "planar"
+parameters = ["w", "l"]
+lmin_m = 1.3e-7
+lmax_m = 1.0e-5
+wmin_m = 1.5e-7
+wmax_m = 1.0e-5
+default_w_m = 1.0e-6
+characterization_lengths_m = [1.3e-7, 2.6e-7, 5.2e-7]
+
+[device.bias_validity]
+vds_min_v = -1.5
+vds_max_v = 1.5
+
+[[device]]
+id = "pmos"
+polarity = "p"
+public_name = "apm130_lv_pmos"
+terminals = ["d", "g", "s", "b"]
+geometry_kind = "planar"
+parameters = ["w", "l"]
+lmin_m = 1.3e-7
+lmax_m = 1.0e-5
+wmin_m = 1.5e-7
+wmax_m = 1.0e-5
+default_w_m = 1.0e-6
+characterization_lengths_m = [1.3e-7, 2.6e-7, 5.2e-7]
+
+[device.bias_validity]
+vds_min_v = -1.5
+vds_max_v = 1.5
+
+[threshold]
+method = "constant_current"
+coefficient_a = 1.0e-7
+normalization = "coefficient * W/L"
+vout_low_v = 0.05
+vout_high_fraction_vdd = 0.8
+
+[characterization]
+idvg_points = 61
+idvd_points = 61
+y_frequencies_hz = [1.0e5, 1.0e6]

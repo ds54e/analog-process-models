@@ -1,0 +1,54 @@
+# SPDX-FileCopyrightText: APM contributors
+# SPDX-License-Identifier: Apache-2.0
+
+schema = "apm.benchmark-passives.v2"
+status = "frozen-real-tool-validated-2026-08-30"
+
+[calibration_basis]
+date = "2026-08-30"
+statement = "Technology-neutral synthetic severities retained from the v1 prior after v2 Global/Local/All real-tool validation. They are not extracted native passive statistics."
+ngspice_model_file = "passives/ngspice/benchmark_passives.inc"
+validation_evidence = "validation/evidence/v2_benchmark_adapters.json"
+
+[temperature]
+reference_c = 27.0
+tc1_units = "1/degC"
+linear_law = "resolved_value(T)=resolved_value_at_27C*(1+tc1*(T-27C))"
+
+[resistor]
+public_name = "Rbench"
+parameters = ["value", "tc1", "match_size"]
+global_sigma = 0.02
+global_sigma_units = "fractional_value_change"
+local_sigma_ref = 0.01
+local_sigma_ref_units = "fractional_value_change_at_match_size_1"
+local_scaling_law = "sigma_ref/sqrt(match_size)"
+implementation = "resolved concrete SPICE resistor value"
+positive_scale_semantic = "positive perturbation increases resolved resistance"
+
+[capacitor]
+public_name = "Cbench"
+parameters = ["value", "tc1", "match_size"]
+global_sigma = 0.02
+global_sigma_units = "fractional_value_change"
+local_sigma_ref = 0.01
+local_sigma_ref_units = "fractional_value_change_at_match_size_1"
+local_scaling_law = "sigma_ref/sqrt(match_size)"
+implementation = "resolved concrete SPICE capacitor value"
+positive_scale_semantic = "positive perturbation increases resolved capacitance"
+
+[variation]
+global_scope = "one shared latent per passive class within one benchmark sample"
+local_scope = "independent per APM passive instance"
+global_vs_local = "independent_by_default"
+resistor_vs_capacitor_global = "independent_by_default"
+composition = "multiplicative scale factors applied to nominal value before deterministic temperature scaling"
+invalid_scale_factor = "reject; never silently clip"
+
+[requirements]
+match_size_is_dimensionless = true
+technology_neutral = true
+native_passives_optional = true
+explicit_sign_semantics = true
+explicit_correlation_semantics = true
+explicit_temperature_semantics = true

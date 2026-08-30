@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: APM contributors
+# SPDX-License-Identifier: Apache-2.0
+
+schema = "apm.variant-generation.v2"
+technology_id = "apm022"
+family_id = "lvt"
+base_family = "svt"
+method = "threshold_isolated"
+method_version = "1.0.0"
+target_vth_spacing_v = -0.08
+target_origin = "apm_selected_rounded_observable"
+public_inputs = [
+  "FreePDK45 VTL/VTG/VTH terminal characterization establishes approximately 0.09 V or larger adjacent native-family threshold separation.",
+  "Public/open multi-Vt families establish the qualitative Vth/Ion/Ioff ordering only.",
+]
+apm_choice = "Use a rounded 0.08 V low-threshold separation from SVT; this is near the characterized native VTL-to-VTG spacing and avoids excessive cold overdrive in the generic deck."
+validation_boundary = "Generic educational family; real ngspice terminal characterization, not silicon or foundry correlation."
+official_ptm_numeric_input_used = false
+secondary_parameter_changes = false
+
+[[parameter_change]]
+device_id = "nmos"
+parameter = "VTH0"
+base_value_v = 0.62
+delta_v = -0.08
+resolved_value_v = 0.54
+
+[[parameter_change]]
+device_id = "pmos"
+parameter = "VTH0"
+base_value_v = -0.62
+delta_v = 0.08
+resolved_value_v = -0.54

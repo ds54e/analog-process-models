@@ -18,7 +18,7 @@ from .characterize import (
     _read_wrdata,
     _run_ngspice,
     _threshold_crossing,
-    load_kit,
+    load_family,
 )
 from .model_build import build_models, sha256_file
 from .toolchain import Toolchain, resolve_toolchain
@@ -42,7 +42,9 @@ CORNER_SPEED_PROFILES = {
 }
 
 CORNER_FIELDS = (
-    "kit_id",
+    "technology_id",
+    "family_id",
+    "device_id",
     "compact_model",
     "public_device",
     "polarity",
@@ -64,7 +66,8 @@ CORNER_FIELDS = (
 )
 
 PROCESS_SAMPLE_FIELDS = (
-    "kit_id",
+    "technology_id",
+    "family_id",
     "sample_index",
     "seed",
     "polarity",
@@ -83,7 +86,9 @@ PROCESS_SAMPLE_FIELDS = (
 )
 
 PROCESS_OBSERVATION_FIELDS = (
-    "kit_id",
+    "technology_id",
+    "family_id",
+    "device_id",
     "sample_index",
     "seed",
     "polarity",
@@ -103,7 +108,9 @@ PROCESS_OBSERVATION_FIELDS = (
 )
 
 MISMATCH_SAMPLE_FIELDS = (
-    "kit_id",
+    "technology_id",
+    "family_id",
+    "device_id",
     "sample_index",
     "seed",
     "polarity",
@@ -209,7 +216,11 @@ def _library_section(text: str, section: str) -> str:
     raise NativeVariationError(f"upstream library lacks section {section}")
 
 
-def parse_process_parameters(corner_library: Path, stat_file: Path) -> tuple[ProcessParameter, ...]:
+def parse_process_parameters(
+    corner_library: Path,
+    stat_file: Path,
+    family_id: str | None = None,
+) -> tuple[ProcessParameter, ...]:
     corner_text = corner_library.read_text(encoding="utf-8")
     stat_text = stat_file.read_text(encoding="utf-8")
     section = _library_section(corner_text, NATIVE_PROCESS_PROFILE)
@@ -237,6 +248,8 @@ def parse_process_parameters(corner_library: Path, stat_file: Path) -> tuple[Pro
     for match in pattern.finditer(stat_text):
         name = match.group(1).lower()
         nominal_name = match.group(2).lower()
+        if "_svaricap_" in name:
+            continue
         if nominal_name not in nominal_values:
             raise NativeVariationError(f"missing nominal value for upstream parameter {name}")
         if "_nmos_" in name:
@@ -255,27 +268,61 @@ def parse_process_parameters(corner_library: Path, stat_file: Path) -> tuple[Pro
                 num_sigmas=num_sigmas,
             )
         )
-    if len(parameters) != 34 or len({item.name for item in parameters}) != 34:
+    discovered_families = {
+        match.group(1)
+        for item in parameters
+        if (match := re.match(r"mc_sg13g2_(lv|hv)_[np]mos_", item.name))
+    }
+    if len(discovered_families) != 1:
         raise NativeVariationError(
-            f"expected 34 upstream low-voltage MOS process parameters, found {len(parameters)}"
+            f"expected exactly one upstream MOS family, found {sorted(discovered_families)}"
+        )
+    discovered = next(iter(discovered_families))
+    if family_id is not None and discovered != family_id:
+        raise NativeVariationError(
+            f"requested {family_id} process parameters but parsed {discovered}"
+        )
+    expected_count = {"lv": 34, "hv": 37}[discovered]
+    if (
+        len(parameters) != expected_count
+        or len({item.name for item in parameters}) != expected_count
+    ):
+        raise NativeVariationError(
+            f"expected {expected_count} upstream {discovered} MOS process parameters, "
+            f"found {len(parameters)}"
         )
     if any(item.expected_sigma <= 0.0 for item in parameters):
         raise NativeVariationError("upstream process parameter has non-positive sigma")
     return tuple(parameters)
 
 
-def parse_mismatch_parameters(mismatch_file: Path) -> dict[str, dict[str, float]]:
+def parse_mismatch_parameters(
+    mismatch_file: Path,
+    family_id: str | None = None,
+) -> dict[str, dict[str, float]]:
     text = mismatch_file.read_text(encoding="utf-8")
     values = {
         match.group(1).lower(): float(match.group(2))
         for match in re.finditer(
-            r"(?im)^\s*\.param\s+(sg13g2_lv_[np]mos_(?:delvto|factuo|dw|dl)_mm)"
+            r"(?im)^\s*\.param\s+(sg13g2_(?:lv|hv)_[np]mos_(?:delvto|factuo|dw|dl)_mm)"
             r"\s*=\s*([-+]?[0-9.]+(?:e[-+]?[0-9]+)?)\s*$",
             text,
         )
     }
+    discovered_families = {
+        match.group(1) for name in values if (match := re.match(r"sg13g2_(lv|hv)_[np]mos_", name))
+    }
+    if len(discovered_families) != 1:
+        raise NativeVariationError(
+            f"expected exactly one upstream mismatch family, found {sorted(discovered_families)}"
+        )
+    discovered = next(iter(discovered_families))
+    if family_id is not None and discovered != family_id:
+        raise NativeVariationError(
+            f"requested {family_id} mismatch parameters but parsed {discovered}"
+        )
     expected_names = {
-        f"sg13g2_lv_{polarity}mos_{field}_mm"
+        f"sg13g2_{discovered}_{polarity}mos_{field}_mm"
         for polarity in ("n", "p")
         for field in ("delvto", "factuo", "dw", "dl")
     }
@@ -283,10 +330,9 @@ def parse_mismatch_parameters(mismatch_file: Path) -> dict[str, dict[str, float]
         raise NativeVariationError("upstream mismatch parameter set is incomplete")
     result: dict[str, dict[str, float]] = {}
     for polarity in ("n", "p"):
-        prefix = f"sg13g2_lv_{polarity}mos_"
+        prefix = f"sg13g2_{discovered}_{polarity}mos_"
         result[polarity] = {
-            field: values[f"{prefix}{field}_mm"]
-            for field in ("delvto", "factuo", "dw", "dl")
+            field: values[f"{prefix}{field}_mm"] for field in ("delvto", "factuo", "dw", "dl")
         }
     return result
 
@@ -308,15 +354,16 @@ def _corner_job(
     sign = 1.0 if polarity == "n" else -1.0
     vout = 0.5 * kit.vdd_v
     step = 0.005
-    geometry_w = kit.width_m
-    geometry_l = 2.0 * kit.lmin_m
+    device_spec = kit.device_spec(polarity)
+    geometry_w = float(device_spec.default_w_m)
+    geometry_l = 2.0 * float(device_spec.lmin_m)
     criterion = kit.threshold_coefficient_a * geometry_w / geometry_l
-    job = f"corner_{profile}_{polarity}"
+    job = f"corner_{kit.family_id}_{profile}_{polarity}"
     raw = output / "raw" / f"{job}.dat"
     netlist = output / "netlists" / f"{job}.cir"
     log = output / "logs" / f"{job}.log"
     lines = [
-        f"APM130 IHP-native corner {profile} {polarity}",
+        f"APM130/{kit.family_id} IHP-native corner {profile} {polarity}",
         f'.lib "{kit.model_library}" {profile}',
         f'.include "{kit.wrapper_file}"',
         ".temp 27",
@@ -324,10 +371,7 @@ def _corner_job(
         "Vg g 0 0",
         "Vs s 0 0",
         "Vb b 0 0",
-        (
-            f"Xdut d g s b {kit.public_devices[polarity]} "
-            f"w={geometry_w:.17g} l={geometry_l:.17g}"
-        ),
+        (f"Xdut d g s b {kit.public_devices[polarity]} w={geometry_w:.17g} l={geometry_l:.17g}"),
         ".control",
         *_osdi_lines(toolchain),
         "set numdgt=15",
@@ -357,7 +401,9 @@ def _corner_job(
         for first, second in zip(conduction, conduction[1:])
     )
     row = {
-        "kit_id": "apm130",
+        "technology_id": "apm130",
+        "family_id": kit.family_id,
+        "device_id": device_spec.device_id,
         "compact_model": "psp103",
         "public_device": kit.public_devices[polarity],
         "polarity": polarity,
@@ -395,10 +441,7 @@ def _device_lines(
         f"Vg{label} g{label} 0 {sign * vctrl_v:.17g}",
         f"Vs{label} s{label} 0 0",
         f"Vb{label} b{label} 0 0",
-        (
-            f"X{label} d{label} g{label} s{label} b{label} {public_device} "
-            f"w={w_m:.17g} l={l_m:.17g}"
-        ),
+        (f"X{label} d{label} g{label} s{label} b{label} {public_device} w={w_m:.17g} l={l_m:.17g}"),
     ]
 
 
@@ -413,20 +456,26 @@ def _process_job(
     replay: bool = False,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     suffix = "_replay" if replay else ""
-    job = f"process_{sample_index:03d}_seed_{seed}{suffix}"
+    job = f"process_{kit.family_id}_{sample_index:03d}_seed_{seed}{suffix}"
     netlist = output / "netlists" / f"{job}.cir"
     log = output / "logs" / f"{job}.log"
-    w_m = kit.width_m
-    l_m = 2.0 * kit.lmin_m
-    biases = {"n": 0.4, "p": 0.46}
+    geometries = {
+        polarity: (
+            float(kit.device_spec(polarity).default_w_m),
+            2.0 * float(kit.device_spec(polarity).lmin_m),
+        )
+        for polarity in ("n", "p")
+    }
+    biases = {polarity: 0.5 * kit.vdd_v for polarity in ("n", "p")}
     lines = [
-        f"APM130 IHP-native process sample {sample_index} seed {seed}",
+        f"APM130/{kit.family_id} IHP-native process sample {sample_index} seed {seed}",
         f".option seed={seed} seedinfo",
         f'.lib "{kit.model_library}" {NATIVE_PROCESS_PROFILE}',
         f'.include "{kit.wrapper_file}"',
         ".temp 27",
     ]
     for polarity in ("n", "p"):
+        w_m, l_m = geometries[polarity]
         for instance_index in (1, 2):
             label = f"{polarity}{instance_index}"
             lines.extend(
@@ -457,7 +506,8 @@ def _process_job(
         resolved = _scalar(log, f"v(proc{index:02d})")
         sample_rows.append(
             {
-                "kit_id": "apm130",
+                "technology_id": "apm130",
+                "family_id": kit.family_id,
                 "sample_index": sample_index,
                 "seed": seed,
                 "polarity": parameter.polarity,
@@ -467,8 +517,7 @@ def _process_job(
                 "ngspice_num_sigmas": parameter.num_sigmas,
                 "expected_sigma": parameter.expected_sigma,
                 "resolved_value": resolved,
-                "normalized_z": (resolved - parameter.nominal_value)
-                / parameter.expected_sigma,
+                "normalized_z": (resolved - parameter.nominal_value) / parameter.expected_sigma,
                 "empirical_role": (
                     "sampled_variable"
                     if parameter.empirically_variable
@@ -482,13 +531,14 @@ def _process_job(
         )
     observations: list[dict[str, Any]] = []
     for polarity in ("n", "p"):
-        currents = [
-            _scalar(log, f"i(vd{polarity}{instance_index})")
-            for instance_index in (1, 2)
-        ]
+        w_m, l_m = geometries[polarity]
+        device_spec = kit.device_spec(polarity)
+        currents = [_scalar(log, f"i(vd{polarity}{instance_index})") for instance_index in (1, 2)]
         observations.append(
             {
-                "kit_id": "apm130",
+                "technology_id": "apm130",
+                "family_id": kit.family_id,
+                "device_id": device_spec.device_id,
                 "sample_index": sample_index,
                 "seed": seed,
                 "polarity": polarity,
@@ -522,30 +572,37 @@ def _mismatch_job(
     replay: bool = False,
 ) -> list[dict[str, Any]]:
     suffix = "_replay" if replay else ""
-    job = f"mismatch_{sample_index:03d}_seed_{seed}{suffix}"
+    job = f"mismatch_{kit.family_id}_{sample_index:03d}_seed_{seed}{suffix}"
     netlist = output / "netlists" / f"{job}.cir"
     log = output / "logs" / f"{job}.log"
     geometries = {
-        "small": (kit.width_m, 2.0 * kit.lmin_m),
-        "large_4x_area": (2.0 * kit.width_m, 4.0 * kit.lmin_m),
+        polarity: {
+            "small": (
+                float(kit.device_spec(polarity).default_w_m),
+                2.0 * float(kit.device_spec(polarity).lmin_m),
+            ),
+            "large_4x_area": (
+                2.0 * float(kit.device_spec(polarity).default_w_m),
+                4.0 * float(kit.device_spec(polarity).lmin_m),
+            ),
+        }
+        for polarity in ("n", "p")
     }
-    biases = {"n": 0.4, "p": 0.46}
+    biases = {polarity: 0.5 * kit.vdd_v for polarity in ("n", "p")}
     devices: list[tuple[str, str, str, int, float, float]] = []
     lines = [
-        f"APM130 IHP-native mismatch sample {sample_index} seed {seed}",
+        f"APM130/{kit.family_id} IHP-native mismatch sample {sample_index} seed {seed}",
         f".option seed={seed} seedinfo",
         f'.lib "{kit.model_library}" {NATIVE_MISMATCH_PROFILE}',
         f'.include "{wrapper}"',
         ".temp 27",
     ]
     for polarity in ("n", "p"):
-        for geometry_label, (w_m, l_m) in geometries.items():
+        for geometry_label, (w_m, l_m) in geometries[polarity].items():
             geometry_token = "s" if geometry_label == "small" else "l"
             for instance_index in (1, 2):
                 label = f"{polarity}{geometry_token}{instance_index}"
-                devices.append(
-                    (label, polarity, geometry_label, instance_index, w_m, l_m)
-                )
+                devices.append((label, polarity, geometry_label, instance_index, w_m, l_m))
                 lines.extend(
                     _device_lines(
                         label,
@@ -559,7 +616,7 @@ def _mismatch_job(
                 )
     lines.extend([".control", *_osdi_lines(toolchain), "set numdgt=15", "op"])
     for label, polarity, _geometry_label, _instance_index, _w_m, _l_m in devices:
-        core = f"@n.x{label}.xapm130_core.nsg13_lv_{polarity}mos"
+        core = f"@n.x{label}.xapm130_{kit.family_id}_core.nsg13_{kit.family_id}_{polarity}mos"
         lines.append(f"print i(vd{label})")
         for field in ("w", "l", "delvto", "factuo"):
             lines.append(f"print {core}[{field}]")
@@ -569,11 +626,10 @@ def _mismatch_job(
 
     rows: list[dict[str, Any]] = []
     for label, polarity, geometry_label, instance_index, w_m, l_m in devices:
-        core = f"@n.x{label}.xapm130_core.nsg13_lv_{polarity}mos"
+        core = f"@n.x{label}.xapm130_{kit.family_id}_core.nsg13_{kit.family_id}_{polarity}mos"
         raw_current = _scalar(log, f"i(vd{label})")
         resolved = {
-            field: _scalar(log, f"{core}[{field}]")
-            for field in ("w", "l", "delvto", "factuo")
+            field: _scalar(log, f"{core}[{field}]") for field in ("w", "l", "delvto", "factuo")
         }
         coefficients = mismatch_parameters[polarity]
         area_um2 = w_m * l_m * 1e12
@@ -581,7 +637,9 @@ def _mismatch_job(
         factuo_sigma = coefficients["factuo"] / math.sqrt(area_um2)
         rows.append(
             {
-                "kit_id": "apm130",
+                "technology_id": "apm130",
+                "family_id": kit.family_id,
+                "device_id": kit.device_spec(polarity).device_id,
                 "sample_index": sample_index,
                 "seed": seed,
                 "polarity": polarity,
@@ -627,8 +685,7 @@ def _correlation(first: list[float], second: list[float]) -> float:
     first_mean = statistics.mean(first)
     second_mean = statistics.mean(second)
     numerator = sum(
-        (left - first_mean) * (right - second_mean)
-        for left, right in zip(first, second)
+        (left - first_mean) * (right - second_mean) for left, right in zip(first, second)
     )
     first_power = sum((value - first_mean) ** 2 for value in first)
     second_power = sum((value - second_mean) ** 2 for value in second)
@@ -645,11 +702,7 @@ def _process_summary(
 ) -> dict[str, Any]:
     parameter_statistics = []
     for parameter in parameters:
-        values = [
-            row["normalized_z"]
-            for row in rows
-            if row["parameter_name"] == parameter.name
-        ]
+        values = [row["normalized_z"] for row in rows if row["parameter_name"] == parameter.name]
         parameter_statistics.append(
             {
                 "parameter_name": parameter.name,
@@ -660,22 +713,17 @@ def _process_summary(
                 "empirically_variable": parameter.empirically_variable,
             }
         )
-    variable_statistics = [
-        item for item in parameter_statistics if item["empirically_variable"]
-    ]
+    variable_statistics = [item for item in parameter_statistics if item["empirically_variable"]]
     current_statistics = []
     for polarity in ("n", "p"):
-        values = [
-            row["idmag_1_a"] for row in observations if row["polarity"] == polarity
-        ]
+        values = [row["idmag_1_a"] for row in observations if row["polarity"] == polarity]
         current_statistics.append(
             {
                 "polarity": polarity,
                 "sample_count": len(values),
                 "mean_idmag_a": statistics.mean(values),
                 "sample_stddev_idmag_a": statistics.stdev(values),
-                "coefficient_of_variation": statistics.stdev(values)
-                / statistics.mean(values),
+                "coefficient_of_variation": statistics.stdev(values) / statistics.mean(values),
             }
         )
     return {
@@ -719,8 +767,7 @@ def _mismatch_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
             selected = [
                 row
                 for row in rows
-                if row["polarity"] == polarity
-                and row["geometry_label"] == geometry_label
+                if row["polarity"] == polarity and row["geometry_label"] == geometry_label
             ]
             for variable, field in normalized_fields.items():
                 values = [row[field] for row in selected]
@@ -752,9 +799,7 @@ def _mismatch_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
                 {
                     "polarity": polarity,
                     "variable": variable,
-                    "pearson_correlation_instance_1_2": _correlation(
-                        cohorts[1], cohorts[2]
-                    ),
+                    "pearson_correlation_instance_1_2": _correlation(cohorts[1], cohorts[2]),
                 }
             )
     geometry_scaling = []
@@ -764,8 +809,7 @@ def _mismatch_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
                 geometry_label: [
                     row[raw_field]
                     for row in rows
-                    if row["polarity"] == polarity
-                    and row["geometry_label"] == geometry_label
+                    if row["polarity"] == polarity and row["geometry_label"] == geometry_label
                 ]
                 for geometry_label in ("small", "large_4x_area")
             }
@@ -774,9 +818,7 @@ def _mismatch_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
                     "polarity": polarity,
                     "variable": variable,
                     "small_sample_stddev": statistics.stdev(cohorts["small"]),
-                    "large_4x_area_sample_stddev": statistics.stdev(
-                        cohorts["large_4x_area"]
-                    ),
+                    "large_4x_area_sample_stddev": statistics.stdev(cohorts["large_4x_area"]),
                     "observed_large_over_small_sigma_ratio": statistics.stdev(
                         cohorts["large_4x_area"]
                     )
@@ -797,33 +839,34 @@ def _mismatch_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
         ),
         "local_correlations": local_correlations,
         "maximum_absolute_local_correlation": max(
-            abs(item["pearson_correlation_instance_1_2"])
-            for item in local_correlations
+            abs(item["pearson_correlation_instance_1_2"]) for item in local_correlations
         ),
         "geometry_scaling": geometry_scaling,
     }
 
 
-def validate_apm130_native(
+def _validate_apm130_native_family(
     output_directory: Path,
-    toolchain: Toolchain | None = None,
+    family_id: str,
+    base_seed: int,
+    toolchain: Toolchain,
 ) -> dict[str, Any]:
-    selected = toolchain or resolve_toolchain()
+    selected = toolchain
     output = output_directory.expanduser().resolve()
     _prepare_output(output)
-    build_models(selected, force=False)
-    kit = load_kit("apm130", selected.root)
+    kit = load_family(f"apm130/{family_id}", selected.root)
     if not isinstance(kit, PlanarKit) or kit.model_library is None:
-        raise NativeVariationError("APM130 is not configured as the IHP planar PSP kit")
+        raise NativeVariationError(
+            f"APM130/{family_id} is not configured as an IHP planar PSP family"
+        )
     vendor = selected.root / "models/apm130/vendor/ihp-sg13g2-models"
-    stat_file = vendor / "sg13g2_moslv_stat.lib"
-    mismatch_file = vendor / "sg13g2_moslv_mismatch.lib"
+    stat_file = vendor / f"sg13g2_mos{family_id}_stat.lib"
+    mismatch_file = vendor / f"sg13g2_mos{family_id}_mismatch.lib"
     mismatch_wrapper = (
-        selected.root
-        / "models/apm130/ngspice/apm130_native_mismatch_wrappers.inc"
+        selected.root / f"models/apm130/families/{family_id}/ngspice/native_mismatch_wrapper.inc"
     )
-    parameters = parse_process_parameters(kit.model_library, stat_file)
-    mismatch_parameters = parse_mismatch_parameters(mismatch_file)
+    parameters = parse_process_parameters(kit.model_library, stat_file, family_id)
+    mismatch_parameters = parse_mismatch_parameters(mismatch_file, family_id)
 
     corner_rows: list[dict[str, Any]] = []
     corner_monotonicity: list[bool] = []
@@ -835,11 +878,9 @@ def validate_apm130_native(
 
     process_rows: list[dict[str, Any]] = []
     process_observations: list[dict[str, Any]] = []
-    seeds = tuple(NATIVE_BASE_SEED + index for index in range(NATIVE_SAMPLE_COUNT))
+    seeds = tuple(base_seed + index for index in range(NATIVE_SAMPLE_COUNT))
     for sample_index, seed in enumerate(seeds):
-        rows, observations = _process_job(
-            selected, output, kit, parameters, sample_index, seed
-        )
+        rows, observations = _process_job(selected, output, kit, parameters, sample_index, seed)
         process_rows.extend(rows)
         process_observations.extend(observations)
     process_replay_rows, process_replay_observations = _process_job(
@@ -891,27 +932,21 @@ def validate_apm130_native(
 
     process_summary = _process_summary(parameters, process_rows, process_observations)
     mismatch_summary = _mismatch_summary(mismatch_rows)
-    corners_by_key = {
-        (row["native_profile"], row["polarity"]): row for row in corner_rows
-    }
+    corners_by_key = {(row["native_profile"], row["polarity"]): row for row in corner_rows}
     corner_direction_checks: dict[str, bool] = {}
     for polarity in ("n", "p"):
         typical = corners_by_key[("mos_tt", polarity)]["idmag_on_a"]
         speed = CORNER_SPEED_PROFILES[polarity]
         corner_direction_checks[f"{polarity}_slow_below_typical"] = all(
-            corners_by_key[(profile, polarity)]["idmag_on_a"] < typical
-            for profile in speed["slow"]
+            corners_by_key[(profile, polarity)]["idmag_on_a"] < typical for profile in speed["slow"]
         )
         corner_direction_checks[f"{polarity}_fast_above_typical"] = all(
-            corners_by_key[(profile, polarity)]["idmag_on_a"] > typical
-            for profile in speed["fast"]
+            corners_by_key[(profile, polarity)]["idmag_on_a"] > typical for profile in speed["fast"]
         )
 
     process_first = [row for row in process_rows if row["sample_index"] == 0]
     process_second = [row for row in process_rows if row["sample_index"] == 1]
-    process_observation_first = [
-        row for row in process_observations if row["sample_index"] == 0
-    ]
+    process_observation_first = [row for row in process_observations if row["sample_index"] == 0]
     mismatch_first = [row for row in mismatch_rows if row["sample_index"] == 0]
     mismatch_second = [row for row in mismatch_rows if row["sample_index"] == 1]
     process_signs = all(
@@ -980,31 +1015,23 @@ def validate_apm130_native(
         "five_native_corner_profiles_executed": {
             (row["native_profile"], row["polarity"]) for row in corner_rows
         }
-        == {
-            (profile, polarity)
-            for profile in NATIVE_CORNER_PROFILES
-            for polarity in ("n", "p")
-        },
+        == {(profile, polarity) for profile in NATIVE_CORNER_PROFILES for polarity in ("n", "p")},
         "corner_curves_finite_monotonic_and_thresholded": all(corner_monotonicity)
         and all(
-            0.0 < row["threshold_magnitude_v"] < kit.vdd_v
-            and row["idmag_on_a"] > 0.0
+            0.0 < row["threshold_magnitude_v"] < kit.vdd_v and row["idmag_on_a"] > 0.0
             for row in corner_rows
         ),
         "upstream_corner_speed_directions": all(corner_direction_checks.values()),
         "corner_raw_current_signs": corner_signs,
-        "process_profile_and_parameter_count": len(parameters) == 34
+        "process_profile_and_parameter_count": len(parameters) == {"lv": 34, "hv": 37}[family_id]
         and len(process_rows) == NATIVE_SAMPLE_COUNT * len(parameters)
-        and process_summary["empirically_variable_parameter_count"] == 33
+        and process_summary["empirically_variable_parameter_count"]
+        == sum(parameter.empirically_variable for parameter in parameters)
         and process_summary["effectively_fixed_parameters"]
-        == ["mc_sg13g2_lv_pmos_dphiblw"],
-        "process_parameter_normalized_means": process_summary[
-            "maximum_absolute_normalized_mean"
-        ]
+        == [parameter.name for parameter in parameters if not parameter.empirically_variable],
+        "process_parameter_normalized_means": process_summary["maximum_absolute_normalized_mean"]
         < 0.4,
-        "process_parameter_normalized_spread": process_summary[
-            "minimum_normalized_sample_stddev"
-        ]
+        "process_parameter_normalized_spread": process_summary["minimum_normalized_sample_stddev"]
         > 0.7
         and process_summary["maximum_normalized_sample_stddev"] < 1.3,
         "process_model_global_sharing": process_summary[
@@ -1020,19 +1047,10 @@ def validate_apm130_native(
         "process_different_seeds_differ": process_first != process_second,
         "process_raw_current_signs": process_signs,
         "mismatch_sample_count": len(mismatch_rows) == NATIVE_SAMPLE_COUNT * 8,
-        "mismatch_normalized_means": mismatch_summary[
-            "maximum_absolute_normalized_mean"
-        ]
-        < 0.4,
-        "mismatch_normalized_spread": mismatch_summary[
-            "minimum_normalized_sample_stddev"
-        ]
-        > 0.7
+        "mismatch_normalized_means": mismatch_summary["maximum_absolute_normalized_mean"] < 0.4,
+        "mismatch_normalized_spread": mismatch_summary["minimum_normalized_sample_stddev"] > 0.7
         and mismatch_summary["maximum_normalized_sample_stddev"] < 1.3,
-        "mismatch_local_independence": mismatch_summary[
-            "maximum_absolute_local_correlation"
-        ]
-        < 0.3,
+        "mismatch_local_independence": mismatch_summary["maximum_absolute_local_correlation"] < 0.3,
         "mismatch_fourfold_area_sigma_scaling": all(
             0.35 < item["observed_large_over_small_sigma_ratio"] < 0.7
             for item in mismatch_summary["geometry_scaling"]
@@ -1068,17 +1086,18 @@ def validate_apm130_native(
         kit.model_library,
         stat_file,
         mismatch_file,
-        vendor / "sg13g2_moslv_parm.lib",
-        vendor / "sg13g2_moslv_mod.lib",
-        vendor / "sg13g2_moslv_mod_mismatch.lib",
+        vendor / f"sg13g2_mos{family_id}_parm.lib",
+        vendor / f"sg13g2_mos{family_id}_mod.lib",
+        vendor / f"sg13g2_mos{family_id}_mod_mismatch.lib",
         kit.wrapper_file,
         mismatch_wrapper,
     )
     report = {
-        "schema": "apm.native-variation-validation.v1",
+        "schema": "apm.native-family-variation-validation.v2",
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "status": "validated" if checks["overall_pass"] else "checks_failed",
-        "kit_id": "apm130",
+        "technology_id": "apm130",
+        "family_id": family_id,
         "compact_model": "psp103",
         "model_revision": kit.provenance_revision,
         "simulator_backend": "ngspice",
@@ -1098,16 +1117,17 @@ def validate_apm130_native(
             "seed_control": ".option seed=<integer>",
             "python_sampling": False,
             "sample_count_per_random_mode": NATIVE_SAMPLE_COUNT,
-            "base_seed": NATIVE_BASE_SEED,
+            "base_seed": base_seed,
             "seeds": list(seeds),
             "same_seed_replay_seed": seeds[0],
         },
         "upstream_semantics": {
             "process": (
-                "34 independent model-global low-voltage N/P parameter gauss expressions; "
-                "num_sigmas=1 in sg13g2_moslv_stat.lib. The sole 1e-9 relative "
-                "PMOS dphiblw entry is retained but resolves nominal at ngspice 47's "
-                "expanded-deck numeric precision; 33 parameters are empirically variable"
+                f"{len(parameters)} independent model-global {family_id.upper()} N/P MOS "
+                f"parameter gauss expressions; num_sigmas=1 in {stat_file.name}. "
+                "Upstream 1e-9 relative entries are retained but resolve nominal at "
+                "ngspice 47's expanded-deck numeric precision; all larger entries are "
+                "checked empirically"
             ),
             "mismatch": (
                 "instance-local agauss draws for w, l, delvto, and factuo with mm_ok=1; "
@@ -1138,5 +1158,101 @@ def validate_apm130_native(
         failed = [name for name, passed in requirements.items() if not passed]
         raise NativeVariationError(
             f"IHP-native variation checks failed ({', '.join(failed)}); see {report_path}"
+        )
+    return report
+
+
+def validate_apm130_native(
+    output_directory: Path,
+    toolchain: Toolchain | None = None,
+) -> dict[str, Any]:
+    """Validate IHP-native LV and HV profiles as independent upstream cohorts."""
+
+    selected = toolchain or resolve_toolchain()
+    output = output_directory.expanduser().resolve()
+    if output.exists() and any(output.iterdir()):
+        raise NativeVariationError(
+            f"refusing to overwrite non-empty native-variation directory: {output}"
+        )
+    output.mkdir(parents=True, exist_ok=True)
+    build_models(selected, force=False)
+
+    family_reports: dict[str, dict[str, Any]] = {}
+    for family_id, seed_offset in (("lv", 0), ("hv", 10000)):
+        family_reports[family_id] = _validate_apm130_native_family(
+            output / family_id,
+            family_id,
+            NATIVE_BASE_SEED + seed_offset,
+            selected,
+        )
+
+    requirements = {
+        "required_lv_hv_families": set(family_reports) == {"lv", "hv"},
+        "each_family_real_tool_validated": all(
+            report["checks"]["overall_pass"] for report in family_reports.values()
+        ),
+        "upstream_names_retained": all(
+            report["selected_upstream_profiles"]
+            == {
+                "corners": list(NATIVE_CORNER_PROFILES),
+                "process": NATIVE_PROCESS_PROFILE,
+                "mismatch": NATIVE_MISMATCH_PROFILE,
+                "combined_all": None,
+                "combined_all_status": (
+                    "not exposed by the selected upstream statistical deck and "
+                    "intentionally not invented"
+                ),
+            }
+            for report in family_reports.values()
+        ),
+        "no_native_all_mode": "all" not in NATIVE_MODES,
+        "no_cross_family_correlation_invented": True,
+        "independent_family_seed_cohorts": (
+            family_reports["lv"]["native_random_sampling"]["base_seed"]
+            != family_reports["hv"]["native_random_sampling"]["base_seed"]
+        ),
+    }
+    checks = {
+        "requirements": requirements,
+        "overall_pass": all(requirements.values()),
+    }
+    report: dict[str, Any] = {
+        "schema": "apm.native-variation-validation.v2",
+        "created_utc": datetime.now(timezone.utc).isoformat(),
+        "status": "validated" if checks["overall_pass"] else "checks_failed",
+        "technology_id": "apm130",
+        "families": ["lv", "hv"],
+        "compact_model": "psp103",
+        "simulator_backend": "ngspice",
+        "simulator_version": "ngspice-47",
+        "variation_origin": "native",
+        "selected_upstream_profiles": {
+            family_id: report["selected_upstream_profiles"]
+            for family_id, report in family_reports.items()
+        },
+        "cross_family_semantics": {
+            "correlation": "unspecified_upstream; not sampled or asserted by APM",
+            "combined_all": None,
+            "cohort_execution": "LV and HV profiles execute independently",
+        },
+        "family_reports": {
+            family_id: {
+                "path": str(Path(report["report_path"]).relative_to(output)),
+                "sha256": sha256_file(Path(report["report_path"])),
+                "status": report["status"],
+                "checks": report["checks"],
+            }
+            for family_id, report in family_reports.items()
+        },
+        "checks": checks,
+    }
+    report_path = output / "report.json"
+    report_path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    report["output_directory"] = str(output)
+    report["report_path"] = str(report_path)
+    if not checks["overall_pass"]:
+        failed = [name for name, passed in requirements.items() if not passed]
+        raise NativeVariationError(
+            f"APM130 LV/HV native variation checks failed ({', '.join(failed)}); see {report_path}"
         )
     return report

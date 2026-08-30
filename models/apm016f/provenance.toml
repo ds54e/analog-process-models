@@ -9,7 +9,7 @@ ptm_mg_derived = false
 [source]
 status = "apm-authored-params-with-vendored-pinned-bsim-cmg-engine"
 parameter_project = "Analog Process Models"
-parameter_revision = "apm016f-params-v1-2026-08-30"
+parameter_revision = "apm016f-multivt-v2-2026-08-30"
 parameter_license = "Apache-2.0"
 engine_project = "UC Berkeley BSIM-CMG"
 engine_url = "https://www.bsim.berkeley.edu/wp-content/uploads/BSIMCMG/BSIM-CMG_112.1.0_04282026.tar.gz"
@@ -19,11 +19,27 @@ engine_license = "ECL-2.0"
 retrieved_utc = "2026-08-29"
 
 [source.authored_files]
-"kit.toml" = "b606294c5075dd40a12cf36de0c333c55fb9e8aa97202cd9b70d9eb165175332"
-"ngspice/apm016f_models.inc" = "afd4b6905d4176e4f0f7802d8f0434fd6f2d51a2dd40abf28cddaa8fe104a323"
-"ngspice/apm016f_wrappers.inc" = "4bbcb2bb7c8573e51fdad316e686b885c1d32614151cf0a38bb258059607ceea"
-"parameter_generation.md" = "5a14e7b8a0a8169de9439c44ba0b15d114813b7b8991ca1c7e2bb3922fb967ac"
-"spectre/apm016f.scs" = "7e372cd832a86ee87554a744b1998d37407d291606fdba56a586858a4b2b0b4f"
+"technology.toml" = "f46e311fad7cd9231c6b549ebe1a9ede1a525228f561218647e022cf96e2853a"
+"ngspice/apm016f_multivt_models.inc" = "54ffca52b7a9c19bbb47589a1933d439917163d9b5ffa1548981ec2e3a2556eb"
+"parameter_generation.md" = "b8b01f19f8439c28d321f189e0816b7c2b5aaf7eed55ed87f135be739712dc5b"
+"spectre/apm016f_multivt.scs" = "4ef7b516f29362e747387daef20b946c551bebb3678a6083ae097e74e86306a1"
+"families/lvt/family.toml" = "babcae54ea1043d1ae0d1842e3a9f4de99d7ed65baecaae33670d15f34313623"
+"families/lvt/variant-generation.toml" = "725e7bf471f4ff0b2bd814e9bb56638c41e8061f0f4a1f9492f9bc04471bc996"
+"families/lvt/ngspice/binding.toml" = "53af71165d8d2ecaa51b4dec736944b8e5b8126cf10d136e64e74efaca808134"
+"families/lvt/ngspice/wrapper.inc" = "4b9433f6c7d6b9e9c7d57d82c321f8d1ed8a3962f6d29a28f8f23d74fac36005"
+"families/lvt/spectre/binding.toml" = "f90138f9573fa0bcd4f632cb798cbe4fb3a29dffb1d4baa78a0c3aca6f20d2e3"
+"families/lvt/spectre/model.scs" = "a7d18003a700775022f670582112e167556eb6429da23240eba55b6be3bf3fa7"
+"families/svt/family.toml" = "9be0d78df10a8f810d15d9035f875cfb7453a4c8387889cdf8afe59bb85ad7d3"
+"families/svt/ngspice/binding.toml" = "041b7bab8dfebeaf5b09ad0f2655c673033a79e4a3e49f30bf69042a9bbfb3d7"
+"families/svt/ngspice/wrapper.inc" = "f46cc83e2cb9a11c3496582a7e3bac45191a4131dfdc2fbebfdf250bc5be02b4"
+"families/svt/spectre/binding.toml" = "fcba86e53f7f6f358c337bb089e2a6e467951e0f9ff63043e1811e931c20485f"
+"families/svt/spectre/model.scs" = "7da2000d93dbc95bbee882e03812a59cf850f937614928099c5c8c4bc3fc3028"
+"families/hvt/family.toml" = "b77c1cc1795840789e6a4b51a5b52e4f69ef163334e2211a01f3ca12ce746be5"
+"families/hvt/variant-generation.toml" = "94c692aa886ebe6428d5a4fc054964b3943464d3717cf526f5ae57894b328d60"
+"families/hvt/ngspice/binding.toml" = "629745448a7d43b815036b252026af4b5427a5f500b230d25727faee220a6a3f"
+"families/hvt/ngspice/wrapper.inc" = "878b522c4f87262b1c539ec93ccdb25c1e5e4b69ec3f5d1cb0eab5fb253e6cda"
+"families/hvt/spectre/binding.toml" = "b3ecd98381a8d9aa41d932d7b7baf24818cae9e2304ab39c1e187238c03d5757"
+"families/hvt/spectre/model.scs" = "d03639dd18b35ea867f7647e3ae80ac95279e283ce9ed42820979056956503f7"
 
 [source.imported_files]
 "vendor/bsim-cmg-112.1.0/LICENSE.txt" = "4d202b27df0df53f021ad2ba5cb2d0e7e62a9025e6a9786952c67be7111edea8"
@@ -68,11 +84,16 @@ benchmark = true
 native = false
 
 [validation]
-ngspice = "M3 complete nominal terminal characterization passed with BSIM-CMG 112.1.0 OSDI at NFIN 1, 2, and 4; see validation/evidence/m3-apm016f.md"
+ngspice = "v2 LVT/SVT/HVT terminal characterization, ordering, NFIN scaling, and six benchmark adapters passed with BSIM-CMG 112.1.0 OSDI"
 spectre = "experimental_unverified"
 
 [spectre]
 status = "experimental_unverified"
-artifact = "spectre/apm016f.scs"
+artifacts = [
+  "spectre/apm016f_multivt.scs",
+  "families/lvt/spectre/model.scs",
+  "families/svt/spectre/model.scs",
+  "families/hvt/spectre/model.scs"
+]
 model_route = "native Spectre BSIM-CMG"
 real_tool_validation = false

@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: APM contributors
+# SPDX-License-Identifier: Apache-2.0
+schema = "apm.backend-binding.v2"
+technology_id = "apm016f"
+family_id = "lvt"
+backend = "spectre"
+compact_model_native_name = "BSIM-CMG"
+model_includes = ["models/apm016f/spectre/apm016f_multivt.scs"]
+wrapper = "models/apm016f/families/lvt/spectre/model.scs"
+native_oracle = "unverified Spectre native BSIM-CMG mapping"
+status = "experimental_unverified"
+real_tool_validation = false
+include_language = "spectre"
+instance_prefix = "N"
+[device.nfet]
+native_vector_template = "unavailable_model_only"
+native_model = "apm016f_lvt_ncore"
+[device.pfet]
+native_vector_template = "unavailable_model_only"
+native_model = "apm016f_lvt_pcore"

@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: APM contributors
+# SPDX-License-Identifier: Apache-2.0
+
+schema = "apm.backend-binding.v2"
+technology_id = "apm016f"
+family_id = "lvt"
+backend = "ngspice"
+compact_model_native_name = "BSIM-CMG 112.1.0"
+model_includes = ["models/apm016f/ngspice/apm016f_multivt_models.inc"]
+wrapper = "models/apm016f/families/lvt/ngspice/wrapper.inc"
+osdi_artifacts = ["bsimcmg-112.1.0.osdi"]
+native_oracle = "BSIM-CMG 112.1.0"
+
+[device.nfet]
+native_vector_template = "@n.xdut.napm016f_lvt_core[{quantity}]"
+
+[device.pfet]
+native_vector_template = "@n.xdut.napm016f_lvt_core[{quantity}]"

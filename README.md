@@ -1,127 +1,194 @@
 # Analog Process Models
 
-**Repository:** https://github.com/ds54e/analog-process-models
+Analog Process Models (**APM**) is a self-contained collection of open compact
+models and a terminal-characterization framework for cross-process and
+within-process analog device studies. This repository is the APM project;
+within it, APM always means Analog Process Models.
 
-Analog Process Models (**APM**) is a self-contained open compact-model collection and characterization framework for cross-process and within-process analog device studies.
+Version **2.0.0** introduces first-class electrical families, 13 characterized
+families across five technologies, and a fail-closed 20-gate release flow.
 
-APM is not a manufacturable PDK and does not provide layout, PCells, DRC/LVS/PEX, signoff, foundry correlation, or reliability qualification.
+## Scope
 
-## Release state
+APM supplies family-qualified MOS model wrappers, manifest-driven discovery,
+ngspice characterization, comparison tools, synthetic benchmark variation,
+technology-neutral benchmark R/C devices, and exact model provenance.
 
-- Stable historical baseline: **v1.0.0**
-- Current `main`: **breaking v2.0.0 development line**
-- Current v2 implementation status: see [`STATUS.md`](STATUS.md)
+APM is **not a manufacturable PDK**. It does not provide layout, PCells, DRC,
+LVS, PEX, standard cells, signoff, reliability qualification, foundry
+correlation, yield prediction, RF devices, MOS noise models, AMS integration,
+or Virtuoso automation.
 
-The v1.0.0 tag remains the validated one-family-per-technology release. Current main intentionally changes the domain model and is not release-ready until all v2 gates pass.
+## Device-family domain model
 
-## v2 direction
+The canonical hierarchy is:
 
-APM v2 adds first-class electrical device families while keeping compact-model-specific raw APIs out of the common cross-technology contract.
+**Technology → Electrical Family → Device**
 
-Canonical hierarchy:
+Operating Profile, Backend Binding, Variation, and Comparison Set are
+orthogonal concepts. Family identity describes a nominal electrical
+parameterization, not merely an intended use such as core or I/O. The
+manifest-driven catalog currently contains:
 
-```text
-Technology
-  -> Electrical Family
-       -> Device
+| Technology | Electrical families | Compact model |
+| --- | --- | --- |
+| APM350 | `general` | BSIM3 |
+| APM130 | `lv`, `hv` | PSP103 |
+| APM045 | `vtl`, `vtg`, `vth`, `thkox` | BSIM4 |
+| APM022 | `lvt`, `svt`, `hvt` | BSIM4 |
+| APM016F | `lvt`, `svt`, `hvt` | BSIM-CMG 112.1.0 |
+
+Every planar device exposes terminals `d g s b` and public sizing parameters
+`w,l`. Every FinFET exposes `d g s b` and `l,nfin`. APM deliberately omits a
+common multiplicity/finger API. Public model names are family-qualified, for
+example `apm045_vtg_nmos` and `apm016f_svt_nfet`.
+
+The normative taxonomy is in [`DEVICE_FAMILY_MODEL.md`](DEVICE_FAMILY_MODEL.md).
+
+## Quick start
+
+The validated reference host is WSL2 with AlmaLinux/RHEL-compatible EL9 on
+x86_64, using ngspice 47 with OSDI and a project-local OpenVAF-Re-Loaded build.
+Keep the checkout and generated state on the Linux filesystem, not `/mnt/c`.
+
+```console
+git clone https://github.com/ds54e/analog-process-models.git
+cd analog-process-models
+tools/bootstrap-el9.sh
+tools/setup-python.sh
+.venv/bin/apm build-models
+.venv/bin/apm doctor
 ```
 
-Orthogonal concepts:
+The setup is project-local below ignored `.apm/` and `.venv/` paths. APM does
+not depend on `~/.spiceinit` or GUI state.
 
-- Operating Profile
-- Backend Binding
-- Variation
-- Comparison Set
+Discover and inspect the catalog:
 
-See [`DEVICE_FAMILY_MODEL.md`](DEVICE_FAMILY_MODEL.md) for the normative taxonomy.
+```console
+.venv/bin/apm list technologies
+.venv/bin/apm list families apm045
+.venv/bin/apm list devices apm045/vtg
+.venv/bin/apm describe apm045/vtg/nmos
+```
 
-Required v2 families:
+Characterize a family, execute a manifest-defined comparison set, or compare
+the five cross-process anchors:
 
-- APM350: `general`
-- APM130: `lv`, `hv`
-- APM045: `vtl`, `vtg`, `vth`, `thkox`
-- APM022: `lvt`, `svt`, `hvt`
-- APM016F: `lvt`, `svt`, `hvt`
+```console
+.venv/bin/apm characterize apm045/vtg --output .apm/results/apm045-vtg
+.venv/bin/apm compare-set apm045 threshold --output .apm/results/apm045-threshold
+.venv/bin/apm compare-set apm045 gate_stack --output .apm/results/apm045-gate-stack
+.venv/bin/apm compare-anchors --output .apm/results/anchors
+```
 
-Total: 13 Electrical Families.
+Commands refuse to overwrite a non-empty result directory. Generated OSDI
+binaries and full simulator results are intentionally untracked.
 
-The cross-process anchor remains one representative family per technology:
+## Operating profile versus validity
 
-`apm350/general -> apm130/lv -> apm045/vtg -> apm022/svt -> apm016f/svt`
+An APM Operating Profile is a documented characterization choice, not a model
+validity or reliability rating. Family manifests separately record supported
+geometry evidence, a default profile, and any common-overlap comparison
+profile. Unknown validity bounds remain unknown rather than being treated as
+unlimited.
 
-Within-technology comparisons add threshold-sibling and gate-stack views without mixing those choices into the golden process-scaling axis.
+The APM045 THKOX native profile is an APM-selected 2.0 V behavior profile; its
+gate-stack comparison with VTG uses an explicitly validated 1.0 V common
+overlap. APM130 HV uses a 3.3 V native profile and a 1.2 V LV/HV common overlap.
+These voltages do not imply breakdown, lifetime, or safe-operating-area claims.
 
-## v2 characterization
+## Characterization
 
-The v1 terminal contract remains the base:
+`apm characterize` produces schema `apm.characterization.v2` and retains the
+raw simulator inputs, logs, signed terminal currents, and complete complex 4×4
+terminal Y matrices. Derived results include Id–Vg/Id–Vd, finite-difference
+gm/gds and convergence, gm/Id, gm/gds, length scaling, DIBL, Y-derived
+capacitance, Ion, Ioff, `log10(Ion/Ioff)`, and a frozen/versioned subthreshold
+swing extraction at −40, 27, 85, and 125 °C.
 
-- Id-Vg / Id-Vd
-- terminal finite-difference gm/gds
-- gm/Id / gm/gds
-- length scaling / DIBL
-- raw 4x4 terminal complex Y matrix
-- Y-derived Cgg/Cgd/Cgs
-- -40/27/85/125 degC
+N/P comparisons use explicit effective-voltage and positive-current-magnitude
+coordinates while preserving raw signed terminal quantities. Planar current,
+gm, and capacitance normalize per drawn width; FinFET values normalize per fin.
+Those bases are never silently equated. See
+[`docs/characterization.md`](docs/characterization.md).
 
-v2 adds:
+## Comparison methodology
 
-- Ion
-- Ioff
-- `log10(Ion/Ioff)`
-- subthreshold swing
-- threshold-family equal-bias and equal-inversion comparisons
-- gate-stack native-profile and validated common-overlap-bias comparisons
+The cross-process golden axis uses one manifest-selected family per technology:
 
-Planar current/capacitance normalization remains per width and FinFET normalization remains per fin; APM does not invent a universal effective width.
+`apm350/general → apm130/lv → apm045/vtg → apm022/svt → apm016f/svt`
 
-## v2 variation terminology
+It compares normalized coordinates such as `L/Lmin`, `VOUT/VDD`, and gm/Id.
+Current/capacitance ratios are withheld across per-width and per-fin bases.
 
-APM synthetic benchmark variation is explicitly separated from upstream/native variation.
+Within a technology, threshold-family sets report equal-bias and
+equal-inversion views. Gate-stack sets report each family's native Operating
+Profile and a separately simulated common-overlap profile. The required sets
+cover APM045 VTL/VTG/VTH and VTG/THKOX, APM022 LVT/SVT/HVT, APM016F
+LVT/SVT/HVT, and APM130 LV/HV.
 
-v2 benchmark modes are:
+## Benchmark versus upstream variation
 
-- **Benchmark Global** — synthetic shared observable stress
-- **Benchmark Local** — synthetic instance-local mismatch stress
-- **Benchmark All** — Global + Local
+APM benchmark variation is synthetic and observable: `vth_shift` changes
+threshold magnitude and `drive_shift` changes terminal drain-current
+magnitude. Its three modes are **Benchmark Global**, **Benchmark Local**, and
+**Benchmark All**. Global MOS latents are shared by technology, polarity, and
+intent across sibling families; local latents are independent per instance and
+scale as `1/sqrt(match_size)`. ngspice samples are generated deterministically
+in Python and persist their PCG64 seed and resolved latents.
 
-Benchmark Global is not a claim of real foundry family-to-family process correlation.
+Benchmark Global is a comparison design, not a claim of physical foundry
+family correlation. IHP-native APM130 LV/HV corners, statistical/process
+variation, and mismatch retain their upstream names and are validated in a
+separate flow without invented cross-family correlation or a synthetic native
+All mode. See [`docs/benchmark-variation.md`](docs/benchmark-variation.md) and
+[`docs/native-variation.md`](docs/native-variation.md).
 
-Upstream/native corner/statistical/mismatch profiles retain their actual upstream names and semantics.
+## Model provenance
 
-## Reference backend
+APM130 and APM045 retain exact-file provenance to pinned, redistributable IHP
+SG13G2 and FreePDK45 sources. The PSP103 and BSIM-CMG compiler sources retain
+their upstream licenses and notices. APM350, APM022, and the APM016F parameter
+deck are independently authored APM assets.
 
-The validated v1 development baseline is reused for v2 implementation:
+Official PTM/PTM-MG model cards are neither shipped nor used as numeric source
+material for APM022 or APM016F. Every shipped model input is hash-declared in a
+technology `provenance.toml`; `apm provenance-check` verifies exact inventory,
+license boundaries, local include closure, independent-variant records, and
+REUSE/SPDX compliance. See [`THIRD_PARTY.md`](THIRD_PARTY.md).
 
-- WSL2 + AlmaLinux/RHEL-compatible EL9 x86_64
-- ngspice 47 with OSDI/predictor
-- project-local OpenVAF-ReLoaded where Verilog-A-to-OSDI is required
-- native BSIM3/BSIM4 plus PSP103 and BSIM-CMG OSDI execution
+## Model fidelity and limitations
 
-Existing project-local toolchain/cache/OSDI state may be reused during v2 development when verified. The final v2 release still requires a genuinely fresh-clone source/bootstrap validation.
+The APM-authored models are generic educational/comparison assets with explicit
+terminal-behavior contracts. They are not calibrated to proprietary silicon.
+Upstream-derived APM130 and APM045 expose only the audited model subset and do
+not turn this repository into the upstream PDK. Characterization establishes
+behavior only over recorded geometry, bias, and temperature points; it is not
+a reliability or manufacturing guarantee.
 
-Spectre remains model-only **experimental/unverified** unless real Spectre execution occurs. Virtuoso integration is user-managed and out of scope.
+Spectre files are model-only and **experimental/unverified**. They have not
+been parsed or simulated by a real Spectre installation, and static checks do
+not establish numerical equivalence with ngspice. See
+[`docs/spectre.md`](docs/spectre.md).
 
-## Implementation specification
+## Release validation
 
-Long-running implementation agents must read:
+The authoritative v2 contract is
+[`validation/release_gates.toml`](validation/release_gates.toml). The release
+command implements exactly its 20 required gates and fails for a missing,
+skipped, evidence-free, or failed gate:
 
-- [`AGENTS.md`](AGENTS.md)
-- [`GOAL.md`](GOAL.md)
-- [`DEVICE_FAMILY_MODEL.md`](DEVICE_FAMILY_MODEL.md)
-- [`RESULT_CONTRACT.md`](RESULT_CONTRACT.md)
-- [`PROJECT_CONTEXT.md`](PROJECT_CONTEXT.md)
-- [`ENVIRONMENT.md`](ENVIRONMENT.md)
-- [`RESEARCH_BASELINE.md`](RESEARCH_BASELINE.md)
-- [`UNATTENDED_EXECUTION.md`](UNATTENDED_EXECUTION.md)
-- [`STATUS.md`](STATUS.md)
-- [`validation/release_gates.toml`](validation/release_gates.toml)
+```console
+.venv/bin/apm validate
+.venv/bin/apm validate --release --output .apm/results/v2-release
+```
 
-The current specification commit may intentionally make the old v1 release validator/tests fail until the v2 migration is implemented. Do not interpret old v1 green status as v2 completion and do not weaken v2 requirements to restore v1 compatibility.
+The final release gate additionally requires an exact-commit clean-clone
+attestation captured immediately after cloning on the designated WSL2 + EL9
+host. See [`docs/release-validation.md`](docs/release-validation.md) for the
+complete sequence. Historical v1 evidence does not satisfy a v2 gate.
 
-## Licensing/provenance
-
-Third-party model files require exact-file redistribution/provenance review. APM-authored generic models remain clearly distinguished from upstream/open model families.
-
-Official PTM/PTM-MG cards are not shipped or used as numeric source material for APM022/APM016F authored families.
-
-See `THIRD_PARTY.md`, `LICENSES/`, `REUSE.toml`, and per-technology provenance files for current source/license boundaries.
+Repository policy, implementation scope, and result semantics are defined by
+[`AGENTS.md`](AGENTS.md), [`GOAL.md`](GOAL.md), and
+[`RESULT_CONTRACT.md`](RESULT_CONTRACT.md).

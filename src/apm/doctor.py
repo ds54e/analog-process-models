@@ -138,7 +138,7 @@ def run_doctor(toolchain: Toolchain | None = None) -> dict[str, Any]:
         _run_smoke(selected, work, "bsimcmg-osdi", _bsimcmg_netlist(selected)),
     ]
     report: dict[str, Any] = {
-        "schema": "apm.doctor.v1",
+        "schema": "apm.doctor.v2",
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "status": "pass",
         "repository": str(selected.root),

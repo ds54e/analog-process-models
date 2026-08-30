@@ -1,0 +1,120 @@
+# SPDX-FileCopyrightText: APM contributors
+# SPDX-License-Identifier: Apache-2.0
+
+schema = "apm.benchmark-variation.v2"
+status = "frozen-real-tool-validated-2026-08-30"
+
+[notes]
+text = "Synthetic benchmark values are comparison severities, not foundry statistics, yield predictions, or a claim that nominal electrical families have fully correlated physical process variation."
+
+[calibration_basis]
+date = "2026-08-30"
+required_family_count = 13
+mapping_file = "variation/adapters_v2.toml"
+reference_condition = "family-native profile, L=2*device Lmin, VOUT=0.5*VDD, VCTRL at the nominal grid point nearest gm/Id=15 1/V, 27 degC"
+corner_strength_sigma = 3.0
+starting_prior = "v1 frozen magnitudes, re-evaluated against all v2 adapters; Global drive was reduced from 4% to 3% so three-sigma corners remain inside the measured APM022 raw-adapter range"
+selection_rationale = "12 mV Global Vth retains the v1 threshold stress and maps to at most 36 mV at corners, inside the measured +/-40 mV range. A 3% Global drive sigma gives a 9% corner shift, inside every measured 0.8-1.2 raw multiplier mapping; the v1 4% prior was rejected because APM022 required an extrapolated raw multiplier. Local 8 mV/2.5% retains the explicit size law and untruncated samples fail explicitly if a rare combined draw exceeds calibration."
+validation_evidence = "validation/evidence/v2_benchmark_adapters.json"
+
+[distribution]
+normalized_variable = "z ~ Normal(mean=0, std=1)"
+rng_reference = "NumPy Generator with explicitly selected PCG64 bit generator for ngspice benchmark sampling"
+seed_is_integer = true
+resolved_samples_are_persisted = true
+no_implicit_truncation = true
+
+[mos.global]
+vth_shift_sigma = 0.012
+vth_shift_sigma_units = "V"
+drive_shift_sigma = 0.03
+drive_shift_sigma_units = "fractional_Id_change"
+latent_scope = "one observable latent per technology_id/polarity/intent, shared by every requested family in that technology"
+
+[mos.local]
+vth_shift_sigma_ref = 0.008
+vth_shift_sigma_ref_units = "V"
+drive_shift_sigma_ref = 0.025
+drive_shift_sigma_ref_units = "fractional_Id_change"
+scaling_law = "sigma_ref/sqrt(match_size)"
+scope = "independent per requested device instance"
+
+[mos.intent]
+vth_shift = "observable threshold-magnitude shift; positive means larger |Vth| for both N and P"
+drive_shift = "observable fractional drain-current-magnitude shift at the family/device reference bias; positive means larger |Id| for both N and P"
+raw_parameter_sign_is_not_canonical = true
+family_device_adapter_must_map_sign_and_scale = true
+
+[mos.composition]
+threshold = "vth_shift_total = vth_shift_global + vth_shift_local"
+drive = "drive_factor_total = (1 + drive_shift_global) * (1 + drive_shift_local)"
+invalid_drive_factor = "reject; never silently clip"
+
+[mos.correlation]
+global_same_technology_polarity_across_families = "identical observable latent by benchmark design"
+global_vth_vs_drive = "independent_by_default"
+global_n_vs_p = "independent_by_default"
+global_between_technologies = "independent_by_default"
+global_mos_vs_passives = "independent_by_default"
+local_between_instances = "independent_by_default"
+local_vth_vs_drive_same_instance = "independent_by_default"
+local_vs_global = "independent_by_default"
+family_residual_latents = "none_in_v2; namespace permits future explicit additions"
+physical_process_correlation_claim = "none"
+
+[corner.bench_tt]
+semantic = "nominal_benchmark_global_vector"
+vth_n_sigma = 0.0
+drive_n_sigma = 0.0
+vth_p_sigma = 0.0
+drive_p_sigma = 0.0
+resistor_scale_sigma = 0.0
+capacitor_scale_sigma = 0.0
+
+[corner.bench_ff]
+semantic = "lower_abs_vth_higher_drive_for_n_and_p"
+vth_n_sigma = -3.0
+drive_n_sigma = 3.0
+vth_p_sigma = -3.0
+drive_p_sigma = 3.0
+resistor_scale_sigma = 0.0
+capacitor_scale_sigma = 0.0
+
+[corner.bench_ss]
+semantic = "higher_abs_vth_lower_drive_for_n_and_p"
+vth_n_sigma = 3.0
+drive_n_sigma = -3.0
+vth_p_sigma = 3.0
+drive_p_sigma = -3.0
+resistor_scale_sigma = 0.0
+capacitor_scale_sigma = 0.0
+
+[corner.bench_fs]
+semantic = "fast_n_slow_p"
+vth_n_sigma = -3.0
+drive_n_sigma = 3.0
+vth_p_sigma = 3.0
+drive_p_sigma = -3.0
+resistor_scale_sigma = 0.0
+capacitor_scale_sigma = 0.0
+
+[corner.bench_sf]
+semantic = "slow_n_fast_p"
+vth_n_sigma = 3.0
+drive_n_sigma = -3.0
+vth_p_sigma = -3.0
+drive_p_sigma = 3.0
+resistor_scale_sigma = 0.0
+capacitor_scale_sigma = 0.0
+
+[requirements]
+global_mode = true
+local_mode = true
+all_mode = true
+shared_technology_polarity_latents = true
+python_rng_for_ngspice = true
+spectre_statistics_for_spectre = true
+explicit_distribution_semantics = true
+explicit_units = true
+explicit_sign_semantics = true
+explicit_correlation_semantics = true

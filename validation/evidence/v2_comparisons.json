@@ -1,0 +1,90 @@
+{
+  "schema": "apm.validation-evidence.v2",
+  "milestone": "V2-M3-and-V2-M7-comparison-development",
+  "date": "2026-08-30",
+  "status": "validated",
+  "scope": {
+    "simulator": "ngspice-47",
+    "report_schema": "apm.comparison.v2",
+    "temperature_c": 27,
+    "l_over_lmin": 2.0,
+    "vout_over_vdd": 0.5,
+    "equal_inversion_gm_over_id_per_v": 15.0
+  },
+  "commands": [
+    "apm compare-anchors --output .apm/results/v2-release-comparisons-smoke/anchors",
+    "apm compare-set apm045 threshold --output .apm/results/v2-release-comparisons-smoke/apm045-threshold",
+    "apm compare-set apm045 gate_stack --output .apm/results/v2-release-comparisons-smoke/apm045-gate-stack",
+    "apm compare-set apm022 threshold --output .apm/results/v2-release-comparisons-smoke/apm022-multivt",
+    "apm compare-set apm016f threshold --output .apm/results/v2-release-comparisons-smoke/apm016f-multivt"
+  ],
+  "results": {
+    "cross_process_anchors": {
+      "status": "validated",
+      "report_sha256": "3c739eae725e575b33dabe21fb2b4e51e5f81a36f716abf3cc711e6d7c49e428",
+      "row_count": 10,
+      "views": [
+        "cross_process_anchor"
+      ],
+      "properties": {
+        "all_characterization_audits": true,
+        "cross_process_anchor_view": true,
+        "no_cross_basis_ratios": true
+      }
+    },
+    "apm045_threshold": {
+      "status": "validated",
+      "report_sha256": "921566ff74461cc49ed93648cd0374ddc346e78d92d55f6249ee5ab07ad1e1f6",
+      "row_count": 12,
+      "views": [
+        "threshold_equal_bias",
+        "threshold_equal_inversion"
+      ],
+      "all_characterization_audits": true,
+      "all_required_views": true
+    },
+    "apm045_gate_stack": {
+      "status": "validated",
+      "report_sha256": "89e8fe2f6f41015a977d0f06e8f92412662d4fd58974df87f782e23444776782",
+      "row_count": 8,
+      "views": [
+        "gate_stack_native_profile",
+        "gate_stack_common_overlap"
+      ],
+      "properties": {
+        "all_characterization_audits": true,
+        "all_required_views": true,
+        "explicit_common_profile": true
+      }
+    },
+    "apm022_multivt": {
+      "status": "validated",
+      "report_sha256": "9b85262e5c4e5d1e74d519fc7f71c09898f0754af552ff67095929a80674f7ad",
+      "row_count": 12,
+      "views": [
+        "threshold_equal_bias",
+        "threshold_equal_inversion"
+      ],
+      "properties": {
+        "all_characterization_audits": true,
+        "all_required_views": true,
+        "generic_multivt_nominal_ordering": true
+      }
+    },
+    "apm016f_multivt": {
+      "status": "validated",
+      "report_sha256": "5cec0a9b09e07b553c4e92a37be35f41343c04aac186fb9155d03c9fc4577d2d",
+      "row_count": 12,
+      "views": [
+        "threshold_equal_bias",
+        "threshold_equal_inversion"
+      ],
+      "properties": {
+        "all_characterization_audits": true,
+        "all_required_views": true,
+        "generic_multivt_nominal_ordering": true
+      }
+    }
+  },
+  "boundary": "These development reports exercise real ngspice and support the implementation milestone. The release validator regenerates every comparison from the exact attested clean-clone commit; this compact file is not a substitute for that final gate."
+}

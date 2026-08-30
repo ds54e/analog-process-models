@@ -1,0 +1,46 @@
+{
+  "schema": "apm.validation-evidence.v2",
+  "milestone": "V2-M4",
+  "date": "2026-08-30",
+  "status": "validated",
+  "scope": {
+    "family_count": 13,
+    "device_count": 26,
+    "variation_modes": ["global", "local", "all"],
+    "corners": ["bench_tt", "bench_ff", "bench_ss", "bench_fs", "bench_sf"]
+  },
+  "tool": {
+    "simulator": "ngspice 47",
+    "reference_environment": "WSL2 + AlmaLinux 9.7 x86_64"
+  },
+  "inputs": {
+    "benchmark_configuration": "variation/benchmark_v2.toml",
+    "adapters": "variation/adapters_v2.toml",
+    "passives": "passives/benchmark_v2.toml",
+    "validator": "apm benchmark-check"
+  },
+  "real_tool_result": {
+    "local_path": ".apm/results/v2-benchmark-validation-smoke/report.json",
+    "sha256": "3fc0957b358ee483110fead8a3b1e205c1252c2ab9040a002045c8bcb5579ff4",
+    "overall_pass": true,
+    "worst_vth_fit_residual_v": 0.00004098349984656656,
+    "vth_fit_acceptance_v": 0.0001,
+    "worst_drive_fit_residual_fraction": 0.0002922871661240334,
+    "drive_fit_acceptance_fraction": 0.001,
+    "worst_nominal_drive_relative_error": 4.218847493575595e-15,
+    "worst_nominal_vth_error_v": 4.996003610813204e-16,
+    "passive_value_max_relative_error": 1.5543122344752192e-15,
+    "passive_noise_relative_error": 1.7383130790360468e-7,
+    "deterministic_replay": true,
+    "shared_technology_polarity_latents": true,
+    "local_large_over_small_sigma_coefficient": 0.5
+  },
+  "frozen_decision": {
+    "global_vth_sigma_v": 0.012,
+    "global_drive_sigma_fraction": 0.03,
+    "local_vth_sigma_reference_v": 0.008,
+    "local_drive_sigma_reference_fraction": 0.025,
+    "reason": "The v1 4 percent Global drive prior was rejected because its three-sigma APM022 mapping exceeded the measured raw range; 3 percent keeps every deterministic corner inside real-tool-calibrated ranges."
+  },
+  "boundary": "Synthetic comparison stress only; not foundry statistics, yield prediction, or a physical cross-family correlation claim."
+}

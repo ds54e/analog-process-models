@@ -58,6 +58,15 @@ def test_upstream_native_process_profile_is_parsed_without_translating_parameter
     assert by_name["mc_sg13g2_lv_pmos_dphiblw"].empirically_variable is False
     assert sum(item.empirically_variable for item in parameters) == 33
 
+    hv_parameters = parse_process_parameters(
+        VENDOR / "cornerMOShv.lib",
+        VENDOR / "sg13g2_moshv_stat.lib",
+        "hv",
+    )
+    assert len(hv_parameters) == 37
+    assert {item.polarity for item in hv_parameters} == {"n", "p"}
+    assert sum(item.empirically_variable for item in hv_parameters) == 28
+
 
 def test_upstream_native_mismatch_coefficients_and_wrapper_are_explicit() -> None:
     parameters = parse_mismatch_parameters(VENDOR / "sg13g2_moslv_mismatch.lib")
@@ -73,14 +82,32 @@ def test_upstream_native_mismatch_coefficients_and_wrapper_are_explicit() -> Non
         "dw": 4e-9,
         "dl": 2e-9,
     }
-    wrapper = (
-        ROOT / "models/apm130/ngspice/apm130_native_mismatch_wrappers.inc"
-    ).read_text(encoding="utf-8")
-    assert ".subckt apm130_nmos d g s b w=1u l=0.13u" in wrapper
-    assert ".subckt apm130_pmos d g s b w=1u l=0.13u" in wrapper
-    assert wrapper.lower().count("mm_ok=1") == 2
-    for forbidden in (" m=", " nf=", " ng="):
-        assert forbidden not in wrapper.lower()
+    hv_parameters = parse_mismatch_parameters(
+        VENDOR / "sg13g2_moshv_mismatch.lib", "hv"
+    )
+    assert hv_parameters["n"] == {
+        "delvto": 0.007,
+        "factuo": 0.005,
+        "dw": 3e-9,
+        "dl": 3e-9,
+    }
+    assert hv_parameters["p"] == {
+        "delvto": 0.0045,
+        "factuo": 0.004,
+        "dw": 3e-9,
+        "dl": 3e-9,
+    }
+
+    for family in ("lv", "hv"):
+        qualified_wrapper = (
+            ROOT
+            / f"models/apm130/families/{family}/ngspice/native_mismatch_wrapper.inc"
+        ).read_text(encoding="utf-8")
+        assert f".subckt apm130_{family}_nmos" in qualified_wrapper
+        assert f".subckt apm130_{family}_pmos" in qualified_wrapper
+        assert qualified_wrapper.lower().count("mm_ok=1") == 2
+        for forbidden in (" m=", " nf=", " ng="):
+            assert forbidden not in qualified_wrapper.lower()
 
 
 def test_local_correlation_helper_is_python39_compatible() -> None:

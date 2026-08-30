@@ -1,33 +1,45 @@
+# SPDX-FileCopyrightText: APM contributors
+# SPDX-License-Identifier: Apache-2.0
+
 from __future__ import annotations
 
 import hashlib
+import math
 from pathlib import Path
 
 import pytest
 
 try:
     import tomllib
-except ModuleNotFoundError:  # Python 3.9/3.10 on EL9-compatible environments
+except ModuleNotFoundError:  # pragma: no cover - Python 3.9/3.10
     import tomli as tomllib
 
+from apm.catalog import load_catalog
 from apm.characterize import (
     CharacterizationError,
     FinFETGeometry,
     _capacitance_rows,
     _threshold_crossing,
 )
-from apm.cli import TECHNOLOGIES, build_parser
+from apm.cli import build_parser
 from apm.doctor import _extract_observables
 from apm.model_build import MODEL_SOURCES
 
 ROOT = Path(__file__).resolve().parents[1]
-EXPECTED_KITS = ("apm350", "apm130", "apm045", "apm022", "apm016f")
+EXPECTED_TECHNOLOGIES = ("apm350", "apm130", "apm045", "apm022", "apm016f")
 EXPECTED_MODELS = {
     "apm350": "bsim3",
     "apm130": "psp103",
     "apm045": "bsim4",
     "apm022": "bsim4",
     "apm016f": "bsim_cmg",
+}
+EXPECTED_FAMILIES = {
+    "apm350": ("general",),
+    "apm130": ("lv", "hv"),
+    "apm045": ("vtl", "vtg", "vth", "thkox"),
+    "apm022": ("lvt", "svt", "hvt"),
+    "apm016f": ("lvt", "svt", "hvt"),
 }
 
 
@@ -36,15 +48,24 @@ def load_toml(relative: str) -> dict:
         return tomllib.load(handle)
 
 
-def test_cli_and_release_gate_use_same_five_kits() -> None:
+def test_release_contract_and_catalog_use_same_five_technologies_and_13_families() -> None:
     gates = load_toml("validation/release_gates.toml")
-    assert tuple(gates["kits"]["required"]) == EXPECTED_KITS
-    assert TECHNOLOGIES == EXPECTED_KITS
+    catalog = load_catalog(ROOT)
+    assert tuple(gates["technology_catalog"]["required_technologies"]) == EXPECTED_TECHNOLOGIES
+    assert gates["technology_catalog"]["required_family_count"] == 13
+    assert tuple(item.technology_id for item in catalog.technologies) == tuple(
+        sorted(EXPECTED_TECHNOLOGIES)
+    )
+    assert sum(len(item.families) for item in catalog.technologies) == 13
+    for technology_id, expected in EXPECTED_FAMILIES.items():
+        assert {item.family_id for item in catalog.technology(technology_id).families} == set(
+            expected
+        )
+        assert gates["technology_catalog"]["required_families"][technology_id] == list(expected)
 
 
 def test_reference_runtime_contract_is_el9_ngspice47_osdi() -> None:
-    gates = load_toml("validation/release_gates.toml")
-    runtime = gates["runtime"]
+    runtime = load_toml("validation/release_gates.toml")["runtime"]
     assert runtime["primary_distribution"] == "AlmaLinux 9"
     assert runtime["acceptable_distribution_class"] == "RHEL-compatible EL9"
     assert runtime["architecture"] == "x86_64"
@@ -53,148 +74,182 @@ def test_reference_runtime_contract_is_el9_ngspice47_osdi() -> None:
     assert runtime["python_minimum"] == "3.9"
 
 
-def test_public_geometry_contract_stays_small() -> None:
+def test_public_geometry_and_identity_contract_is_manifest_enforced() -> None:
     gates = load_toml("validation/release_gates.toml")
     public = gates["public_devices"]
     assert public["terminals"] == ["d", "g", "s", "b"]
     assert public["planar_parameters"] == ["w", "l"]
     assert public["finfet_parameters"] == ["l", "nfin"]
     assert set(public["forbidden_common_parameters"]) == {"m", "nf", "ng"}
+    catalog = load_catalog(ROOT)
+    names: set[str] = set()
+    for technology in catalog.technologies:
+        for family in technology.families:
+            assert {binding.backend_id for binding in family.backend_bindings} == {
+                "ngspice",
+                "spectre",
+            }
+            for device in family.devices:
+                assert device.terminals == ("d", "g", "s", "b")
+                assert device.parameters == (
+                    ("l", "nfin") if family.architecture == "finfet" else ("w", "l")
+                )
+                assert device.public_name.startswith(f"{technology.technology_id}_{family.family_id}_")
+                assert device.public_name not in names
+                names.add(device.public_name)
+    assert len(names) == 26
 
 
-def test_all_provenance_files_match_kit_identity_and_model_family() -> None:
-    for kit, compact_model in EXPECTED_MODELS.items():
-        provenance = load_toml(f"models/{kit}/provenance.toml")
-        assert provenance["id"] == kit
+def test_all_provenance_files_match_identity_model_and_spectre_boundary() -> None:
+    for technology, compact_model in EXPECTED_MODELS.items():
+        provenance = load_toml(f"models/{technology}/provenance.toml")
+        assert provenance["id"] == technology
         assert provenance["compact_model"] == compact_model
         assert provenance["validation"]["spectre"] == "experimental_unverified"
+        assert provenance["spectre"]["status"] == "experimental_unverified"
+        assert provenance["spectre"]["real_tool_validation"] is False
 
 
-def test_audited_vendor_manifests_cover_exact_files_and_hashes() -> None:
-    for kit in ("apm130", "apm045", "apm016f"):
-        provenance = load_toml(f"models/{kit}/provenance.toml")
-        expected = provenance["source"]["imported_files"]
-        vendor = ROOT / "models" / kit / "vendor"
-        actual_paths = {
-            str(path.relative_to(ROOT / "models" / kit))
-            for path in vendor.rglob("*")
+def test_provenance_inventories_cover_every_shipped_model_asset_and_hash() -> None:
+    for technology in EXPECTED_TECHNOLOGIES:
+        model_root = ROOT / "models" / technology
+        provenance = load_toml(f"models/{technology}/provenance.toml")
+        source = provenance["source"]
+        inventories = [
+            source.get(name, {})
+            for name in (
+                "authored_files",
+                "apm_authored_files",
+                "imported_files",
+                "transformed_files",
+            )
+        ]
+        declared = {path: digest for inventory in inventories for path, digest in inventory.items()}
+        actual = {
+            path.relative_to(model_root).as_posix()
+            for path in model_root.rglob("*")
             if path.is_file()
+            and path.relative_to(model_root).as_posix() not in {"README.md", "provenance.toml"}
         }
-        assert set(expected) == actual_paths
-        for relative, expected_hash in expected.items():
-            payload = (ROOT / "models" / kit / relative).read_bytes()
-            assert hashlib.sha256(payload).hexdigest() == expected_hash
+        assert set(declared) == actual
+        assert set(source.get("imported_files", {})) == {
+            path for path in actual if path.startswith("vendor/")
+        }
+        for relative, expected_hash in declared.items():
+            assert hashlib.sha256((model_root / relative).read_bytes()).hexdigest() == expected_hash
 
 
-def test_required_osdi_sources_are_self_contained() -> None:
+def test_required_osdi_sources_are_self_contained_and_generated_binaries_are_ignored() -> None:
     assert set(MODEL_SOURCES) == {"psp103", "psp103-nqs", "bsimcmg-112.1.0"}
     for source in MODEL_SOURCES.values():
         assert (ROOT / source).is_file()
+        assert (ROOT / source).resolve().is_relative_to(ROOT.resolve())
+    assert not list(ROOT.glob("models/**/*.osdi"))
 
 
-def test_apm130_public_wrapper_hides_upstream_multiplicity() -> None:
-    kit = load_toml("models/apm130/kit.toml")
+def test_every_family_wrapper_has_exact_public_names_and_small_interface() -> None:
+    catalog = load_catalog(ROOT)
+    for technology in catalog.technologies:
+        for family in technology.families:
+            wrapper = family.backend("ngspice").wrapper_path.read_text(encoding="utf-8")
+            for device in family.devices:
+                declaration = next(
+                    line
+                    for line in wrapper.splitlines()
+                    if line.lower().startswith(f".subckt {device.public_name.lower()} ")
+                )
+                assert declaration.lower().split()[2:6] == ["d", "g", "s", "b"]
+                public_tail = declaration.lower().split(" b", 1)[1]
+                for forbidden in (" m=", " nf=", " ng="):
+                    assert forbidden not in public_tail
+                if family.architecture == "finfet":
+                    assert " nfin=" in public_tail
+                    assert " w=" not in public_tail
+                else:
+                    assert " w=" in public_tail and " l=" in public_tail
+
+
+def test_apm130_lv_hv_are_independent_upstream_families_with_geometry_semantics() -> None:
+    catalog = load_catalog(ROOT)
+    technology = catalog.technology("apm130")
+    assert {family.family_id for family in technology.families} == {"lv", "hv"}
+    lv, hv = technology.family("lv"), technology.family("hv")
+    assert lv.origin == hv.origin == "upstream_model"
+    assert lv.upstream_flavor == "sg13_lv"
+    assert hv.upstream_flavor == "sg13_hv"
+    assert lv.operating_profile().reference_vdd_v == 1.2
+    assert hv.operating_profile().reference_vdd_v == 3.3
+    assert lv.device("nmos").lmin_m != hv.device("nmos").lmin_m
     provenance = load_toml("models/apm130/provenance.toml")
-    assert kit["nominal_vdd_v"] == 1.2
-    assert kit["model_lmin_m"] == 1.3e-7
-    assert kit["public_devices"]["parameters"] == ["w", "l"]
-    wrapper = (ROOT / "models/apm130/ngspice/apm130_wrappers.inc").read_text()
-    assert ".subckt apm130_nmos d g s b w=1u l=0.13u" in wrapper
-    assert ".subckt apm130_pmos d g s b w=1u l=0.13u" in wrapper
-    for forbidden in (" m=", " nf=", " ng="):
-        assert forbidden not in wrapper.lower()
-    assert provenance["variation"]["native_process_profile"] == "mos_tt_stat"
-    assert provenance["variation"]["native_mismatch_profile"] == "mos_tt_mismatch"
+    assert provenance["variation"]["native_process"] is True
+    assert provenance["variation"]["native_mismatch"] is True
     assert provenance["variation"]["native_combined_all_profile"] is False
-    for relative, expected_hash in provenance["source"]["apm_authored_files"].items():
-        payload = (ROOT / "models/apm130" / relative).read_bytes()
-        assert hashlib.sha256(payload).hexdigest() == expected_hash
+    assert provenance["source"]["revision"] == "331c00484213b13414777eec1336ef5c29b969bd"
 
 
-def test_apm045_public_wrapper_and_model_basis_are_explicit() -> None:
-    kit = load_toml("models/apm045/kit.toml")
-    provenance = load_toml("models/apm045/provenance.toml")
-    assert kit["nominal_vdd_v"] == 1.0
-    assert kit["model_lmin_m"] == 5.0e-8
-    assert kit["public_devices"]["parameters"] == ["w", "l"]
-    assert provenance["source"]["revision"] == "688ee68ec5301e5fe11ebee5e53c1109d3cfd51d"
-    assert "PTM" in provenance["source"]["upstream_model_origin"]
-    wrapper = (ROOT / "models/apm045/ngspice/apm045_wrappers.inc").read_text()
-    assert ".subckt apm045_nmos d g s b w=1u l=0.05u" in wrapper
-    assert ".subckt apm045_pmos d g s b w=1u l=0.05u" in wrapper
-    for forbidden in (" m=", " nf=", " ng="):
-        assert forbidden not in wrapper.lower()
+def test_apm045_threshold_and_gate_stack_domains_are_explicit() -> None:
+    technology = load_catalog(ROOT).technology("apm045")
+    threshold = technology.comparison_set("threshold")
+    gate_stack = technology.comparison_set("gate_stack")
+    assert threshold.kind == "threshold_family"
+    assert threshold.members == ("vtl", "vtg", "vth")
+    assert gate_stack.kind == "gate_stack"
+    assert gate_stack.members == ("vtg", "thkox")
+    assert gate_stack.common_overlap_profile == "common_overlap_1v0"
+    thkox = technology.family("thkox")
+    assert thkox.operating_profile().reference_vdd_v == 2.0
+    overlap = thkox.operating_profile("common_overlap_1v0")
+    assert overlap.reference_vdd_v == 1.0
+    assert overlap.origin == "apm_selected"
+    assert bool(overlap.evidence)
 
 
-def test_apm350_public_wrapper_and_model_basis_are_explicit() -> None:
-    kit = load_toml("models/apm350/kit.toml")
-    provenance = load_toml("models/apm350/provenance.toml")
-    assert kit["technology_class"] == "0.35um-class"
-    assert kit["model_lmin_m"] == 4.0e-7
-    assert kit["nominal_vdd_v"] == 5.0
-    assert kit["public_devices"]["parameters"] == ["w", "l"]
-    assert provenance["model_origin"] == "generic_reference"
-    assert provenance["foundry_correlated"] is False
-    assert provenance["redistribution"]["third_party_files"] == []
-    assert provenance["source"]["parameter_revision"] == "apm350-params-v1-2026-08-30"
-    rejected = provenance["source"]["rejected_candidate"]
-    assert rejected["redistributed"] is False
-    assert rejected["numeric_parameter_use"] == "none"
-    assert rejected["file_level_license"] == "absent"
-    wrapper = (ROOT / "models/apm350/ngspice/apm350_wrappers.inc").read_text()
-    assert ".subckt apm350_nmos d g s b w=1u l=0.4u" in wrapper
-    assert ".subckt apm350_pmos d g s b w=1u l=0.4u" in wrapper
-    for forbidden in (" m=", " nf=", " ng="):
-        assert forbidden not in wrapper.lower()
-    model = (ROOT / "models/apm350/ngspice/apm350_models.inc").read_text()
-    assert "level=49 version=3.3.0" in model
-    assert "0.4964448" not in model
-    for relative, expected_hash in provenance["source"]["authored_files"].items():
-        payload = (ROOT / "models/apm350" / relative).read_bytes()
-        assert hashlib.sha256(payload).hexdigest() == expected_hash
-
-
-def test_apm022_public_wrapper_and_authored_provenance_are_explicit() -> None:
-    kit = load_toml("models/apm022/kit.toml")
+def test_apm022_variants_change_only_threshold_and_are_not_ptm_derived() -> None:
     provenance = load_toml("models/apm022/provenance.toml")
-    assert kit["nominal_vdd_v"] == 0.8
-    assert kit["model_lmin_m"] == 2.5e-8
-    assert kit["characterization_lengths_m"] == [2.5e-8, 5.0e-8, 1.0e-7]
-    assert kit["geometry_basis"]["valid_l_m"] == [2.5e-8, 1.0e-7]
-    assert kit["public_devices"]["parameters"] == ["w", "l"]
-    assert kit["behavior_targets"]["length_scaling_requires_higher_vth"] is True
-    assert provenance["source"]["parameter_revision"] == "apm022-params-v1-2026-08-30"
+    assert provenance["model_origin"] == "apm_generic"
     assert provenance["ptm_derived"] is False
-    assert provenance["development"]["ptm_usage"].startswith("not used")
-    wrapper = (ROOT / "models/apm022/ngspice/apm022_wrappers.inc").read_text()
-    assert ".subckt apm022_nmos d g s b w=1u l=25n" in wrapper
-    assert ".subckt apm022_pmos d g s b w=1u l=25n" in wrapper
-    for forbidden in (" m=", " nf=", " ng="):
-        assert forbidden not in wrapper.lower()
-    model = (ROOT / "models/apm022/ngspice/apm022_models.inc").read_text().lower()
-    assert model.count("lpe0=0 lpeb=0") == 2
-    assert "level=54 version=4.8.2" in model
-    for relative, expected_hash in provenance["source"]["authored_files"].items():
-        payload = (ROOT / "models/apm022" / relative).read_bytes()
-        assert hashlib.sha256(payload).hexdigest() == expected_hash
+    catalog = load_catalog(ROOT)
+    technology = catalog.technology("apm022")
+    assert technology.family("svt").origin == "apm_authored"
+    for family_id in ("lvt", "hvt"):
+        family = technology.family(family_id)
+        assert family.origin == "apm_derived_variant"
+        assert family.base_family == "svt"
+        assert family.variant_method == "threshold_isolated"
+        record = load_toml(
+            f"models/apm022/families/{family_id}/variant-generation.toml"
+        )
+        assert record["official_ptm_numeric_input_used"] is False
+        assert record["secondary_parameter_changes"] is False
+        assert {item["parameter"] for item in record["parameter_change"]} == {"VTH0"}
+    model = (ROOT / "models/apm022/ngspice/apm022_multivt_models.inc").read_text().lower()
+    assert model.count("level=54 version=4.8.2") == 6
+    assert model.count("lpe0=0 lpeb=0") == 6
 
 
-def test_apm016f_public_wrapper_preserves_discrete_fin_semantics() -> None:
-    kit = load_toml("models/apm016f/kit.toml")
+def test_apm016f_variants_are_workfunction_dominant_and_preserve_nfin() -> None:
     provenance = load_toml("models/apm016f/provenance.toml")
-    assert kit["nominal_vdd_v"] == 0.8
-    assert kit["model_lmin_m"] == 1.6e-8
-    assert kit["public_devices"]["parameters"] == ["l", "nfin"]
-    assert kit["characterization_nfin"] == [1, 2, 4]
-    wrapper = (ROOT / "models/apm016f/ngspice/apm016f_wrappers.inc").read_text()
-    assert ".subckt apm016f_nfet d g s b l=16n nfin=1" in wrapper
-    assert ".subckt apm016f_pfet d g s b l=16n nfin=1" in wrapper
-    assert " w=" not in wrapper.lower()
-    for forbidden in (" m=", " nf=", " ng="):
-        assert forbidden not in wrapper.lower()
-    for relative, expected_hash in provenance["source"]["authored_files"].items():
-        payload = (ROOT / "models/apm016f" / relative).read_bytes()
-        assert hashlib.sha256(payload).hexdigest() == expected_hash
+    assert provenance["model_origin"] == "apm_generic"
+    assert provenance["ptm_mg_derived"] is False
+    catalog = load_catalog(ROOT)
+    technology = catalog.technology("apm016f")
+    assert technology.family("svt").origin == "apm_authored"
+    for family_id in ("lvt", "hvt"):
+        family = technology.family(family_id)
+        assert family.origin == "apm_derived_variant"
+        assert family.variant_method == "workfunction_dominant"
+        record = load_toml(
+            f"models/apm016f/families/{family_id}/variant-generation.toml"
+        )
+        assert record["official_ptm_mg_numeric_input_used"] is False
+        assert record["secondary_parameter_changes"] is False
+        assert {item["parameter"] for item in record["parameter_change"]} == {"PHIG"}
+    for family in technology.families:
+        for device in family.devices:
+            assert device.parameters == ("l", "nfin")
+            assert device.characterization_nfin == (1, 2, 4)
+    model = (ROOT / "models/apm016f/ngspice/apm016f_multivt_models.inc").read_text().lower()
+    assert model.count("bsimcmg_va") == 6
 
 
 def test_finfet_result_geometry_never_invents_width() -> None:
@@ -221,9 +276,7 @@ def test_constant_current_threshold_is_linearly_interpolated() -> None:
     assert _threshold_crossing(curve, 2.0e-7) == 0.35
 
 
-def test_capacitance_derivation_uses_raw_gate_y_terms() -> None:
-    import math
-
+def test_capacitance_derivation_uses_raw_ordered_gate_y_terms() -> None:
     frequency = 1.0e6
     omega = 2.0 * math.pi * frequency
     imag = [[0.0] * 4 for _ in range(4)]
@@ -231,16 +284,21 @@ def test_capacitance_derivation_uses_raw_gate_y_terms() -> None:
     imag[1][0] = -omega * 3.0e-16
     imag[1][2] = -omega * 4.0e-16
     record = {
-        "kit_id": "apm130",
-        "public_device": "apm130_nmos",
+        "technology_id": "apm130",
+        "family_id": "lv",
+        "device_id": "nmos",
+        "public_device": "apm130_lv_nmos",
         "polarity": "n",
+        "operating_profile_id": "native_1v2",
         "temperature_c": 27,
         "w_m": 1.0e-6,
-        "l_m": 1.3e-7,
-        "l_over_lmin": 1.0,
+        "l_m": 2.6e-7,
+        "l_over_lmin": 2.0,
         "vctrl_v": 0.6,
         "vout_v": 0.6,
+        "bias_mode": "equal_bias",
         "frequency_hz": frequency,
+        "terminal_order": ["d", "g", "s", "b"],
         "y_imag_s": imag,
     }
     row = _capacitance_rows([record])[0]
@@ -249,129 +307,63 @@ def test_capacitance_derivation_uses_raw_gate_y_terms() -> None:
     assert math.isclose(row["cgs_f"], 4.0e-16)
 
 
-def test_apm_authored_scaled_models_are_explicitly_not_ptm_derived() -> None:
-    apm022 = load_toml("models/apm022/provenance.toml")
-    apm016f = load_toml("models/apm016f/provenance.toml")
-    assert apm022["model_origin"] == "apm_generic"
-    assert apm022["ptm_derived"] is False
-    assert apm016f["model_origin"] == "apm_generic"
-    assert apm016f["ptm_mg_derived"] is False
-
-
-def test_benchmark_variation_contract_is_frozen_after_three_family_calibration() -> None:
-    variation = load_toml("variation/benchmark_v1.toml")
-    assert variation["status"] == "v1-values-frozen-2026-08-30"
-    assert variation["requirements"]["process_mode"] is True
-    assert variation["requirements"]["mismatch_mode"] is True
+def test_benchmark_v2_contract_has_global_local_all_and_technology_latents() -> None:
+    variation = load_toml("variation/benchmark_v2.toml")
+    assert variation["requirements"]["global_mode"] is True
+    assert variation["requirements"]["local_mode"] is True
     assert variation["requirements"]["all_mode"] is True
-    assert variation["requirements"]["python_rng_for_ngspice"] is True
-    assert variation["requirements"]["spectre_statistics_for_spectre"] is True
-    assert variation["requirements"]["explicit_distribution_semantics"] is True
-    assert variation["requirements"]["explicit_units"] is True
-    assert variation["requirements"]["explicit_sign_semantics"] is True
-    assert variation["requirements"]["explicit_correlation_semantics"] is True
-    assert "Normal(mean=0, std=1)" in variation["distribution"]["normalized_variable"]
-    assert "PCG64" in variation["distribution"]["rng_reference"]
+    assert variation["requirements"]["shared_technology_polarity_latents"] is True
     assert variation["distribution"]["resolved_samples_are_persisted"] is True
-    assert variation["mos"]["process"]["vth_shift_sigma_units"] == "V"
-    assert variation["mos"]["process"]["drive_shift_sigma_units"] == "fractional_Id_change"
-    assert "larger |Vth|" in variation["mos"]["intent"]["vth_shift"]
-    assert "larger |Id|" in variation["mos"]["intent"]["drive_shift"]
-    assert variation["mos"]["intent"]["raw_parameter_sign_is_not_canonical"] is True
-    assert variation["mos"]["intent"]["adapter_must_map_sign_per_model_and_polarity"] is True
+    assert "technology_id/polarity/intent" in variation["mos"]["global"]["latent_scope"]
+    assert variation["mos"]["correlation"]["physical_process_correlation_claim"] == "none"
 
 
-def test_benchmark_passive_contract_is_technology_neutral() -> None:
-    passives = load_toml("passives/benchmark_v1.toml")
-    assert passives["resistor"]["public_name"] == "Rbench"
-    assert passives["capacitor"]["public_name"] == "Cbench"
-    assert passives["requirements"]["match_size_is_dimensionless"] is True
-    assert passives["requirements"]["technology_neutral"] is True
-    assert passives["requirements"]["explicit_sign_semantics"] is True
-    assert passives["requirements"]["explicit_correlation_semantics"] is True
-    assert passives["requirements"]["explicit_temperature_semantics"] is True
-    assert passives["temperature"]["reference_c"] == 27.0
-    assert passives["temperature"]["tc1_units"] == "1/degC"
-    assert "increases resolved resistance" in passives["resistor"]["positive_scale_semantic"]
-    assert "increases resolved capacitance" in passives["capacitor"]["positive_scale_semantic"]
+def test_v1_runtime_single_sources_are_removed() -> None:
+    assert not list((ROOT / "models").glob("*/kit.toml"))
+    assert not (ROOT / "variation/benchmark_v1.toml").exists()
+    assert not (ROOT / "variation/adapters_v1.toml").exists()
+    assert not (ROOT / "passives/benchmark_v1.toml").exists()
+    assert not list((ROOT / "models").glob("*/ngspice/*_wrappers.inc"))
 
 
-def test_release_validation_flag_is_part_of_cli_contract() -> None:
+def test_release_validation_and_provenance_commands_are_cli_contracts(tmp_path: Path) -> None:
     parser = build_parser()
-    args = parser.parse_args(["validate", "--release"])
-    assert args.command == "validate"
-    assert args.release is True
+    release = parser.parse_args(["validate", "--release", "--output", str(tmp_path / "release")])
+    assert release.command == "validate"
+    assert release.release is True
+    provenance = parser.parse_args(
+        ["provenance-check", "--output", str(tmp_path / "provenance")]
+    )
+    assert provenance.command == "provenance-check"
 
 
-def test_benchmark_validation_command_is_part_of_cli_contract(tmp_path: Path) -> None:
-    parser = build_parser()
-    output = tmp_path / "benchmark"
-    args = parser.parse_args(["benchmark-check", "--output", str(output)])
-    assert args.command == "benchmark-check"
-    assert args.output == output
+def test_spectre_is_model_only_experimental_and_not_real_tool_gate() -> None:
+    spectre = load_toml("validation/release_gates.toml")["spectre"]
+    assert spectre["artifacts_required_for_all_v2_families"] is True
+    assert spectre["model_only"] is True
+    assert spectre["status"] == "experimental_unverified"
+    assert spectre["real_tool_validation_required"] is False
+    assert spectre["virtuoso_integration_required"] is False
 
 
-def test_spectre_is_not_a_real_tool_release_gate() -> None:
-    gates = load_toml("validation/release_gates.toml")
-    assert gates["spectre"]["status"] == "experimental_unverified"
-    assert gates["spectre"]["real_tool_validation_required"] is False
-    assert gates["spectre"]["virtuoso_integration_required"] is False
+def test_release_contract_requires_v2_metadata_and_all_20_gates() -> None:
+    contract = load_toml("validation/release_gates.toml")
+    release = contract["release_metadata"]
+    assert contract["schema"] == "apm.release-gates.v2"
+    assert contract["target"] == "v2.0.0"
+    assert release["target_version"] == "2.0.0"
+    assert release["package_version_must_match_target"] is True
+    assert release["unresolved_release_placeholders_forbidden"] is True
+    gates = contract["gate"]
+    assert len(gates) == 20
+    assert all(gate["required"] is True for gate in gates)
+    assert len({gate["id"] for gate in gates}) == 20
 
 
-def test_reference_clean_clone_is_required_and_visibility_change_forbidden() -> None:
-    gates = load_toml("validation/release_gates.toml")
-    policy = gates["policy"]
+def test_reference_clean_clone_and_fail_closed_policy_remain_required() -> None:
+    policy = load_toml("validation/release_gates.toml")["policy"]
     assert policy["clean_clone_required"] is True
     assert policy["repository_visibility_may_change"] is False
     assert policy["missing_evidence_is_failure"] is True
     assert policy["required_skipped_check_is_failure"] is True
-
-
-def test_release_contract_requires_final_version_and_resolved_metadata() -> None:
-    gates = load_toml("validation/release_gates.toml")
-    release = gates["release_metadata"]
-    assert release["target_version"] == "1.0.0"
-    assert release["package_version_must_match_target"] is True
-    assert release["release_notes_required"] is True
-    assert release["release_notes_path"] == "CHANGELOG.md"
-    assert release["unresolved_release_placeholders_forbidden"] is True
-    assert "TBD" in release["forbidden_release_placeholder_tokens"]
-    assert "not_started" in release["forbidden_release_placeholder_tokens"]
-    gate_ids = {gate["id"] for gate in gates["gate"]}
-    assert "release.metadata_complete" in gate_ids
-
-
-def test_project_context_exists_and_is_explicitly_informative() -> None:
-    text = (ROOT / "PROJECT_CONTEXT.md").read_text(encoding="utf-8")
-    assert "informative, not normative" in text
-    assert "Commonize the characterization contract, not the compact-model API" in text
-    assert "PTM/PTM-MG" in text
-    assert "ngspice 47" in text
-    assert "AlmaLinux 9" in text
-
-
-def test_initial_environment_is_explicitly_unvalidated_bootstrap_input() -> None:
-    text = (ROOT / "ENVIRONMENT.md").read_text(encoding="utf-8")
-    assert "ngspice is **not currently installed**" in text
-    assert "M0 Runtime qualification" in text
-    assert "--enable-osdi" in text
-    assert "pre_osdi" in text
-
-
-def test_research_baseline_is_dated_and_non_normative() -> None:
-    text = (ROOT / "RESEARCH_BASELINE.md").read_text(encoding="utf-8")
-    assert "2026-08-29" in text
-    assert "not immutable policy" in text
-    assert "BSIM-CMG" in text
-    assert "112.1.0" in text
-    assert "PSP 103.6" in text
-
-
-def test_unattended_protocol_requires_full_context_and_status() -> None:
-    text = (ROOT / "UNATTENDED_EXECUTION.md").read_text(encoding="utf-8")
-    assert "PROJECT_CONTEXT.md" in text
-    assert "ENVIRONMENT.md" in text
-    assert "RESEARCH_BASELINE.md" in text
-    assert "STATUS.md" in text
-    assert "apm validate --release" in text
-    assert "fresh clone" in text.lower()
+    assert policy["v1_evidence_satisfies_v2"] is False

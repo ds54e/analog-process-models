@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: APM contributors
+# SPDX-License-Identifier: Apache-2.0
+
+schema = "apm.backend-binding.v2"
+technology_id = "apm045"
+family_id = "vtg"
+backend = "ngspice"
+compact_model_native_name = "FreePDK45 BSIM4 VTG"
+model_includes = [
+  "models/apm045/vendor/freepdk45/NMOS_VTG.inc",
+  "models/apm045/vendor/freepdk45/PMOS_VTG.inc",
+]
+wrapper = "models/apm045/families/vtg/ngspice/wrapper.inc"
+osdi_artifacts = []
+native_oracle = "ngspice BSIM4"
+
+[device.nmos]
+native_vector_template = "@m.xdut.mapm045_vtg_core[{quantity}]"
+
+[device.pmos]
+native_vector_template = "@m.xdut.mapm045_vtg_core[{quantity}]"

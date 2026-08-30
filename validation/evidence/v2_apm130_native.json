@@ -1,0 +1,38 @@
+{
+  "schema": "apm.validation-evidence.v2",
+  "milestone": "V2-M1",
+  "date": "2026-08-30",
+  "status": "validated",
+  "scope": {
+    "technology_id": "apm130",
+    "families": ["lv", "hv"],
+    "corner_profiles": ["mos_tt", "mos_ss", "mos_ff", "mos_sf", "mos_fs"],
+    "process_profile": "mos_tt_stat",
+    "mismatch_profile": "mos_tt_mismatch",
+    "samples_per_random_profile_per_family": 128
+  },
+  "tool": {
+    "simulator": "ngspice 47",
+    "compact_model": "PSP103.6 through OSDI",
+    "reference_environment": "WSL2 + AlmaLinux 9.7 x86_64"
+  },
+  "real_tool_result": {
+    "local_path": ".apm/results/v2-apm130-native-validation-smoke/report.json",
+    "sha256": "07b053d377b9782b3c0375b3c56c338797a26e1553757bb290d2764062373775",
+    "overall_pass": true,
+    "lv_report_sha256": "5621aa4ceee87aa15b24c42414f7628b8f6125579ef2a4a00fa0150e6cc0b73a",
+    "hv_report_sha256": "de4ae74186f341e15c3b250c8e4759d6b155a6cc8f11a59ee2369a5f958e59c0",
+    "lv_process_parameter_count": 34,
+    "hv_process_parameter_count": 37,
+    "lv_max_abs_local_correlation": 0.1541744984697257,
+    "hv_max_abs_local_correlation": 0.14602954420558284,
+    "deterministic_replay": true
+  },
+  "semantic_boundary": {
+    "variation_origin": "native",
+    "family_cohorts": "independent executions using upstream family-specific files",
+    "cross_family_correlation": "unspecified upstream; APM does not invent one",
+    "native_combined_all": null,
+    "benchmark_variation_is_separate": true
+  }
+}

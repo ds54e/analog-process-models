@@ -12,7 +12,7 @@ url = "https://github.com/IHP-GmbH/IHP-Open-PDK"
 revision = "331c00484213b13414777eec1336ef5c29b969bd"
 retrieved_utc = "2026-08-29"
 compiled_engine_revision = "PSP 103.8.2 with JUNCAP 200.6.2"
-model_card_revision = "PSP 103.6, IHP revision 200310"
+model_card_revisions = { lv = "PSP 103.6, IHP revision 200310", hv = "PSP 103.6, IHP revision 210511" }
 compatibility_basis = "The upstream PSP 103.8.2 release notes state backward compatibility with PSP 103.8.1; real ngspice 47 OSDI simulation with the IHP PSP 103.6 card passed."
 engine_license = "LicenseRef-Si2-PSP-103.8.2"
 model_card_license = "Apache-2.0"
@@ -36,6 +36,14 @@ model_card_license = "Apache-2.0"
 "vendor/psp103/psp103t.va" = "856166de39aaa247204763e8e347c912fde8f27312f6a34e4cac975389810fd2"
 "vendor/psp103/releasenotesPSP103.8.2.txt" = "64cd7bc8090e4a2aaa495918f8f9ae44424205934edfd96dde96683135a872be"
 "vendor/ihp-sg13g2-models/cornerMOSlv.lib" = "03d505847c880d233b341be115a1e5460edf4d8e9b3e8a7df791a52fa4455d67"
+"vendor/ihp-sg13g2-models/cornerMOShv.lib" = "5a1f862dc304fdfe2fb9758b15d54809a688d83c3ce981dad2e8473b3e93481a"
+"vendor/ihp-sg13g2-models/sg13g2_moshv_mismatch.lib" = "2e9612bdb8252c281f422511039dc9b3ea983892aec89f8ef3361592e68fed09"
+"vendor/ihp-sg13g2-models/sg13g2_moshv_mod.lib" = "58ce3084c253f2d3753c3b95386e8f4b81dcadfed4f4503dce56862a556c3328"
+"vendor/ihp-sg13g2-models/sg13g2_moshv_mod_mismatch.lib" = "75c30f6975aad4cfe95af7c80fcea142ab0df6c9d7667c09120c7d0c9b814801"
+"vendor/ihp-sg13g2-models/sg13g2_moshv_parm.lib" = "eea5bbed39184cb1e2654ae29425a9ed6ee2f2341d6cb76c472591c75237bd35"
+"vendor/ihp-sg13g2-models/sg13g2_moshv_stat.lib" = "cd30f22637e41fdbbaba506ebe0f17746b8438027e4651a7a87b241a39d68903"
+"vendor/ihp-sg13g2-models/sg13g2_svaricaphv_mod.lib" = "b6ae39c7334c75c222ecdee9d6b04c9be48657e91351429aebac47d1192a9abb"
+"vendor/ihp-sg13g2-models/sg13g2_svaricaphv_mod_mismatch.lib" = "509495437667afc2ee96ebb9fe5836ffeb7d18df1db24245c90662fbf09283cd"
 "vendor/ihp-sg13g2-models/sg13g2_moslv_mismatch.lib" = "2d3251e2d42eadb0f8af152a4915fdc60a68bceb95a2d17a52f90cfb34b7e63e"
 "vendor/ihp-sg13g2-models/sg13g2_moslv_mod.lib" = "84ec57080b9dd4666417f05db6f7b34c8dd3f12118929f9b308018613bece16e"
 "vendor/ihp-sg13g2-models/sg13g2_moslv_mod_mismatch.lib" = "fac66b4344da4e31dece9a95c32d7af5aac7b40a60b4e029201e1904fb4e8acd"
@@ -43,22 +51,33 @@ model_card_license = "Apache-2.0"
 "vendor/ihp-sg13g2-models/sg13g2_moslv_stat.lib" = "8d807e0ae41be381e655bf51f0eecf72269c8eaa022a2da59a1c90b0772e229a"
 
 [source.apm_authored_files]
-"ngspice/apm130_wrappers.inc" = "779335d18ad8fce7b3b2c4df66cdcb617759842609299aeff7fba0954f0d7a97"
-"ngspice/apm130_native_mismatch_wrappers.inc" = "598448e47d358ebd2e427170a6bd48cff587c94e7b5812f0e4a7fcf12964fddc"
-"spectre/apm130.scs" = "fc783a1e3c963a5bdaf6db92700f67621e2fdaefaa67e8ac8d3cee9b6272cdea"
+"technology.toml" = "0dafc1d94693a7a59be6e1af1cf2c0a5cbe77979d4f283996db16263a5443c33"
+"families/lv/family.toml" = "cd902ad9bb147b61a7766c731795d4067279c736ed7e9c4d8ffacbc764d39234"
+"families/lv/ngspice/binding.toml" = "39aebae07fbae07023538cfed21f5496a9087f589e3dd56525e647e490cb92b6"
+"families/lv/ngspice/wrapper.inc" = "126f161095596c77347f9492b2b41ecf5c27b95351b169ebfe5ad781fb91ddd7"
+"families/lv/ngspice/native_mismatch_wrapper.inc" = "84d1efdb4b217df0d92dc3695c7212e42130e27e7ff86db8a32b7721297254f2"
+"families/lv/spectre/binding.toml" = "f8878a2cd457e28184ae24e37e42711d8345775eae1fb709bda9f73d5b4e9ec7"
+"families/lv/spectre/model.scs" = "b3a309747687e924f858bf3355a3caafef3bf461fe3fc589a4241249eefa212b"
+"families/hv/family.toml" = "0f41a1b65a85f99cdbb83ff8037ccfd283da422a952ea62b4ae8efb66f146587"
+"families/hv/ngspice/binding.toml" = "84f4453aaedab837fea83fce54d180d2990e9b0375902164ae727359d633841f"
+"families/hv/ngspice/wrapper.inc" = "5bdf9a2727eca4b864bae53295f0a9bbbc385a83f57db9bfbaa68d32b78e1377"
+"families/hv/ngspice/native_mismatch_wrapper.inc" = "439dd5e29ef7976eddfec05f8cb06dab6d9e19dea339842861c5f65e2e057d01"
+"families/hv/spectre/binding.toml" = "ec8df89f4041e6cbcfe463e13ae54a37350a34413867cedf67d654b4d99078a3"
+"families/hv/spectre/model.scs" = "8587218f8abebb9e1261720d3e27de3cdbcd6df3b770f5a4486d0f39cef596bc"
 
 [source.transformed_files]
 "spectre/sg13g2_lv_psp103_tt.sp" = "338936fe4fe8a6bbbf26b83941fa75a86aec77bfc697ece7d9c0dc44deabb752"
+"spectre/sg13g2_hv_psp103_tt.sp" = "e7d5d30e10339ab1cd99930933e1b1eb9c34568f3c938a92a547757dec1650b7"
 
 [redistribution]
 ship_in_repo = true
-selection = "PSP/JUNCAP Verilog-A package, IHP low-voltage MOS ngspice files, and a generated TT QS Spectre-native PSP103 translation"
-modifications = "vendored upstream bytes are unmodified; generated Spectre card selects the 34 TT globals and two QS blocks, changes only psp103va to psp103, and fixes wrapper-scope ng/pre_layout/SWSOA values"
+selection = "PSP/JUNCAP Verilog-A package, IHP LV/HV MOS corner/process/mismatch files, and generated LV/HV TT QS Spectre-native PSP103 translations"
+modifications = "vendored upstream bytes are unmodified; generated Spectre cards select family TT globals and two QS blocks, change only psp103va to psp103, and fix wrapper-scope ng/pre_layout/SWSOA values"
 upstream_notices_preserved = true
 
 [device_scope]
-include = ["low-voltage NMOS", "low-voltage PMOS"]
-exclude_v1 = ["HBT", "high-voltage MOS", "RF public devices"]
+include = ["low-voltage NMOS/PMOS", "high-voltage NMOS/PMOS"]
+exclude_v2 = ["HBT", "RF public devices", "native varicap public interface"]
 
 [variation]
 benchmark = true
@@ -72,15 +91,15 @@ native_combined_all_profile = false
 spectre_native_mc_claimed = false
 
 [validation]
-ngspice = "M1 nominal and M8 IHP-native corner/process/mismatch flows validated; see validation/evidence/m1-apm130.md and validation/evidence/m8-apm130-native.md"
+ngspice = "v2 LV/HV nominal characterization and independent native corner/process/mismatch cohorts validated; see validation/evidence/v2_apm130_native.json"
 spectre = "experimental_unverified"
 
 [spectre]
 status = "experimental_unverified"
-artifact = "spectre/apm130.scs"
-translated_model_artifact = "spectre/sg13g2_lv_psp103_tt.sp"
+artifacts = ["families/lv/spectre/model.scs", "families/hv/spectre/model.scs"]
+translated_model_artifacts = ["spectre/sg13g2_lv_psp103_tt.sp", "spectre/sg13g2_hv_psp103_tt.sp"]
 generator = "tools/generate_spectre_psp.py"
-generator_sha256 = "fefb6ecf6856ef6b9e93094e83c23762760d2421f6de0d6e52de0e063758a9bd"
+generator_sha256 = "3c467b14a266797726f901037f3c43964def5762561acae7f933e348ebd4ce76"
 model_route = "native Spectre PSP103 using deterministic IHP TT-card translation"
 ihp_native_mc_claimed = false
 real_tool_validation = false

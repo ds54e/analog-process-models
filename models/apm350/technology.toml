@@ -1,0 +1,9 @@
+# SPDX-FileCopyrightText: APM contributors
+# SPDX-License-Identifier: Apache-2.0
+
+schema = "apm.technology.v2"
+id = "apm350"
+display_name = "APM350"
+technology_class = "0.35um-class"
+description = "Independently authored generic legacy planar technology."
+cross_process_anchor = "general"

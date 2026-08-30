@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from dataclasses import asdict, is_dataclass
 from pathlib import Path
 
 from .benchmark import (
@@ -14,16 +15,35 @@ from .benchmark import (
     write_resolved_sample,
 )
 from .benchmark_validate import validate_benchmark
-from .characterize import CharacterizationError, characterize
-from .compare import ComparisonError, compare_technologies, validate_all_characterizations
+from .catalog import CatalogError, DeviceSpec, FamilySpec, TechnologySpec, load_catalog
+from .characterize import CharacterizationError, characterize_selector
+from .compare import (
+    ComparisonError,
+    compare_anchors,
+    compare_families,
+    compare_set,
+    validate_all_characterizations,
+)
 from .doctor import run_doctor
 from .model_build import build_models
 from .native_variation import NativeVariationError, validate_apm130_native
+from .paths import repository_root
+from .provenance_validate import ProvenanceValidationError, validate_provenance
 from .release_validate import ReleaseValidationError, validate_release, validate_repository
 from .spectre_validate import SpectreStructureError, validate_spectre
 from .toolchain import ToolchainError
 
-TECHNOLOGIES = ("apm350", "apm130", "apm045", "apm022", "apm016f")
+
+def _jsonable(value: object) -> object:
+    if is_dataclass(value):
+        return _jsonable(asdict(value))
+    if isinstance(value, Path):
+        return str(value)
+    if isinstance(value, dict):
+        return {str(key): _jsonable(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_jsonable(item) for item in value]
+    return value
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -31,13 +51,25 @@ def build_parser() -> argparse.ArgumentParser:
         prog="apm",
         description="Analog Process Models characterization framework",
     )
+    parser.add_argument("--version", action="version", version="APM 2.0.0")
     sub = parser.add_subparsers(dest="command", required=True)
 
     sub.add_parser("doctor", help="Run reference-runtime and compact-model smoke tests")
     sub.add_parser("build-models", help="Build local generated compact-model artifacts")
 
-    p_char = sub.add_parser("characterize", help="Characterize one technology kit")
-    p_char.add_argument("technology", choices=TECHNOLOGIES)
+    p_list = sub.add_parser("list", help="List manifest-discovered catalog entities")
+    p_list.add_argument("kind", choices=("technologies", "families", "devices"))
+    p_list.add_argument("selector", nargs="?")
+
+    p_describe = sub.add_parser("describe", help="Describe a technology/family/device selector")
+    p_describe.add_argument("selector")
+
+    p_char = sub.add_parser("characterize", help="Characterize a technology/family/device selector")
+    p_char.add_argument("selector")
+    p_char.add_argument(
+        "--profile",
+        help="Operating-profile ID (default: the family manifest's release profile)",
+    )
     p_char.add_argument(
         "--output",
         type=Path,
@@ -49,7 +81,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--release",
         action="store_true",
         help=(
-            "Evaluate the v1.0 release-gate contract; required unimplemented, skipped, "
+            "Evaluate the v2.0 release-gate contract; required unimplemented, skipped, "
             "or failed automatically-checkable gates must cause a non-zero exit status"
         ),
     )
@@ -59,18 +91,30 @@ def build_parser() -> argparse.ArgumentParser:
         help="Validation evidence directory (default: a new UTC-stamped directory under .apm)",
     )
 
-    p_compare = sub.add_parser("compare", help="Compare two technology kits")
-    p_compare.add_argument("technology_a", choices=TECHNOLOGIES)
-    p_compare.add_argument("technology_b", choices=TECHNOLOGIES)
+    p_compare = sub.add_parser("compare", help="Compare two technology or family selectors")
+    p_compare.add_argument("selector_a")
+    p_compare.add_argument("selector_b")
     p_compare.add_argument(
         "--output",
         type=Path,
         help="Result directory (default: a new UTC-stamped comparison directory)",
     )
 
+    p_compare_set = sub.add_parser(
+        "compare-set", help="Run a manifest-defined within-technology comparison set"
+    )
+    p_compare_set.add_argument("technology")
+    p_compare_set.add_argument("set_id")
+    p_compare_set.add_argument("--output", type=Path, required=True)
+
+    p_compare_anchors = sub.add_parser(
+        "compare-anchors", help="Compare the five manifest-selected cross-process anchors"
+    )
+    p_compare_anchors.add_argument("--output", type=Path, required=True)
+
     p_characterization = sub.add_parser(
         "characterization-check",
-        help="Run and audit the common terminal characterization across all five kits",
+        help="Run and audit terminal characterization across all 13 electrical families",
     )
     p_characterization.add_argument("--output", type=Path, required=True)
 
@@ -107,6 +151,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_spectre.add_argument("--output", type=Path, required=True)
 
+    p_provenance = sub.add_parser(
+        "provenance-check",
+        help="Audit exact model provenance, licensing, and self-contained distribution",
+    )
+    p_provenance.add_argument("--output", type=Path, required=True)
+
     return parser
 
 
@@ -114,6 +164,31 @@ def main() -> int:
     parser = build_parser()
     args = parser.parse_args()
     try:
+        if args.command == "list":
+            catalog = load_catalog(repository_root())
+            if args.kind == "technologies":
+                if args.selector is not None:
+                    raise CatalogError("list technologies does not take a selector")
+                result = [item.technology_id for item in catalog.technologies]
+            elif args.kind == "families":
+                if args.selector is None:
+                    raise CatalogError("list families requires a technology selector")
+                result = [item.family_id for item in catalog.technology(args.selector).families]
+            else:
+                if args.selector is None:
+                    raise CatalogError("list devices requires a technology/family selector")
+                resolved = catalog.resolve(args.selector)
+                if not isinstance(resolved, FamilySpec):
+                    raise CatalogError("list devices selector must resolve to a family")
+                result = [item.device_id for item in resolved.devices]
+            print(json.dumps(result, indent=2))
+            return 0
+        if args.command == "describe":
+            resolved = load_catalog(repository_root()).resolve(args.selector)
+            if not isinstance(resolved, (TechnologySpec, FamilySpec, DeviceSpec)):
+                raise CatalogError("selector did not resolve to a catalog entity")
+            print(json.dumps(_jsonable(resolved), indent=2, sort_keys=True))
+            return 0
         if args.command == "build-models":
             result = build_models()
             print(json.dumps(result, indent=2, sort_keys=True))
@@ -139,7 +214,9 @@ def main() -> int:
             )
             return 0
         if args.command == "characterize":
-            result = characterize(args.technology, args.output)
+            result = characterize_selector(
+                args.selector, args.output, operating_profile_id=args.profile
+            )
             print(json.dumps(result, indent=2, sort_keys=True))
             return 0
         if args.command == "benchmark-check":
@@ -190,6 +267,21 @@ def main() -> int:
                 )
             )
             return 0
+        if args.command == "provenance-check":
+            result = validate_provenance(args.output)
+            print(
+                json.dumps(
+                    {
+                        "status": result["status"],
+                        "output_directory": result["output_directory"],
+                        "report_path": result["report_path"],
+                        "checks": result["checks"],
+                    },
+                    indent=2,
+                    sort_keys=True,
+                )
+            )
+            return 0
         if args.command == "characterization-check":
             result = validate_all_characterizations(args.output)
             print(
@@ -206,25 +298,33 @@ def main() -> int:
             )
             return 0
         if args.command == "compare":
-            result = compare_technologies(
-                args.technology_a,
-                args.technology_b,
+            result = compare_families(
+                args.selector_a,
+                args.selector_b,
                 args.output,
             )
             print(
                 json.dumps(
                     {
                         "status": result["status"],
-                        "technologies": result["technologies"],
+                        "selectors": result["selectors"],
                         "output_directory": result["output_directory"],
                         "report_path": result["report_path"],
                         "checks": result["checks"],
-                        "pairwise_relations": result["pairwise_relations"],
+                        "relations": result["relations"],
                     },
                     indent=2,
                     sort_keys=True,
                 )
             )
+            return 0
+        if args.command == "compare-set":
+            result = compare_set(args.technology, args.set_id, args.output)
+            print(json.dumps(_jsonable(result), indent=2, sort_keys=True))
+            return 0
+        if args.command == "compare-anchors":
+            result = compare_anchors(args.output)
+            print(json.dumps(_jsonable(result), indent=2, sort_keys=True))
             return 0
         if args.command in ("sample-variation", "resolve-corner"):
             request = json.loads(args.request.read_text(encoding="utf-8"))
@@ -248,12 +348,14 @@ def main() -> int:
             return 0
     except (
         BenchmarkError,
+        CatalogError,
         CharacterizationError,
         ComparisonError,
         FileNotFoundError,
         json.JSONDecodeError,
         NativeVariationError,
         OSError,
+        ProvenanceValidationError,
         ReleaseValidationError,
         RuntimeError,
         SpectreStructureError,

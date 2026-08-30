@@ -40,7 +40,7 @@ def _cached_build(toolchain: Toolchain) -> dict[str, Any] | None:
         return None
     try:
         metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
-        if metadata.get("schema") != "apm.model-build.v1":
+        if metadata.get("schema") != "apm.model-build.v2":
             return None
         if metadata.get("openvaf_sha256") != sha256_file(toolchain.openvaf):
             return None
@@ -106,7 +106,7 @@ def build_models(toolchain: Toolchain | None = None, *, force: bool = True) -> d
         )
 
     metadata: dict[str, Any] = {
-        "schema": "apm.model-build.v1",
+        "schema": "apm.model-build.v2",
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "openvaf_path": str(selected.openvaf),
         "openvaf_sha256": sha256_file(selected.openvaf),

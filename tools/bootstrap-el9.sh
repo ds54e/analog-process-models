@@ -90,13 +90,13 @@ apm_require rpm2cpio
 apm_require sha256sum
 apm_require tar
 
-[[ "$(uname -m)" == "x86_64" ]] || apm_die "v1.0 reference bootstrap requires x86_64"
+[[ "$(uname -m)" == "x86_64" ]] || apm_die "v2.0 reference bootstrap requires x86_64"
 [[ -r /etc/os-release ]] || apm_die "cannot inspect /etc/os-release"
 # shellcheck disable=SC1091
 source /etc/os-release
 [[ "${ID_LIKE:-}" == *rhel* || "${ID:-}" == "almalinux" ]] || \
-  apm_die "v1.0 reference bootstrap requires RHEL-compatible EL9"
-[[ "${VERSION_ID%%.*}" == "9" ]] || apm_die "v1.0 reference bootstrap requires EL9"
+  apm_die "v2.0 reference bootstrap requires RHEL-compatible EL9"
+[[ "${VERSION_ID%%.*}" == "9" ]] || apm_die "v2.0 reference bootstrap requires EL9"
 
 mkdir -p "${apm_source_dir}" "${apm_build_dir}" "${apm_toolchain_dir}"
 

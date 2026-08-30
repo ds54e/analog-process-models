@@ -1,95 +1,92 @@
 # APM benchmark variation and passives
 
-APM benchmark variation is a synthetic, technology-neutral comparison basis. It
-is not a foundry statistical model, a Pelgrom model, a yield prediction, or a
-substitute for a kit's native variation. The frozen v1 values live in
-`variation/benchmark_v1.toml`; the technology-neutral passive contract lives in
-`passives/benchmark_v1.toml`; and measured compact-model mappings live in
-`variation/adapters_v1.toml`.
+APM benchmark variation is a synthetic, technology-neutral comparison basis.
+It is not a foundry statistical model, Pelgrom extraction, yield prediction, or
+substitute for upstream/native variation.
 
-Every persisted benchmark result uses `variation_origin = "benchmark"`.
-PDK/model-native results use `variation_origin = "native"` and retain their
-actual upstream corner/profile identity. The two systems must not be overlaid or
-silently translated into one another. APM130's selected IHP-native profiles,
-native ngspice seed semantics, and separate result layout are documented in
-[`native-variation.md`](native-variation.md).
+The frozen v2 contracts are:
+
+- `variation/benchmark_v2.toml` — distributions, correlations, corners, and
+  observable-intent semantics;
+- `variation/adapters_v2.toml` — real-ngspice-calibrated mappings for all 13
+  families and 26 devices; and
+- `passives/benchmark_v2.toml` — technology-neutral Rbench/Cbench behavior.
+
+Persisted benchmark rows use `variation_origin = "benchmark"`.
+Model-owned results use `variation_origin = "native"` and retain upstream
+profile names. The two systems are not translated into one another.
 
 ## Observable MOS intents
 
-The common MOS variables describe terminal behavior, not a shared raw compact
-model API:
+The stable variables describe terminal behavior, not raw compact-model knobs:
 
-- `vth_shift`: a positive value means a larger threshold-voltage magnitude for
-  both N and P devices.
-- `drive_shift`: a positive value means a larger drain-current magnitude at the
-  kit's documented reference bias.
+- `vth_shift`: positive means a larger threshold-voltage magnitude for N and
+  P devices.
+- `drive_shift`: positive means a larger drain-current magnitude at the
+  declared family/device reference bias.
 
-Each kit maps those intents to model-family-specific instance parameters. The
-v1 mapping is a measured quadratic fit,
+Each family/device adapter maps those intents to the appropriate raw instance
+handles (`delvto`, `mulu0`, `factuo`, `DELVTRAND`, or `IDS0MULT`) and
+accounts for polarity-specific sign and scale. The measured fit is
 
-`observable_shift = linear*raw_delta + quadratic*raw_delta^2`,
+`observable_shift = linear*raw_delta + quadratic*raw_delta^2`.
 
-which the resolver inverts using the root nearest zero. Equal raw compact-model
-parameter changes are not treated as equal observable changes.
+The resolver selects the inverse root continuous through zero. Raw compact
+parameters are not treated as universal physical quantities.
 
-The calibration point is 27 degC, `L=2*Lmin`, `VOUT=0.5*VDD`, and the nominal
-VCTRL grid point nearest `gm/Id=15 1/V`. Threshold mapping is measured with the
-kit's constant-current criterion at `VOUT=0.8*VDD`. Raw threshold offsets from
--40 mV through +40 mV and raw drive multipliers from 0.8 through 1.2 are swept
-in real ngspice 47.
+Every adapter was calibrated in real ngspice 47 at 27 °C under the family's
+native profile, `L=2*Lmin`, `VOUT=0.5*VDD`, and the gate-grid point nearest
+gm/Id = 15 V⁻¹. Threshold mappings use the declared constant-current criterion
+at `VOUT=0.8*VDD`. Coefficients, residuals, model/manifest identities, raw
+ranges, reference current, geometry, and bias are frozen in
+`variation/adapters_v2.toml`.
 
-| Kit/model | N raw handles | P raw handles | Raw sign for positive `vth_shift` | Small-signal drive response |
-| --- | --- | --- | --- | ---: |
-| APM350 / BSIM3 | `delvto`, `mulu0` | `delvto`, `mulu0` | N `+`, P `-` | N 0.9791, P 1.0100 |
-| APM130 / PSP103 | `delvto`, `factuo` | `delvto`, `factuo` | N `+`, P `+` | N 0.9948, P 0.9865 |
-| APM045 / BSIM4 | `delvto`, `mulu0` | `delvto`, `mulu0` | N `+`, P `-` | N 0.8574, P 0.8953 |
-| APM022 / BSIM4 | `delvto`, `mulu0` | `delvto`, `mulu0` | N `+`, P `-` | N 1.0007, P 1.0121 |
-| APM016F / BSIM-CMG | `DELVTRAND`, `IDS0MULT` | `DELVTRAND`, `IDS0MULT` | N `-`, P `-` | N 1.0000, P 1.0000 |
+## Benchmark Global, Local, and All
 
-Here the drive response is observable fractional Id change per unit raw
-multiplier change near nominal. `variation/adapters_v1.toml` is authoritative
-for all coefficients, residuals, reference currents, geometry, biases, raw
-parameter paths, and calibrated ranges. All five v1 kits now have measured
-adapters; the benchmark specification itself does not change per kit.
+The three public modes are:
 
-## Frozen v1 distributions
+- **Benchmark Global** (`global`): apply shared Global draws; Local draws are
+  retained as inactive audit data.
+- **Benchmark Local** (`local`): apply instance-local draws; Global draws are
+  retained as inactive audit data.
+- **Benchmark All** (`all`): apply both from the same canonical draw sequence.
 
-All normalized variables are independent standard normal variables unless an
-explicit profile says otherwise.
+For MOS, one Global latent is shared by every requested sibling family with the
+same technology, polarity, and intent. Global threshold/drive, N/P, different
+technologies, MOS/passives, and R/C are independent by default. Local
+threshold/drive variables are independent per instance and independent of all
+Global variables. There are no family-residual latents or undocumented partial
+correlations in v2.
 
-| Variable | Process sigma | Local mismatch sigma at `match_size=1` |
+This sharing is a benchmark design for equal observable stress. It is not a
+claim that real family parameters have fully correlated physical process
+variation.
+
+Threshold shifts add:
+
+`vth_shift_total = vth_shift_global + vth_shift_local`.
+
+Drive and passive factors compose multiplicatively. Nonpositive resolved
+factors/values are rejected and never silently clipped. The Gaussian
+distribution is not silently truncated; a resolved adapter record identifies
+whether a draw stays within the real-tool-calibrated raw range.
+
+## Frozen distributions
+
+All latents are independent standard normal variables except for the explicit
+Global sibling-family sharing above.
+
+| Intent | Global sigma | Local sigma at reference size |
 | --- | ---: | ---: |
-| N/P `vth_shift` | 0.012 V | 0.008 V |
-| N/P `drive_shift` | 0.04 fractional Id | 0.025 fractional Id |
-| `Rbench` value scale | 0.02 fractional value | 0.01 fractional value |
-| `Cbench` value scale | 0.02 fractional value | 0.01 fractional value |
+| N/P threshold magnitude | 0.012 V | 0.008 V |
+| N/P drain-current magnitude | 0.03 fractional | 0.025 fractional |
+| Rbench value | 0.02 fractional | 0.01 fractional |
+| Cbench value | 0.02 fractional | 0.01 fractional |
 
-These modest synthetic values were frozen after PSP103, BSIM4, and BSIM-CMG
-were operational and their observable mappings had been measured, then
-confirmed unchanged after the independent BSIM3 kit was added. They make
-cross-kit perturbations visible while keeping the fixed three-sigma corners
-inside the measured raw ranges. They do not describe manufacturing statistics.
-
-The six process variables are mutually independent: N threshold, N drive, P
-threshold, P drive, resistor scale, and capacitor scale. Each is global within
-one resolved sample for its device/passive class. Local threshold/drive or
-passive variables are independent per APM instance, independent of one another,
-and independent of all process variables. There is no undocumented
-cross-correlation.
-
-The three Monte Carlo modes are:
-
-- `process`: apply global process draws and retain local draws as inactive audit
-  data;
-- `mismatch`: apply local mismatch draws and retain global draws as inactive
-  audit data;
-- `all`: apply both from the same canonical draw sequence.
-
-Threshold shifts add. MOS drive and passive factors compose
-multiplicatively. Nonpositive resolved factors/values are rejected and never
-silently clipped. The Gaussian distribution is not silently truncated; a
-resolved adapter record explicitly reports whether its raw value lies inside
-the characterized range.
+The 12 mV Global threshold prior remained inside every measured ±40 mV adapter
+range at three sigma. Global drive was frozen at 3%, rather than the historical
+4% prior, so every three-sigma corner remains within every measured mapping.
+These are comparison severities, not manufacturing statistics.
 
 ## Matching-size law
 
@@ -101,67 +98,61 @@ FinFET matching size is
 
 `match_size = (NFIN*L)/(NFINref*Lref)`.
 
-Local sigma is `sigma_ref/sqrt(match_size)`, so four times the matching size
-gives half the local sigma for the same normalized draw. FinFET requests use
-only `l_m` and positive integer `nfin`; they never acquire a synthetic width.
-
+Local sigma is `sigma_ref/sqrt(match_size)`; four times the matching size
+therefore halves the local sigma. FinFET requests contain only `l_m` and
+positive integer `nfin`; no synthetic continuous width is introduced.
 Passive `match_size` is a positive dimensionless benchmark input, not layout
-area. Its only v1 meaning is the same inverse-square-root mismatch law.
+area.
 
 ## Deterministic corners
 
-Corners are fixed vectors of the process sigmas above and never consume RNG
-draws:
+Corners are fixed Global vectors and consume no random draw:
 
-| Corner | N threshold/drive | P threshold/drive | R/C scale |
+| Corner | N threshold/drive | P threshold/drive | R/C Global scale |
 | --- | --- | --- | --- |
 | `bench_tt` | 0, 0 | 0, 0 | 0, 0 |
-| `bench_ff` | -3 sigma, +3 sigma | -3 sigma, +3 sigma | 0, 0 |
-| `bench_ss` | +3 sigma, -3 sigma | +3 sigma, -3 sigma | 0, 0 |
-| `bench_fs` | -3 sigma, +3 sigma | +3 sigma, -3 sigma | 0, 0 |
-| `bench_sf` | +3 sigma, -3 sigma | -3 sigma, +3 sigma | 0, 0 |
+| `bench_ff` | −3σ, +3σ | −3σ, +3σ | 0, 0 |
+| `bench_ss` | +3σ, −3σ | +3σ, −3σ | 0, 0 |
+| `bench_fs` | −3σ, +3σ | +3σ, −3σ | 0, 0 |
+| `bench_sf` | +3σ, −3σ | −3σ, +3σ | 0, 0 |
 
-These names always mean APM benchmark corners. They are distinct from native
-IHP or other upstream model corners.
+These names always identify APM benchmark corners, never an IHP/upstream
+corner.
 
-## Resolved samples and replay
+## Requests, sampling, and replay
 
-An input request uses schema `apm.benchmark-request.v1`. See
-`examples/benchmark_request.json` for N/P planar, N/P FinFET, resistor, and
-capacitor instances. Every ID is unique. A MOS request declares its kit,
-polarity, public geometry, and the actual top-level ngspice X-instance name so
-the resolver can emit exact instance-level `alter` commands.
-
-Resolve a Monte Carlo sample or deterministic corner with:
+Input uses schema `apm.benchmark-request.v2`; each MOS entry declares a
+`technology/family/device` selector, legal public geometry, and its top-level
+ngspice X-instance name. See `examples/benchmark_request.json`.
 
 ```console
 apm sample-variation \
   --request examples/benchmark_request.json \
   --mode all \
   --seed 20260830 \
-  --output results/all.json
+  --output .apm/results/sample-all.json
 
 apm resolve-corner bench_fs \
   --request examples/benchmark_request.json \
-  --output results/bench_fs.json
+  --output .apm/results/bench-fs.json
 ```
 
-ngspice randomness is generated only in Python using NumPy
-`Generator(PCG64)`. Six global draws are followed by sorted per-instance local
-draws in a canonical order, regardless of the selected mode. A repeated
-request/mode/seed/configuration produces byte-identical JSON; a differing seed
-changes the sample. The JSON preserves the RNG algorithm, seed, NumPy version,
-configuration paths/hashes, every normalized draw, sampled and applied values,
-global/local identities, total observable intents, raw resolved adapter values,
-and exact ngspice `alter` commands.
+ngspice benchmark randomness is generated in Python with NumPy
+`Generator(PCG64)`. A canonical order generates all Global latents followed
+by sorted per-instance Local latents regardless of selected mode. The resolved
+`apm.resolved-variation.v2` JSON persists the integer seed, NumPy/algorithm
+identity, configuration paths/hashes, normalized draws, sampled/applied
+values, latent scope, total observable intents, raw adapter values, range
+status, and exact ngspice `alter` commands.
 
 The content-derived `sample_id` covers the canonical payload. Loading verifies
-that ID, and writing refuses to replace a different sample. Persisted samples,
-not an assumed future RNG implementation, are the authoritative replay input.
-Apply their `ngspice_alter_commands` after public device instantiation and
-before the deterministic analysis. `apm benchmark-check --output DIR` builds
-the real models, resolves all modes/corners, runs ngspice, repeats the `all`
-sample, and writes a fully linked validation report.
+it; writing refuses to replace a different sample. Persisted samples, not an
+assumed future RNG implementation, are the replay authority.
+
+`apm benchmark-check --output DIR` resolves all three modes and five corners,
+checks replay/different-seed behavior and statistical cohorts, runs every
+family/device through real ngspice, and validates passives. Its report schema is
+`apm.benchmark-validation.v2`.
 
 ## Benchmark passives
 
@@ -172,23 +163,23 @@ Xr p n Rbench value=10k tc1=0.001 match_size=1
 Xc p n Cbench value=1p tc1=0.0002 match_size=1
 ```
 
-The Python resolver first applies process and local mismatch to the nominal
-value. That resolved concrete value is passed to an ordinary simulator resistor
-or capacitor primitive. Temperature then follows
+The resolver applies Global and/or Local factors before temperature:
 
-`value(T) = resolved_value_at_27C * (1 + tc1*(T-27C))`,
+`value(T) = resolved_value_at_27C * (1 + tc1*(T-27C))`.
 
-where `tc1` is in `1/degC`. A temperature that produces a nonpositive value is
-rejected. `Rbench` adds no custom noise source, so ordinary simulator resistor
-Johnson noise is retained. Native technology passives, where available, are a
-separate optional facility and are never the golden cross-process basis.
+`tc1` is in °C⁻¹; nonpositive results are rejected. Rbench resolves to an
+ordinary simulator resistor and therefore retains native Johnson noise rather
+than adding a custom source. Native technology passives remain separate and
+are not the golden comparison basis.
 
-## Current limitations
+## Native and Spectre boundaries
 
-Benchmark severities are comparison knobs, not assertions of silicon fidelity.
-Mappings characterize the documented reference point and measured raw ranges;
-they do not make compact models interchangeable away from that point. The
-ngspice path uses deterministic resolved samples. Spectre benchmark statistics
-are a separate model-only deliverable, documented in
-[`spectre.md`](spectre.md), and remain experimental/unverified until tested in
-a real Spectre environment.
+IHP-native APM130 LV/HV validation is documented in
+[`native-variation.md`](native-variation.md). It uses ngspice evaluation of
+the pinned upstream random expressions and does not adopt the benchmark
+correlation contract.
+
+The Spectre model-only layer expresses the same intended Global/Local/All
+distributions, geometry scaling, and explicit correlations using Spectre's own
+process/mismatch sampling. Seed-for-seed identity is not required. It remains
+experimental/unverified until executed in a real Spectre environment.

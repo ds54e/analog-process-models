@@ -1,0 +1,49 @@
+{
+  "schema": "apm.validation-evidence.v2",
+  "milestone": "V2-M8-provenance-and-distribution",
+  "date": "2026-08-30",
+  "status": "validated",
+  "tool": {
+    "command": "apm provenance-check --output .apm/results/v2-provenance-staged",
+    "report_schema": "apm.provenance-validation.v2",
+    "report_sha256": "4b44e874140fc80486e0c3fe7edf56ad9ecb7000fe2d56e7b357c28308706783"
+  },
+  "checks": {
+    "complete_exact_file_hash_inventories": true,
+    "third_party_redistribution_and_license_boundaries": true,
+    "apm022_apm016f_independent_authorship": true,
+    "catalog_model_sources_self_contained": true,
+    "release_assets_tracked_and_generated_outputs_excluded": true,
+    "spectre_experimental_unverified_claim_boundary": true,
+    "reuse_spdx_compliance": true
+  },
+  "inventory": {
+    "technology_asset_counts": {
+      "apm350": 8,
+      "apm130": 46,
+      "apm045": 32,
+      "apm022": 20,
+      "apm016f": 31
+    },
+    "required_tracked_model_asset_count": 142,
+    "catalog_bound_source_count": 95,
+    "catalog_family_count": 13,
+    "ngspice_binding_count": 13,
+    "spectre_binding_count": 13,
+    "generated_binaries_tracked": 0,
+    "raw_results_tracked": 0,
+    "obsolete_v1_runtime_assets_tracked": 0,
+    "separate_model_download_required": false
+  },
+  "license_boundaries": {
+    "ihp_apm130": "Apache-2.0 model cards plus LicenseRef-Si2-PSP-103.8.2 engine sources/notices",
+    "freepdk45_apm045": "Apache-2.0 exact pinned files",
+    "bsim_cmg_apm016f_engine": "ECL-2.0 with retained LICENSE.txt and NOTICE.txt",
+    "reuse": "221/221 files contain copyright and license information"
+  },
+  "independence": {
+    "apm022": "SVT plus VTH0-only threshold_isolated LVT/HVT; official PTM numeric input false",
+    "apm016f": "SVT plus PHIG-only workfunction_dominant LVT/HVT; official PTM-MG numeric input false"
+  },
+  "boundary": "This audit evaluated the staged release distribution. Exact-commit clean-clone release validation reruns it and remains required."
+}

@@ -132,7 +132,7 @@ def create_clean_clone_attestation(
         failed = ", ".join(name for name, passed in checks.items() if not passed)
         raise CleanCloneError(f"clean-clone attestation failed: {failed}")
     report: dict[str, Any] = {
-        "schema": "apm.clean-clone-attestation.v1",
+        "schema": "apm.clean-clone-attestation.v2",
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "status": "attested",
         "repository": str(selected),
@@ -169,7 +169,7 @@ def verify_clean_clone_attestation(root: Path) -> dict[str, Any]:
     platform_observation = _platform_observation(selected)
     attested_checks = report.get("checks", {})
     checks = {
-        "schema": report.get("schema") == "apm.clean-clone-attestation.v1",
+        "schema": report.get("schema") == "apm.clean-clone-attestation.v2",
         "attestation_status": report.get("status") == "attested",
         "attested_checks_complete": isinstance(attested_checks, dict)
         and set(attested_checks) == ATTESTATION_CHECK_IDS

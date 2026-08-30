@@ -1,0 +1,34 @@
+{
+  "schema": "apm.validation-evidence.v2",
+  "milestone": "V2-M8",
+  "date": "2026-08-30",
+  "status": "structurally_checked",
+  "backend_status": "experimental_unverified",
+  "scope": {
+    "family_count": 13,
+    "device_count": 26,
+    "spectre_scope_artifact_count": 31,
+    "benchmark_modes": ["global", "local", "all"],
+    "corners": ["bench_tt", "bench_ff", "bench_ss", "bench_fs", "bench_sf"]
+  },
+  "structural_result": {
+    "local_path": ".apm/results/v2-spectre-structural-smoke/spectre_structural_report.json",
+    "sha256": "2ab9a54dbb19e641fc34933e0d52de0b3109c8a76429d7ff20d20e4a733250f1",
+    "all_checks_pass": true,
+    "analyses": 0,
+    "sources": 0,
+    "testbenches": 0
+  },
+  "generation": {
+    "v2_generator": "tools/generate_spectre_v2.py",
+    "v2_generator_sha256": "0d2c42751915aa56cfbe47a158236b56d6a0f7b0a3083638d006391d1a577869",
+    "psp_generator": "tools/generate_spectre_psp.py",
+    "psp_generator_sha256": "3c467b14a266797726f901037f3c43964def5762561acae7f933e348ebd4ce76"
+  },
+  "claim_boundary": {
+    "real_tool_validation_performed": false,
+    "parse_validity_claimed": false,
+    "numerical_conformance_claimed": false,
+    "virtuoso_integration": "user-managed and out of scope"
+  }
+}

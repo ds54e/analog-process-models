@@ -9,8 +9,9 @@ import subprocess
 import sys
 from pathlib import Path
 
+from apm.catalog import load_catalog
 from apm.cli import build_parser
-from apm.spectre_validate import MODEL_FILES, validate_spectre
+from apm.spectre_validate import validate_spectre
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -31,25 +32,32 @@ def test_all_spectre_artifacts_pass_static_gate(tmp_path: Path) -> None:
     assert all(report["checks"].values())
     persisted = json.loads(Path(report["report_path"]).read_text(encoding="utf-8"))
     assert persisted["release_gate"] == "spectre.model_only"
+    assert persisted["details"]["model_only_scope"]["artifact_count"] == 31
 
 
-def test_spectre_public_names_match_all_ngspice_facing_names() -> None:
-    for kit_id, path in MODEL_FILES.items():
-        spectre = (ROOT / path).read_text(encoding="utf-8")
-        ngspice = (ROOT / f"models/{kit_id}/ngspice/{kit_id}_wrappers.inc").read_text(
-            encoding="utf-8"
+def test_spectre_public_names_match_all_family_ngspice_names() -> None:
+    catalog = load_catalog(ROOT)
+    count = 0
+    for technology in catalog.technologies:
+        for family in technology.families:
+            spectre = family.backend("spectre").wrapper_path.read_text(encoding="utf-8")
+            ngspice = family.backend("ngspice").wrapper_path.read_text(encoding="utf-8")
+            ngspice_names = set(re.findall(r"(?mi)^\.subckt\s+(apm\w+)", ngspice))
+            assert ngspice_names == {device.public_name for device in family.devices}
+            for public_name in ngspice_names:
+                assert f"subckt {public_name} (d g s b)" in spectre
+            count += 1
+    assert count == 13
+
+
+def test_spectre_generation_is_byte_reproducible() -> None:
+    for tool in ("tools/generate_spectre_psp.py", "tools/generate_spectre_v2.py"):
+        completed = subprocess.run(
+            [sys.executable, tool, "--check"],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
         )
-        for match in re.finditer(r"(?mi)^\.subckt\s+(apm\w+)", ngspice):
-            assert f"subckt {match.group(1)} (d g s b)" in spectre
-
-
-def test_apm130_spectre_psp_derivation_is_reproducible() -> None:
-    completed = subprocess.run(
-        [sys.executable, "tools/generate_spectre_psp.py", "--check"],
-        cwd=ROOT,
-        text=True,
-        capture_output=True,
-        check=False,
-    )
-    assert completed.returncode == 0, completed.stderr
-    assert "up to date" in completed.stdout
+        assert completed.returncode == 0, completed.stderr
+        assert "up to date" in completed.stdout

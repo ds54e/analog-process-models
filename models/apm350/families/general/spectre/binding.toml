@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: APM contributors
+# SPDX-License-Identifier: Apache-2.0
+schema = "apm.backend-binding.v2"
+technology_id = "apm350"
+family_id = "general"
+backend = "spectre"
+compact_model_native_name = "BSIM3v3"
+model_includes = ["models/apm350/ngspice/apm350_models.inc"]
+wrapper = "models/apm350/families/general/spectre/model.scs"
+native_oracle = "unverified Spectre native BSIM3 mapping"
+status = "experimental_unverified"
+real_tool_validation = false
+include_language = "spice"
+instance_prefix = "M"
+
+[device.nmos]
+native_vector_template = "unavailable_model_only"
+native_model = "apm350_ncore"
+fixed_parameters = "ad=w*400n as=w*400n pd=2*w+800n ps=2*w+800n"
+
+[device.pmos]
+native_vector_template = "unavailable_model_only"
+native_model = "apm350_pcore"
+fixed_parameters = "ad=w*400n as=w*400n pd=2*w+800n ps=2*w+800n"

@@ -9,7 +9,7 @@ ptm_derived = false
 [source]
 status = "apm-authored-parameter-deck"
 parameter_project = "Analog Process Models"
-parameter_revision = "apm022-params-v1-2026-08-30"
+parameter_revision = "apm022-multivt-v2-2026-08-30"
 parameter_license = "Apache-2.0"
 model_semantics_project = "UC Berkeley BSIM4"
 model_semantics_url = "https://www.bsim.berkeley.edu/models/bsim4/"
@@ -18,11 +18,26 @@ simulator_engine = "native BSIM4 in ngspice 47"
 research_retrieved_utc = "2026-08-29"
 
 [source.authored_files]
-"kit.toml" = "ef75720da6e5d6bf0033705ee8a647af7aa28f38fc4ca30caed38fe92a9df99d"
-"ngspice/apm022_models.inc" = "4556a5901940eb0a2a3c130b4a843a1fe53fecbd36acb5e5d8b1ef4e82c70ff0"
-"ngspice/apm022_wrappers.inc" = "e55dd185cdfc5047c9d01dd6f0244ab49496601f1b6fafc018ead17a45a8d83e"
-"parameter_generation.md" = "87047bf4ec587c75b933942671e74e7e924ba86b425b816c84e98bf75b3b368c"
-"spectre/apm022.scs" = "ddf97554eea15759a52793048e95975426a3e92494630548598b2f31e6831011"
+"technology.toml" = "dc0a995c863492eb61ae08d87de75cbe5038ff879a558c26787cb14be3f80f69"
+"ngspice/apm022_multivt_models.inc" = "c7616b942d4bc0e5f9d6fad78b6a4a48945b8dc04bb8125264617d6bbb860c90"
+"parameter_generation.md" = "f1d3069b31ab9744dc62fc508b6866e6f806fbaa4ca00518f0f961fbf1f62d6b"
+"families/lvt/family.toml" = "7520bf53955813051f82199ca5079ec1e77f8cfc63c9783928f235384cde8fb7"
+"families/lvt/variant-generation.toml" = "cdd480fba693dc855afbd1706806b4b49a217a3865d78eee63717b6c8104a99a"
+"families/lvt/ngspice/binding.toml" = "ccc321388032ce8c77037952e5a9a01e4e16c0660e6e5b331e299825c2a3f0f3"
+"families/lvt/ngspice/wrapper.inc" = "c487b12b144c6b7f00bcf3d18af1dc752bd556ba7bb7a459f88804323f11e447"
+"families/lvt/spectre/binding.toml" = "fcb702a67455991f45115909b9bd306a683767b52b8f6c18e23a8d5baef9484c"
+"families/lvt/spectre/model.scs" = "857a575b5b9bfd88fb1b9ae4130d488ee2d430409c587d09d15cb0a11f736771"
+"families/svt/family.toml" = "aa9fc87f84d365f76d2b0ad6e7d8e8a5b2f61bdb32a77f047930babb7fc3b132"
+"families/svt/ngspice/binding.toml" = "d89449d202086b9be89aaf666ca064319b129cede634be0ea59edef816e3ec3c"
+"families/svt/ngspice/wrapper.inc" = "91a409678bc80ee27aae4ac57d15d5c9ccf9d7a0d27bdd223aaea3533ff291ec"
+"families/svt/spectre/binding.toml" = "b7c836b6d2b274662e40a71ec37a46d32e4d9fdc459d7f69cc3e6d863304a042"
+"families/svt/spectre/model.scs" = "6b52380bd2403cfde61ffb292374ab78a7681258e04c5286d8280c72e479a32d"
+"families/hvt/family.toml" = "c116cc4c43d543e56aeaf1a7601c290d5c0c40bb644242014d149ea22b1ef55e"
+"families/hvt/variant-generation.toml" = "ae54bfe0b048ef166103392e33521711024182928993987748ff6084bdafaeac"
+"families/hvt/ngspice/binding.toml" = "fcc5bfcd6b72eac226509cfa059c393a596ae1d223452c358d1117931af77d41"
+"families/hvt/ngspice/wrapper.inc" = "fb3d8c7ef17fb16493a9046106b818148cd33808d78809af1a16e64cac059e14"
+"families/hvt/spectre/binding.toml" = "1bf1be536933b8bfc3a0640eb24a6e893b96a78a5714f38822b9a928388c9804"
+"families/hvt/spectre/model.scs" = "8049c93fe23cabfcd3551798f724388386ae39e963582e7aa9eb5142b1610285"
 
 [[source.research_inputs]]
 title = "Performance and Yield Benefits of Quasi-Planar Bulk CMOS Technology for 6-T SRAM at the 22-nm Node"
@@ -46,7 +61,7 @@ redistributed = false
 
 [redistribution]
 ship_in_repo = true
-authorship = "all APM022 kit, parameter, wrapper, and generation files are APM-authored"
+authorship = "all APM022 technology/family manifests, multi-Vt parameters, wrappers, and generation records are independently APM-authored"
 third_party_files = []
 generated_binaries_committed = false
 
@@ -77,11 +92,15 @@ benchmark = true
 native = false
 
 [validation]
-ngspice = "M5 complete nominal terminal characterization and benchmark-adapter validation passed; see validation/evidence/m5-apm022.md"
+ngspice = "v2 LVT/SVT/HVT characterization, ordering, comparison, and six benchmark adapters passed; see validation/evidence/v2_benchmark_adapters.json"
 spectre = "experimental_unverified"
 
 [spectre]
 status = "experimental_unverified"
-artifact = "spectre/apm022.scs"
+artifacts = [
+  "families/lvt/spectre/model.scs",
+  "families/svt/spectre/model.scs",
+  "families/hvt/spectre/model.scs"
+]
 model_route = "native Spectre BSIM4 through SPICE level-54 mapping"
 real_tool_validation = false

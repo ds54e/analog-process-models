@@ -1,0 +1,35 @@
+# SPDX-FileCopyrightText: APM contributors
+# SPDX-License-Identifier: Apache-2.0
+
+schema = "apm.variant-generation.v2"
+technology_id = "apm016f"
+family_id = "hvt"
+base_family = "svt"
+method = "workfunction_dominant"
+method_version = "1.0.0"
+target_vth_spacing_v = 0.10
+target_origin = "apm_selected_rounded_observable"
+public_inputs = [
+  "BSIM-CMG 112.1.0 defines PHIG as gate workfunction and recommends PHIG/NBODY for threshold adjustment.",
+  "Open multi-Vt FinFET examples establish PHIG as a dominant qualitative family control; no example parameter value was copied.",
+  "FreePDK45 terminal characterization supplies only rounded observable spacing context.",
+]
+apm_choice = "Shift each polarity's PHIG by 0.10 eV in the direction that raises terminal threshold magnitude."
+validation_boundary = "Generic educational family; real BSIM-CMG/ngspice terminal characterization, not silicon or foundry correlation."
+official_ptm_mg_numeric_input_used = false
+asap7_numeric_input_used = false
+secondary_parameter_changes = false
+
+[[parameter_change]]
+device_id = "nfet"
+parameter = "PHIG"
+base_value_ev = 4.45
+delta_ev = 0.10
+resolved_value_ev = 4.55
+
+[[parameter_change]]
+device_id = "pfet"
+parameter = "PHIG"
+base_value_ev = 4.75
+delta_ev = -0.10
+resolved_value_ev = 4.65

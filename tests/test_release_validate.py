@@ -13,9 +13,10 @@ from apm.cli import build_parser
 from apm.release_validate import (
     IMPLEMENTED_GATE_IDS,
     ReleaseValidationError,
+    audit_catalog,
     audit_claims,
     audit_distribution,
-    audit_provenance,
+    audit_migration,
     audit_release_metadata,
     evaluate_required_gates,
     load_gate_contract,
@@ -24,11 +25,11 @@ from apm.release_validate import (
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def _pass_results(contract: dict[str, object]) -> dict[str, dict[str, object]]:
+def _pass_results(contract: dict[str, object], evidence: Path) -> dict[str, dict[str, object]]:
     gates = contract["gate"]
     assert isinstance(gates, list)
     return {
-        gate["id"]: {"status": "pass", "evidence": ["unit-test"], "detail": "test"}
+        gate["id"]: {"status": "pass", "evidence": [str(evidence)], "detail": "test"}
         for gate in gates
         if gate["required"] is True
     }
@@ -36,18 +37,16 @@ def _pass_results(contract: dict[str, object]) -> dict[str, dict[str, object]]:
 
 def _git(root: Path, *arguments: str) -> None:
     subprocess.run(
-        ["git", *arguments],
-        cwd=root,
-        text=True,
-        capture_output=True,
-        check=True,
+        ["git", *arguments], cwd=root, text=True, capture_output=True, check=True
     )
 
 
 def test_release_contract_and_implementation_are_exact() -> None:
     contract = load_gate_contract(ROOT)
     required = {gate["id"] for gate in contract["gate"] if gate["required"] is True}
-    assert len(required) == 16
+    assert contract["schema"] == "apm.release-gates.v2"
+    assert contract["target"] == "v2.0.0"
+    assert len(required) == 20
     assert required == IMPLEMENTED_GATE_IDS
 
 
@@ -55,10 +54,14 @@ def test_release_contract_and_implementation_are_exact() -> None:
     ("mutation", "expected_status"),
     (("missing", "missing"), ("skipped", "skipped"), ("empty_evidence", "pass")),
 )
-def test_gate_evaluation_fails_closed(mutation: str, expected_status: str) -> None:
+def test_gate_evaluation_fails_closed(
+    tmp_path: Path, mutation: str, expected_status: str
+) -> None:
     contract = load_gate_contract(ROOT)
-    results = _pass_results(contract)
-    identifier = "runtime.ngspice_headless"
+    evidence = tmp_path / "evidence.json"
+    evidence.write_text("{}\n", encoding="utf-8")
+    results = _pass_results(contract, evidence)
+    identifier = "runtime.compact_models"
     if mutation == "missing":
         del results[identifier]
     elif mutation == "skipped":
@@ -72,10 +75,20 @@ def test_gate_evaluation_fails_closed(mutation: str, expected_status: str) -> No
     assert overall is False
 
 
+def test_gate_evaluation_rejects_stale_or_nonexistent_evidence(tmp_path: Path) -> None:
+    contract = load_gate_contract(ROOT)
+    evidence = tmp_path / "missing.json"
+    results = _pass_results(contract, evidence)
+    ordered, overall = evaluate_required_gates(contract, results)
+    assert overall is False
+    assert all(gate["evidence_valid"] is False for gate in ordered)
+
+
 def test_release_repository_audits_pass() -> None:
     contract = load_gate_contract(ROOT)
     assert audit_release_metadata(ROOT, contract)["status"] == "pass"
-    assert audit_provenance(ROOT)["status"] == "pass"
+    assert audit_catalog(ROOT, contract)["status"] == "pass"
+    assert audit_migration(ROOT)["status"] == "pass"
     assert audit_distribution(ROOT)["status"] == "pass"
     assert audit_claims(ROOT, contract)["status"] == "pass"
 
@@ -83,13 +96,24 @@ def test_release_repository_audits_pass() -> None:
 def test_metadata_audit_rejects_development_versions(tmp_path: Path) -> None:
     contract = load_gate_contract(ROOT)
     (tmp_path / "src/apm").mkdir(parents=True)
-    (tmp_path / "pyproject.toml").write_text('[project]\nversion = "0.0.0"\n', encoding="utf-8")
-    (tmp_path / "src/apm/__init__.py").write_text('__version__ = "0.0.0"\n', encoding="utf-8")
+    (tmp_path / "models/fixture/families/only").mkdir(parents=True)
+    (tmp_path / "variation").mkdir()
+    (tmp_path / "passives").mkdir()
+    (tmp_path / "pyproject.toml").write_text(
+        '[project]\nversion = "0.0.0"\n', encoding="utf-8"
+    )
+    (tmp_path / "src/apm/__init__.py").write_text(
+        '__version__ = "0.0.0"\n', encoding="utf-8"
+    )
+    (tmp_path / "src/apm/cli.py").write_text(
+        'parser.add_argument("--version", version="APM 0.0.0")\n', encoding="utf-8"
+    )
     (tmp_path / "CHANGELOG.md").write_text("## Unreleased\n", encoding="utf-8")
     result = audit_release_metadata(tmp_path, contract)
     assert result["status"] == "fail"
     assert "pyproject_version_matches_target" in result["failed_checks"]
     assert "runtime_version_matches_target" in result["failed_checks"]
+    assert "cli_version_matches_target" in result["failed_checks"]
 
 
 def test_clean_clone_attestation_is_tied_to_exact_commit(
@@ -99,7 +123,7 @@ def test_clean_clone_attestation_is_tied_to_exact_commit(
     root.mkdir()
     (root / "validation").mkdir()
     (root / "validation/release_gates.toml").write_text(
-        'schema = "apm.release-gates.v1"\n', encoding="utf-8"
+        'schema = "apm.release-gates.v2"\n', encoding="utf-8"
     )
     (root / ".gitignore").write_text(".apm/\n", encoding="utf-8")
     _git(root, "init")
@@ -124,11 +148,11 @@ def test_clean_clone_attestation_is_tied_to_exact_commit(
     monkeypatch.setattr(clean_clone, "_platform_observation", lambda _: observation)
 
     created = clean_clone.create_clean_clone_attestation(root)
-    assert created["status"] == "attested"
+    assert created["schema"] == "apm.clean-clone-attestation.v2"
     assert clean_clone.verify_clean_clone_attestation(root)["status"] == "verified"
 
     (root / "validation/release_gates.toml").write_text(
-        'schema = "apm.release-gates.v2"\n', encoding="utf-8"
+        'schema = "apm.release-gates.v2"\ntarget = "v2.0.0"\n', encoding="utf-8"
     )
     _git(root, "add", ".")
     _git(root, "commit", "-m", "later commit")
@@ -137,7 +161,9 @@ def test_clean_clone_attestation_is_tied_to_exact_commit(
 
 
 def test_validate_cli_exposes_release_output() -> None:
-    args = build_parser().parse_args(["validate", "--release", "--output", "/tmp/apm-release-test"])
+    args = build_parser().parse_args(
+        ["validate", "--release", "--output", "/tmp/apm-release-test"]
+    )
     assert args.command == "validate"
     assert args.release is True
     assert args.output == Path("/tmp/apm-release-test")
@@ -146,7 +172,8 @@ def test_validate_cli_exposes_release_output() -> None:
 def test_contract_mismatch_is_an_error(tmp_path: Path) -> None:
     (tmp_path / "validation").mkdir()
     (tmp_path / "validation/release_gates.toml").write_text(
-        """schema = "apm.release-gates.v1"
+        """schema = "apm.release-gates.v2"
+target = "v2.0.0"
 [[gate]]
 id = "unknown.required"
 required = true

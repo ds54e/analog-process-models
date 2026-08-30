@@ -1,34 +1,30 @@
-# APM130 model kit
+# APM130
 
-APM130 is APM's 130 nm planar reference kit. It uses the open IHP SG13G2
-low-voltage MOS parameter cards with the PSP compact-model engine compiled to
-OSDI. It is an upstream-derived open model kit, not an independent APM
-silicon-correlation claim and not a complete manufacturable PDK.
+APM130 exposes the audited IHP SG13G2 LV and HV planar PSP103 MOS families. It
+is an upstream-derived open model subset, not an independent APM silicon
+correlation and not a complete manufacturable PDK.
 
-## Public devices
+## Electrical families and devices
 
-- `apm130_nmos d g s b w=<length> l=<length>`
-- `apm130_pmos d g s b w=<length> l=<length>`
+| Family | Public devices | Default profile | L range N/P |
+| --- | --- | ---: | --- |
+| `apm130/lv` | `apm130_lv_nmos`, `apm130_lv_pmos` | 1.2 V | 0.13–10 µm / 0.13–10 µm |
+| `apm130/hv` | `apm130_hv_nmos`, `apm130_hv_pmos` | 3.3 V | 0.45–10 µm / 0.40–10 µm |
 
-Only `w` and `l` are public sizing parameters. The upstream finger and
-multiplicity controls remain fixed inside the wrappers and are not part of the
-APM v1 interface. Supported upstream geometry is `L=0.13..10 um` and
-`W=0.15..10 um`; the nominal APM characterization width is 1 um and lengths are
-`L/Lmin = 1, 2, 4` with `Lmin=0.13 um`.
+All devices use terminal order `d g s b` and only public `w,l`. Upstream
+multiplicity/finger/mismatch controls are fixed inside family wrappers. The
+1.2 V LV/HV common-overlap profile is a behavior-comparison condition, not a
+lifetime, breakdown, or safe-operating-area claim.
 
-The nominal supply is 1.2 V, matching IHP's description of the SG13G2
-thin-oxide logic device. Model use above the documented upstream voltage or
-geometry ranges is not supported by APM.
+## ngspice and OSDI
 
-## ngspice use
-
-Run `apm build-models` first. A nominal netlist then loads:
+Run `apm build-models` first. A nominal LV example is:
 
 ```spice
 .lib models/apm130/vendor/ihp-sg13g2-models/cornerMOSlv.lib mos_tt
-.include models/apm130/ngspice/apm130_wrappers.inc
+.include models/apm130/families/lv/ngspice/wrapper.inc
 
-Xn d g s b apm130_nmos w=1u l=0.13u
+Xn d g s b apm130_lv_nmos w=1u l=0.13u
 
 .control
 pre_osdi .apm/build/osdi/psp103.osdi
@@ -37,45 +33,24 @@ pre_osdi .apm/build/osdi/psp103-nqs.osdi
 .endc
 ```
 
-The model cards identify PSP 103.6. Current pinned IHP source supplies the
-backward-compatible PSP 103.8.2/JUNCAP 200.6.2 implementation; the exact
-distinction, licenses, imported files, and SHA-256 hashes are recorded in
+The cards identify PSP 103.6 and are executed with the pinned,
+backward-compatible PSP 103.8.2/JUNCAP 200.6.2 sources. Exact imported files,
+licenses, notices, transformations, and SHA-256 hashes are in
 `provenance.toml`.
 
-The upstream library also contains `mos_ss`, `mos_ff`, `mos_sf`, `mos_fs`,
-statistical, and mismatch sections. They remain explicitly IHP-native behavior,
-not APM benchmark variation. Run the real-tool native regression with:
+Use:
 
-```text
-apm apm130-native-check --output <new-result-directory>
+```console
+apm characterize apm130/lv --output .apm/results/apm130-lv
+apm characterize apm130/hv --output .apm/results/apm130-hv
+apm compare-set apm130 gate_stack --output .apm/results/apm130-gate-stack
+apm apm130-native-check --output .apm/results/apm130-native
 ```
 
-The selected profiles are the five `mos_*` corners, `mos_tt_stat` process, and
-`mos_tt_mismatch` local mismatch. Native random expressions are evaluated by
-ngspice with explicit seeds, not by the APM benchmark Python sampler. The
-mismatch run includes `apm130_native_mismatch_wrappers.inc` instead of the
-nominal wrapper; it preserves the same public names and `w,l` interface while
-fixing upstream `mm_ok=1` internally. No native stochastic process+mismatch
-`all` profile is exposed because the selected upstream deck provides none.
-See [`docs/native-variation.md`](../../docs/native-variation.md) for exact
-semantics and result files.
+Native corners/process/mismatch retain IHP names and execute as independent LV
+and HV cohorts. APM invents neither cross-family correlation nor a native All
+mode. See [`docs/native-variation.md`](../../docs/native-variation.md).
 
-## Characterization
-
-```text
-apm characterize apm130 --output <new-result-directory>
-```
-
-The command runs both polarities, all three characterization lengths, and
-temperatures -40, 27, 85, and 125 degC. Outputs follow the terminal conventions
-in `RESULT_CONTRACT.md`; see `docs/characterization.md` for the concrete file
-layout. Generated OSDI binaries and full result directories are deliberately
-untracked.
-
-The model-only Spectre artifact is `spectre/apm130.scs`, backed by the
-deterministically translated native-PSP103 TT card in the same directory. It
-preserves the public names and `w,l` sizing and supports APM benchmark
-statistics only. It is **experimental/unverified**; IHP-native Spectre Monte
-Carlo is not claimed. See [`docs/spectre.md`](../../docs/spectre.md). Nothing in
-this kit provides Virtuoso integration, layout, PCells, DRC, LVS, PEX, or
-foundry signoff.
+Family Spectre artifacts are under `families/{lv,hv}/spectre/model.scs`.
+They are model-only **experimental/unverified**; IHP-native Spectre Monte Carlo
+is not claimed.

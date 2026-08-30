@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: APM contributors
+# SPDX-License-Identifier: Apache-2.0
+
+schema = "apm.backend-binding.v2"
+technology_id = "apm350"
+family_id = "general"
+backend = "ngspice"
+compact_model_native_name = "BSIM3 3.3.0"
+model_includes = ["models/apm350/ngspice/apm350_models.inc"]
+wrapper = "models/apm350/families/general/ngspice/wrapper.inc"
+osdi_artifacts = []
+native_oracle = "ngspice BSIM3"
+
+[device.nmos]
+native_vector_template = "@m.xdut.mapm350_general_core[{quantity}]"
+
+[device.pmos]
+native_vector_template = "@m.xdut.mapm350_general_core[{quantity}]"

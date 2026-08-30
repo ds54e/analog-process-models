@@ -9,7 +9,7 @@ foundry_correlated = false
 [source]
 status = "apm-authored-open-generic-reference"
 parameter_project = "Analog Process Models"
-parameter_revision = "apm350-params-v1-2026-08-30"
+parameter_revision = "apm350-params-v2-2026-08-30"
 parameter_license = "Apache-2.0"
 model_semantics_project = "UC Berkeley BSIM3"
 model_semantics_url = "https://www.bsim.berkeley.edu/models/bsim3/"
@@ -18,12 +18,14 @@ simulator_engine = "native BSIM3 in ngspice 47"
 research_retrieved_utc = "2026-08-30"
 
 [source.authored_files]
-"kit.toml" = "bd438bc18e594e7f97a23895602fea4583877e203897e1b70b0841089903cb40"
+"technology.toml" = "5dc3a9b6df4f9f194c3d8da0c91773edcd4d81f46e23e6c32cb072ad4ffaada1"
+"families/general/family.toml" = "21d150ddcc6c0261bbc6a1103449740926c87f9d7921a031628fa3b9f407875a"
 "ngspice/apm350_models.inc" = "2cd8e7fd7bd9dbec3e269959b2342d6d7a1a1609c6198c89931de676d47c8dc1"
-"ngspice/apm350_wrappers.inc" = "d410758e2101f9da0b3be463b4ad2e4a96e613d6640e27a03d72deef0fbf147b"
+"families/general/ngspice/binding.toml" = "73530ef2f03bc3c535f31b153f8d9f1460d1a211d103b5d317b3d5847fa904e4"
+"families/general/ngspice/wrapper.inc" = "7e6777d74ef86282515eebc5dd67c2fea863548582d89fc2384df11b1730369e"
+"families/general/spectre/binding.toml" = "9fa6f14a420276ae202c2bee357d6a748c6b4db4315f5cdfd3d563983f10ccad"
+"families/general/spectre/model.scs" = "4541132a2089e02af5c4a18fa1b174c4fb363f200ddf1d7f3a6fef07a9be68de"
 "parameter_generation.md" = "e44b8a4eab54e922367ceba4b4c81cf21b25cf758d12bfd4d44498c7474004cc"
-"README.md" = "057f5c284a411751099ff9be4d95781c3911bef65bbead7e23c4aa8b96612b4e"
-"spectre/apm350.scs" = "a655397c7287a878ddc67fcac01f9bc371406509affe013320199e0c4cf172d1"
 
 [[source.research_inputs]]
 title = "Technology: MOSIS Scalable CMOS / SCN4M_SUBM class description"
@@ -78,11 +80,11 @@ benchmark = true
 native = false
 
 [validation]
-ngspice = "M6 nominal terminal characterization and benchmark-adapter validation passed; see validation/evidence/m6-apm350.md"
+ngspice = "v2 all-family terminal characterization and benchmark-adapter validation passed; see validation/evidence/v2_benchmark_adapters.json"
 spectre = "experimental_unverified"
 
 [spectre]
 status = "experimental_unverified"
-artifact = "spectre/apm350.scs"
+artifacts = ["families/general/spectre/binding.toml", "families/general/spectre/model.scs"]
 model_route = "native Spectre BSIM3v3 through SPICE level-49 mapping"
 real_tool_validation = false

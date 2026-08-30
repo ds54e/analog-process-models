@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: APM contributors
+# SPDX-License-Identifier: Apache-2.0
+schema = "apm.backend-binding.v2"
+technology_id = "apm045"
+family_id = "vtg"
+backend = "spectre"
+compact_model_native_name = "BSIM4"
+model_includes = ["models/apm045/vendor/freepdk45/NMOS_VTG.inc", "models/apm045/vendor/freepdk45/PMOS_VTG.inc"]
+wrapper = "models/apm045/families/vtg/spectre/model.scs"
+native_oracle = "unverified Spectre SPICE level-54 mapping"
+status = "experimental_unverified"
+real_tool_validation = false
+include_language = "spice"
+instance_prefix = "M"
+[device.nmos]
+native_vector_template = "unavailable_model_only"
+native_model = "NMOS_VTG"
+[device.pmos]
+native_vector_template = "unavailable_model_only"
+native_model = "PMOS_VTG"

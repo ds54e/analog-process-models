@@ -1,0 +1,635 @@
+# SPDX-FileCopyrightText: APM contributors
+# SPDX-License-Identifier: Apache-2.0
+
+schema = "apm.benchmark-adapters.v2"
+status = "real-tool-calibrated-all-26-devices-2026-08-30"
+
+[method]
+simulator = "ngspice 47"
+temperature_c = 27.0
+required_family_count = 13
+required_device_count = 26
+reference_length = "2*device-specific Lmin"
+reference_vout = "0.5*family-native VDD"
+reference_vctrl = "nominal characterization grid point nearest gm/Id=15 1/V"
+vth_measurement = "constant-current threshold magnitude at VOUT=0.8*family-native VDD"
+vth_raw_sweep = [-0.04, 0.04]
+drive_raw_multiplier_sweep = [0.8, 1.2]
+fit_form = "observable_shift = linear*raw_delta + quadratic*raw_delta^2; resolver uses the near-zero inverse root"
+canonical_vth_sign = "positive observable vth_shift means larger |Vth| for N and P"
+canonical_drive_sign = "positive observable drive_shift means larger |Id| for N and P"
+application = "resolved raw instance values are applied deterministically with ngspice alter commands"
+calibration_evidence = "validation/evidence/v2_benchmark_adapters.json"
+vth_fit_max_residual_acceptance_v = 1.0e-4
+drive_fit_max_residual_acceptance_fraction = 1.0e-3
+
+[family."apm016f/hvt"]
+technology_id = "apm016f"
+family_id = "hvt"
+family_manifest_sha256 = "b77c1cc1795840789e6a4b51a5b52e4f69ef163334e2211a01f3ca12ce746be5"
+architecture = "finfet"
+compact_model = "bsim_cmg"
+vdd_v = 0.8
+vout_reference_v = 0.4
+threshold_coefficient_a = 1.0e-7
+vth_raw_parameter = "delvtrand"
+drive_raw_parameter = "ids0mult"
+drive_raw_nominal = 1.0
+
+[family."apm016f/hvt".device.nfet]
+polarity = "n"
+public_device = "apm016f_hvt_nfet"
+reference_l_m = 3.2e-8
+reference_nfin = 1
+vctrl_reference_v = 0.55
+nominal_gm_over_id_per_v = 15.255391180546262
+nominal_reference_id_a = 5.27276488826210e-6
+nominal_threshold_magnitude_v = 0.397751194375287
+vth_fit_linear = -1.0
+vth_fit_quadratic = 0.0
+vth_fit_max_residual_v = 5.56e-17
+drive_fit_linear = 0.999999999924143
+drive_fit_quadratic = 0.0
+drive_fit_max_residual_fraction = 8.96e-16
+ngspice_device_path_template = "@n.{instance}.napm016f_hvt_core"
+
+[family."apm016f/hvt".device.pfet]
+polarity = "p"
+public_device = "apm016f_hvt_pfet"
+reference_l_m = 3.2e-8
+reference_nfin = 1
+vctrl_reference_v = 0.535
+nominal_gm_over_id_per_v = 15.172276831215113
+nominal_reference_id_a = 3.28941243018058e-6
+nominal_threshold_magnitude_v = 0.392588019670852
+vth_fit_linear = -1.0
+vth_fit_quadratic = 0.0
+vth_fit_max_residual_v = 6.94e-17
+drive_fit_linear = 0.999999999878400
+drive_fit_quadratic = 0.0
+drive_fit_max_residual_fraction = 1.20e-15
+ngspice_device_path_template = "@n.{instance}.napm016f_hvt_core"
+
+[family."apm016f/lvt"]
+technology_id = "apm016f"
+family_id = "lvt"
+family_manifest_sha256 = "babcae54ea1043d1ae0d1842e3a9f4de99d7ed65baecaae33670d15f34313623"
+architecture = "finfet"
+compact_model = "bsim_cmg"
+vdd_v = 0.8
+vout_reference_v = 0.4
+threshold_coefficient_a = 1.0e-7
+vth_raw_parameter = "delvtrand"
+drive_raw_parameter = "ids0mult"
+drive_raw_nominal = 1.0
+
+[family."apm016f/lvt".device.nfet]
+polarity = "n"
+public_device = "apm016f_lvt_nfet"
+reference_l_m = 3.2e-8
+reference_nfin = 1
+vctrl_reference_v = 0.35
+nominal_gm_over_id_per_v = 15.255391180546262
+nominal_reference_id_a = 5.27276488826205e-6
+nominal_threshold_magnitude_v = 0.197751194375288
+vth_fit_linear = -1.0
+vth_fit_quadratic = 0.0
+vth_fit_max_residual_v = 7.81e-17
+drive_fit_linear = 0.999999999924140
+drive_fit_quadratic = 0.0
+drive_fit_max_residual_fraction = 7.50e-16
+ngspice_device_path_template = "@n.{instance}.napm016f_lvt_core"
+
+[family."apm016f/lvt".device.pfet]
+polarity = "p"
+public_device = "apm016f_lvt_pfet"
+reference_l_m = 3.2e-8
+reference_nfin = 1
+vctrl_reference_v = 0.335
+nominal_gm_over_id_per_v = 15.172276831215113
+nominal_reference_id_a = 3.28941243018060e-6
+nominal_threshold_magnitude_v = 0.192588019670851
+vth_fit_linear = -1.0
+vth_fit_quadratic = 0.0
+vth_fit_max_residual_v = 4.86e-17
+drive_fit_linear = 0.999999999878400
+drive_fit_quadratic = 0.0
+drive_fit_max_residual_fraction = 3.68e-16
+ngspice_device_path_template = "@n.{instance}.napm016f_lvt_core"
+
+[family."apm016f/svt"]
+technology_id = "apm016f"
+family_id = "svt"
+family_manifest_sha256 = "9be0d78df10a8f810d15d9035f875cfb7453a4c8387889cdf8afe59bb85ad7d3"
+architecture = "finfet"
+compact_model = "bsim_cmg"
+vdd_v = 0.8
+vout_reference_v = 0.4
+threshold_coefficient_a = 1.0e-7
+vth_raw_parameter = "delvtrand"
+drive_raw_parameter = "ids0mult"
+drive_raw_nominal = 1.0
+
+[family."apm016f/svt".device.nfet]
+polarity = "n"
+public_device = "apm016f_svt_nfet"
+reference_l_m = 3.2e-8
+reference_nfin = 1
+vctrl_reference_v = 0.45
+nominal_gm_over_id_per_v = 15.255391180546262
+nominal_reference_id_a = 5.27276488826209e-6
+nominal_threshold_magnitude_v = 0.297751194375288
+vth_fit_linear = -1.0
+vth_fit_quadratic = 0.0
+vth_fit_max_residual_v = 1.13e-16
+drive_fit_linear = 0.999999999924138
+drive_fit_quadratic = 0.0
+drive_fit_max_residual_fraction = 1.67e-15
+ngspice_device_path_template = "@n.{instance}.napm016f_svt_core"
+
+[family."apm016f/svt".device.pfet]
+polarity = "p"
+public_device = "apm016f_svt_pfet"
+reference_l_m = 3.2e-8
+reference_nfin = 1
+vctrl_reference_v = 0.435
+nominal_gm_over_id_per_v = 15.172276831215113
+nominal_reference_id_a = 3.28941243018057e-6
+nominal_threshold_magnitude_v = 0.292588019670852
+vth_fit_linear = -1.0
+vth_fit_quadratic = 0.0
+vth_fit_max_residual_v = 9.72e-17
+drive_fit_linear = 0.999999999878396
+drive_fit_quadratic = 0.0
+drive_fit_max_residual_fraction = 6.25e-16
+ngspice_device_path_template = "@n.{instance}.napm016f_svt_core"
+
+[family."apm022/hvt"]
+technology_id = "apm022"
+family_id = "hvt"
+family_manifest_sha256 = "c116cc4c43d543e56aeaf1a7601c290d5c0c40bb644242014d149ea22b1ef55e"
+architecture = "planar_bulk"
+compact_model = "bsim4"
+vdd_v = 0.8
+vout_reference_v = 0.4
+threshold_coefficient_a = 1.0e-7
+vth_raw_parameter = "delvto"
+drive_raw_parameter = "mulu0"
+drive_raw_nominal = 1.0
+
+[family."apm022/hvt".device.nmos]
+polarity = "n"
+public_device = "apm022_hvt_nmos"
+reference_l_m = 5.0e-8
+reference_w_m = 1.0e-6
+vctrl_reference_v = 0.755
+nominal_gm_over_id_per_v = 14.759633930947565
+nominal_reference_id_a = 4.03423121925713e-5
+nominal_threshold_magnitude_v = 0.577122668216849
+vth_fit_linear = 1.0
+vth_fit_quadratic = 0.0
+vth_fit_max_residual_v = 1.01e-16
+drive_fit_linear = 0.512218174342685
+drive_fit_quadratic = -0.260571111698620
+drive_fit_max_residual_fraction = 2.92287166123936e-4
+ngspice_device_path_template = "@m.{instance}.mapm022_hvt_core"
+
+[family."apm022/hvt".device.pmos]
+polarity = "p"
+public_device = "apm022_hvt_pmos"
+reference_l_m = 5.0e-8
+reference_w_m = 1.0e-6
+vctrl_reference_v = 0.765
+nominal_gm_over_id_per_v = 14.725816343187448
+nominal_reference_id_a = 3.49301837097183e-5
+nominal_threshold_magnitude_v = 0.590694694391852
+vth_fit_linear = -1.0
+vth_fit_quadratic = 0.0
+vth_fit_max_residual_v = 1.39e-17
+drive_fit_linear = 0.627843906141976
+drive_fit_quadratic = -0.250836320458530
+drive_fit_max_residual_fraction = 2.15510864100599e-4
+ngspice_device_path_template = "@m.{instance}.mapm022_hvt_core"
+
+[family."apm022/lvt"]
+technology_id = "apm022"
+family_id = "lvt"
+family_manifest_sha256 = "7520bf53955813051f82199ca5079ec1e77f8cfc63c9783928f235384cde8fb7"
+architecture = "planar_bulk"
+compact_model = "bsim4"
+vdd_v = 0.8
+vout_reference_v = 0.4
+threshold_coefficient_a = 1.0e-7
+vth_raw_parameter = "delvto"
+drive_raw_parameter = "mulu0"
+drive_raw_nominal = 1.0
+
+[family."apm022/lvt".device.nmos]
+polarity = "n"
+public_device = "apm022_lvt_nmos"
+reference_l_m = 5.0e-8
+reference_w_m = 1.0e-6
+vctrl_reference_v = 0.575
+nominal_gm_over_id_per_v = 14.759633930947565
+nominal_reference_id_a = 4.03423121925713e-5
+nominal_threshold_magnitude_v = 0.397122668216849
+vth_fit_linear = 1.0
+vth_fit_quadratic = 0.0
+vth_fit_max_residual_v = 8.68e-17
+drive_fit_linear = 0.512218174342685
+drive_fit_quadratic = -0.260571111698632
+drive_fit_max_residual_fraction = 2.92287166123492e-4
+ngspice_device_path_template = "@m.{instance}.mapm022_lvt_core"
+
+[family."apm022/lvt".device.pmos]
+polarity = "p"
+public_device = "apm022_lvt_pmos"
+reference_l_m = 5.0e-8
+reference_w_m = 1.0e-6
+vctrl_reference_v = 0.585
+nominal_gm_over_id_per_v = 14.725816343187448
+nominal_reference_id_a = 3.49301837097182e-5
+nominal_threshold_magnitude_v = 0.410694694391852
+vth_fit_linear = -1.0
+vth_fit_quadratic = 0.0
+vth_fit_max_residual_v = 9.72e-17
+drive_fit_linear = 0.627843906141980
+drive_fit_quadratic = -0.250836320458516
+drive_fit_max_residual_fraction = 2.15510864100627e-4
+ngspice_device_path_template = "@m.{instance}.mapm022_lvt_core"
+
+[family."apm022/svt"]
+technology_id = "apm022"
+family_id = "svt"
+family_manifest_sha256 = "aa9fc87f84d365f76d2b0ad6e7d8e8a5b2f61bdb32a77f047930babb7fc3b132"
+architecture = "planar_bulk"
+compact_model = "bsim4"
+vdd_v = 0.8
+vout_reference_v = 0.4
+threshold_coefficient_a = 1.0e-7
+vth_raw_parameter = "delvto"
+drive_raw_parameter = "mulu0"
+drive_raw_nominal = 1.0
+
+[family."apm022/svt".device.nmos]
+polarity = "n"
+public_device = "apm022_svt_nmos"
+reference_l_m = 5.0e-8
+reference_w_m = 1.0e-6
+vctrl_reference_v = 0.655
+nominal_gm_over_id_per_v = 14.759633930947565
+nominal_reference_id_a = 4.03423121925712e-5
+nominal_threshold_magnitude_v = 0.477122668216849
+vth_fit_linear = 1.0
+vth_fit_quadratic = 0.0
+vth_fit_max_residual_v = 8.68e-17
+drive_fit_linear = 0.512218174342684
+drive_fit_quadratic = -0.260571111698597
+drive_fit_max_residual_fraction = 2.92287166122951e-4
+ngspice_device_path_template = "@m.{instance}.mapm022_svt_core"
+
+[family."apm022/svt".device.pmos]
+polarity = "p"
+public_device = "apm022_svt_pmos"
+reference_l_m = 5.0e-8
+reference_w_m = 1.0e-6
+vctrl_reference_v = 0.665
+nominal_gm_over_id_per_v = 14.725816343187448
+nominal_reference_id_a = 3.49301837097183e-5
+nominal_threshold_magnitude_v = 0.490694694391851
+vth_fit_linear = -1.0
+vth_fit_quadratic = 0.0
+vth_fit_max_residual_v = 5.90e-17
+drive_fit_linear = 0.627843906141977
+drive_fit_quadratic = -0.250836320458491
+drive_fit_max_residual_fraction = 2.15510864100571e-4
+ngspice_device_path_template = "@m.{instance}.mapm022_svt_core"
+
+[family."apm045/thkox"]
+technology_id = "apm045"
+family_id = "thkox"
+family_manifest_sha256 = "d2144028bc9f2bbf2bb567b7345243c077ec80cbc5f8d252a8617cc4ad9136fc"
+architecture = "planar_bulk"
+compact_model = "bsim4"
+vdd_v = 2.0
+vout_reference_v = 1.0
+threshold_coefficient_a = 1.0e-7
+vth_raw_parameter = "delvto"
+drive_raw_parameter = "mulu0"
+drive_raw_nominal = 1.0
+
+[family."apm045/thkox".device.nmos]
+polarity = "n"
+public_device = "apm045_thkox_nmos"
+reference_l_m = 1.0e-7
+reference_w_m = 1.0e-6
+vctrl_reference_v = 0.68
+nominal_gm_over_id_per_v = 14.344240606774454
+nominal_reference_id_a = 1.16030230954757e-10
+nominal_threshold_magnitude_v = 1.329019158766012
+vth_fit_linear = 1.024978484243213
+vth_fit_quadratic = 0.00502715366561846
+vth_fit_max_residual_v = 6.68086354908143e-7
+drive_fit_linear = 0.953063178444850
+drive_fit_quadratic = -0.0485936683050528
+drive_fit_max_residual_fraction = 2.89811165612996e-6
+ngspice_device_path_template = "@m.{instance}.mapm045_thkox_core"
+
+[family."apm045/thkox".device.pmos]
+polarity = "p"
+public_device = "apm045_thkox_pmos"
+reference_l_m = 1.0e-7
+reference_w_m = 1.0e-6
+vctrl_reference_v = 0.81
+nominal_gm_over_id_per_v = 14.600497896740201
+nominal_reference_id_a = 1.17373101742421e-10
+nominal_threshold_magnitude_v = 1.457603259623748
+vth_fit_linear = -1.032915958042397
+vth_fit_quadratic = 0.00192885403617263
+vth_fit_max_residual_v = 8.84073814155784e-10
+drive_fit_linear = 1.012797780664982
+drive_fit_quadratic = 0.00188672996128464
+drive_fit_max_residual_fraction = 9.76294834412195e-6
+ngspice_device_path_template = "@m.{instance}.mapm045_thkox_core"
+
+[family."apm045/vtg"]
+technology_id = "apm045"
+family_id = "vtg"
+family_manifest_sha256 = "04ed71e41192850eb0d83ef1f7d5671485f8c472e7d1c86755207e7680bcbd76"
+architecture = "planar_bulk"
+compact_model = "bsim4"
+vdd_v = 1.0
+vout_reference_v = 0.5
+threshold_coefficient_a = 1.0e-7
+vth_raw_parameter = "delvto"
+drive_raw_parameter = "mulu0"
+drive_raw_nominal = 1.0
+
+[family."apm045/vtg".device.nmos]
+polarity = "n"
+public_device = "apm045_vtg_nmos"
+reference_l_m = 1.0e-7
+reference_w_m = 1.0e-6
+vctrl_reference_v = 0.46
+nominal_gm_over_id_per_v = 15.005032075789092
+nominal_reference_id_a = 2.31791023681825e-5
+nominal_threshold_magnitude_v = 0.297015520942541
+vth_fit_linear = 1.080775034461532
+vth_fit_quadratic = 0.00938357580229496
+vth_fit_max_residual_v = 2.11865090052957e-5
+drive_fit_linear = 0.857363498416275
+drive_fit_quadratic = -0.124769469215223
+drive_fit_max_residual_fraction = 3.65096120998332e-5
+ngspice_device_path_template = "@m.{instance}.mapm045_vtg_core"
+
+[family."apm045/vtg".device.pmos]
+polarity = "p"
+public_device = "apm045_vtg_pmos"
+reference_l_m = 1.0e-7
+reference_w_m = 1.0e-6
+vctrl_reference_v = 0.46
+nominal_gm_over_id_per_v = 14.645624926437169
+nominal_reference_id_a = 1.28249215449025e-5
+nominal_threshold_magnitude_v = 0.322315531383652
+vth_fit_linear = -1.073207962166857
+vth_fit_quadratic = -0.0230272333709218
+vth_fit_max_residual_v = 3.12355967944170e-5
+drive_fit_linear = 0.895264891937753
+drive_fit_quadratic = -0.100034117019231
+drive_fit_max_residual_fraction = 1.88321639426337e-5
+ngspice_device_path_template = "@m.{instance}.mapm045_vtg_core"
+
+[family."apm045/vth"]
+technology_id = "apm045"
+family_id = "vth"
+family_manifest_sha256 = "9379dfba193227b5b941cbc5342d1427a18219e28ebb680ce722919ad79d6050"
+architecture = "planar_bulk"
+compact_model = "bsim4"
+vdd_v = 1.0
+vout_reference_v = 0.5
+threshold_coefficient_a = 1.0e-7
+vth_raw_parameter = "delvto"
+drive_raw_parameter = "mulu0"
+drive_raw_nominal = 1.0
+
+[family."apm045/vth".device.nmos]
+polarity = "n"
+public_device = "apm045_vth_nmos"
+reference_l_m = 1.0e-7
+reference_w_m = 1.0e-6
+vctrl_reference_v = 0.65
+nominal_gm_over_id_per_v = 15.029892635036056
+nominal_reference_id_a = 2.07723909038964e-5
+nominal_threshold_magnitude_v = 0.486595282628237
+vth_fit_linear = 1.060763332211355
+vth_fit_quadratic = 0.00114757155909164
+vth_fit_max_residual_v = 2.11337004145384e-5
+drive_fit_linear = 0.900746785729245
+drive_fit_quadratic = -0.0918657900805127
+drive_fit_max_residual_fraction = 1.66497195616400e-5
+ngspice_device_path_template = "@m.{instance}.mapm045_vth_core"
+
+[family."apm045/vth".device.pmos]
+polarity = "p"
+public_device = "apm045_vth_pmos"
+reference_l_m = 1.0e-7
+reference_w_m = 1.0e-6
+vctrl_reference_v = 0.57
+nominal_gm_over_id_per_v = 14.904735092729410
+nominal_reference_id_a = 9.92624700454966e-6
+nominal_threshold_magnitude_v = 0.441652439934347
+vth_fit_linear = -1.059924012550416
+vth_fit_quadratic = -0.0468990023446643
+vth_fit_max_residual_v = 4.09834998465666e-5
+drive_fit_linear = 0.923988417425057
+drive_fit_quadratic = -0.0754659128194324
+drive_fit_max_residual_fraction = 8.46433116777345e-6
+ngspice_device_path_template = "@m.{instance}.mapm045_vth_core"
+
+[family."apm045/vtl"]
+technology_id = "apm045"
+family_id = "vtl"
+family_manifest_sha256 = "9875155c21a9e951b9887196ab47381cc6c8a2e9860acc70ed8db859bb661278"
+architecture = "planar_bulk"
+compact_model = "bsim4"
+vdd_v = 1.0
+vout_reference_v = 0.5
+threshold_coefficient_a = 1.0e-7
+vth_raw_parameter = "delvto"
+drive_raw_parameter = "mulu0"
+drive_raw_nominal = 1.0
+
+[family."apm045/vtl".device.nmos]
+polarity = "n"
+public_device = "apm045_vtl_nmos"
+reference_l_m = 1.0e-7
+reference_w_m = 1.0e-6
+vctrl_reference_v = 0.38
+nominal_gm_over_id_per_v = 15.008789196850241
+nominal_reference_id_a = 2.83046340475924e-5
+nominal_threshold_magnitude_v = 0.209709709661215
+vth_fit_linear = 1.079721354720965
+vth_fit_quadratic = 0.0279532490414192
+vth_fit_max_residual_v = 3.15675204666018e-5
+drive_fit_linear = 0.848163630681680
+drive_fit_quadratic = -0.131269484382715
+drive_fit_max_residual_fraction = 4.14343102659032e-5
+ngspice_device_path_template = "@m.{instance}.mapm045_vtl_core"
+
+[family."apm045/vtl".device.pmos]
+polarity = "p"
+public_device = "apm045_vtl_pmos"
+reference_l_m = 1.0e-7
+reference_w_m = 1.0e-6
+vctrl_reference_v = 0.37
+nominal_gm_over_id_per_v = 15.119386797592787
+nominal_reference_id_a = 1.30736734400794e-5
+nominal_threshold_magnitude_v = 0.233743739947450
+vth_fit_linear = -1.080145465703984
+vth_fit_quadratic = -0.0606799169440453
+vth_fit_max_residual_v = 2.75719255735662e-5
+drive_fit_linear = 0.894638762214700
+drive_fit_quadratic = -0.100571434027026
+drive_fit_max_residual_fraction = 1.90894219947724e-5
+ngspice_device_path_template = "@m.{instance}.mapm045_vtl_core"
+
+[family."apm130/hv"]
+technology_id = "apm130"
+family_id = "hv"
+family_manifest_sha256 = "0f41a1b65a85f99cdbb83ff8037ccfd283da422a952ea62b4ae8efb66f146587"
+architecture = "planar_bulk"
+compact_model = "psp103"
+vdd_v = 3.3
+vout_reference_v = 1.65
+threshold_coefficient_a = 1.0e-7
+vth_raw_parameter = "delvto"
+drive_raw_parameter = "factuo"
+drive_raw_nominal = 1.0
+
+[family."apm130/hv".device.nmos]
+polarity = "n"
+public_device = "apm130_hv_nmos"
+reference_l_m = 9.0e-7
+reference_w_m = 1.0e-6
+vctrl_reference_v = 0.68
+nominal_gm_over_id_per_v = 15.197906691997142
+nominal_reference_id_a = 8.09131861310879e-7
+nominal_threshold_magnitude_v = 0.573590312473946
+vth_fit_linear = 1.005144894598917
+vth_fit_quadratic = 0.000547548115393081
+vth_fit_max_residual_v = 6.88926616448926e-9
+drive_fit_linear = 0.995380753985107
+drive_fit_quadratic = -0.00459853328305484
+drive_fit_max_residual_fraction = 4.46281031851736e-8
+ngspice_device_path_template = "@n.{instance}.xapm130_hv_core.nsg13_hv_nmos"
+
+[family."apm130/hv".device.pmos]
+polarity = "p"
+public_device = "apm130_hv_pmos"
+reference_l_m = 8.0e-7
+reference_w_m = 1.0e-6
+vctrl_reference_v = 0.68
+nominal_gm_over_id_per_v = 15.203447960529582
+nominal_reference_id_a = 1.75392320758033e-7
+nominal_threshold_magnitude_v = 0.657036109386055
+vth_fit_linear = 1.013645712864563
+vth_fit_quadratic = 0.00157156611519445
+vth_fit_max_residual_v = 9.69353743107693e-9
+drive_fit_linear = 0.992396600079294
+drive_fit_quadratic = -0.00754725884565986
+drive_fit_max_residual_fraction = 1.20630678890343e-7
+ngspice_device_path_template = "@n.{instance}.xapm130_hv_core.nsg13_hv_pmos"
+
+[family."apm130/lv"]
+technology_id = "apm130"
+family_id = "lv"
+family_manifest_sha256 = "cd902ad9bb147b61a7766c731795d4067279c736ed7e9c4d8ffacbc764d39234"
+architecture = "planar_bulk"
+compact_model = "psp103"
+vdd_v = 1.2
+vout_reference_v = 0.6
+threshold_coefficient_a = 1.0e-7
+vth_raw_parameter = "delvto"
+drive_raw_parameter = "factuo"
+drive_raw_nominal = 1.0
+
+[family."apm130/lv".device.nmos]
+polarity = "n"
+public_device = "apm130_lv_nmos"
+reference_l_m = 2.6e-7
+reference_w_m = 1.0e-6
+vctrl_reference_v = 0.4
+nominal_gm_over_id_per_v = 15.505411418026354
+nominal_reference_id_a = 4.27961948086443e-6
+nominal_threshold_magnitude_v = 0.274281140423332
+vth_fit_linear = 1.000000064465641
+vth_fit_quadratic = -1.30329567267408e-7
+vth_fit_max_residual_v = 2.54868348648074e-12
+drive_fit_linear = 0.994764083015599
+drive_fit_quadratic = -0.00520932772307072
+drive_fit_max_residual_fraction = 5.72949037103143e-8
+ngspice_device_path_template = "@n.{instance}.xapm130_lv_core.nsg13_lv_nmos"
+
+[family."apm130/lv".device.pmos]
+polarity = "p"
+public_device = "apm130_lv_pmos"
+reference_l_m = 2.6e-7
+reference_w_m = 1.0e-6
+vctrl_reference_v = 0.46
+nominal_gm_over_id_per_v = 15.257028539775485
+nominal_reference_id_a = 1.65050036538355e-6
+nominal_threshold_magnitude_v = 0.379417882856950
+vth_fit_linear = 1.004945731336413
+vth_fit_quadratic = 0.000973084932173111
+vth_fit_max_residual_v = 2.58665929647739e-8
+drive_fit_linear = 0.986532373160454
+drive_fit_quadratic = -0.0132914647828467
+drive_fit_max_residual_fraction = 3.76596727774681e-7
+ngspice_device_path_template = "@n.{instance}.xapm130_lv_core.nsg13_lv_pmos"
+
+[family."apm350/general"]
+technology_id = "apm350"
+family_id = "general"
+family_manifest_sha256 = "21d150ddcc6c0261bbc6a1103449740926c87f9d7921a031628fa3b9f407875a"
+architecture = "planar_bulk"
+compact_model = "bsim3"
+vdd_v = 5.0
+vout_reference_v = 2.5
+threshold_coefficient_a = 1.0e-7
+vth_raw_parameter = "delvto"
+drive_raw_parameter = "mulu0"
+drive_raw_nominal = 1.0
+
+[family."apm350/general".device.nmos]
+polarity = "n"
+public_device = "apm350_general_nmos"
+reference_l_m = 8.0e-7
+reference_w_m = 1.0e-6
+vctrl_reference_v = 0.64
+nominal_gm_over_id_per_v = 15.380232591322404
+nominal_reference_id_a = 1.51696372864252e-6
+nominal_threshold_magnitude_v = 0.486629111448529
+vth_fit_linear = 1.006519322270223
+vth_fit_quadratic = 0.00382433521865806
+vth_fit_max_residual_v = 4.94959274954798e-10
+drive_fit_linear = 0.979076171939547
+drive_fit_quadratic = -0.0351493249451954
+drive_fit_max_residual_fraction = 3.12086625264829e-6
+ngspice_device_path_template = "@m.{instance}.mapm350_general_core"
+
+[family."apm350/general".device.pmos]
+polarity = "p"
+public_device = "apm350_general_pmos"
+reference_l_m = 8.0e-7
+reference_w_m = 1.0e-6
+vctrl_reference_v = 0.74
+nominal_gm_over_id_per_v = 14.327012441033943
+nominal_reference_id_a = 6.50740929683526e-7
+nominal_threshold_magnitude_v = 0.617584179138172
+vth_fit_linear = -1.008021285252409
+vth_fit_quadratic = 0.00448359392826560
+vth_fit_max_residual_v = 5.96910201822176e-10
+drive_fit_linear = 1.009967450317669
+drive_fit_quadratic = -0.0114111639956943
+drive_fit_max_residual_fraction = 1.43191207194748e-5
+ngspice_device_path_template = "@m.{instance}.mapm350_general_core"

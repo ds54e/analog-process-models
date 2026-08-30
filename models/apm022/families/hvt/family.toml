@@ -1,0 +1,77 @@
+# SPDX-FileCopyrightText: APM contributors
+# SPDX-License-Identifier: Apache-2.0
+
+schema = "apm.family.v2"
+technology_id = "apm022"
+id = "hvt"
+architecture = "planar_bulk"
+compact_model = "bsim4"
+gate_stack_id = "generic_thin"
+gate_stack_class = "thin"
+threshold_class = "high"
+origin = "apm_derived_variant"
+base_family = "svt"
+variant_method = "threshold_isolated"
+variant_generation = "models/apm022/families/hvt/variant-generation.toml"
+typical_uses = ["generic_low_leakage", "educational_comparison"]
+default_operating_profile = "nominal"
+provenance = "models/apm022/provenance.toml"
+backend_bindings = ["models/apm022/families/hvt/ngspice/binding.toml", "models/apm022/families/hvt/spectre/binding.toml"]
+
+[[operating_profile]]
+id = "nominal"
+reference_vdd_v = 0.8
+origin = "apm_selected"
+purpose = "release characterization"
+evidence = "Shared APM022 thin-gate operating profile; family separation is threshold-only."
+temperatures_c = [-40, 27, 85, 125]
+
+[[device]]
+id = "nmos"
+polarity = "n"
+public_name = "apm022_hvt_nmos"
+terminals = ["d", "g", "s", "b"]
+geometry_kind = "planar"
+parameters = ["w", "l"]
+lmin_m = 2.5e-8
+lmax_m = 1.0e-7
+wmin_m = 1.0e-7
+wmax_m = 1.0e-4
+default_w_m = 1.0e-6
+characterization_lengths_m = [2.5e-8, 5.0e-8, 1.0e-7]
+
+[[device]]
+id = "pmos"
+polarity = "p"
+public_name = "apm022_hvt_pmos"
+terminals = ["d", "g", "s", "b"]
+geometry_kind = "planar"
+parameters = ["w", "l"]
+lmin_m = 2.5e-8
+lmax_m = 1.0e-7
+wmin_m = 1.0e-7
+wmax_m = 1.0e-4
+default_w_m = 1.0e-6
+characterization_lengths_m = [2.5e-8, 5.0e-8, 1.0e-7]
+
+[threshold]
+method = "constant_current"
+coefficient_a = 1.0e-7
+normalization = "coefficient * W/L"
+vout_low_v = 0.05
+vout_high_fraction_vdd = 0.8
+
+[characterization]
+idvg_points = 161
+idvd_points = 81
+y_frequencies_hz = [1.0e5, 1.0e6]
+
+[behavior_targets]
+nominal_lmin_vth_magnitude_v = [0.28, 0.46]
+nominal_lmin_dibl_v_per_v = [0.14, 0.30]
+nominal_lmin_gm_over_gds_at_gm_over_id_15 = [2.0, 9.0]
+nominal_lmin_on_current_n_a_per_um = [2.5e-3, 4.0e-3]
+nominal_lmin_on_current_p_a_per_um = [2.2e-3, 3.8e-3]
+length_scaling_requires_lower_dibl = true
+length_scaling_requires_higher_intrinsic_gain = false
+length_scaling_requires_higher_vth = true

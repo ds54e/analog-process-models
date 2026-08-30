@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: APM contributors
+# SPDX-License-Identifier: Apache-2.0
+
+schema = "apm.backend-binding.v2"
+technology_id = "apm130"
+family_id = "lv"
+backend = "ngspice"
+compact_model_native_name = "PSP 103.6"
+model_library = "models/apm130/vendor/ihp-sg13g2-models/cornerMOSlv.lib"
+model_section = "mos_tt"
+model_includes = []
+wrapper = "models/apm130/families/lv/ngspice/wrapper.inc"
+osdi_artifacts = ["psp103.osdi", "psp103-nqs.osdi"]
+native_oracle = "PSP 103"
+
+[device.nmos]
+native_vector_template = "@n.xdut.xapm130_lv_core.nsg13_lv_nmos[{quantity}]"
+
+[device.pmos]
+native_vector_template = "@n.xdut.xapm130_lv_core.nsg13_lv_pmos[{quantity}]"

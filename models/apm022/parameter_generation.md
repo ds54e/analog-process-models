@@ -44,7 +44,7 @@ continued scaled planar bulk CMOS. It supplied no APM model-card value.
 | Choice | APM022 value | Rationale |
 | --- | ---: | --- |
 | Supply / physical minimum gate length | 0.8 V / 25 nm | Public class-level geometry and the lower-voltage APM comparison contract. |
-| Characterized lengths | 25, 50, 100 nm | Exact `L/Lmin = 1, 2, 4` comparison coordinates; also the supported v1 length range. |
+| Characterized lengths | 25, 50, 100 nm | Exact `L/Lmin = 1, 2, 4` comparison coordinates and the supported v2 length range. |
 | EOT / junction depth | 0.9 nm / 10 nm | Direct dimensional inputs from the primary study. |
 | Channel / source-drain doping | 2e18 / 1e20 cm^-3 | Independently selected representative high-doping scales for aggressively scaled bulk and source/drain regions. |
 | Baseline threshold coefficients | `VTH0=+0.62/-0.62 V`, N/P | Conventional signed long-channel coefficients; terminal constant-current threshold, not raw `VTH0`, is the public contract. |
@@ -55,7 +55,7 @@ continued scaled planar bulk CMOS. It supplied no APM model-card value.
 | Series-resistance coefficients | `RDSW=20`, `RDSWMIN=5`, N/P | Modest explicit BSIM coefficients that retain monotonic gm through the supported bias range. |
 | Output terms | `PCLM=1.5`; output-DIBL current multipliers off | Produces positive finite gds and deliberately low minimum-length intrinsic gain without negative gm. Threshold DIBL remains controlled by the explicit electrostatic terms. |
 | Intrinsic capacitance | `CAPMOD=2`, explicit overlaps and smoothing | Supplies stable terminal Y-derived Cgg/Cgd/Cgs over 100 kHz and 1 MHz. |
-| Optional leakage effects | gate current, GIDL, impact-ionization additions off | Keeps v1 focused on stable terminal DC and intrinsic admittance behavior; MOS noise and leakage correlation are outside scope. |
+| Optional leakage effects | gate current, GIDL, impact-ionization additions off | Keeps v2 focused on stable terminal DC and intrinsic admittance behavior; MOS noise and leakage correlation are outside scope. |
 
 N and P share the physical geometry and capacitance basis, while threshold,
 mobility, velocity, and electrostatic coefficients are independently selected

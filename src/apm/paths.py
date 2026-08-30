@@ -10,7 +10,7 @@ from pathlib import Path
 def repository_root() -> Path:
     """Return the APM checkout root.
 
-    APM is intentionally a source-tree-oriented v1 distribution because model
+    APM is intentionally a source-tree-oriented distribution because model
     decks and provenance remain normal repository assets.  An explicit root is
     useful for installed/editable entry points and clean-clone tests.
     """

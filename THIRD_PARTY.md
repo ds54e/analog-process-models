@@ -1,85 +1,108 @@
-# Third-Party Model Policy
+# Third-party model policy and provenance
 
-APM v1.0 is intended to be self-contained, but it must not redistribute model assets without clear authority.
+APM 2.0.0 is self-contained for transistor-model sources, but repository-level
+licensing is never assumed to override a model file's own terms.
 
-## Rules
+## Distribution rules
 
-1. Every vendored third-party model file must have an auditable upstream source, exact revision, and original license.
-2. Third-party files are not relicensed under the APM root Apache-2.0 license.
-3. Upstream copyright and license notices must be preserved.
-4. If redistribution rights are ambiguous, the file must not be shipped.
-5. Prefer a clearly redistributable alternative or an independently authored APM model over ambiguous material.
-6. Official PTM/PTM-MG model cards are not to be redistributed in v1.0 unless a future authoritative redistribution review explicitly changes that packaging decision.
-7. **Separately from licensing**, APM022 and the APM016F parameter deck must remain independently authored as required by `GOAL.md` and `AGENTS.md`. Even if PTM/PTM-MG redistribution rights were later clarified, their numeric model-card parameters are not valid source material for those APM-authored v1.0 decks. PTM/PTM-MG may be used only as local, non-redistributed sanity/comparison oracles.
+1. Every vendored third-party model file has an authoritative source, pinned
+   revision, exact imported path, applicable license, retained notice, and
+   SHA-256 declaration in the owning technology's `provenance.toml`.
+2. Third-party files retain their upstream licenses. They are not relicensed
+   under APM's Apache-2.0 project license.
+3. Ambiguous files are excluded even if the surrounding repository appears
+   permissively licensed.
+4. Generated derivatives record source and output hashes and must be
+   reproducible from committed generators.
+5. Generated OSDI binaries and large simulator results are not distributed.
+6. Official PTM/PTM-MG model cards are neither shipped nor valid numeric source
+   material for the independently authored APM022 and APM016F parameters. They
+   may be used only as local, non-redistributed comparison oracles.
 
-## V1.0 provenance
+## APM350
 
-### APM350
+APM350 is an independently authored Apache-2.0 generic BSIM3 deck. No
+third-party model card is shipped.
 
-The preferred `silicon-vlsi-org/eda-technology` SCN4M_SUBM parameter file was
-audited at commit `70c89ecac61bf3409322355463650775f5b29f5e` and rejected. The
-repository has an MIT root license, but the exact model card contains no
-author, original-source, copyright, or file-level permission statement. It is
-not vendored and none of its parameters was used.
+The `silicon-vlsi-org/eda-technology` SCN4M_SUBM candidate was audited at
+commit `70c89ecac61bf3409322355463650775f5b29f5e`. Although the repository root
+is MIT-licensed, the exact parameter file lacks file-level author, original
+source, and permission evidence. APM therefore neither redistributes it nor
+uses its numeric parameters. Only clearly licensed class-level Lmin, Wmin, and
+VDD statements from the candidate repository README informed the documented
+technology class. The rejection record and hashes are in
+`models/apm350/provenance.toml` and `parameter_generation.md`.
 
-APM350 instead ships an independently authored Apache-2.0 generic BSIM3 deck.
-The pinned candidate repository README is used only for its MIT-licensed
-class-level Lmin, Wmin, and VDD statements. The complete audit and exact
-rejected-file hash are in `models/apm350/provenance.toml` and
-`models/apm350/parameter_generation.md`; APM350 has no third-party files.
+## APM130
 
-### APM130
+APM130 vendors an exact subset of IHP Open PDK SG13G2 commit
+`331c00484213b13414777eec1336ef5c29b969bd`:
 
-Pinned source: IHP SG13G2 Open PDK commit
-`331c00484213b13414777eec1336ef5c29b969bd`. The vendored subset contains only the
-low-voltage MOS ngspice cards (Apache-2.0) and the PSP 103.8.2/JUNCAP 200.6.2
-Verilog-A source package (`LicenseRef-Si2-PSP-103.8.2`). The model cards identify
-PSP 103.6; they have been tested with the newer backward-compatible engine.
-Vendored upstream files remain byte-identical. A generated Apache-2.0 Spectre
-derivative selects the IHP TT N/P QS blocks, preserves all selected parameter
-values and notices, changes only the OpenVAF model-type name `psp103va` to the
-native Spectre name `psp103`, and fixes wrapper-only inputs. Its generator,
-transformation record, source hashes, and output hash are in
-`models/apm130/provenance.toml` and `docs/spectre.md`.
+- LV and HV PSP103 MOS model, corner, statistical, and mismatch libraries under
+  Apache-2.0; and
+- PSP 103.8.2/JUNCAP 200.6.2 Verilog-A sources under
+  `LicenseRef-Si2-PSP-103.8.2`.
 
-The PSP/JUNCAP implementation is developed by NXP Semiconductors, Delft
-University of Technology, and CEA. APM acknowledges those developers as
-required by the preserved Si2 in-code terms; the upstream copyright,
-disclaimer, conditions, changelog, README, and release notes remain in the
-vendored source package, with the applicable terms reproduced under
-`LICENSES/LicenseRef-Si2-PSP-103.8.2.txt`.
+The cards identify PSP 103.6 and are executed with the pinned backward-compatible
+103.8.2 engine. All imported upstream files remain byte-identical. Upstream Si2
+terms, developer acknowledgements, notices, changelog, README, and release
+notes are preserved, with the applicable terms reproduced under `LICENSES/`.
 
-### APM045
+Generated LV and HV Spectre TT cards select the pinned QS model blocks, preserve
+all selected parameter values and notices, rename only the OpenVAF module type
+to Spectre's native PSP type, and fix wrapper-only inputs. Source/output hashes
+and the deterministic generator are recorded in
+`models/apm130/provenance.toml`. This transformation does not constitute real
+Spectre validation.
 
-Pinned source: FreePDK45 1.4 from the open-source-clean
-`Chips4Makers/freepdk45` Git mirror, commit
-`688ee68ec5301e5fe11ebee5e53c1109d3cfd51d`. The exact upstream root README
-states that all files are Apache-2.0 and records that SVRF-licensed files were
-removed. APM ships only the byte-identical nominal VTG NMOS/PMOS BSIM4 cards,
-that README, the Apache-2.0 license, and the model-basis manual. Exact hashes
-are in `models/apm045/provenance.toml`.
+## APM045
 
-The model cards state that they are customized PTM-derived 45 nm cards. That
-ancestry is disclosed for this deliberately upstream-derived predictive kit;
-the values are not source material for the independently authored APM022 deck.
+APM045 vendors the required nominal N/P VTL, VTG, VTH, and THKOX BSIM4 cards
+from FreePDK45 1.4, Subversion revision 173, using the open-source-clean
+`Chips4Makers/freepdk45` mirror commit
+`688ee68ec5301e5fe11ebee5e53c1109d3cfd51d`.
 
-### APM022
+The exact upstream README declares the files Apache-2.0 and states that
+SVRF-EULA files were removed. APM preserves that README, the Apache-2.0 license,
+and the model-basis manual. The shipped cards are byte-identical and every hash
+is declared in `models/apm045/provenance.toml`.
 
-APM-authored BSIM4 parameter deck. Public literature and compact-model specifications may inform behavior targets. Official PTM22 may be used only as a local non-redistributed sanity/comparison oracle and is not numeric source material for the deck.
+The cards disclose customized PTM ancestry for this intentionally
+upstream-derived predictive model set. That ancestry is not a license or
+technical basis for APM022, whose values were independently authored.
 
-### APM016F
+## APM022
 
-APM-authored parameter deck using UC Berkeley BSIM-CMG 112.1.0, released
-2026-04-28 and distributed under ECL-2.0. The exact upstream `LICENSE.txt`,
-`NOTICE.txt`, and Verilog-A engine sources are preserved without modification;
-the upstream archive SHA-256 is recorded in `models/apm016f/provenance.toml`.
-Official PTM-MG16 may be used only as a local, non-redistributed sanity/comparison
-oracle and is not numeric source material for the deck.
+APM022's SVT deck, VTH0-isolated LVT/HVT variants, manifests, wrappers, and
+variant-generation records are APM-authored Apache-2.0 assets. Public
+literature and BSIM4 specifications establish dimensional context, parameter
+semantics, and observable behavior targets. Official PTM22 card values were not
+copied, transcribed, interpolated, fitted, optimized against, or otherwise used
+as a numeric source.
 
-## Release requirement
+The declared source inventory and independent-variant constraints are in
+`models/apm022/provenance.toml` and `parameter_generation.md`.
 
-`provenance.toml` for every v1.0 kit is complete. The release validator hashes
-every declared imported file, requires the vendored filesystem to match that
-manifest exactly, checks retained license/notice handling, and runs the
-repository-wide REUSE/SPDX audit. Repository-level license assumptions are not
-used as a substitute for the recorded file-level review.
+## APM016F
+
+APM016F's SVT parameter deck, PHIG-only LVT/HVT variants, manifests, wrappers,
+and generation records are independently authored Apache-2.0 assets. They use
+the UC Berkeley BSIM-CMG 112.1.0 engine released 2026-04-28 under ECL-2.0. The
+engine's exact `LICENSE.txt`, `NOTICE.txt`, archive hash, and unmodified
+Verilog-A sources are preserved and declared in
+`models/apm016f/provenance.toml`.
+
+Official PTM-MG16 card values were not copied, transcribed, interpolated,
+fitted, optimized against, or otherwise used as a numeric source.
+
+## Automated release audit
+
+`apm provenance-check` verifies the complete shipped model inventory and
+hashes, retained upstream license/notice boundaries, APM022/APM016F independent
+authorship records, family binding closure, generated-output declarations,
+Spectre claim boundaries, and repository-wide REUSE/SPDX compliance.
+
+The release validator also rejects missing local includes, remote model
+dependencies, generated binaries or raw results in Git, undeclared shipped
+model files, oversized artifacts, credential signatures, or a provenance
+manifest whose filesystem inventory differs from its declarations.

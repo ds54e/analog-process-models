@@ -1,0 +1,73 @@
+# SPDX-FileCopyrightText: APM contributors
+# SPDX-License-Identifier: Apache-2.0
+
+schema = "apm.family.v2"
+technology_id = "apm045"
+id = "vtg"
+architecture = "planar_bulk"
+compact_model = "bsim4"
+gate_stack_id = "thin_oxide"
+gate_stack_class = "thin"
+threshold_class = "standard"
+origin = "upstream_model"
+upstream_flavor = "VTG"
+typical_uses = ["general_threshold"]
+default_operating_profile = "nominal"
+provenance = "models/apm045/provenance.toml"
+backend_bindings = ["models/apm045/families/vtg/ngspice/binding.toml", "models/apm045/families/vtg/spectre/binding.toml"]
+
+[[operating_profile]]
+id = "nominal"
+reference_vdd_v = 1.0
+origin = "upstream"
+purpose = "release characterization"
+evidence = "Pinned FreePDK45 manual reports VTG behavior at 1.0 V."
+temperatures_c = [-40, 27, 85, 125]
+
+[[operating_profile]]
+id = "common_overlap_1v0"
+reference_vdd_v = 1.0
+origin = "apm_selected"
+purpose = "APM045 VTG/THKOX common-overlap gate-stack comparison"
+evidence = "1.0 V is the VTG native profile and a conservative terminal-model bias for the thicker-oxide card; it is explicitly a behavior comparison, not a reliability rating."
+temperatures_c = [-40, 27, 85, 125]
+
+[[device]]
+id = "nmos"
+polarity = "n"
+public_name = "apm045_vtg_nmos"
+terminals = ["d", "g", "s", "b"]
+geometry_kind = "planar"
+parameters = ["w", "l"]
+lmin_m = 5.0e-8
+lmax_m = 1.0e-6
+wmin_m = 9.0e-8
+wmax_m = 1.6e-5
+default_w_m = 1.0e-6
+characterization_lengths_m = [5.0e-8, 1.0e-7, 2.0e-7]
+
+[[device]]
+id = "pmos"
+polarity = "p"
+public_name = "apm045_vtg_pmos"
+terminals = ["d", "g", "s", "b"]
+geometry_kind = "planar"
+parameters = ["w", "l"]
+lmin_m = 5.0e-8
+lmax_m = 1.0e-6
+wmin_m = 9.0e-8
+wmax_m = 1.6e-5
+default_w_m = 1.0e-6
+characterization_lengths_m = [5.0e-8, 1.0e-7, 2.0e-7]
+
+[threshold]
+method = "constant_current"
+coefficient_a = 1.0e-7
+normalization = "coefficient * W/L"
+vout_low_v = 0.05
+vout_high_fraction_vdd = 0.8
+
+[characterization]
+idvg_points = 101
+idvd_points = 101
+y_frequencies_hz = [1.0e5, 1.0e6]

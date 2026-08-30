@@ -1,33 +1,43 @@
 # APM350
 
 APM350 is the open generic mature-planar anchor in Analog Process Models. Its
-technology class is 0.35 um, while its honest actual minimum modeled length is
-0.4 um. The BSIM3 parameter deck is independently authored by APM and is not
-foundry-correlated or a manufacturable PDK.
+technology class is 0.35 µm; its honest minimum modeled length is 0.4 µm. The
+BSIM3 parameter deck is independently APM-authored, not foundry-correlated, and
+not a manufacturable PDK.
 
-The stable public devices are `apm350_nmos` and `apm350_pmos`, with terminal
-order `d g s b`. Their only public sizing parameters are `w` and `l`; internal
-source/drain diffusion geometry is fixed by the wrapper and no multiplicity,
-finger, or layout parameter is exposed. The supported v1 length range is
-0.4–10 um, the supported width range is 0.6–100 um, and the nominal supply is
-5 V.
+## Electrical family and devices
 
-ngspice uses its native BSIM3 implementation:
+The v2 catalog declares one family, `apm350/general`:
+
+- `apm350_general_nmos d g s b w=<length> l=<length>`
+- `apm350_general_pmos d g s b w=<length> l=<length>`
+
+Only `w,l` are public. Internal diffusion geometry is fixed by the wrapper;
+multiplicity, finger, and layout parameters are not exposed. The documented
+model range is L = 0.4–10 µm and W = 0.6–100 µm. Its default Operating Profile
+uses 5.0 V at −40, 27, 85, and 125 °C; this is characterization metadata, not a
+reliability rating.
+
+## ngspice
+
+APM350 uses native BSIM3 and needs no OSDI artifact:
 
 ```spice
 .include "models/apm350/ngspice/apm350_models.inc"
-.include "models/apm350/ngspice/apm350_wrappers.inc"
+.include "models/apm350/families/general/ngspice/wrapper.inc"
 
-Xn d g s b apm350_nmos w=1u l=0.4u
-Xp d g s b apm350_pmos w=1u l=0.4u
+Xn d g s b apm350_general_nmos w=1u l=0.4u
+Xp d g s b apm350_general_pmos w=1u l=0.4u
 ```
 
-See [parameter_generation.md](parameter_generation.md) for the rejected-source
-license audit, independent parameter choices, terminal behavior contract, and
-limitations. Regenerate nominal evidence with
-`apm characterize apm350 --output DIR`.
+Run `apm characterize apm350/general --output DIR` for nominal terminal
+characterization. `technology.toml`, `family.toml`, and backend
+`binding.toml` files are the runtime source of truth.
 
-The model-only Spectre artifact is `spectre/apm350.scs`. It preserves the same
-public names and `w,l` sizing and selects native Spectre BSIM3v3 through the
-SPICE level-49 mapping. It is **experimental/unverified**; see
-[`docs/spectre.md`](../../docs/spectre.md).
+See [parameter_generation.md](parameter_generation.md) for independent choices,
+the rejected-source licensing audit, behavior targets, and limitations.
+`provenance.toml` declares every shipped model asset and hash.
+
+The family Spectre artifact is
+`families/general/spectre/model.scs`. It is model-only
+**experimental/unverified** and has not been parsed or simulated by Spectre.

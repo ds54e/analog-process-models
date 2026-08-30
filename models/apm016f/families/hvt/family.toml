@@ -1,0 +1,72 @@
+# SPDX-FileCopyrightText: APM contributors
+# SPDX-License-Identifier: Apache-2.0
+
+schema = "apm.family.v2"
+technology_id = "apm016f"
+id = "hvt"
+architecture = "finfet"
+compact_model = "bsim_cmg"
+gate_stack_id = "generic_finfet_thin"
+gate_stack_class = "thin"
+threshold_class = "high"
+origin = "apm_derived_variant"
+base_family = "svt"
+variant_method = "workfunction_dominant"
+variant_generation = "models/apm016f/families/hvt/variant-generation.toml"
+typical_uses = ["generic_low_leakage", "educational_comparison"]
+default_operating_profile = "nominal"
+provenance = "models/apm016f/provenance.toml"
+backend_bindings = ["models/apm016f/families/hvt/ngspice/binding.toml", "models/apm016f/families/hvt/spectre/binding.toml"]
+
+[[operating_profile]]
+id = "nominal"
+reference_vdd_v = 0.8
+origin = "apm_selected_public_literature"
+purpose = "release characterization"
+evidence = "Published 16 nm FinFET device data use VDD=0.8 V; all threshold families share this profile."
+temperatures_c = [-40, 27, 85, 125]
+
+[[device]]
+id = "nfet"
+polarity = "n"
+public_name = "apm016f_hvt_nfet"
+terminals = ["d", "g", "s", "b"]
+geometry_kind = "finfet"
+parameters = ["l", "nfin"]
+lmin_m = 1.6e-8
+lmax_m = 6.4e-8
+characterization_lengths_m = [1.6e-8, 3.2e-8, 6.4e-8]
+characterization_nfin = [1, 2, 4]
+
+[[device]]
+id = "pfet"
+polarity = "p"
+public_name = "apm016f_hvt_pfet"
+terminals = ["d", "g", "s", "b"]
+geometry_kind = "finfet"
+parameters = ["l", "nfin"]
+lmin_m = 1.6e-8
+lmax_m = 6.4e-8
+characterization_lengths_m = [1.6e-8, 3.2e-8, 6.4e-8]
+characterization_nfin = [1, 2, 4]
+
+[threshold]
+method = "constant_current"
+coefficient_a = 1.0e-7
+normalization = "coefficient * NFIN"
+vout_low_v = 0.05
+vout_high_fraction_vdd = 0.8
+
+[characterization]
+idvg_points = 161
+idvd_points = 81
+y_frequencies_hz = [1.0e5, 1.0e6]
+
+[behavior_targets]
+nominal_lmin_vth_magnitude_v = [0.28, 0.48]
+nominal_lmin_dibl_v_per_v = [0.0, 0.08]
+nfin_normalized_id_relative_spread_max = 0.02
+nfin_normalized_gm_relative_spread_max = 0.02
+nfin_normalized_capacitance_relative_spread_max = 0.02
+nfin_gm_over_id_relative_spread_max = 0.02
+nfin_gm_over_gds_relative_spread_max = 0.05
