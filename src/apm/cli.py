@@ -28,6 +28,7 @@ from .doctor import run_doctor
 from .model_build import build_models
 from .native_variation import NativeVariationError, validate_apm130_native
 from .noise import NoiseCharacterizationError, characterize_noise_selector
+from .noise_catalog import NoiseCatalogError, validate_noise_catalog
 from .noise_method_validate import NoiseMethodValidationError, validate_noise_method
 from .noise_validate import NoiseValidationError, validate_noise_spike
 from .paths import repository_root
@@ -181,6 +182,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Run the complete V3-N1 noise acquisition and fit-method qualification",
     )
     p_noise_method_check.add_argument("--output", type=Path, required=True)
+
+    p_noise_catalog_check = sub.add_parser(
+        "noise-catalog-check",
+        help="Run or strictly resume the complete V3-N2 catalog-wide noise qualification",
+    )
+    p_noise_catalog_check.add_argument("--output", type=Path, required=True)
+    p_noise_catalog_check.add_argument(
+        "--resume",
+        action="store_true",
+        help="Reuse only completed results whose request and bound artifact hashes validate",
+    )
 
     return parser
 
@@ -349,6 +361,27 @@ def main() -> int:
                 )
             )
             return 0
+        if args.command == "noise-catalog-check":
+            result = validate_noise_catalog(
+                args.output,
+                resume=args.resume,
+                progress=lambda message: print(message, file=sys.stderr, flush=True),
+            )
+            print(
+                json.dumps(
+                    {
+                        "status": result["status"],
+                        "milestone": result["milestone"],
+                        "acceptance_result": result["acceptance_result"],
+                        "output_directory": result["output_directory"],
+                        "report_path": result["report_path"],
+                        "report_sha256": result["report_sha256"],
+                    },
+                    indent=2,
+                    sort_keys=True,
+                )
+            )
+            return 0
         if args.command == "characterization-check":
             result = validate_all_characterizations(args.output)
             print(
@@ -422,6 +455,7 @@ def main() -> int:
         json.JSONDecodeError,
         NativeVariationError,
         NoiseCharacterizationError,
+        NoiseCatalogError,
         NoiseMethodValidationError,
         NoiseValidationError,
         OSError,

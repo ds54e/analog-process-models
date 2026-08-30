@@ -57,6 +57,11 @@ ADAPTIVE_SEARCH_CAP_HZ = ADAPTIVE_FREQUENCY_STOPS_HZ[-1]
 MAX_BIAS_ITERATIONS = 20
 FINITE_DIFFERENCE_RELATIVE_TOLERANCE = 0.02
 NATIVE_ORACLE_RELATIVE_TOLERANCE = 0.02
+# ngspice 47 clamps the gain-squared denominator used for its convenience
+# inoise_spectrum vector at approximately 1e-20.  The APM canonical value is
+# always derived from the separately acquired actual complex transfer.  Below
+# this floor the backend vector remains raw evidence but is not a valid oracle.
+NGSPICE_INPUT_REFERRED_GAIN_SQUARED_FLOOR = 1.0e-20
 
 
 class NoiseCharacterizationError(RuntimeError):
@@ -206,6 +211,9 @@ def resolve_noise_device(
     operating_profile_id: str | None = None,
     temperature_c: int = DEFAULT_TEMPERATURE_C,
     vout_v: float | None = None,
+    l_m: float | None = None,
+    w_m: float | None = None,
+    nfin: int | None = None,
 ) -> ResolvedNoiseDevice:
     catalog = load_catalog(root)
     resolved = catalog.resolve(selector)
@@ -215,15 +223,46 @@ def resolve_noise_device(
     kit = load_family(family.selector, root, operating_profile_id)
     if resolved.polarity not in kit.polarities:
         raise NoiseCharacterizationError(f"{selector}: device polarity is not bound for ngspice")
-    l_m = DEFAULT_L_OVER_LMIN * resolved.lmin_m
-    if resolved.lmax_m is not None and l_m > resolved.lmax_m:
-        raise NoiseCharacterizationError(f"{selector}: L/Lmin=2 exceeds the recorded model range")
+    resolved_l_m = (
+        DEFAULT_L_OVER_LMIN * resolved.lmin_m if l_m is None else float(l_m)
+    )
+    if not math.isfinite(resolved_l_m) or resolved_l_m < resolved.lmin_m:
+        raise NoiseCharacterizationError(
+            f"{selector}: length must be finite and >= Lmin={resolved.lmin_m:g} m"
+        )
+    if resolved.lmax_m is not None and resolved_l_m > resolved.lmax_m:
+        raise NoiseCharacterizationError(
+            f"{selector}: length {resolved_l_m:g} m exceeds Lmax={resolved.lmax_m:g} m"
+        )
     if resolved.geometry_kind == "planar":
+        if nfin is not None:
+            raise NoiseCharacterizationError(f"{selector}: planar geometry cannot specify NFIN")
         if resolved.default_w_m is None:
             raise NoiseCharacterizationError(f"{selector}: planar default width is missing")
-        geometry: NoiseGeometry = PlanarGeometry(l_m=l_m, w_m=resolved.default_w_m)
+        resolved_w_m = resolved.default_w_m if w_m is None else float(w_m)
+        if not math.isfinite(resolved_w_m) or resolved_w_m <= 0.0:
+            raise NoiseCharacterizationError(f"{selector}: planar width must be finite/positive")
+        if resolved.wmin_m is not None and resolved_w_m < resolved.wmin_m:
+            raise NoiseCharacterizationError(
+                f"{selector}: width {resolved_w_m:g} m is below Wmin={resolved.wmin_m:g} m"
+            )
+        if resolved.wmax_m is not None and resolved_w_m > resolved.wmax_m:
+            raise NoiseCharacterizationError(
+                f"{selector}: width {resolved_w_m:g} m exceeds Wmax={resolved.wmax_m:g} m"
+            )
+        geometry: NoiseGeometry = PlanarGeometry(l_m=resolved_l_m, w_m=resolved_w_m)
     elif resolved.geometry_kind == "finfet":
-        geometry = FinFETGeometry(l_m=l_m, nfin=1)
+        if w_m is not None:
+            raise NoiseCharacterizationError(
+                f"{selector}: FinFET geometry cannot specify planar width"
+            )
+        resolved_nfin = 1 if nfin is None else nfin
+        if resolved_nfin not in resolved.characterization_nfin:
+            raise NoiseCharacterizationError(
+                f"{selector}: NFIN={resolved_nfin!r} is not in the manifest-declared "
+                f"characterization grid {resolved.characterization_nfin}"
+            )
+        geometry = FinFETGeometry(l_m=resolved_l_m, nfin=resolved_nfin)
     else:
         raise NoiseCharacterizationError(
             f"{selector}: unsupported geometry kind {resolved.geometry_kind!r}"
@@ -262,13 +301,21 @@ def _control_osdi(resolved: ResolvedNoiseDevice, toolchain: Toolchain) -> list[s
     ]
 
 
-def _operating_point_id(resolved: ResolvedNoiseDevice, target_per_v: float) -> str:
-    target = f"{target_per_v:g}".replace(".", "p")
+def _operating_point_id(resolved: ResolvedNoiseDevice, bias: dict[str, Any]) -> str:
+    target_per_v = bias.get("target_per_v")
+    if bias.get("bias_mode") == "explicit_vctrl":
+        control = f"{bias['requested_vctrl_v']:.9g}".replace("-", "m").replace(".", "p")
+        base = f"vctrl-{control}v"
+    else:
+        if target_per_v is None:
+            raise NoiseCharacterizationError("gm/Id operating point is missing its target")
+        target = f"{target_per_v:g}".replace(".", "p")
+        base = "gm-id-15" if target_per_v == DEFAULT_GM_OVER_ID_TARGET else f"gm-id-{target}"
     if resolved.vout_mode == "canonical_half_vdd":
         # Preserve the completed V3-N0 canonical identifier exactly.
-        return "gm-id-15" if target_per_v == DEFAULT_GM_OVER_ID_TARGET else f"gm-id-{target}"
+        return base
     millivolts = f"{resolved.vout_v * 1.0e3:g}".replace(".", "p")
-    return f"gm-id-{target}-vout-{millivolts}mv"
+    return f"{base}-vout-{millivolts}mv"
 
 
 def _coarse_bias_sweep(
@@ -454,6 +501,7 @@ def resolve_gm_over_id_bias(
     *,
     target_per_v: float = DEFAULT_GM_OVER_ID_TARGET,
     relative_tolerance: float = DEFAULT_GM_OVER_ID_RELATIVE_TOLERANCE,
+    require_native_oracle_agreement: bool = True,
 ) -> dict[str, Any]:
     coarse = _coarse_bias_sweep(resolved, toolchain, output)
     usable = [
@@ -474,6 +522,7 @@ def resolve_gm_over_id_bias(
             "schema": "apm.noise-bias-resolution.v1",
             "method_id": BIAS_METHOD_ID,
             "method_version": BIAS_METHOD_VERSION,
+            "bias_mode": "gm_over_id_target",
             "status": "target_not_reachable",
             "reason": "coarse_sweep_did_not_bracket_target",
             "target_per_v": target_per_v,
@@ -528,6 +577,7 @@ def resolve_gm_over_id_bias(
             "schema": "apm.noise-bias-resolution.v1",
             "method_id": BIAS_METHOD_ID,
             "method_version": BIAS_METHOD_VERSION,
+            "bias_mode": "gm_over_id_target",
             "status": "target_not_reachable",
             "reason": "precise_finite_differences_invalidated_coarse_bracket",
             "target_per_v": target_per_v,
@@ -579,7 +629,7 @@ def resolve_gm_over_id_bias(
         status = "failed_tolerance"
     elif not finite_difference_pass:
         status = "failed_finite_difference_convergence"
-    elif not native_oracle_pass:
+    elif require_native_oracle_agreement and not native_oracle_pass:
         status = "failed_native_oracle_agreement"
     else:
         status = "resolved"
@@ -587,6 +637,7 @@ def resolve_gm_over_id_bias(
         "schema": "apm.noise-bias-resolution.v1",
         "method_id": BIAS_METHOD_ID,
         "method_version": BIAS_METHOD_VERSION,
+        "bias_mode": "gm_over_id_target",
         "status": status,
         "target_per_v": target_per_v,
         "relative_tolerance": relative_tolerance,
@@ -600,7 +651,14 @@ def resolve_gm_over_id_bias(
             "gds_relative_change": best["gds_convergence_relative"],
         },
         "native_oracle_validation": {
-            "status": "pass" if native_oracle_pass else "fail",
+            "status": (
+                "pass"
+                if native_oracle_pass
+                else "fail"
+                if require_native_oracle_agreement
+                else "diagnostic_mismatch"
+            ),
+            "required_for_acceptance": require_native_oracle_agreement,
             "relative_tolerance": NATIVE_ORACLE_RELATIVE_TOLERANCE,
             "gm_relative_error": best["native_gm_relative_error"],
             "gds_relative_error": best["native_gds_relative_error"],
@@ -621,6 +679,83 @@ def resolve_gm_over_id_bias(
         raise NoiseCharacterizationError(
             f"{resolved.selector}: bias resolution failed with status {status}; "
             f"gm/Id target error={best['relative_target_error']:.3%}"
+        )
+    return result
+
+
+def resolve_explicit_vctrl_bias(
+    resolved: ResolvedNoiseDevice,
+    toolchain: Toolchain,
+    output: Path,
+    *,
+    vctrl_v: float,
+    require_native_oracle_agreement: bool = True,
+) -> dict[str, Any]:
+    """Resolve one explicit effective control bias with canonical finite differences."""
+
+    requested = float(vctrl_v)
+    if not math.isfinite(requested) or not 0.0 < requested < resolved.kit.vdd_v:
+        raise NoiseCharacterizationError(
+            f"{resolved.selector}: explicit VCTRL must be finite and within "
+            f"(0, {resolved.kit.vdd_v:g}) V"
+        )
+    final = _precise_bias_evaluation(resolved, toolchain, output, requested, 1)
+    finite_difference_pass = (
+        final["gm_convergence_relative"] < FINITE_DIFFERENCE_RELATIVE_TOLERANCE
+        and final["gds_convergence_relative"] < FINITE_DIFFERENCE_RELATIVE_TOLERANCE
+    )
+    native_oracle_pass = (
+        final["native_gm_relative_error"] < NATIVE_ORACLE_RELATIVE_TOLERANCE
+        and final["native_gds_relative_error"] < NATIVE_ORACLE_RELATIVE_TOLERANCE
+    )
+    if not math.isfinite(final["gm_over_id_per_v"]):
+        status = "failed_nonfinite_gm_over_id"
+    elif not finite_difference_pass:
+        status = "failed_finite_difference_convergence"
+    elif require_native_oracle_agreement and not native_oracle_pass:
+        status = "failed_native_oracle_agreement"
+    else:
+        status = "resolved"
+    result = {
+        "schema": "apm.noise-bias-resolution.v1",
+        "method_id": BIAS_METHOD_ID,
+        "method_version": BIAS_METHOD_VERSION,
+        "bias_mode": "explicit_vctrl",
+        "status": status,
+        "requested_vctrl_v": requested,
+        "target_per_v": None,
+        "achieved_per_v": final["gm_over_id_per_v"],
+        "relative_tolerance": None,
+        "relative_target_error": None,
+        "iteration_count": 1,
+        "finite_difference_validation": {
+            "status": "pass" if finite_difference_pass else "fail",
+            "relative_tolerance": FINITE_DIFFERENCE_RELATIVE_TOLERANCE,
+            "gm_relative_change": final["gm_convergence_relative"],
+            "gds_relative_change": final["gds_convergence_relative"],
+        },
+        "native_oracle_validation": {
+            "status": (
+                "pass"
+                if native_oracle_pass
+                else "fail"
+                if require_native_oracle_agreement
+                else "diagnostic_mismatch"
+            ),
+            "required_for_acceptance": require_native_oracle_agreement,
+            "relative_tolerance": NATIVE_ORACLE_RELATIVE_TOLERANCE,
+            "gm_relative_error": final["native_gm_relative_error"],
+            "gds_relative_error": final["native_gds_relative_error"],
+        },
+        "coarse_bracket": None,
+        "coarse_sweep": None,
+        "evaluations": [final],
+        "final": final,
+    }
+    _json_write(output / "bias_resolution.json", result)
+    if status != "resolved":
+        raise NoiseCharacterizationError(
+            f"{resolved.selector}: explicit VCTRL evaluation failed with status {status}"
         )
     return result
 
@@ -689,7 +824,7 @@ def _run_mos_noise(
     points_per_decade: int,
 ) -> dict[str, Any]:
     final = bias["final"]
-    operating_point_id = _operating_point_id(resolved, bias["target_per_v"])
+    operating_point_id = _operating_point_id(resolved, bias)
     netlist = output / "netlists" / "noise_spectrum.cir"
     log = output / "logs" / "noise_spectrum.log"
     raw_noise = output / "raw" / "noise_all_vectors.dat"
@@ -755,6 +890,8 @@ def _run_mos_noise(
         raise NoiseCharacterizationError("noise and AC transfer grids have different lengths")
     spectrum: list[dict[str, Any]] = []
     input_ref_relative_errors: list[float] = []
+    qualified_input_ref_relative_errors: list[float] = []
+    unqualified_input_ref_point_count = 0
     for noise_row, ac_row in zip(noise_records, ac_rows):
         frequency = noise_row["frequency"]
         if not math.isclose(frequency, ac_row[0], rel_tol=1e-10):
@@ -768,6 +905,16 @@ def _run_mos_noise(
             abs(s_vgate), abs(backend_input), 1e-300
         )
         input_ref_relative_errors.append(relative_error)
+        transfer_squared = (
+            canonical["y_dg_real_s"] ** 2 + canonical["y_dg_imag_s"] ** 2
+        )
+        input_ref_oracle_qualified = (
+            transfer_squared > NGSPICE_INPUT_REFERRED_GAIN_SQUARED_FLOOR
+        )
+        if input_ref_oracle_qualified:
+            qualified_input_ref_relative_errors.append(relative_error)
+        else:
+            unqualified_input_ref_point_count += 1
         spectrum.append(
             {
                 "operating_point_id": operating_point_id,
@@ -775,11 +922,16 @@ def _run_mos_noise(
                 **canonical,
                 "backend_inoise_spectrum_v2_per_hz": backend_input,
                 "backend_input_ref_relative_error": relative_error,
+                "backend_input_ref_oracle_qualified": input_ref_oracle_qualified,
             }
         )
-    if max(input_ref_relative_errors) > 1e-5:
+    if (
+        qualified_input_ref_relative_errors
+        and max(qualified_input_ref_relative_errors) > 1e-5
+    ):
         raise NoiseCharacterizationError(
-            "calculated gate-referred PSD disagrees with ngspice input-referred PSD"
+            "calculated gate-referred PSD disagrees with the qualified ngspice "
+            "input-referred PSD oracle"
         )
     low_frequency_gm_error = abs(abs(complex(spectrum[0]["y_dg_real_s"], spectrum[0]["y_dg_imag_s"])) - final["gm_s"]) / final["gm_s"]
     if low_frequency_gm_error > 0.05:
@@ -831,6 +983,7 @@ def _run_mos_noise(
             "y_dg_imag_s",
             "backend_inoise_spectrum_v2_per_hz",
             "backend_input_ref_relative_error",
+            "backend_input_ref_oracle_qualified",
         ],
         spectrum,
     )
@@ -841,6 +994,23 @@ def _run_mos_noise(
         "native_oracles": native_oracles,
         "low_frequency_gm_relative_error": low_frequency_gm_error,
         "max_backend_input_ref_relative_error": max(input_ref_relative_errors),
+        "qualified_backend_input_ref_oracle": {
+            "status": (
+                "validated"
+                if qualified_input_ref_relative_errors
+                else "not_available_below_gain_floor"
+            ),
+            "gain_squared_floor": NGSPICE_INPUT_REFERRED_GAIN_SQUARED_FLOOR,
+            "qualified_point_count": len(qualified_input_ref_relative_errors),
+            "unqualified_point_count": unqualified_input_ref_point_count,
+            "max_qualified_relative_error": (
+                max(qualified_input_ref_relative_errors)
+                if qualified_input_ref_relative_errors
+                else None
+            ),
+            "raw_max_relative_error_all_points": max(input_ref_relative_errors),
+            "canonical_definition_uses_actual_complex_transfer_at_all_points": True,
+        },
         "log_audit": log_audit,
         "netlist": str(netlist.relative_to(output)),
         "log": str(log.relative_to(output)),
@@ -855,7 +1025,7 @@ def _operating_point_row(
 ) -> dict[str, Any]:
     final = bias["final"]
     return {
-        "operating_point_id": _operating_point_id(resolved, bias["target_per_v"]),
+        "operating_point_id": _operating_point_id(resolved, bias),
         "technology_id": resolved.device.technology_id,
         "family_id": resolved.device.family_id,
         "device_id": resolved.device.device_id,
@@ -876,6 +1046,8 @@ def _operating_point_row(
         "gds_s": final["gds_s"],
         "gm_over_id_per_v": final["gm_over_id_per_v"],
         "gm_over_gds": final["gm_over_gds"],
+        "bias_mode": bias["bias_mode"],
+        "requested_vctrl_v": bias.get("requested_vctrl_v"),
         "gm_over_id_target_per_v": bias["target_per_v"],
         "gm_over_id_relative_error": bias["relative_target_error"],
         "gm_over_id_resolution_status": bias["status"],
@@ -953,13 +1125,19 @@ def characterize_noise_selector(
     operating_profile_id: str | None = None,
     temperature_c: int = DEFAULT_TEMPERATURE_C,
     gm_over_id_target: float = DEFAULT_GM_OVER_ID_TARGET,
+    vctrl_v: float | None = None,
     vout_v: float | None = None,
+    l_m: float | None = None,
+    w_m: float | None = None,
+    nfin: int | None = None,
     frequency_start_hz: float = DEFAULT_FREQUENCY_START_HZ,
     frequency_stop_hz: float = DEFAULT_FREQUENCY_STOP_HZ,
     points_per_decade: int = DEFAULT_POINTS_PER_DECADE,
     adaptive_white_search: bool = True,
+    require_native_oracle_agreement: bool = True,
     root: Path | None = None,
     toolchain: Toolchain | None = None,
+    catalog_request: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     resolved_root = (root or repository_root()).resolve()
     result_directory = _prepare_output(output or _default_output(selector, resolved_root))
@@ -970,6 +1148,9 @@ def characterize_noise_selector(
         operating_profile_id=operating_profile_id,
         temperature_c=temperature_c,
         vout_v=vout_v,
+        l_m=l_m,
+        w_m=w_m,
+        nfin=nfin,
     )
     if resolved.kit.osdi_artifacts:
         build_models(selected_toolchain, force=False)
@@ -980,12 +1161,22 @@ def characterize_noise_selector(
         ]
         if missing:
             raise NoiseCharacterizationError(f"missing required OSDI artifacts: {missing}")
-    bias = resolve_gm_over_id_bias(
-        resolved,
-        selected_toolchain,
-        result_directory,
-        target_per_v=gm_over_id_target,
-    )
+    if vctrl_v is None:
+        bias = resolve_gm_over_id_bias(
+            resolved,
+            selected_toolchain,
+            result_directory,
+            target_per_v=gm_over_id_target,
+            require_native_oracle_agreement=require_native_oracle_agreement,
+        )
+    else:
+        bias = resolve_explicit_vctrl_bias(
+            resolved,
+            selected_toolchain,
+            result_directory,
+            vctrl_v=vctrl_v,
+            require_native_oracle_agreement=require_native_oracle_agreement,
+        )
     operating_point = _operating_point_row(resolved, bias)
     _csv_write(result_directory / "operating_points.csv", list(operating_point), [operating_point])
     if adaptive_white_search:
@@ -1164,7 +1355,9 @@ def characterize_noise_selector(
         "bias_resolution": {
             "method_id": bias["method_id"],
             "method_version": bias["method_version"],
+            "bias_mode": bias["bias_mode"],
             "status": bias["status"],
+            "requested_vctrl_v": bias.get("requested_vctrl_v"),
             "target_per_v": bias["target_per_v"],
             "achieved_per_v": bias["achieved_per_v"],
             "relative_target_error": bias["relative_target_error"],
@@ -1286,6 +1479,9 @@ def characterize_noise_selector(
             "max_backend_input_ref_relative_error": noise[
                 "max_backend_input_ref_relative_error"
             ],
+            "qualified_backend_input_ref_oracle": noise[
+                "qualified_backend_input_ref_oracle"
+            ],
         },
         "variation_origin": "none",
         "variation_mode": "nominal",
@@ -1305,6 +1501,8 @@ def characterize_noise_selector(
             "acquisition": "acquisition.json",
         },
     }
+    if catalog_request is not None:
+        metadata["catalog_request"] = catalog_request
     _json_write(result_directory / "metadata.json", metadata)
     return {
         "status": "pass",

@@ -2,6 +2,35 @@
 
 All notable changes to Analog Process Models (APM) are documented here.
 
+## Post-v2 development — V3-N2 catalog-wide noise qualification
+
+- added a deterministic manifest-driven plan for all five technologies, 13
+  electrical families, and 26 public MOS devices, covering temperature,
+  inversion, manifest-declared length, and integer-NFIN datasets plus
+  threshold-family and cross-process comparison views;
+- added stable semantic request identity, cross-dataset physical-request
+  deduplication, complete terminal status, and strict resumable execution that
+  reuses only exact request/artifact hash matches and quarantines stale or
+  incomplete results;
+- added `apm.noise-comparison.v1` machine-readable threshold equal-inversion,
+  threshold equal-bias, and separate N/P cross-process-anchor outputs with
+  exact source-result references, common-frequency values, and 1 Hz–10 MHz
+  gate-referred integration;
+- added geometry-native descriptive length/NFIN scaling observations without
+  invented planar-width grids, universal monotonic laws, or planar/FinFET
+  effective-width ratios;
+- retained converged terminal finite-difference gm/gds as canonical while
+  recording native OP disagreements diagnostically at numerical floors, and
+  qualified ngspice's input-referred-noise convenience oracle above its
+  observed gain-squared clamp while retaining all raw data; and
+- added `apm noise-catalog-check --output DIR [--resume]` with nested V3-N0/N1
+  regression, Sparse/no-KLU audit, model-card immutability, resume/stale-result
+  qualification, comparison/coverage indexes, and compact report hashes.
+
+V3-N2 characterizes existing compact-model predictions. It does not tune
+process-noise coefficients, establish silicon/foundry accuracy, change package
+version, or create a v3 release/tag.
+
 ## Post-v2 development — V3-N1 noise method qualification
 
 - replaced provisional fixed review windows with the versioned

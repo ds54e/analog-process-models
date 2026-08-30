@@ -8,9 +8,9 @@ within it, APM always means Analog Process Models.
 Version **2.0.0** introduces first-class electrical families, 13 characterized
 families across five technologies, and a fail-closed 20-gate release flow.
 Post-v2 `main` also contains the V3-N0 stationary small-signal MOS-noise
-foundation and the V3-N1 acquisition/fit-method qualification. These are
-development milestones, not a v3.0.0 release or a silicon-noise calibration
-claim.
+foundation, V3-N1 acquisition/fit-method qualification, and the V3-N2
+manifest-driven catalog dataset/comparison layer. These are development
+milestones, not a v3.0.0 release or a silicon-noise calibration claim.
 
 ## Scope
 
@@ -123,13 +123,15 @@ Those bases are never silently equated. See
 
 The independent `apm.noise-characterization.v1` domain preserves the released
 `apm.characterization.v2` DC/Y/capacitance behavior. Run one public device,
-the V3-N0 harness/four-engine regression, or the complete V3-N1 method
-qualification with:
+the V3-N0 harness/four-engine regression, the complete V3-N1 method
+qualification, or the V3-N2 catalog qualification with:
 
 ```console
 .venv/bin/apm noise apm130/lv/nmos --output .apm/results/noise-apm130-lv-nmos
 .venv/bin/apm noise-check --output .apm/results/v3-n0-noise-spike
 .venv/bin/apm noise-method-check --output .apm/results/v3-n1-noise-method
+.venv/bin/apm noise-catalog-check --output .apm/results/v3-n2-noise-catalog
+.venv/bin/apm noise-catalog-check --output .apm/results/v3-n2-noise-catalog --resume
 ```
 
 The spike first qualifies the 1-ohm drain-current probe against an analytic
@@ -156,6 +158,33 @@ VOUT diagnostics and a runtime-only BSIM-CMG `TNOIMOD=1` capability check
 without modifying the production card. See
 [`NOISE_CHARACTERIZATION.md`](NOISE_CHARACTERIZATION.md) and
 [`NOISE_N1.md`](NOISE_N1.md) for the normative contracts and claim boundaries.
+
+V3-N2 discovers all 26 public MOS devices from the five-technology/13-family
+manifest catalog and plans the complete temperature, inversion, length, NFIN,
+threshold-sibling, and cross-process-anchor matrix before simulation. Its
+stable request hash binds the exact selector/profile/bias/geometry, frozen
+acquisition/fit methods, implementation, compact-model/provenance files,
+generated OSDI artifacts, and reference-tool binaries. Identical physical
+requests are simulated once even when several dataset/comparison views use
+them.
+
+Every logical request retains an explicit `validated`,
+`target_not_reachable`, or `simulation_failed` state. Resume accepts only a
+completed result whose request identity and complete artifact inventory still
+hash-match; incomplete, tampered, or semantically stale results are rejected
+and never silently reused. Machine-readable `apm.noise-comparison.v1` outputs
+reference exact source request/result hashes, expose 1 Hz, 1 kHz, 1 MHz, and
+10 MHz values plus 1 Hz–10 MHz gate-referred integration, preserve native
+planar-W versus integer-NFIN geometry, and produce no fake cross-basis ratios.
+See [`NOISE_N2.md`](NOISE_N2.md).
+
+At exceptionally low transconductance, ngspice 47's convenience
+`inoise_spectrum` vector exhibits an empirically audited gain-squared clamp
+near `1e-20`. APM retains that raw vector but qualifies it as an oracle only
+above the floor; canonical gate-referred PSD always uses the separately
+persisted actual complex external transfer. Likewise, internal model OP
+`gm/gds` values remain diagnostic oracles for N2 while converged terminal
+finite differences remain canonical.
 
 ## Comparison methodology
 
@@ -233,9 +262,10 @@ attestation captured immediately after cloning on the designated WSL2 + EL9
 host. See [`docs/release-validation.md`](docs/release-validation.md) for the
 complete sequence. Historical v1 evidence does not satisfy a v2 gate.
 
-V3-N0/V3-N1 do not change this released v2 contract, the package version, or
-any release tag. Their separate noise qualification commands validate
-development milestones and are not substitutes for `apm validate --release`.
+V3-N0/V3-N1/V3-N2 do not change this released v2 contract, the package
+version, or any release tag. Their separate noise qualification commands
+validate development milestones and are not substitutes for
+`apm validate --release`.
 
 Repository policy, implementation scope, and result semantics are defined by
 [`AGENTS.md`](AGENTS.md), [`GOAL.md`](GOAL.md), and
