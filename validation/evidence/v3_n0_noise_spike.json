@@ -1,0 +1,400 @@
+{
+  "schema": "apm.v3-n0-noise-spike-evidence.v1",
+  "milestone": "V3-N0",
+  "status": "validated",
+  "created_utc": "2026-08-30T04:42:18.631149+00:00",
+  "implementation_commit": "9c9f5b132829bda0e06045981e34e0dd2a41deb4",
+  "implementation_commit_exact_report": true,
+  "acceptance_result": "13/13",
+  "release_claim": false,
+  "package_version": "2.0.0",
+  "claim_boundary": "V3-N0 validates framework/backend execution and characterizes current compact-model predictions. It is not a v3 release and is not silicon/process-noise calibration for APM-authored families.",
+  "full_reports": {
+    "noise_spike": {
+      "generated_path": ".apm/results/v3-n0-exact-9c9f5b1/report.json",
+      "sha256": "53a28597a01fd850c3d23ca74a534ea5c8d9ed2180ef90f85105734eedec9b6f",
+      "status": "pass",
+      "retention": "ignored reproducible full result"
+    },
+    "harness": {
+      "generated_path": ".apm/results/v3-n0-exact-9c9f5b1/harness_report.json",
+      "sha256": "021127912c5ce2d0435549d533a5118ad5bb0e0e6266f9568de750ad92b96b3b",
+      "status": "pass",
+      "retention": "ignored reproducible full result"
+    },
+    "static_validation": {
+      "generated_path": ".apm/results/v3-n0-exact-static-9c9f5b1/report.json",
+      "sha256": "d24ef660407debf86764634fe2e2f5dcef0b3ba08dfd7217331b605fc2049ee6",
+      "status": "pass"
+    },
+    "doctor": {
+      "generated_path": ".apm/doctor/report.json",
+      "sha256": "67c368b602e688dbf1fa018e40f76eb34c5a03f274a77b4334923adbee836c60",
+      "status": "pass"
+    }
+  },
+  "environment": {
+    "platform": "WSL2",
+    "distribution": "AlmaLinux 9.7 (Moss Jungle Cat)",
+    "architecture": "x86_64",
+    "kernel": "6.18.33.2-microsoft-standard-WSL2",
+    "workspace_filesystem_class": "Linux filesystem",
+    "python": "3.9.25",
+    "ngspice": {
+      "version": "47",
+      "sha256": "34d24e813da266ee2a5deef72596de1351b63d489f96372ec4364648676cdc21",
+      "required_noise_solver": "Sparse",
+      "compiled_klu_capability_is_not_selected_solver": true
+    },
+    "openvaf_reloaded": {
+      "upstream_tag": "v24.0.2mob",
+      "upstream_commit": "fdf2522b70f42793f64b1c72f0195c96dea0cc19",
+      "sha256": "6bde23f4802efd7336d02f00f68744c9fe409dc248d0926ae832c45930b51ac6"
+    },
+    "osdi_artifacts": {
+      "psp103": "c4d72a04c083fdd501d797e8b3828cf3510f84abe51721a60825fd60019d1a5d",
+      "psp103_nqs": "b07c42c2135b8df79844ebf407ca770aa84129caea7346c1ddba08758a5ab4bc",
+      "bsim_cmg_112_1_0": "0b7ba7de3081e50b94017a91e4cf24c124e18618b0c0a3c3ef2b518d474f9e01"
+    }
+  },
+  "commands": [
+    {
+      "command": "git status --short --branch",
+      "status": "pass",
+      "purpose": "preserve and inspect local state before synchronization"
+    },
+    {
+      "command": "git pull --ff-only",
+      "status": "pass",
+      "purpose": "synchronize main before implementation"
+    },
+    {
+      "command": ".venv/bin/apm doctor",
+      "status": "pass",
+      "purpose": "rebuild and smoke native BSIM3/BSIM4 plus PSP103/BSIM-CMG OSDI"
+    },
+    {
+      "command": ".venv/bin/pytest -q",
+      "status": "pass",
+      "result": "68 passed"
+    },
+    {
+      "command": ".venv/bin/ruff check .",
+      "status": "pass"
+    },
+    {
+      "command": ".venv/bin/reuse lint",
+      "status": "pass",
+      "result": "233/233 files licensed"
+    },
+    {
+      "command": ".venv/bin/apm provenance-check --output .apm/v3-n0-provenance-audit-2",
+      "status": "pass"
+    },
+    {
+      "command": ".venv/bin/apm validate --output .apm/results/v3-n0-exact-static-9c9f5b1",
+      "status": "pass",
+      "purpose": "complete repository static validation at the implementation commit"
+    },
+    {
+      "command": ".venv/bin/apm noise-check --output .apm/results/v3-n0-exact-9c9f5b1",
+      "status": "pass",
+      "purpose": "fresh-output analytic harness and four-engine real-tool spike"
+    },
+    {
+      "command": "git diff --name-only v2.0.0 -- models/apm350/ngspice/apm350_models.inc models/apm022/ngspice/apm022_multivt_models.inc models/apm016f/ngspice/apm016f_multivt_models.inc",
+      "status": "pass",
+      "result": "no changed paths"
+    }
+  ],
+  "operating_conditions": {
+    "temperature_c": 27,
+    "l_over_lmin": 2.0,
+    "planar_width": "family/device default",
+    "finfet_nfin": 1,
+    "vout_over_reference_vdd": 0.5,
+    "gm_over_id_target_per_v": 15.0,
+    "gm_over_id_relative_tolerance": 0.01,
+    "frequency_start_hz": 1.0,
+    "frequency_stop_hz": 100000000.0,
+    "points_per_decade": 20,
+    "retained_points_per_device": 161,
+    "canonical_schema": "apm.noise-characterization.v1"
+  },
+  "harness": {
+    "status": "pass",
+    "fixture_sources": [
+      {
+        "id": "apm_noise_white",
+        "source_sha256": "24ae44d0a126a1d69f0ada7b8ee668c2a8fa9c066c3ed82f330a2113bbeea28b",
+        "osdi_sha256": "413dcb5156c655274e42bd5fb24cd2e79478745865a203830c91eadd278bcb5e"
+      },
+      {
+        "id": "apm_noise_flicker",
+        "source_sha256": "6cc19b8a6ee86bcc6c03a48f76f2ad42b119419a14abce9ee4d9cdff64b3050d",
+        "osdi_sha256": "78d4c187979f87008652bb7f653d48f40cc399e59ccc89b63a6c55281eadefe5"
+      },
+      {
+        "id": "apm_noise_correlated",
+        "source_sha256": "eb6a9075ea95eb18874dcc89e6339cb64024bdbc91e73718079ae540b1881f70",
+        "osdi_sha256": "6f52dc6c9bf56d85cb59b09c84f231a4aba3906feaf8c62bfdc69c639df8aeb0"
+      }
+    ],
+    "resistor_reference": {
+      "status": "pass",
+      "definition": "4*k*T/R",
+      "expected_a2_per_hz": 1.6576071894000002e-23,
+      "maximum_relative_error": 3.495399899425232e-7,
+      "relative_tolerance": 2.0e-5,
+      "log_sha256": "b7d9d5dcd92542245bd472752306b6b28719e7ab95732f6fefc22918cb0c3fdd",
+      "raw_sha256": "3050ca8bc86f78ca0852c8c98e8da6cc6badb2d0744362734a04d2107cf69419"
+    },
+    "probe_transparency": {
+      "status": "pass",
+      "dc_current_absolute_error_a": 0.0,
+      "dc_voltage_absolute_error_v": 0.0,
+      "observed_gain_two_to_one_psd_ratio": 4.000000006032795,
+      "noise_free_run_maximum_psd": 0.0,
+      "ccvs_named_noise_generator_present": false
+    },
+    "white_noise": {
+      "status": "pass",
+      "expected_a2_per_hz": 4.0e-20,
+      "maximum_relative_error": 0.0
+    },
+    "flicker_noise": {
+      "status": "pass",
+      "expected_exponent": 1.25,
+      "observed_exponent": 1.25,
+      "maximum_relative_error": 3.2134397338321452e-9
+    },
+    "correlated_network": {
+      "status": "pass",
+      "expected_correlated_a2_per_hz": 9.999999999999996e-21,
+      "hypothetical_independent_a2_per_hz": 1.81e-18,
+      "independent_to_correlated_ratio": 181.00000000000006,
+      "maximum_relative_error": 3.009265538105056e-16
+    }
+  },
+  "mos_results": [
+    {
+      "engine": "native_bsim3",
+      "selector": "apm350/general/nmos",
+      "status": "pass",
+      "achieved_gm_over_id_per_v": 14.99089379319135,
+      "gm_over_id_relative_error": 0.0006070804539099583,
+      "gm_convergence_relative": 0.001223455280442704,
+      "gds_convergence_relative": 0.0001316135825604419,
+      "native_gm_relative_error": 3.1178806563856647e-6,
+      "native_gds_relative_error": 4.4358629751681046e-7,
+      "minimum_drain_psd_a2_per_hz": 3.39690926e-25,
+      "maximum_drain_psd_a2_per_hz": 3.39690926e-25,
+      "source_vector_count": 5,
+      "effective_parameter_count": 9,
+      "parameter_value_sources": ["backend_resolved_default"],
+      "fit": {
+        "white": "valid",
+        "flicker": "invalid_not_observed",
+        "corner": "invalid_not_observed",
+        "white_floor_a2_per_hz": 3.39690926e-25,
+        "corner_hz": null
+      },
+      "log_audit": {
+        "sparse_attestation_count": 3,
+        "klu_attestation_count": 0,
+        "warning_count": 0,
+        "critical_diagnostic_count": 0
+      },
+      "hashes": {
+        "metadata": "a31fde61e529bae500c5c62c18b0b05c3f9ab6c48535ab7d1380162f6e891e6e",
+        "spectrum": "1b788e4a18f51472e91f2d13d45637d46736431e9360f468ec6a8cc893d20113",
+        "source_breakdown": "01e89902f60a53d046e8616fbcf0d1761cb8b8c5d7b646203b628ec856a9013a",
+        "model_snapshot": "b3b6e10ce34761a96476db14aa58cf8a0d29f326a224a3461b379720ee7558f8"
+      }
+    },
+    {
+      "engine": "psp103_osdi",
+      "selector": "apm130/lv/nmos",
+      "status": "pass",
+      "achieved_gm_over_id_per_v": 14.99458480150588,
+      "gm_over_id_relative_error": 0.0003610132329413318,
+      "gm_convergence_relative": 0.00030407319258124357,
+      "gds_convergence_relative": 0.00007728700876255906,
+      "native_gm_relative_error": 8.024335952173284e-7,
+      "native_gds_relative_error": 3.37278316190421e-7,
+      "minimum_drain_psd_a2_per_hz": 9.82718553e-25,
+      "maximum_drain_psd_a2_per_hz": 2.89832916e-18,
+      "source_vector_count": 17,
+      "effective_parameter_count": 16,
+      "parameter_value_sources": ["compact_model_default", "explicit_model_card"],
+      "fit": {
+        "white": "valid",
+        "flicker": "valid",
+        "corner": "valid",
+        "white_floor_a2_per_hz": 1.04538659e-24,
+        "corner_hz": 2773589.51784406
+      },
+      "log_audit": {
+        "sparse_attestation_count": 3,
+        "klu_attestation_count": 0,
+        "warning_count": 0,
+        "critical_diagnostic_count": 0
+      },
+      "hashes": {
+        "metadata": "46f87a5d4f70b7aff0b6e931fbb9701594f7b99795800db256ee2ac3028dfe91",
+        "spectrum": "e7598740fe57c3ed73a37cec18ef2e63f4b5e1c33b3c23e609966b74de7bac1e",
+        "source_breakdown": "aa5808d022e7df1de4c4178043eba7c365d6e3e5e62bad614544c5983d9dc6b7",
+        "model_snapshot": "27c99634f3ac0b5db0eefe35cac46075996973ac9a91a74d6b8dd57c306ca0a0"
+      }
+    },
+    {
+      "engine": "native_bsim4",
+      "selector": "apm045/vtg/nmos",
+      "status": "pass",
+      "achieved_gm_over_id_per_v": 15.000390309686036,
+      "gm_over_id_relative_error": 0.000026020645735750727,
+      "gm_convergence_relative": 0.000259566947421375,
+      "gds_convergence_relative": 0.00003666316327545128,
+      "native_gm_relative_error": 1.7572867166315126e-6,
+      "native_gds_relative_error": 6.174264954837126e-6,
+      "minimum_drain_psd_a2_per_hz": 5.74372639e-24,
+      "maximum_drain_psd_a2_per_hz": 4.13826695e-17,
+      "source_vector_count": 14,
+      "effective_parameter_count": 17,
+      "parameter_value_sources": [
+        "backend_resolved_default",
+        "derived_by_model",
+        "explicit_model_card"
+      ],
+      "fit": {
+        "white": "invalid_not_observed",
+        "flicker": "valid",
+        "corner": "invalid_not_observed",
+        "white_floor_a2_per_hz": null,
+        "corner_hz": null
+      },
+      "log_audit": {
+        "sparse_attestation_count": 3,
+        "klu_attestation_count": 0,
+        "warning_count": 0,
+        "critical_diagnostic_count": 0
+      },
+      "hashes": {
+        "metadata": "33f6960164be61cd7f90bf2f96bee25ae6cd329f252518da8f5bb303c573227e",
+        "spectrum": "614d66e99d92d012d9dab18a29e87ed81bf9494d0b8baacabb98937064a2c783",
+        "source_breakdown": "78a9232b650115395edac691fac30bf5998be5a5c8ae58f156135c66345a83f1",
+        "model_snapshot": "bfcf911c1694586a8ba6212d82f4e4ce2e327953350ad8f615d7df4b4ca7cbd5"
+      }
+    },
+    {
+      "engine": "bsim_cmg_osdi",
+      "selector": "apm016f/svt/nfet",
+      "status": "pass",
+      "achieved_gm_over_id_per_v": 14.99704672094148,
+      "gm_over_id_relative_error": 0.00019688527056800355,
+      "gm_convergence_relative": 0.00016234730218442293,
+      "gds_convergence_relative": 0.0002822758588140116,
+      "native_gm_relative_error": 3.069563124262658e-7,
+      "native_gds_relative_error": 1.8477947293647726e-6,
+      "minimum_drain_psd_a2_per_hz": 1.24025591e-24,
+      "maximum_drain_psd_a2_per_hz": 7.12962695e-19,
+      "source_vector_count": 17,
+      "effective_parameter_count": 20,
+      "parameter_value_sources": ["compact_model_default", "explicit_apm_card"],
+      "fit": {
+        "white": "valid",
+        "flicker": "valid",
+        "corner": "valid",
+        "white_floor_a2_per_hz": 1.25567212e-24,
+        "corner_hz": 568828.5273581716
+      },
+      "log_audit": {
+        "sparse_attestation_count": 3,
+        "klu_attestation_count": 0,
+        "warning_count": 0,
+        "critical_diagnostic_count": 0
+      },
+      "hashes": {
+        "metadata": "15c8ce1b64b1f7a490f937294f4fe414995984f7ae838d87e33753e1624f7938",
+        "spectrum": "abca40e6a03fe3fe9c9ec3c90c4a94e36be4227dffc1603b9b5b335cba9a6bbf",
+        "source_breakdown": "8d0009cf58640c6f6ad0b26f9ad514623fddc823b0723d62e4eae538f032040c",
+        "model_snapshot": "8cf7e8739fc2d4be1356a17b4bcfba67d3dcb8ac1fd340e1bdb18427ba81139d"
+      }
+    }
+  ],
+  "correlation_capability": {
+    "status": "pass",
+    "analytic_internal_network_preserved": true,
+    "psp103": {
+      "representative_model_mode_exercised": true,
+      "nonzero_source_names": ["igig", "idid"],
+      "native_cigid_imaginary_correlation": 0.4988225,
+      "native_sid_a2_per_hz": 9.496017e-25,
+      "native_sfl_at_1hz_a2_per_hz": 2.898328e-18,
+      "external_1hz_to_native_sfl_ratio": 1.0000004002307536,
+      "external_100mhz_to_native_sid_ratio": 1.034874466842256,
+      "oracle_status": "pass",
+      "oracle_equality_required": false
+    },
+    "bsim_cmg": {
+      "baseline_production_tnoimod": 0,
+      "diagnostic_runtime_tnoimod": 1,
+      "nonzero_source_names": ["corl", "id"],
+      "production_card_modified": false,
+      "production_card_sha256_before": "54ffca52b7a9c19bbb47589a1933d439917163d9b5ffa1548981ec2e3a2556eb",
+      "production_card_sha256_after": "54ffca52b7a9c19bbb47589a1933d439917163d9b5ffa1548981ec2e3a2556eb"
+    },
+    "justified_claim": "The current OpenVAF-Re-Loaded to OSDI to ngspice Sparse path preserves the internal-node correlation construction used by the analytic fixture and exercised representative PSP103 and BSIM-CMG modes. This is an execution-capability claim, not a calibration claim."
+  },
+  "parameter_interrogation": {
+    "status": "pass",
+    "native_bsim3": "Use targeted ngspice showmod final values.",
+    "native_bsim4": "Use targeted ngspice showmod final values plus the narrow documented LINTNOI=0 runtime-default fallback for ngspice 47's query error; selector-inactive values remain not_applicable.",
+    "psp103_osdi": "Use OSDI showmod final values and bind each value to matching explicit upstream-card occurrences or the pinned vendored Verilog-A default declaration.",
+    "bsim_cmg_osdi": "Use OSDI showmod final values and bind each value to matching explicit APM-card occurrences or the pinned vendored Verilog-A default declaration.",
+    "fake_universal_parameter_api_created": false
+  },
+  "model_immutability": {
+    "status": "pass",
+    "v2_tag_object": "89b9ce70cfa15e92ca6473f1916d50f77c7b95dc",
+    "v2_tag_peeled_commit": "3cc6cfea4932cc40f2d693784d0a569926cdf399",
+    "v2_tag_moved": false,
+    "apm_authored_noise_card_paths_changed_since_v2": [],
+    "current_card_sha256": {
+      "models/apm350/ngspice/apm350_models.inc": "2cd8e7fd7bd9dbec3e269959b2342d6d7a1a1609c6198c89931de676d47c8dc1",
+      "models/apm022/ngspice/apm022_multivt_models.inc": "c7616b942d4bc0e5f9d6fad78b6a4a48945b8dc04bb8125264617d6bbb860c90",
+      "models/apm016f/ngspice/apm016f_multivt_models.inc": "54ffca52b7a9c19bbb47589a1933d439917163d9b5ffa1548981ec2e3a2556eb"
+    }
+  },
+  "acceptance_checks": [
+    {"id": "harness.resistor_reference", "status": "pass"},
+    {"id": "harness.probe_transparency", "status": "pass"},
+    {"id": "harness.osdi_white", "status": "pass"},
+    {"id": "harness.osdi_flicker", "status": "pass"},
+    {"id": "harness.osdi_correlation", "status": "pass"},
+    {"id": "mos.gm_id_resolution", "status": "pass"},
+    {"id": "mos.four_engines_execute", "status": "pass"},
+    {"id": "mos.drain_psd_finite_nonnegative", "status": "pass"},
+    {"id": "mos.gate_referred_and_complex_transfer", "status": "pass"},
+    {"id": "mos.source_breakdown", "status": "pass"},
+    {"id": "mos.effective_parameter_provenance", "status": "pass"},
+    {"id": "mos.log_audit_sparse", "status": "pass"},
+    {"id": "models.no_spike_tuning", "status": "pass"}
+  ],
+  "recommendations": {
+    "frequency_range": "Keep 1 Hz as the provisional lower endpoint. Do not freeze 100 MHz as the common upper endpoint because APM045/VTG did not expose a white region in the fixed 10-100 MHz review window; run a bounded higher-frequency diagnostic first.",
+    "points_per_decade": "Retain 20 points/decade provisionally.",
+    "fitting_method": "Replace fixed review windows with a versioned contiguous-region detector using predeclared slope, span, point-count, and quality rules. Preserve fail-closed nulls and refit persisted raw spectra when possible.",
+    "all_26_devices": "Do not expand to all 26 devices until the upper-frequency diagnostic and fit-region method are frozen. The raw schema and four engine paths are otherwise ready.",
+    "low_vds_diagnostic": "Add a small low-VDS diagnostic before all-device expansion; keep it diagnostic rather than replacing the canonical VOUT=0.5*VDD point.",
+    "generic_apm_noise_calibration": "Consider only in a later evidence-backed milestone. Do not tune now: unchanged APM350 defaults produce no flicker while unchanged APM016F defaults produce strong flicker.",
+    "terminal_correlation_matrix": "Keep as a possible later extension, not a prerequisite for the next milestone."
+  },
+  "limitations": [
+    "The full generated spectra, netlists, logs, and reports remain intentionally untracked under .apm and are reproducible from the recorded command.",
+    "The fixed-window fit method is versioned provisional evidence, not the final v3 fitting contract.",
+    "Spectre remains model-only experimental/unverified and was not used for this spike.",
+    "V3-N0 does not establish silicon accuracy, foundry correlation, reliability, or manufacturability.",
+    "No v3 tag or v3.0.0 package version is created by this milestone."
+  ]
+}

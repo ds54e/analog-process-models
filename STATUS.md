@@ -12,9 +12,9 @@ This is the compact persistent progress index. It is not validation evidence by 
 - Current development line: post-v2 `main`
 - Current target: v3 stationary small-signal MOS-noise characterization foundation
 - Current milestone: `V3-N0 Four-engine noise spike`
-- State: `V3_N0_IMPLEMENTED_DEVELOPMENT_QUALIFICATION_PASS`
+- State: `V3_N0_COMPLETE`
 - v3 release eligible: NO
-- Blockers: none; final exact-implementation-commit rerun and compact committed evidence remain before milestone closure
+- Blockers: none
 
 APM v2.0.0 is immutable history and remains the validated electrical/DC/Y/capacitance/variation baseline. Current v3 work does not invalidate or modify the v2 release.
 
@@ -108,27 +108,30 @@ The gm/Id point must be actively resolved/revalidated rather than taken from the
 
 The correlated fixture is intended to decide capability from real evidence rather than from OSDI-version assumptions.
 
-## V3-N0 development qualification
+## V3-N0 exact-commit qualification
 
-A pre-commit integrated real-tool qualification completed on 2026-08-30:
+The implementation commit was qualified with fresh output on 2026-08-30:
 
 ```console
 .venv/bin/apm doctor
-.venv/bin/apm noise-check --output .apm/v3-n0-dev-check
+.venv/bin/apm validate --output .apm/results/v3-n0-exact-static-9c9f5b1
+.venv/bin/apm noise-check --output .apm/results/v3-n0-exact-9c9f5b1
 ```
 
-- development report SHA-256: `a31d5db1ff1faf021edb2cda54fa5cf84f1e2237bc11724e9983e00f73746039`;
+- exact implementation commit: `9c9f5b132829bda0e06045981e34e0dd2a41deb4`;
+- exact noise-spike report SHA-256: `53a28597a01fd850c3d23ca74a534ea5c8d9ed2180ef90f85105734eedec9b6f`;
+- exact static-validation report SHA-256: `d24ef660407debf86764634fe2e2f5dcef0b3ba08dfd7217331b605fc2049ee6`;
+- doctor report SHA-256: `67c368b602e688dbf1fa018e40f76eb34c5a03f274a77b4334923adbee836c60`;
+- compact evidence: `validation/evidence/v3_n0_noise_spike.json`;
+- compact evidence SHA-256: `1ee217a9b4763c993969245ab47b0fc34392204f5aac7574099cda12e3b8dcec`;
 - acceptance result: 13/13 pass;
+- repository regression: 68 tests passed; Ruff, REUSE 233/233, provenance, and complete static validation passed;
 - all required jobs attested the normal Sparse solver and no required job used KLU;
 - resistor `4*k*T/R` maximum relative error: `3.4954e-7`;
 - probe DC current/voltage error: zero; gain-two PSD ratio: `4.000000006`; noise-free run PSD: zero;
 - white fixture maximum relative error: zero;
 - flicker fixture exponent: `1.25`; maximum relative error: `3.2134e-9`;
 - correlated fixture observed the correlated result to `3.01e-16` relative error and decisively rejected the independent interpretation by a ratio of `181`.
-
-This development report was generated before the implementation commit and is
-not the final committed milestone evidence. The same flow must be rerun after
-the implementation commit before V3-N0 is marked complete.
 
 | Engine / selector | Achieved gm/Id | Relative target error | Drain PSD range (A^2/Hz) | Provisional fit observation |
 | --- | ---: | ---: | ---: | --- |
@@ -210,6 +213,17 @@ Derived metrics such as flicker exponent, white floor, flicker corner, `gamma_ef
 - Add a small low-VDS diagnostic before all-device expansion; the canonical `VOUT=0.5*VDD` point alone does not exercise linear-region thermal/correlation behavior.
 - Consider generic APM-authored noise calibration only in a later evidence-backed milestone. Do not tune now: unchanged APM350 defaults produce no flicker (`KF=0`), while unchanged APM016F defaults produce strong flicker.
 - Keep a full terminal noise-correlation matrix as a possible later extension, not a prerequisite for the next milestone.
+
+## V3-N0 evidence retained
+
+The compact exact-commit evidence is:
+
+`validation/evidence/v3_n0_noise_spike.json`
+
+The full 130-file simulator result remains intentionally ignored under
+`.apm/results/v3-n0-exact-9c9f5b1/` and is reproducible from the evidence
+command. V3-N0 is complete as a development spike only: the package remains
+2.0.0, no v3 tag exists, and no v3 release is claimed.
 
 ## v2 release evidence retained
 

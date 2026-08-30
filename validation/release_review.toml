@@ -1,6 +1,6 @@
 schema = "apm.release-review.v2"
 status = "complete"
-reviewed_utc = "2026-08-30T04:39:08Z"
+reviewed_utc = "2026-08-30T04:46:13Z"
 reviewer = "APM implementation agent"
 scope = [
   "v2.0.0 installation, runtime, and release-condition wording",
@@ -24,7 +24,7 @@ conclusion = "Public v2 claims remain unchanged and preserve the exact-commit re
 [reviewed_files]
 "README.md" = "1795a061d17b9f09999963e483e08172f5e63f3ade07553accfba59969bb83bb"
 "CHANGELOG.md" = "7ca3b2bd0190337494d2ac775f3a86cfa00019bcf8ddc3db6f9768f4c6c659ff"
-"STATUS.md" = "20409f9072448989b9d46675461281a56c27b984ffc96553ce57f7a3111d9d6e"
+"STATUS.md" = "bd02510e5a74b98c66e61186dd00cba3fcea4c0db611c893818bc9223ce0f112"
 "THIRD_PARTY.md" = "24cf582a44a170285545cfa2ae3556360a805367f81742459a2feba36b3b5a0e"
 "docs/benchmark-variation.md" = "71911c1474324a8529cd7754f98dd9afe26b231ca7bf8a04cc57a8ddba76fbe6"
 "docs/characterization.md" = "1e684b948ad89bdecb276c8bfce23c2eeadb2df09e082a50f4cbc2a0e55924eb"

@@ -11,6 +11,7 @@ not satisfy a v2 gate. Current evidence uses a `v2_` prefix.
 Post-v2 development milestones use a `v3_` prefix. A V3-N0 noise-spike summary
 establishes only the stated real-tool characterization capability; it is not a
 v3 release attestation and does not amend the immutable v2 release evidence.
+The completed spike summary is `v3_n0_noise_spike.json`.
 
 ## Status vocabulary
 
