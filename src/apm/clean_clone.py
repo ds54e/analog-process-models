@@ -23,6 +23,25 @@ ATTESTATION_CHECK_IDS = frozenset(
         "rhel_compatible_el9",
         "x86_64",
         "linux_filesystem_path",
+        "project_generated_state_absent",
+        "v3_tag_absent",
+    }
+)
+GENERATED_STATE_NAMES = frozenset(
+    {
+        ".apm",
+        ".cache",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        ".venv",
+        "__pycache__",
+        "build",
+        "dist",
+        "results",
+        "runs",
+        "venv",
+        "work",
     }
 )
 
@@ -103,6 +122,36 @@ def _platform_observation(root: Path) -> dict[str, Any]:
     }
 
 
+def _generated_state_paths(root: Path) -> list[str]:
+    """Return project-local generated/build/cache state present before bootstrap."""
+
+    observed: set[str] = set()
+    for name in GENERATED_STATE_NAMES:
+        direct = root / name
+        if direct.exists():
+            observed.add(direct.relative_to(root).as_posix())
+    for path in root.rglob("*"):
+        relative = path.relative_to(root)
+        if ".git" in relative.parts:
+            continue
+        if path.name in GENERATED_STATE_NAMES or path.suffix.lower() == ".osdi":
+            observed.add(relative.as_posix())
+    return sorted(observed)
+
+
+def _tag_exists(root: Path, tag: str) -> bool:
+    result = subprocess.run(
+        ["git", "show-ref", "--verify", "--quiet", f"refs/tags/{tag}"],
+        cwd=root,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if result.returncode not in {0, 1}:
+        raise CleanCloneError(f"cannot inspect tag {tag}")
+    return result.returncode == 0
+
+
 def create_clean_clone_attestation(
     root: Path,
     output: Path | None = None,
@@ -117,6 +166,8 @@ def create_clean_clone_attestation(
     destination = (output or (selected / ATTESTATION_PATH)).expanduser().resolve()
     state = selected / ".apm"
     state_absent = not state.exists()
+    generated_state_paths = _generated_state_paths(selected)
+    v3_tag_present = _tag_exists(selected, "v3.0.0")
     status = _run(selected, ["git", "status", "--porcelain", "--untracked-files=all"])
     remote = _run(selected, ["git", "remote", "get-url", "origin"]).removesuffix(".git")
     head = _run(selected, ["git", "rev-parse", "HEAD"])
@@ -126,13 +177,15 @@ def create_clean_clone_attestation(
         "initial_worktree_clean": status == "",
         "state_absent_before_attestation": state_absent,
         "expected_origin": remote == EXPECTED_REMOTE,
+        "project_generated_state_absent": not generated_state_paths,
+        "v3_tag_absent": not v3_tag_present,
         **platform_observation["checks"],
     }
     if not all(checks.values()):
         failed = ", ".join(name for name, passed in checks.items() if not passed)
         raise CleanCloneError(f"clean-clone attestation failed: {failed}")
     report: dict[str, Any] = {
-        "schema": "apm.clean-clone-attestation.v2",
+        "schema": "apm.clean-clone-attestation.v3",
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "status": "attested",
         "repository": str(selected),
@@ -140,6 +193,8 @@ def create_clean_clone_attestation(
         "symbolic_branch": symbolic_branch,
         "origin": remote,
         "initial_git_status_porcelain": status,
+        "initial_generated_state_paths": generated_state_paths,
+        "v3_tag_present": v3_tag_present,
         "platform": platform_observation,
         "checks": checks,
     }
@@ -167,9 +222,10 @@ def verify_clean_clone_attestation(root: Path) -> dict[str, Any]:
     status = _run(selected, ["git", "status", "--porcelain", "--untracked-files=all"])
     remote = _run(selected, ["git", "remote", "get-url", "origin"]).removesuffix(".git")
     platform_observation = _platform_observation(selected)
+    v3_tag_present = _tag_exists(selected, "v3.0.0")
     attested_checks = report.get("checks", {})
     checks = {
-        "schema": report.get("schema") == "apm.clean-clone-attestation.v2",
+        "schema": report.get("schema") == "apm.clean-clone-attestation.v3",
         "attestation_status": report.get("status") == "attested",
         "attested_checks_complete": isinstance(attested_checks, dict)
         and set(attested_checks) == ATTESTATION_CHECK_IDS
@@ -179,6 +235,8 @@ def verify_clean_clone_attestation(root: Path) -> dict[str, Any]:
         "current_worktree_clean": status == "",
         "expected_origin": report.get("origin") == remote == EXPECTED_REMOTE,
         "current_platform_matches_gate": all(platform_observation["checks"].values()),
+        "v3_tag_still_absent": report.get("v3_tag_present") is False
+        and not v3_tag_present,
     }
     if not all(checks.values()):
         failed = ", ".join(name for name, passed in checks.items() if not passed)
@@ -189,5 +247,6 @@ def verify_clean_clone_attestation(root: Path) -> dict[str, Any]:
         "repository_head": head,
         "origin": remote,
         "platform": platform_observation,
+        "v3_tag_present": v3_tag_present,
         "checks": checks,
     }

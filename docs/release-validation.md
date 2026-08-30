@@ -1,152 +1,174 @@
-# Release validation
+# v3.0.0 release-candidate validation
 
-APM 2.0.0 has one authoritative machine-readable gate contract:
-`validation/release_gates.toml`. Its 20 required gates cover:
+APM 3.0.0 has one active machine-readable release contract:
+`validation/release_gates.toml`. Its 18 required gates cover:
 
-- the WSL2 + RHEL-compatible EL9 x86_64 runtime and ngspice 47 compact-model
-  execution;
-- manifest-driven catalog behavior and all five technologies/13 families;
-- APM130 LV/HV, APM045 VTL/VTG/VTH/THKOX, APM022 multi-VT, and APM016F
-  multi-VT/NFIN behavior;
-- v2 characterization and all required comparison views;
-- Benchmark Global/Local/All, Rbench/Cbench, and independent IHP-native
-  APM130 LV/HV variation;
-- model-only experimental/unverified Spectre structure;
-- exact-file licensing/provenance and a self-contained source distribution;
-- removal of v1 runtime single-source/alias dependencies;
-- 2.0.0 metadata, exact-commit clean-clone execution, and a hash-bound public
-  claim audit.
+- the exact WSL2 + RHEL-compatible EL9 x86_64 runtime, ngspice 47, project-
+  pinned OpenVAF, and native/OSDI compact-model execution;
+- normal Sparse/no-KLU required noise execution;
+- manifest-driven five-technology/13-family/26-device discovery and native
+  planar/FinFET geometry;
+- the complete existing v2 electrical characterization, comparison, benchmark,
+  passive, and APM130 upstream-variation baseline;
+- V3-N0 analytic harness/four-engine qualification;
+- the frozen V3-N1 acquisition/fit method, synthetic cases, low-VDS, and
+  correlation diagnostics;
+- fresh V3-N2 catalog-wide temperature/inversion/length/NFIN datasets,
+  comparisons, explicit statuses, raw spectra/provenance, and strict resume;
+- model-card immutability and honest model/default claim boundaries;
+- Spectre's model-only experimental/unverified boundary;
+- exact licensing/provenance, REUSE, self-contained distribution, public-
+  repository hygiene, 3.0.0 metadata, exact clone, and claim review.
 
-Historical v1 evidence is never accepted for a v2 gate.
+Historical v1/v2 evidence remains immutable and useful context, but never
+satisfies a v3 gate.
 
 ## Fail-closed evaluator
 
-`apm validate --release` loads required gate IDs from the contract and refuses
-to run if the implemented set differs. At report time, a required gate passes
-only when:
+`apm validate --release` loads required gate IDs in declaration order and
+refuses to run when the implemented set differs. A required gate passes only
+when:
 
-1. its status is exactly `pass`;
-2. its evidence list is nonempty; and
-3. every evidence path exists as a file.
+1. status is exactly `pass`;
+2. evidence is nonempty;
+3. every evidence path exists;
+4. the supporting current-run component passed; and
+5. its semantic observations satisfy the frozen contract.
 
-`missing`, `not_run`, skipped, blocked, failed, evidence-free, or unimplemented
-gates make the command exit nonzero. Component failures are recorded and later
-independent components continue where possible, so a failed run still produces
-an inspectable report.
+Missing, skipped, blocked, failed, unimplemented, stale, evidence-free, or
+hash-mismatched required gates make the command exit nonzero. Independent
+components continue after many failures so the report remains diagnostic.
 
-The final report uses schema `apm.release-validation.v2` and records target,
-contract hash, exact Git commit, component reports/durations/errors, every
+The final report uses `apm.release-validation.v3` and binds the target, exact
+Git commit, gate-contract hash, component report paths/hashes/durations, every
 ordered gate result, evidence validity, and required/pass counts.
 
 ## Repository validation
 
-Without `--release`, `apm validate` runs the source/audit layer and writes
-`apm.repository-validation.v2`:
+Without `--release`, `apm validate` writes
+`apm.repository-validation.v3` and runs:
 
-- the complete Pytest suite;
-- Ruff and Python compile audits;
-- REUSE/SPDX licensing audit;
-- exact-file provenance, independent-authorship, and redistribution audit;
-- manifest/catalog contract and v1-migration audits;
-- tracked source/include closure, generated-output, large-file, and credential
+- the full Pytest suite;
+- Ruff and Python import/compile coverage through the tests;
+- REUSE/SPDX;
+- exact provenance, notices, independent-authorship, and redistribution
   audits;
-- 2.0.0 metadata/placeholder audit;
+- manifest/catalog/geometry and v1-runtime-migration audits;
+- tracked source/include closure and generated-output checks;
+- credential, secret-signature, inappropriate private-path, editor/temp,
+  oversized-artifact, and ignore-policy audits;
+- 3.0.0 package/runtime/CLI/changelog/placeholder checks;
 - hash-bound public-claim review; and
-- deterministic Spectre structural audit.
+- deterministic Spectre structural checking with no real-tool claim.
 
-Release mode repeats that static layer in the current checkout, then runs the
-doctor, all 13 family characterizations, five required comparison jobs, all
-benchmark modes/corners/passives, and both IHP-native APM130 family cohorts.
-No prior milestone report substitutes for current execution.
+Release mode repeats this static layer from the exact candidate and then runs
+every required real-tool component.
 
-## Exact-commit clean-clone attestation
+## Pre-bootstrap clean-clone attestation
 
-The clean-clone gate cannot be satisfied by deleting outputs in a development
-checkout. Immediately after cloning—while Git is clean and `.apm/` does not
-exist—run:
+The clean-clone gate cannot be satisfied by deleting outputs from a development
+checkout. From a genuinely new HTTPS clone, immediately after selecting the
+candidate commit and before any setup command, run:
 
 ```console
 python3 tools/attest_clean_clone.py
 ```
 
-The standard-library-only command records schema
-`apm.clean-clone-attestation.v2` and verifies:
+The standard-library-only command writes ignored
+`.apm/clean-clone-attestation.json` with schema
+`apm.clean-clone-attestation.v3`. It verifies and records:
 
-- origin `https://github.com/ds54e/analog-process-models`;
-- an initially clean tracked/untracked worktree;
-- absence of project state before attestation;
-- exact commit and branch;
-- a WSL2 kernel;
-- RHEL-compatible EL9 identity;
-- x86_64; and
-- a Linux-filesystem checkout outside `/mnt/c`, with observed mount data.
+- exact origin `https://github.com/ds54e/analog-process-models`;
+- initially clean tracked/untracked worktree;
+- exact commit and branch/detached state;
+- absence of `.apm`, `.venv`, model OSDI binaries, caches, build/results, and
+  other project-local generated state before attestation;
+- absence of a `v3.0.0` tag;
+- WSL2 kernel, RHEL-compatible EL9, x86_64, and Linux-filesystem checkout
+  outside `/mnt/c`, with observed filesystem/mount identity.
 
-It writes ignored `.apm/clean-clone-attestation.json`. Release validation
-requires the same checkout path, origin, commit, qualifying platform, and a
-still-clean worktree. Copying the attestation elsewhere or committing a later
-change invalidates it.
+Release validation later requires the same checkout path, origin, exact commit,
+qualifying platform, clean worktree, and continued absence of the final tag.
+Copying the attestation or committing a later change invalidates it.
 
-## Reproducible fresh-clone sequence
+## Reproducible exact-candidate sequence
 
-On the designated WSL2 + EL9 x86_64 host and Linux filesystem:
+The coherent candidate must already be reachable from the authoritative origin
+so the qualification is a real network clone rather than a copied local tree:
 
 ```console
 git clone https://github.com/ds54e/analog-process-models.git
 cd analog-process-models
+git checkout --detach <exact-candidate-sha>
 python3 tools/attest_clean_clone.py
 tools/bootstrap-el9.sh
 tools/setup-python.sh
 .venv/bin/apm build-models
 .venv/bin/apm doctor
-.venv/bin/apm validate
-.venv/bin/apm validate --release --output .apm/results/v2-release
+.venv/bin/apm validate --output .apm/results/v3-static
+.venv/bin/apm validate --release \
+  --output .apm/results/v3-release-candidate
 ```
 
-Bootstrap installs/builds project-local dependencies and OpenVAF/ngspice
-artifacts as required. The explicit build, doctor, and repository validation
-give useful early diagnostics. The release command repeats every automatic
-release check and real-tool component; success means all 20 gates passed in the
-same exact-commit checkout.
-
-Generated OSDI binaries, toolchain sources, raw simulator runs, and detailed
-reports stay below ignored `.apm/` paths. Transistor-model source inputs are
-all tracked; no separate model download is needed.
+Bootstrap builds or verifies project-local ngspice 47, OpenVAF-Re-Loaded,
+PSP103 QS/NQS, and BSIM-CMG 112.1.0 OSDI artifacts from documented sources.
+No `.apm`, `.venv`, OSDI artifact, simulator result, or cache may be copied
+from another checkout.
 
 ## Real-tool components
 
-The release execution produces:
+One release execution produces and hash-links:
 
-- doctor report with native BSIM3/BSIM4 and PSP103/BSIM-CMG OSDI real-device
-  smokes;
-- fresh complete characterization for all 13 families/26 devices;
-- five-anchor, APM045 threshold, APM045 gate-stack, APM022 multi-VT, and
-  APM016F multi-VT comparison reports;
-- Benchmark Global/Local/All, five corners, adapter/replay/statistical, and
-  Rbench/Cbench validation;
-- independent APM130 LV and HV corner/process/mismatch reports; and
-- static provenance, distribution, regression, Spectre, metadata, and claims
-  evidence.
+- initial and final exact clean-clone verification;
+- repository static/regression report;
+- doctor report for native BSIM3/BSIM4 and PSP103/BSIM-CMG OSDI;
+- complete 13-family/26-device electrical characterization;
+- five required electrical comparison jobs;
+- Benchmark Global/Local/All, fixed corners, Rbench/Cbench, adapter/replay, and
+  statistical validation;
+- independent APM130 LV/HV upstream corner/process/mismatch validation;
+- a fresh 290-unique-request V3-N2 catalog execution from empty output, whose
+  nested regression executes the complete V3-N1 method and V3-N0 harness;
+- a second unchanged V3-N2 invocation that must safely reuse all 290 physical
+  results and freshly requalify strict mismatch/tamper/incomplete/stale
+  rejection.
 
-The release report hash-links those component reports. A failed component
-remains evidence of a failure, never a pass.
+The first catalog execution cannot be satisfied by reuse. Valid
+`target_not_reachable` results and fail-closed null fit metrics remain valid
+scientific outcomes; `simulation_failed`, silent clipping, missing request
+states, or forced fit values fail the release contract.
 
-## Public-claim review
+## Public claims and model immutability
 
-`validation/release_review.toml` records the manual decisions and SHA-256
-hashes for the README, changelog, status, third-party policy, core v2 docs, and
-release-readiness summary. Editing any reviewed text invalidates the claim
-gate until it is reviewed and rehashed.
+`validation/release_review.toml` records decisions and SHA-256 hashes for all
+reviewed current user-facing/release/noise documents. Editing reviewed content
+invalidates the claim gate until the review is refreshed.
 
-The review must record no real Spectre execution, no foundry/silicon correlation
-claim for APM-authored decks, no physical family-correlation claim for
-Benchmark Global, no repository visibility change, and no unresolved finding.
-Spectre structural success remains model-only `experimental_unverified`; real
-Spectre validation is not a v2 gate.
+The review and automated audit require:
 
-## Release decision
+- no silicon/foundry noise-accuracy claim for APM-authored models;
+- no new process-noise calibration/tuning;
+- no unsupported noise Monte Carlo, RTS/RTN, transient-noise, PSS/PNoise,
+  oscillator phase-noise, or full terminal-correlation claim;
+- no universal planar/FinFET effective-width claim;
+- no reliability/manufacturing/signoff claim;
+- no real Spectre parsing/simulation claim;
+- no physical Benchmark Global family-correlation claim;
+- APM350/APM022/APM016F production cards byte-identical to `v2.0.0`.
 
-A version string, completed run, or historical success cannot authorize a tag.
-Tag `v2.0.0` only when the exact-commit fresh clone reports
-`status = "pass"`, `required_gate_count = 20`, and
-`passed_required_gate_count = 20`, with every required gate's
-`evidence_valid = true` and `passed = true`.
+## Candidate/evidence boundary
+
+Once development regressions pass, create one coherent candidate commit. That
+exact commit is the future `v3.0.0` tag target and must not be amended after
+qualification starts.
+
+After its fresh clone reports `status = "pass"`, 18 required gates, 18 passed
+required gates, and valid evidence for every gate, add only compact evidence
+and final status/review changes on `main`, preferably at
+`validation/evidence/v3_release_candidate.json`. The later evidence commit is
+not the future tag target.
+
+V3-N3 does not authorize a tag, GitHub Release, or visibility change. The next
+human action is explicit review/authorization to create immutable tag
+`v3.0.0` at the already-qualified candidate commit. Post-tag requalification,
+GitHub Release creation, and any publication/visibility decision are separate.

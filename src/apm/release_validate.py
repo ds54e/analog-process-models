@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: APM contributors
 # SPDX-License-Identifier: Apache-2.0
 
-"""Fail-closed repository and v2.0.0 release-gate validation."""
+"""Fail-closed repository and v3.0.0 release-candidate validation."""
 
 from __future__ import annotations
 
@@ -32,6 +32,7 @@ from .compare import (
 from .doctor import run_doctor
 from .model_build import MODEL_SOURCES, sha256_file
 from .native_variation import validate_apm130_native
+from .noise_catalog import validate_noise_catalog
 from .paths import repository_root, state_directory
 from .provenance_validate import ProvenanceValidationError, validate_provenance
 from .spectre_validate import SpectreStructureError, validate_spectre
@@ -41,21 +42,19 @@ IMPLEMENTED_GATE_IDS = frozenset(
     {
         "runtime.reference_environment",
         "runtime.compact_models",
+        "runtime.noise_sparse",
         "catalog.manifest_driven",
-        "catalog.required_families",
-        "models.apm130_lv_hv",
-        "models.apm045_families",
-        "models.apm022_multivt",
-        "models.apm016f_multivt",
         "characterization.v2",
         "comparison.v2",
-        "variation.benchmark_v2",
-        "variation.apm130_upstream",
-        "passives.benchmark",
+        "variation.v2",
+        "noise.foundation",
+        "noise.method",
+        "noise.catalog",
+        "noise.resume_integrity",
+        "models.claims_immutability",
         "spectre.model_only",
         "licensing.provenance",
-        "distribution.self_contained_models",
-        "migration.no_v1_runtime_ssot",
+        "distribution.public_hygiene",
         "release.metadata_complete",
         "release.clean_clone",
         "release.claim_audit",
@@ -65,31 +64,64 @@ REQUIRED_REVIEWED_FILES = frozenset(
     {
         "README.md",
         "CHANGELOG.md",
+        "GOAL.md",
+        "RELEASE_V3.md",
         "STATUS.md",
         "THIRD_PARTY.md",
+        "NOISE_CHARACTERIZATION.md",
+        "NOISE_N1.md",
+        "NOISE_N2.md",
+        "RESULT_CONTRACT.md",
         "docs/benchmark-variation.md",
         "docs/characterization.md",
         "docs/native-variation.md",
         "docs/release-validation.md",
         "docs/spectre.md",
-        "validation/evidence/v2_release_readiness.md",
     }
 )
 TRACKED_FORBIDDEN_PARTS = {
     ".apm",
+    ".cache",
+    ".idea",
     ".venv",
+    ".vscode",
+    ".mypy_cache",
     ".pytest_cache",
     ".ruff_cache",
     "__pycache__",
+    "build",
+    "dist",
     "results",
+    "runs",
+    "scratch",
+    "work",
 }
-TRACKED_FORBIDDEN_SUFFIXES = {".osdi", ".raw", ".log", ".pyc", ".pyo"}
+TRACKED_FORBIDDEN_SUFFIXES = {
+    ".osdi",
+    ".raw",
+    ".log",
+    ".pyc",
+    ".pyo",
+    ".swp",
+    ".tmp",
+}
 SECRET_PATTERNS = {
     "private_key": re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----"),
     "github_token": re.compile(r"\b(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{30,}\b"),
     "aws_access_key": re.compile(r"\bAKIA[0-9A-Z]{16}\b"),
     "slack_token": re.compile(r"\bxox[baprs]-[A-Za-z0-9-]{20,}\b"),
+    "generic_bearer": re.compile(r"(?i)\bAuthorization:\s*Bearer\s+[A-Za-z0-9._~-]{20,}"),
+    "private_key_assignment": re.compile(
+        r"(?i)\b(?:api[_-]?key|secret|token|password)\s*[=:]\s*[\"'][^\"']{12,}[\"']"
+    ),
 }
+PRIVATE_PATH_PATTERNS = {
+    "posix_home": re.compile(r"/(?:home|Users)/([A-Za-z0-9._-]+)/"),
+    "windows_profile": re.compile(r"(?i)\b[A-Z]:\\Users\\([^\\\s]+)\\"),
+}
+HISTORICAL_REPRODUCIBILITY_PATH_RE = re.compile(
+    r"^validation/evidence/(?:m\d+[-_.]|v2_)"
+)
 INCLUDE_RE = re.compile(
     r"^\s*(?:\.include|include|`include)\s+[\"']?([^\"'\s]+)",
     re.IGNORECASE | re.MULTILINE,
@@ -141,7 +173,7 @@ def _check_map(checks: dict[str, bool], *, context: str) -> dict[str, Any]:
 
 def load_gate_contract(root: Path) -> dict[str, Any]:
     contract = _load_toml(root / "validation/release_gates.toml")
-    if contract.get("schema") != "apm.release-gates.v2":
+    if contract.get("schema") != "apm.release-gates.v3":
         raise ReleaseValidationError("unsupported release-gate schema")
     gates = contract.get("gate")
     if not isinstance(gates, list) or not gates:
@@ -159,8 +191,8 @@ def load_gate_contract(root: Path) -> dict[str, Any]:
             "release validator/contract mismatch; "
             f"missing implementations={sorted(missing)}, stale implementations={sorted(stale)}"
         )
-    if len(required) != 20 or contract.get("target") != "v2.0.0":
-        raise ReleaseValidationError("v2 release contract must contain 20 gates for v2.0.0")
+    if len(required) != 18 or contract.get("target") != "v3.0.0":
+        raise ReleaseValidationError("v3 release contract must contain 18 gates for v3.0.0")
     return contract
 
 
@@ -212,7 +244,7 @@ def audit_release_metadata(root: Path, contract: dict[str, Any]) -> dict[str, An
         ),
         "no_release_placeholder_tokens": not placeholder_hits,
     }
-    result = _check_map(checks, context="v2 version, release notes, and placeholder audit")
+    result = _check_map(checks, context="v3 version, release notes, and placeholder audit")
     result.update(
         {
             "target_version": target,
@@ -269,7 +301,7 @@ def audit_catalog(root: Path, contract: dict[str, Any]) -> dict[str, Any]:
         "family_device_profile_backend_contracts": family_contracts,
         "public_device_names_unique_and_family_qualified": len(device_names)
         == len(set(device_names))
-        == 26
+        == int(required["required_public_device_count"])
         and all(
             device.public_name.startswith(f"{family.technology_id}_{family.family_id}_")
             for technology in catalog.technologies
@@ -292,7 +324,7 @@ def audit_catalog(root: Path, contract: dict[str, Any]) -> dict[str, Any]:
         ).read_text(encoding="utf-8")
         and "load_kit" not in (root / "src/apm/characterize.py").read_text(encoding="utf-8"),
     }
-    result = _check_map(checks, context="manifest-driven v2 catalog and family contract")
+    result = _check_map(checks, context="manifest-driven v3 catalog and family contract")
     result.update(
         {
             "technology_ids": sorted(actual),
@@ -371,6 +403,8 @@ def audit_distribution(root: Path) -> dict[str, Any]:
     suspicious_names: list[str] = []
     secret_hits: list[dict[str, str]] = []
     oversized_tracked: list[dict[str, Any]] = []
+    private_path_hits: list[dict[str, str]] = []
+    historical_path_observations: list[dict[str, str]] = []
     for path in tracked:
         relative = path.relative_to(root)
         if not path.is_file():
@@ -391,6 +425,13 @@ def audit_distribution(root: Path) -> dict[str, Any]:
             for name, pattern in SECRET_PATTERNS.items():
                 if pattern.search(text):
                     secret_hits.append({"path": str(relative), "pattern": name})
+            for name, pattern in PRIVATE_PATH_PATTERNS.items():
+                if pattern.search(text):
+                    finding = {"path": str(relative), "pattern": name}
+                    if HISTORICAL_REPRODUCIBILITY_PATH_RE.match(str(relative)):
+                        historical_path_observations.append(finding)
+                    else:
+                        private_path_hits.append(finding)
         if path.stat().st_size > 5 * 1024 * 1024:
             oversized_tracked.append(
                 {"path": str(relative), "size_bytes": path.stat().st_size}
@@ -417,6 +458,18 @@ def audit_distribution(root: Path) -> dict[str, Any]:
         for model_id, relative in MODEL_SOURCES.items()
         if (root / relative).is_file()
     }
+    gitignore = (root / ".gitignore").read_text(encoding="utf-8", errors="replace")
+    required_ignore_rules = {
+        ".apm/",
+        ".venv/",
+        "*.osdi",
+        "*.raw",
+        "*.log",
+        "results/",
+        "__pycache__/",
+        ".pytest_cache/",
+        ".ruff_cache/",
+    }
     checks = {
         "tracked_worktree_files_exist": not missing_tracked,
         "compiler_model_sources_shipped": set(shipped_sources) == set(MODEL_SOURCES),
@@ -424,10 +477,16 @@ def audit_distribution(root: Path) -> dict[str, Any]:
         "no_generated_or_scratch_artifacts_tracked": not forbidden_tracked,
         "no_suspicious_secret_filenames_tracked": not suspicious_names,
         "no_credential_signatures_detected": not secret_hits,
+        "no_inappropriate_private_paths": not private_path_hits,
         "no_oversized_tracked_artifacts": not oversized_tracked,
         "generated_osdi_not_tracked": not any(path.suffix.lower() == ".osdi" for path in tracked),
+        "generated_state_ignore_rules_complete": required_ignore_rules
+        <= set(gitignore.splitlines()),
     }
-    result = _check_map(checks, context="tracked distribution, include closure, and secret audit")
+    result = _check_map(
+        checks,
+        context="tracked distribution, include closure, generated state, and public hygiene",
+    )
     result.update(
         {
             "tracked_file_count": len(tracked),
@@ -437,7 +496,12 @@ def audit_distribution(root: Path) -> dict[str, Any]:
             "forbidden_tracked": forbidden_tracked,
             "suspicious_names": suspicious_names,
             "secret_hits": secret_hits,
+            "private_path_hits": private_path_hits,
+            "allowed_historical_reproducibility_path_observations": (
+                historical_path_observations
+            ),
             "oversized_tracked": oversized_tracked,
+            "required_ignore_rules": sorted(required_ignore_rules),
         }
     )
     return result
@@ -461,13 +525,12 @@ def audit_claims(root: Path, contract: dict[str, Any]) -> dict[str, Any]:
         path.name: path.read_text(encoding="utf-8", errors="replace")
         for path in sorted((root / "docs").glob("*.md"))
     }
-    public_text = "\n".join(
-        [
-            readme,
-            (root / "CHANGELOG.md").read_text(encoding="utf-8"),
-            *docs.values(),
-        ]
-    )
+    reviewed_public_text = [
+        (root / relative).read_text(encoding="utf-8", errors="replace")
+        for relative in sorted(REQUIRED_REVIEWED_FILES)
+        if (root / relative).is_file()
+    ]
+    public_text = "\n".join(reviewed_public_text)
     prohibited_patterns = [
         pattern
         for pattern in (
@@ -476,6 +539,9 @@ def audit_claims(root: Path, contract: dict[str, Any]) -> dict[str, Any]:
             r"(?i)APM (?:is|provides) (?:a )?manufacturable PDK",
             r"(?i)APM-authored .* (?:foundry|silicon)[- ]correlated",
             r"(?i)Benchmark Global (?:is|represents) (?:a )?physical process correlation",
+            r"(?i)APM-authored .* (?:is|are) silicon[- ]calibrated",
+            r"(?i)planar (?:width|per-width) (?:is|equals|equates to) .*FinFET",
+            r"(?i)Spectre numerical validation (?:passed|is complete)",
         )
         if re.search(pattern, public_text)
     ]
@@ -483,7 +549,16 @@ def audit_claims(root: Path, contract: dict[str, Any]) -> dict[str, Any]:
     topic_checks = {
         "scope": "## Scope" in readme,
         "device_family_domain_model": "Technology → Electrical Family → Device" in readme,
-        "operating_profile_vs_validity": "Operating profile versus validity" in readme,
+        "reference_environment": "WSL2" in readme and "EL9" in readme and "x86_64" in readme,
+        "installation": "## Quick start" in readme and "tools/bootstrap-el9.sh" in readme,
+        "electrical_characterization": "## Characterization" in readme
+        and "apm.characterization.v2" in readme,
+        "stationary_noise": "## Stationary noise characterization" in readme
+        and "apm.noise-characterization.v1" in readme,
+        "noise_dataset_meaning": "catalog-wide" in readme.lower()
+        and "compact-model predictions" in readme,
+        "noise_claim_exclusions": "silicon-calibrated process-noise" in readme.lower()
+        and "PSS/PNoise" in readme,
         "model_provenance": "## Model provenance" in readme,
         "model_fidelity_limitations": "## Model fidelity and limitations" in readme,
         "benchmark_vs_upstream_variation": "Benchmark versus upstream variation" in readme,
@@ -493,12 +568,17 @@ def audit_claims(root: Path, contract: dict[str, Any]) -> dict[str, Any]:
         "not_a_manufacturable_pdk": "not a manufacturable PDK" in readme,
     }
     checks = {
-        "manual_review_record_complete": review.get("schema") == "apm.release-review.v2"
+        "manual_review_record_complete": review.get("schema") == "apm.release-review.v3"
         and review.get("status") == "complete",
         "manual_review_decisions": review.get("spectre_real_tool_run") is False
         and review.get("foundry_or_silicon_correlation_claimed") is False
         and review.get("benchmark_physical_family_correlation_claimed") is False
+        and review.get("process_noise_calibration_claimed") is False
+        and review.get("universal_planar_finfet_width_claimed") is False
+        and review.get("unsupported_noise_modes_claimed") is False
         and review.get("repository_visibility_changed") is False
+        and review.get("v3_tag_created") is False
+        and review.get("github_release_created") is False
         and review.get("unresolved_claim_findings") == [],
         "manual_review_identity_and_time_present": bool(review.get("reviewer"))
         and bool(
@@ -514,7 +594,7 @@ def audit_claims(root: Path, contract: dict[str, Any]) -> dict[str, Any]:
         and all(topic_checks.values()),
         "no_prohibited_public_claims": not prohibited_patterns,
     }
-    result = _check_map(checks, context="hash-bound v2 public-claim review")
+    result = _check_map(checks, context="hash-bound v3 public-claim review")
     result.update(
         {
             "review_path": str(review_path.relative_to(root)),
@@ -612,7 +692,7 @@ def run_static_audits(root: Path, output: Path) -> dict[str, Any]:
     }
     report_path = output / "static_audits.json"
     persisted = {
-        "schema": "apm.static-audits.v2",
+        "schema": "apm.static-audits.v3",
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "status": result["status"],
         "contract_sha256": sha256_file(root / "validation/release_gates.toml"),
@@ -708,7 +788,7 @@ def validate_repository(output: Path | None = None, *, root: Path | None = None)
     destination = (output or _default_output(selected, False)).expanduser().resolve()
     result = run_static_audits(selected, destination)
     report: dict[str, Any] = {
-        "schema": "apm.repository-validation.v2",
+        "schema": "apm.repository-validation.v3",
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "status": result["status"],
         "repository": str(selected),
@@ -742,6 +822,407 @@ def _component_error(components: dict[str, Any], name: str) -> str:
     return str(components.get(name, {}).get("error", f"{name} validation did not pass"))
 
 
+def _report_checks_pass(
+    report: dict[str, Any], expected_count: int, expected_ids: set[str]
+) -> bool:
+    checks = report.get("checks")
+    observed_ids = [item.get("id") for item in checks] if isinstance(checks, list) else []
+    return (
+        isinstance(checks, list)
+        and len(checks) == expected_count
+        and len(observed_ids) == len(set(observed_ids))
+        and set(observed_ids) == expected_ids
+        and all(item.get("status") == "pass" for item in checks)
+    )
+
+
+def _read_json_report(path: Path) -> dict[str, Any]:
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        raise ReleaseValidationError(f"cannot read validation report {path}: {error}") from error
+
+
+def _catalog_component(
+    root: Path,
+    output: Path,
+    toolchain: Any,
+    *,
+    resume: bool,
+) -> dict[str, Any]:
+    result = validate_noise_catalog(
+        output,
+        resume=resume,
+        root=root,
+        toolchain=toolchain,
+        progress=lambda message: print(f"[v3 release] {message}", file=sys.stderr, flush=True),
+    )
+    # The catalog's current report is intentionally replaced on resume. Bind
+    # this component to its immutable per-invocation copy instead.
+    return {**result, "report_path": result["run_report_path"]}
+
+
+def _noise_release_observation(
+    root: Path,
+    fresh: dict[str, Any],
+    resumed: dict[str, Any],
+    contract: dict[str, Any],
+) -> dict[str, Any]:
+    catalog_root = Path(fresh["output_directory"])
+    fresh_path = Path(fresh["run_report_path"])
+    resumed_path = Path(resumed["run_report_path"])
+    plan_path = catalog_root / "plan.json"
+    coverage_path = catalog_root / "coverage.json"
+    comparisons_path = catalog_root / "summary/noise_comparisons.json"
+    resume_qualification_path = catalog_root / "resume_qualification/report.json"
+    n1_path = catalog_root / "regressions/v3_n1_method/report.json"
+    n0_path = catalog_root / "regressions/v3_n1_method/v3_n0_regression/report.json"
+    synthetic_path = catalog_root / "regressions/v3_n1_method/synthetic_fit_report.json"
+
+    plan = _read_json_report(plan_path)
+    coverage = _read_json_report(coverage_path)
+    comparisons = _read_json_report(comparisons_path)
+    resume_qualification = _read_json_report(resume_qualification_path)
+    n1 = _read_json_report(n1_path)
+    n0 = _read_json_report(n0_path)
+    synthetic = _read_json_report(synthetic_path)
+    noise_contract = contract["noise"]
+    head = _git(root, "rev-parse", "HEAD")
+    expected_unique = int(noise_contract["catalog_unique_request_count"])
+    expected_logical = int(noise_contract["catalog_planned_logical_request_count"])
+    required_statuses = set(noise_contract["required_terminal_statuses"])
+    terminal_counts = fresh.get("terminal_status_counts", {})
+    n1_policy = n1.get("acquisition_policy", {})
+    method_identity = str(noise_contract["fit_method_identity"])
+    acquisition_identity = str(noise_contract["acquisition_policy_identity"])
+    observed_acquisition_identity = (
+        f"{n1_policy.get('id')}@{n1_policy.get('version')}"
+    )
+    required_harness_check_ids = set(noise_contract["required_harness_checks"])
+    required_n0_check_ids = required_harness_check_ids | {
+        "mos.gm_id_resolution",
+        "mos.four_engines_execute",
+        "mos.drain_psd_finite_nonnegative",
+        "mos.gate_referred_and_complex_transfer",
+        "mos.source_breakdown",
+        "mos.effective_parameter_provenance",
+        "mos.log_audit_sparse",
+        "models.no_spike_tuning",
+    }
+    required_n1_check_ids = {
+        "n0.regression",
+        "fit.synthetic_cases",
+        "canonical.four_engine_adaptive_acquisition",
+        "canonical.apm045_extended_diagnostic",
+        "low_vds.four_engine_results",
+        "low_vds.bsim_cmg_tnoimod1_correlation",
+        "fit.fail_closed_metrics",
+        "provenance.parameter_level_and_raw_sources",
+        "solver.sparse_no_klu",
+        "models.v2_card_immutability",
+    }
+    required_n2_check_ids = {
+        "catalog.manifest_5_13_26",
+        "plan.stable_identity_and_deduplication",
+        "dataset.temperature_complete_status",
+        "dataset.inversion_complete_status",
+        "dataset.length_manifest_coverage",
+        "dataset.nfin_manifest_coverage",
+        "results.explicit_terminal_status",
+        "results.no_simulation_failures",
+        "results.raw_provenance_and_sources",
+        "solver.sparse_no_klu",
+        "comparison.threshold_views",
+        "comparison.cross_process_polarity_and_basis",
+        "resume.strict_reuse_and_stale_rejection",
+        "regression.v3_n0",
+        "regression.v3_n1",
+        "models.v2_card_immutability",
+    }
+    required_resume_check_ids = {
+        "exact_completed_result_is_reusable",
+        "request_hash_mismatch_is_rejected",
+        "artifact_tamper_is_rejected",
+        "incomplete_result_is_rejected",
+    }
+    required_synthetic_case_ids = {
+        "pure_white",
+        "pure_flicker",
+        "known_flicker_white_corner",
+        "interior_white_plateau_before_high_frequency_rise",
+        "truncated_no_white_plateau",
+        "no_flicker_component",
+        "insufficient_candidate_span",
+        "zero_non_finite_and_malformed_fail_closed",
+    }
+    required_engine_selectors = set(noise_contract["required_engine_selectors"])
+    n0_mos_selectors = {
+        item.get("selector")
+        for item in n0.get("mos_results", [])
+        if item.get("status") == "pass"
+    }
+    canonical_selectors = {
+        item.get("selector")
+        for item in n1.get("canonical_results", [])
+        if item.get("status") == "pass"
+    }
+    low_vds_selectors = {
+        item.get("selector")
+        for item in n1.get("low_vds_results", [])
+        if item.get("status") == "pass"
+    }
+    synthetic_case_ids = {
+        item.get("id")
+        for item in synthetic.get("cases", [])
+        if item.get("status") == "pass"
+    }
+    expected_logical_counts = {
+        str(key): int(value)
+        for key, value in noise_contract["catalog_logical_request_counts"].items()
+    }
+    logical_status_counts = coverage.get("logical_status_counts", {})
+    temperature_coverage = coverage.get("temperature_coverage_c", {})
+    inversion_coverage = coverage.get("inversion_coverage_per_v", {})
+    expected_temperature_keys = {
+        str(int(value)) for value in noise_contract["temperature_values_c"]
+    }
+    expected_inversion_keys = {
+        f"{float(value):.1f}" for value in noise_contract["inversion_targets_per_v"]
+    }
+    n0_check_ids = {item.get("id") for item in n0.get("checks", [])}
+    fresh_check_by_id = {
+        item.get("id"): item.get("status") for item in fresh.get("checks", [])
+    }
+    n1_check_by_id = {
+        item.get("id"): item.get("status") for item in n1.get("checks", [])
+    }
+
+    checks = {
+        "foundation": (
+            n0.get("schema") == "apm.noise-spike-validation.v1"
+            and n0.get("status") == "pass"
+            and n0.get("repository_commit") == head
+            and n0.get("acceptance_result") == "13/13"
+            and _report_checks_pass(n0, 13, required_n0_check_ids)
+            and n0_check_ids == required_n0_check_ids
+            and n0_mos_selectors == required_engine_selectors
+            and n0.get("harness_report", {}).get("status") == "pass"
+            and n0.get("correlation", {}).get("status") == "pass"
+        ),
+        "method": (
+            n1.get("schema") == "apm.noise-method-validation.v1"
+            and n1.get("status") == "pass"
+            and n1.get("repository_commit") == head
+            and n1.get("acceptance_result") == "10/10"
+            and _report_checks_pass(n1, 10, required_n1_check_ids)
+            and n1.get("fit_method", {}).get("identity") == method_identity
+            and observed_acquisition_identity == acquisition_identity
+            and n1_policy.get("stop_sequence_hz")
+            == list(noise_contract["bounded_stop_sequence_hz"])
+            and n1_policy.get("points_per_decade")
+            == int(noise_contract["points_per_decade"])
+            and synthetic.get("status") == "pass"
+            and synthetic.get("acceptance_result")
+            == f"{int(noise_contract['required_synthetic_fit_case_count'])}/"
+            f"{int(noise_contract['required_synthetic_fit_case_count'])}"
+            and len(synthetic.get("cases", []))
+            == int(noise_contract["required_synthetic_fit_case_count"])
+            and synthetic_case_ids == required_synthetic_case_ids
+            and canonical_selectors == required_engine_selectors
+            and low_vds_selectors == required_engine_selectors
+            and n1.get("bsim_cmg_tnoimod1_low_vds", {}).get("status") == "pass"
+            and n1.get("bsim_cmg_tnoimod1_low_vds", {}).get(
+                "production_card_modified"
+            )
+            is False
+        ),
+        "catalog": (
+            fresh.get("schema") == "apm.noise-catalog-validation.v1"
+            and fresh.get("status") == "pass"
+            and fresh.get("repository_commit") == head
+            and fresh.get("repository_worktree_status") == []
+            and fresh.get("acceptance_result") == "16/16"
+            and _report_checks_pass(fresh, 16, required_n2_check_ids)
+            and plan.get("schema") == "apm.noise-catalog-plan.v1"
+            and plan.get("planned_logical_request_count") == expected_logical
+            and plan.get("unique_request_count") == expected_unique
+            and plan.get("catalog", {}).get("technology_count") == 5
+            and plan.get("catalog", {}).get("family_count") == 13
+            and plan.get("catalog", {}).get("public_device_count") == 26
+            and plan.get("frozen_methods", {}).get("fit_method") == method_identity
+            and plan.get("frozen_methods", {}).get("acquisition_policy")
+            == acquisition_identity
+            and plan.get("frozen_methods", {}).get("required_solver") == "Sparse"
+            and plan.get("reference_tools", {}).get(
+                "klu_permitted_for_required_noise"
+            )
+            is False
+            and plan.get("logical_request_counts") == expected_logical_counts
+            and fresh.get("plan", {}).get("sha256") == sha256_file(plan_path)
+            and fresh.get("coverage", {}).get("sha256") == sha256_file(coverage_path)
+            and fresh.get("comparisons", {}).get("sha256")
+            == sha256_file(comparisons_path)
+            and coverage.get("schema") == "apm.noise-catalog-coverage.v1"
+            and coverage.get("plan_hash") == plan.get("plan_hash")
+            and coverage.get("planned_logical_request_count") == expected_logical
+            and coverage.get("unique_request_count") == expected_unique
+            and coverage.get("catalog", {}).get("technology_count") == 5
+            and coverage.get("catalog", {}).get("family_count") == 13
+            and coverage.get("catalog", {}).get("public_device_count") == 26
+            and len(coverage.get("catalog", {}).get("selectors", [])) == 26
+            and set(logical_status_counts) == set(expected_logical_counts)
+            and all(
+                sum(int(count) for count in logical_status_counts[dataset].values())
+                == expected_count
+                and int(logical_status_counts[dataset].get("simulation_failed", 0)) == 0
+                for dataset, expected_count in expected_logical_counts.items()
+            )
+            and set(temperature_coverage) == expected_temperature_keys
+            and all(
+                sum(int(count) for count in states.values()) == 26
+                for states in temperature_coverage.values()
+            )
+            and set(inversion_coverage) == expected_inversion_keys
+            and all(
+                sum(int(count) for count in states.values()) == 26
+                for states in inversion_coverage.values()
+            )
+            and coverage.get("length_request_count")
+            == expected_logical_counts["length_scaling"]
+            and coverage.get("length_selector_count") == 26
+            and coverage.get("nfin_request_count")
+            == expected_logical_counts["nfin_scaling"]
+            and coverage.get("nfin_selector_count") == 6
+            and coverage.get("nfin_values") == list(noise_contract["nfin_values"])
+            and comparisons.get("schema") == noise_contract["comparison_schema"]
+            and comparisons.get("plan_hash") == plan.get("plan_hash")
+            and len(comparisons.get("threshold_groups", [])) == 12
+            and len(comparisons.get("cross_process_anchor_groups", [])) == 2
+            and comparisons.get("reference_frequencies_hz")
+            == [1.0, 1.0e3, 1.0e6, 1.0e7]
+            and comparisons.get("gate_referred_integration_band_hz")
+            == [1.0, 1.0e7]
+            and comparisons.get("universal_noise_ordering_imposed") is False
+            and comparisons.get("cross_basis_ratios_produced") is False
+            and fresh.get("execution", {}).get("mode") == "fresh"
+            and fresh.get("execution", {}).get("fresh_execution_count")
+            == expected_unique
+            and fresh.get("execution", {}).get("safely_reused_count") == 0
+            and fresh.get("execution", {}).get("stale_result_rejection_count") == 0
+            and sum(int(value) for value in terminal_counts.values())
+            == expected_unique
+            and set(terminal_counts) == required_statuses
+            and int(terminal_counts.get("simulation_failed", 0)) == 0
+            and fresh.get("coverage", {}).get(
+                "all_required_noise_jobs_sparse_no_klu"
+            )
+            is True
+            and fresh.get("comparisons", {}).get("threshold_group_count") == 12
+            and fresh.get("comparisons", {}).get(
+                "cross_process_anchor_group_count"
+            )
+            == 2
+            and fresh.get("comparisons", {}).get("cross_basis_ratios_produced")
+            is False
+            and fresh_check_by_id.get("results.raw_provenance_and_sources")
+            == "pass"
+            and fresh_check_by_id.get("results.explicit_terminal_status") == "pass"
+            and fresh_check_by_id.get("comparison.threshold_views") == "pass"
+            and fresh_check_by_id.get(
+                "comparison.cross_process_polarity_and_basis"
+            )
+            == "pass"
+        ),
+        "resume_integrity": (
+            resumed.get("schema") == "apm.noise-catalog-validation.v1"
+            and resumed.get("status") == "pass"
+            and resumed.get("repository_commit") == head
+            and resumed.get("acceptance_result") == "16/16"
+            and _report_checks_pass(resumed, 16, required_n2_check_ids)
+            and resumed.get("execution", {}).get("mode") == "resume"
+            and resumed.get("execution", {}).get("fresh_execution_count") == 0
+            and resumed.get("execution", {}).get("safely_reused_count")
+            == expected_unique
+            and resumed.get("execution", {}).get("stale_result_rejection_count")
+            == 0
+            and resumed.get("resume_qualification", {}).get("status") == "pass"
+            and resumed.get("resume_qualification", {}).get("acceptance_result")
+            == "4/4"
+            and resumed.get("resume_qualification", {}).get("sha256")
+            == sha256_file(resume_qualification_path)
+            and resume_qualification.get("status") == "pass"
+            and resume_qualification.get("acceptance_result") == "4/4"
+            and {
+                item.get("id")
+                for item in resume_qualification.get("checks", [])
+                if item.get("status") == "pass"
+            }
+            == required_resume_check_ids
+            and resumed.get("regressions", {}).get("execution_disposition")
+            == "safely_reused"
+        ),
+        "sparse_no_klu": (
+            n0_check_ids >= {"mos.log_audit_sparse"}
+            and next(
+                item.get("status")
+                for item in n0.get("checks", [])
+                if item.get("id") == "mos.log_audit_sparse"
+            )
+            == "pass"
+            and n1_check_by_id.get("solver.sparse_no_klu") == "pass"
+            and fresh_check_by_id.get("solver.sparse_no_klu") == "pass"
+            and fresh.get("coverage", {}).get(
+                "all_required_noise_jobs_sparse_no_klu"
+            )
+            is True
+        ),
+        "model_immutability": (
+            fresh.get("model_immutability", {}).get("status") == "pass"
+            and fresh.get("model_immutability", {}).get("v2_tag_commit")
+            == contract["model_immutability"]["baseline_commit"]
+            and fresh.get("model_immutability", {}).get(
+                "noise_coefficients_tuned_by_n2"
+            )
+            is False
+            and {
+                item.get("path")
+                for item in fresh.get("model_immutability", {}).get("cards", [])
+                if item.get("unchanged") is True
+            }
+            == set(contract["model_immutability"]["required_unchanged_cards"])
+        ),
+    }
+    evidence = {
+        "foundation": [str(n0_path)],
+        "method": [str(n1_path), str(synthetic_path)],
+        "catalog": [
+            str(fresh_path),
+            str(plan_path),
+            str(coverage_path),
+            str(comparisons_path),
+        ],
+        "resume_integrity": [str(resumed_path), str(resume_qualification_path)],
+        "sparse_no_klu": [str(n0_path), str(n1_path), str(fresh_path)],
+        "model_immutability": [str(fresh_path)],
+    }
+    return {
+        "status": "pass" if all(checks.values()) else "fail",
+        "checks": checks,
+        "evidence": evidence,
+        "reports": {
+            "fresh_catalog": str(fresh_path),
+            "resume_catalog": str(resumed_path),
+            "plan": str(plan_path),
+            "coverage": str(coverage_path),
+            "comparisons": str(comparisons_path),
+            "resume_qualification": str(resume_qualification_path),
+            "v3_n1": str(n1_path),
+            "v3_n0": str(n0_path),
+            "synthetic": str(synthetic_path),
+        },
+    }
+
+
 def validate_release(output: Path | None = None, *, root: Path | None = None) -> dict[str, Any]:
     selected = (root or repository_root()).resolve()
     destination = (output or _default_output(selected, True)).expanduser().resolve()
@@ -756,7 +1237,7 @@ def validate_release(output: Path | None = None, *, root: Path | None = None) ->
 
     attestation = _call_component(
         components,
-        "clean_clone",
+        "clean_clone_initial",
         lambda: {
             **verify_clean_clone_attestation(selected),
             "report_path": str(selected / ".apm/clean-clone-attestation.json"),
@@ -775,20 +1256,13 @@ def validate_release(output: Path | None = None, *, root: Path | None = None) ->
         command_by_id = {command["id"]: command for command in static["commands"]}
         pytest_pass = command_by_id.get("pytest", {}).get("status") == "pass"
         catalog_pass = audits["catalog"]["status"] == "pass"
+        migration_pass = audits["migration"]["status"] == "pass"
         provenance_pass = audits["provenance"].get("status") == "pass"
         distribution_pass = audits["distribution"]["status"] == "pass"
         gate_results["catalog.manifest_driven"] = _gate(
-            "pass" if pytest_pass and catalog_pass else "fail",
+            "pass" if pytest_pass and catalog_pass and migration_pass else "fail",
             static_evidence,
-            "generic fixture-family regression plus production catalog audit",
-        )
-        gate_results["catalog.required_families"] = _gate(
-            audits["catalog"]["status"], static_evidence, "five technologies and 13 families"
-        )
-        gate_results["migration.no_v1_runtime_ssot"] = _gate(
-            "pass" if pytest_pass and audits["migration"]["status"] == "pass" else "fail",
-            static_evidence,
-            "v1 runtime single-source and alias migration audit",
+            "manifest-driven 5/13/26 catalog, native geometry, and no v1 SSOT",
         )
         gate_results["spectre.model_only"] = _gate(
             "pass"
@@ -803,18 +1277,24 @@ def validate_release(output: Path | None = None, *, root: Path | None = None) ->
             if provenance_pass and command_by_id.get("reuse", {}).get("status") == "pass"
             else "fail",
             _report_reference(audits["provenance"]),
-            "exact-file hashes, redistribution boundaries, and REUSE/SPDX",
+            "exact-file provenance, redistribution boundaries, notices, and REUSE",
         )
-        gate_results["distribution.self_contained_models"] = _gate(
-            "pass" if provenance_pass and distribution_pass and attestation else "fail",
+        gate_results["distribution.public_hygiene"] = _gate(
+            "pass"
+            if provenance_pass and distribution_pass and attestation is not None
+            else "fail",
             [*static_evidence, *attestation_evidence],
-            "tracked model closure and generated-output policy in an attested clone",
+            "self-contained distribution, generated-state exclusions, secrets/private-path audit",
         )
         gate_results["release.metadata_complete"] = _gate(
-            audits["metadata"]["status"], static_evidence, "v2.0.0 metadata and placeholders"
+            audits["metadata"]["status"],
+            static_evidence,
+            "3.0.0 package/runtime/CLI/changelog metadata and placeholders",
         )
         gate_results["release.claim_audit"] = _gate(
-            audits["claims"]["status"], static_evidence, "hash-bound v2 public claim review"
+            audits["claims"]["status"],
+            static_evidence,
+            "hash-bound v3 public claim and exclusion review",
         )
 
     toolchain = None
@@ -847,11 +1327,6 @@ def validate_release(output: Path | None = None, *, root: Path | None = None) ->
             _report_reference(doctor),
             "native BSIM3/BSIM4 plus PSP103 and BSIM-CMG OSDI smokes",
         )
-    gate_results["runtime.reference_environment"] = _gate(
-        "pass" if attestation and doctor else "fail",
-        [*attestation_evidence, *_report_reference(doctor)],
-        "attested WSL2/RHEL-compatible EL9 x86_64 and ngspice 47 runtime",
-    )
 
     all_families = (
         _call_component(
@@ -907,14 +1382,12 @@ def validate_release(output: Path | None = None, *, root: Path | None = None) ->
         comparison_results = {name: None for name, _ in comparison_calls}
     comparison_pass = all(_validated(result) for result in comparison_results.values())
     comparison_evidence = [
-        path
-        for result in comparison_results.values()
-        for path in _report_reference(result)
+        path for result in comparison_results.values() for path in _report_reference(result)
     ]
     gate_results["comparison.v2"] = _gate(
         "pass" if comparison_pass else "fail",
         comparison_evidence,
-        "anchors, threshold equal-bias/equal-inversion, and gate-stack native/common-overlap",
+        "anchors, threshold equal-bias/equal-inversion, and gate-stack views",
     )
 
     benchmark = (
@@ -926,18 +1399,6 @@ def validate_release(output: Path | None = None, *, root: Path | None = None) ->
         if toolchain
         else None
     )
-    benchmark_pass = _validated(benchmark)
-    gate_results["variation.benchmark_v2"] = _gate(
-        "pass" if benchmark_pass else "fail",
-        _report_reference(benchmark),
-        "real-ngspice Global/Local/All, corners, adapter calibration, and replay",
-    )
-    gate_results["passives.benchmark"] = _gate(
-        "pass" if benchmark_pass else "fail",
-        _report_reference(benchmark),
-        "real-ngspice Rbench/Cbench value, matching, temperature, and noise checks",
-    )
-
     native = (
         _call_component(
             components,
@@ -947,55 +1408,124 @@ def validate_release(output: Path | None = None, *, root: Path | None = None) ->
         if toolchain
         else None
     )
+    benchmark_pass = _validated(benchmark)
     native_pass = _validated(native)
-    gate_results["variation.apm130_upstream"] = _gate(
-        "pass" if native_pass else "fail",
-        _report_reference(native),
-        "independent IHP LV/HV corners, process/statistical, and mismatch cohorts",
+    gate_results["variation.v2"] = _gate(
+        "pass" if benchmark_pass and native_pass else "fail",
+        [*_report_reference(benchmark), *_report_reference(native)],
+        "Benchmark Global/Local/All, passives, and independent APM130 native variation",
     )
 
-    static_pass = bool(static and static.get("status") == "pass")
-    provenance_pass = bool(
-        static and static["audits"]["provenance"].get("status") == "pass"
+    noise_fresh = (
+        _call_component(
+            components,
+            "noise_catalog_fresh",
+            lambda: _catalog_component(
+                selected,
+                destination / "noise-catalog",
+                toolchain,
+                resume=False,
+            ),
+        )
+        if toolchain
+        else None
     )
-    apm045_comparisons = _validated(
-        comparison_results["comparison_apm045_threshold"]
-    ) and _validated(comparison_results["comparison_apm045_gate_stack"])
-    apm022_comparison = _validated(comparison_results["comparison_apm022_multivt"])
-    apm016f_comparison = _validated(comparison_results["comparison_apm016f_multivt"])
-    gate_results["models.apm130_lv_hv"] = _gate(
-        "pass" if all_family_pass and native_pass and provenance_pass else "fail",
-        [*_report_reference(all_families), *_report_reference(native)],
-        "APM130 LV/HV terminal and independent native-variation execution",
+    noise_resumed = (
+        _call_component(
+            components,
+            "noise_catalog_resume",
+            lambda: _catalog_component(
+                selected,
+                destination / "noise-catalog",
+                toolchain,
+                resume=True,
+            ),
+        )
+        if toolchain and noise_fresh
+        else None
     )
-    gate_results["models.apm045_families"] = _gate(
-        "pass" if all_family_pass and apm045_comparisons and provenance_pass else "fail",
+    noise_observation = None
+    if noise_fresh and noise_resumed:
+        try:
+            noise_observation = _noise_release_observation(
+                selected, noise_fresh, noise_resumed, contract
+            )
+            components["noise_contract"] = {
+                "status": noise_observation["status"],
+                "checks": noise_observation["checks"],
+                "reports": noise_observation["reports"],
+            }
+        except Exception as error:  # noqa: BLE001 - preserve failure as release evidence
+            components["noise_contract"] = {
+                "status": "fail",
+                "error_type": type(error).__name__,
+                "error": str(error),
+            }
+
+    if noise_observation:
+        observation_checks = noise_observation["checks"]
+        observation_evidence = noise_observation["evidence"]
+        gate_results["noise.foundation"] = _gate(
+            "pass" if observation_checks["foundation"] else "fail",
+            observation_evidence["foundation"],
+            "V3-N0 analytic harness and four-engine external-noise qualification",
+        )
+        gate_results["noise.method"] = _gate(
+            "pass" if observation_checks["method"] else "fail",
+            observation_evidence["method"],
+            "frozen N1 acquisition/fit method, synthetic cases, and low-VDS diagnostics",
+        )
+        gate_results["noise.catalog"] = _gate(
+            "pass" if observation_checks["catalog"] else "fail",
+            observation_evidence["catalog"],
+            "fresh deterministic V3-N2 catalog with complete explicit states and comparisons",
+        )
+        gate_results["noise.resume_integrity"] = _gate(
+            "pass" if observation_checks["resume_integrity"] else "fail",
+            observation_evidence["resume_integrity"],
+            "exact all-reuse run plus mismatch/tamper/incomplete/stale rejection",
+        )
+        gate_results["runtime.noise_sparse"] = _gate(
+            "pass" if observation_checks["sparse_no_klu"] else "fail",
+            observation_evidence["sparse_no_klu"],
+            "N0/N1/N2 required noise jobs use normal Sparse and no KLU",
+        )
+        claims_pass = bool(
+            static
+            and static["audits"]["claims"]["status"] == "pass"
+            and static["audits"]["provenance"].get("status") == "pass"
+        )
+        gate_results["models.claims_immutability"] = _gate(
+            "pass"
+            if observation_checks["model_immutability"] and claims_pass
+            else "fail",
+            [
+                *observation_evidence["model_immutability"],
+                *static_evidence,
+            ],
+            "v2 model-card byte identity plus parameter/default and public-claim boundaries",
+        )
+
+    final_attestation = _call_component(
+        components,
+        "clean_clone_final",
+        lambda: {
+            **verify_clean_clone_attestation(selected),
+            "report_path": str(selected / ".apm/clean-clone-attestation.json"),
+        },
+    )
+    gate_results["runtime.reference_environment"] = _gate(
+        "pass" if attestation and final_attestation and doctor else "fail",
         [
-            *_report_reference(all_families),
-            *_report_reference(comparison_results["comparison_apm045_threshold"]),
-            *_report_reference(comparison_results["comparison_apm045_gate_stack"]),
+            *attestation_evidence,
+            *_report_reference(doctor),
+            *_report_reference(final_attestation),
         ],
-        "VTL/VTG/VTH/THKOX execution and required comparison sets",
-    )
-    gate_results["models.apm022_multivt"] = _gate(
-        "pass" if all_family_pass and apm022_comparison and provenance_pass else "fail",
-        [
-            *_report_reference(all_families),
-            *_report_reference(comparison_results["comparison_apm022_multivt"]),
-        ],
-        "independent threshold-isolated LVT/SVT/HVT execution and ordering",
-    )
-    gate_results["models.apm016f_multivt"] = _gate(
-        "pass" if all_family_pass and apm016f_comparison and provenance_pass else "fail",
-        [
-            *_report_reference(all_families),
-            *_report_reference(comparison_results["comparison_apm016f_multivt"]),
-        ],
-        "BSIM-CMG workfunction-dominant LVT/SVT/HVT execution, ordering, and NFIN",
+        "exact candidate on attested WSL2/RHEL-compatible EL9 x86_64 with ngspice 47",
     )
 
     required_component_names = (
-        "clean_clone",
+        "clean_clone_initial",
         "static",
         "doctor",
         "all_families",
@@ -1006,24 +1536,40 @@ def validate_release(output: Path | None = None, *, root: Path | None = None) ->
         "comparison_apm016f_multivt",
         "benchmark",
         "apm130_native",
+        "noise_catalog_fresh",
+        "noise_catalog_resume",
+        "noise_contract",
+        "clean_clone_final",
     )
-    clean_clone_pass = all(
-        components.get(name, {}).get("status") == "pass" for name in required_component_names
+    component_pass = all(
+        components.get(name, {}).get("status") == "pass"
+        for name in required_component_names
     )
     clean_clone_evidence = [
         str(components[name]["report_path"])
         for name in required_component_names
         if components.get(name, {}).get("report_path")
     ]
+    if noise_observation:
+        clean_clone_evidence.extend(
+            path
+            for paths in noise_observation["evidence"].values()
+            for path in paths
+            if path not in clean_clone_evidence
+        )
     gate_results["release.clean_clone"] = _gate(
-        "pass" if clean_clone_pass and static_pass else "fail",
+        "pass"
+        if component_pass
+        and static is not None
+        and static.get("status") == "pass"
+        else "fail",
         clean_clone_evidence,
-        "exact-commit clone completed every automatic v2 release component",
+        "exact candidate clone completed every automatic v3 release component",
     )
 
     ordered_gates, overall = evaluate_required_gates(contract, gate_results)
     report: dict[str, Any] = {
-        "schema": "apm.release-validation.v2",
+        "schema": "apm.release-validation.v3",
         "created_utc": created,
         "completed_utc": datetime.now(timezone.utc).isoformat(),
         "status": "pass" if overall else "fail",
@@ -1038,13 +1584,25 @@ def validate_release(output: Path | None = None, *, root: Path | None = None) ->
         "passed_required_gate_count": sum(
             1 for gate in ordered_gates if gate["required"] and gate["passed"]
         ),
+        "v3_tag_present": subprocess.run(
+            ["git", "show-ref", "--verify", "--quiet", "refs/tags/v3.0.0"],
+            cwd=selected,
+            check=False,
+        ).returncode
+        == 0,
     }
     report_path = destination / "report.json"
-    report_path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    report_path.write_text(
+        json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
     report["output_directory"] = str(destination)
     report["report_path"] = str(report_path)
     if not overall:
-        failed = [gate["id"] for gate in ordered_gates if gate["required"] and not gate["passed"]]
+        failed = [
+            gate["id"]
+            for gate in ordered_gates
+            if gate["required"] and not gate["passed"]
+        ]
         raise ReleaseValidationError(
             f"release validation failed ({', '.join(failed)}); see {report_path}"
         )

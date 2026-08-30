@@ -448,7 +448,7 @@ def validate_provenance(output: Path, *, root: Path = ROOT) -> dict[str, Any]:
         "schema": "apm.provenance-validation.v2",
         "generated_utc": datetime.now(timezone.utc).isoformat(),
         "status": "pass" if all(checks.values()) else "fail",
-        "release_gates": ["licensing.provenance", "distribution.self_contained_models"],
+        "release_gates": ["licensing.provenance", "distribution.public_hygiene"],
         "checks": checks,
         "details": details,
         "failures": failures,

@@ -230,7 +230,7 @@ Comparison tables may denormalize:
 - operating-profile reference VDD;
 - current-density basis.
 
-Do not report current/capacitance ratios across planar-per-width and FinFET-per-fin bases unless a future explicit physical conversion model is introduced. Current v2 must leave such cross-basis ratios absent/null.
+Do not report current/capacitance ratios across planar-per-width and FinFET-per-fin bases unless a future explicit physical conversion model is introduced. The v2 electrical contract, including v3 package outputs that preserve it, must leave such cross-basis ratios absent/null.
 
 ## 14. Variation identity
 

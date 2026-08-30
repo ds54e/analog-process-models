@@ -55,7 +55,7 @@ def build_parser() -> argparse.ArgumentParser:
         prog="apm",
         description="Analog Process Models characterization framework",
     )
-    parser.add_argument("--version", action="version", version="APM 2.0.0")
+    parser.add_argument("--version", action="version", version="APM 3.0.0")
     sub = parser.add_subparsers(dest="command", required=True)
 
     sub.add_parser("doctor", help="Run reference-runtime and compact-model smoke tests")
@@ -85,7 +85,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--release",
         action="store_true",
         help=(
-            "Evaluate the v2.0 release-gate contract; required unimplemented, skipped, "
+            "Evaluate the v3.0 release-gate contract; required unimplemented, skipped, "
             "or failed automatically-checkable gates must cause a non-zero exit status"
         ),
     )

@@ -10,14 +10,27 @@ This is the compact persistent progress index. It is not validation evidence by 
 - Released tag commit: `3cc6cfea4932cc40f2d693784d0a569926cdf399`
 - v2 post-release exact-tag requalification: complete, 20/20 required gates passed
 - Current development line: post-v2 `main`
-- Current target: v3 stationary small-signal MOS-noise characterization
+- Current target: v3.0.0 release candidate hardening
 - Completed milestones: `V3-N0 Four-engine noise spike`; `V3-N1 Noise acquisition and fit-method qualification`; `V3-N2 Catalog-wide noise dataset and comparison qualification`
-- Current milestone: `V3-N2 COMPLETE`; next recommended milestone is v3 release hardening
-- State: `V3_N2_COMPLETE_EXACT_IMPLEMENTATION_COMMIT_QUALIFIED`
+- Current milestone: `V3-N3 v3.0.0 Release Hardening`
+- State: `V3_N3_IN_PROGRESS`
 - v3 release eligible: NO
 - Blockers: none
 
-APM v2.0.0 is immutable. V3-N0, V3-N1, and V3-N2 are complete. V3-N2 applies the qualified noise measurement/acquisition/fitting method to the entire public MOS catalog without changing model cards or claiming a v3 release.
+APM v2.0.0 is immutable. V3-N0, V3-N1, and V3-N2 are complete. V3-N3 is
+authorized to prepare and exactly qualify a package/runtime v3.0.0 candidate,
+but not to create the final v3 tag, GitHub Release, or visibility change.
+
+Normative current release-hardening contract:
+
+- `GOAL.md`;
+- `RELEASE_V3.md`.
+
+V3-N3 began from clean synchronized `main` at
+`bbd4932d325270ddd37711e7e2c7e0b00e91670f`; both the V3-N2 implementation
+commit `ca977af3ba08b9dfdee8556e5781f647f99cabdd` and evidence/status commit are
+present. Candidate commit: not yet created. Final `v3.0.0` tag: not created.
+GitHub Release: not created. Repository visibility: unchanged.
 
 ## Reference toolchain
 
@@ -111,11 +124,10 @@ The APM045/VTG 10 GHz attempt found an interior white plateau around 79.43 MHz t
 
 The 50 mV diagnostic profile remains diagnostic. A runtime-only BSIM-CMG `TNOIMOD=1` diagnostic demonstrated the correlated path without modifying the production APM016F card.
 
-## V3-N2 normative contract
+## Frozen V3-N2 contract
 
-Current goal/specification:
+Historical milestone specification:
 
-- `GOAL.md`
 - `NOISE_N2.md`
 
 V3-N2 applies the frozen N1 method to the full manifest-discovered public MOS catalog.
@@ -354,10 +366,30 @@ Tracked compact evidence:
 
 `validation/evidence/v3_n2_noise_catalog.json`
 
-## Current next action
+## V3-N3 release-hardening progress
 
-Proceed to a separately specified v3 release-hardening milestone. Do not begin
-process-noise calibration from N2 alone: generic APM-authored calibration would
-require separately authorized, defensible external silicon or literature
-targets. V3-N2 does not change package version, create a v3 tag, or make the
-repository v3-release eligible by itself.
+The active `GOAL.md` and `RELEASE_V3.md` freeze package/runtime candidate
+version 3.0.0 and an 18-gate current-main release contract. The candidate tree
+now contains the v3 contract/evaluator, strengthened clean-clone attestation,
+hash-bound claim review, public-hygiene audit, 3.0.0 package/CLI metadata, and
+release documentation. The electrical/noise/comparison result schema
+identities remain unchanged.
+
+Development real-tool qualification on the documented environment currently
+passes:
+
+- `apm doctor` for native BSIM3/BSIM4 and PSP103/BSIM-CMG OSDI;
+- fresh V3-N2 16/16 with 290 fresh executions, nested V3-N1 10/10, nested
+  V3-N0 13/13, and zero simulation failures;
+- unchanged strict resume 16/16 with 290 safe reuses and zero fresh/stale
+  executions;
+- all-family electrical characterization, all five comparison suites,
+  Benchmark variation/passives, and APM130 native LV/HV variation.
+
+Remaining work is to finish the final static/hash audit, create and push one
+immutable candidate future tag-target commit, qualify that exact commit from a
+genuine fresh HTTPS clone, and commit compact exact-candidate evidence/status
+afterward.
+
+Process-noise calibration remains unauthorized. Final `v3.0.0` tag, GitHub
+Release, and repository visibility changes remain explicitly unperformed.

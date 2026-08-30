@@ -1,5 +1,5 @@
-schema = "apm.release-gates.v2"
-target = "v2.0.0"
+schema = "apm.release-gates.v3"
+target = "v3.0.0"
 status = "authoritative-gate-definition"
 
 [policy]
@@ -9,26 +9,29 @@ repository_visibility_may_change = false
 clean_clone_required = true
 clean_clone_platform = "WSL2 + RHEL-compatible EL9 Linux + x86_64"
 reference_simulator = "ngspice 47 with OSDI"
-v1_evidence_satisfies_v2 = false
-v1_backward_compatibility_required = false
+historical_evidence_satisfies_v3 = false
+final_tag_creation_authorized = false
+github_release_creation_authorized = false
 
 [runtime]
 primary_distribution = "AlmaLinux 9"
 acceptable_distribution_class = "RHEL-compatible EL9"
 architecture = "x86_64"
 required_ngspice_major = 47
+required_openvaf_tag = "v24.0.2mob"
 osdi_required = true
 python_minimum = "3.9"
-existing_v1_toolchain_may_be_reused_during_development = true
+required_noise_solver = "Sparse"
+required_noise_solver_forbidden = "KLU"
 final_fresh_clone_requalification_required = true
 
 [release_metadata]
-target_version = "2.0.0"
+target_version = "3.0.0"
 package_version_must_match_target = true
 release_notes_required = true
 release_notes_path = "CHANGELOG.md"
 unresolved_release_placeholders_forbidden = true
-version_metadata_paths = ["pyproject.toml", "src/apm/__init__.py"]
+version_metadata_paths = ["pyproject.toml", "src/apm/__init__.py", "src/apm/cli.py"]
 forbidden_release_placeholder_tokens = [
   "TBD",
   "not_started",
@@ -39,6 +42,7 @@ forbidden_release_placeholder_tokens = [
 [technology_catalog]
 required_technologies = ["apm350", "apm130", "apm045", "apm022", "apm016f"]
 required_family_count = 13
+required_public_device_count = 26
 manifest_driven = true
 n_p_symmetry_required = false
 family_id_is_technology_local = true
@@ -64,8 +68,10 @@ finfet_parameters = ["l", "nfin"]
 forbidden_common_parameters = ["m", "nf", "ng"]
 family_qualified_names_required = true
 unqualified_v1_aliases_required = false
+universal_planar_finfet_effective_width_forbidden = true
 
 [characterization]
+schema = "apm.characterization.v2"
 required_metrics = [
   "id_vg",
   "id_vd",
@@ -98,56 +104,69 @@ required_kinds = [
 common_overlap_bias_must_be_explicit_and_validated = true
 cross_basis_current_capacitance_ratios_forbidden = true
 
-[benchmark_variation]
-required_modes = ["global", "local", "all"]
-required_intents = ["vth_shift", "drive_shift"]
-required_corners = ["bench_tt", "bench_ff", "bench_ss", "bench_fs", "bench_sf"]
-seed_reproducibility_ngspice = true
-resolved_latents_persisted = true
-family_specific_adapter_calibration_required = true
-technology_polarity_global_latent_shared_across_families = true
-physical_family_correlation_claimed = false
+[variation]
+benchmark_modes = ["global", "local", "all"]
+benchmark_intents = ["vth_shift", "drive_shift"]
+benchmark_corners = ["bench_tt", "bench_ff", "bench_ss", "bench_fs", "bench_sf"]
+benchmark_passives = ["Rbench", "Cbench"]
+apm130_upstream_variation = ["corners", "statistical_or_process", "mismatch"]
 benchmark_vs_upstream_separation_required = true
+physical_family_correlation_claimed = false
 
-[benchmark_passives]
-required = ["Rbench", "Cbench"]
-match_size_dimensionless = true
-mismatch_scaling = "1/sqrt(match_size)"
-variation_terminology = ["global", "local", "all"]
+[noise]
+result_schema = "apm.noise-characterization.v1"
+comparison_schema = "apm.noise-comparison.v1"
+fit_method_identity = "apm.noise-fit.contiguous-regions@1.0.0"
+acquisition_policy_identity = "apm.noise-acquisition.bounded-white-search@1.0.0"
+required_harness_checks = [
+  "harness.resistor_reference",
+  "harness.probe_transparency",
+  "harness.osdi_white",
+  "harness.osdi_flicker",
+  "harness.osdi_correlation",
+]
+required_engine_selectors = [
+  "apm350/general/nmos",
+  "apm130/lv/nmos",
+  "apm045/vtg/nmos",
+  "apm016f/svt/nfet",
+]
+required_synthetic_fit_case_count = 8
+base_start_hz = 1.0
+base_stop_hz = 1.0e8
+points_per_decade = 20
+bounded_stop_sequence_hz = [1.0e8, 1.0e9, 1.0e10, 1.0e11]
+low_vds_diagnostic_v = 0.05
+catalog_planned_logical_request_count = 376
+catalog_unique_request_count = 290
+required_terminal_statuses = ["validated", "target_not_reachable", "simulation_failed"]
+temperature_values_c = [-40, 27, 85, 125]
+inversion_targets_per_v = [5, 10, 15, 20, 25]
+nfin_values = [1, 2, 4]
+fresh_release_catalog_required = true
+strict_resume_after_fresh_required = true
+process_noise_tuning_authorized = false
 
-[apm130]
-required_families = ["lv", "hv"]
-preferred_upstream_revision = "331c00484213b13414777eec1336ef5c29b969bd"
-required_upstream_variation = ["corners", "statistical_or_process", "mismatch"]
-n_p_specific_geometry_supported = true
-cross_family_native_correlation_may_be_invented = false
-native_combined_all_required = false
+[noise.catalog_logical_request_counts]
+canonical_temperature_matrix = 104
+inversion_sweep = 130
+length_scaling = 78
+nfin_scaling = 18
+threshold_equal_bias = 18
+threshold_equal_inversion = 18
+cross_process_anchor = 10
 
-[apm045]
-required_families = ["vtl", "vtg", "vth", "thkox"]
-threshold_comparison_set = ["vtl", "vtg", "vth"]
-gate_stack_comparison_set = ["vtg", "thkox"]
-thkox_profile_must_have_documented_origin = true
-
-[apm022]
-required_families = ["lvt", "svt", "hvt"]
-ptm_numeric_derivation_forbidden = true
-lvt_hvt_origin = "apm_derived_variant"
-variant_method = "threshold_isolated"
-required_nominal_ordering = ["abs_vth", "ion", "ioff"]
-
-[apm016f]
-required_families = ["lvt", "svt", "hvt"]
-bsim_cmg_required = true
-nfin_scaling_required = true
-planar_substitute_forbidden = true
-ptm_mg_numeric_derivation_forbidden = true
-lvt_hvt_origin = "apm_derived_variant"
-variant_method = "workfunction_dominant"
-high_voltage_io_family_required = false
+[model_immutability]
+baseline_tag = "v2.0.0"
+baseline_commit = "3cc6cfea4932cc40f2d693784d0a569926cdf399"
+required_unchanged_cards = [
+  "models/apm350/ngspice/apm350_models.inc",
+  "models/apm022/ngspice/apm022_multivt_models.inc",
+  "models/apm016f/ngspice/apm016f_multivt_models.inc",
+]
 
 [spectre]
-artifacts_required_for_all_v2_families = true
+artifacts_required_for_all_families = true
 model_only = true
 status = "experimental_unverified"
 real_tool_validation_required = false
@@ -159,7 +178,6 @@ exact_provenance_per_vendored_file = true
 ambiguous_redistribution_forbidden = true
 third_party_relicensing_forbidden = true
 reuse_spdx_audit_required = true
-prefer_existing_pinned_revision_when_suitable = true
 ptm_parameter_redistribution_forbidden = true
 ptm_numeric_derivation_for_apm022_apm016f_forbidden = true
 
@@ -167,19 +185,27 @@ ptm_numeric_derivation_for_apm022_apm016f_forbidden = true
 separate_transistor_model_download_required = false
 generated_osdi_committed = false
 large_raw_results_committed = false
+credentials_or_private_artifacts_forbidden = true
+absolute_private_paths_forbidden_outside_historical_evidence = true
+generated_cache_result_files_must_be_ignored = true
 
-[v1_migration]
-old_kit_toml_canonical_ssot_forbidden_at_release = true
-old_result_schema_canonical_output_forbidden_at_release = true
-old_benchmark_adapter_schema_canonical_forbidden_at_release = true
-unqualified_v1_public_alias_dependency_forbidden_at_release = true
+[migration]
+old_kit_toml_canonical_ssot_forbidden = true
+old_result_schema_canonical_output_forbidden = true
+old_benchmark_adapter_schema_canonical_forbidden = true
+unqualified_v1_public_alias_dependency_forbidden = true
 technology_specific_loader_dependency_for_normal_family_discovery_forbidden = true
 
 [documentation]
 required_topics = [
   "scope",
   "device_family_domain_model",
-  "operating_profile_vs_validity",
+  "reference_environment",
+  "installation",
+  "electrical_characterization",
+  "stationary_noise",
+  "noise_dataset_meaning",
+  "noise_claim_exclusions",
   "model_provenance",
   "model_fidelity_limitations",
   "benchmark_vs_upstream_variation",
@@ -196,7 +222,11 @@ all_required_family_characterization_required = true
 comparison_sets_required = true
 benchmark_global_local_all_required = true
 apm130_upstream_lv_hv_variation_required = true
+noise_n0_n1_n2_required = true
+fresh_noise_catalog_required = true
+strict_resume_required = true
 license_provenance_audit_required = true
+public_hygiene_audit_required = true
 readme_claim_audit_required = true
 fresh_clone_from_repository_required = true
 release_metadata_audit_required = true
@@ -204,119 +234,107 @@ release_metadata_audit_required = true
 [[gate]]
 id = "runtime.reference_environment"
 required = true
-validation = "real_environment"
-summary = "Fresh-clone v2 release flow executes on WSL2 + RHEL-compatible EL9 x86_64 with the documented ngspice/OpenVAF/OSDI reference path."
+validation = "clean_clone_and_real_environment"
+summary = "Exact candidate runs from a pre-bootstrap-attested WSL2 + RHEL-compatible EL9 x86_64 HTTPS clone on a Linux filesystem with the documented source-built toolchain."
 
 [[gate]]
 id = "runtime.compact_models"
 required = true
 validation = "real_tool"
-summary = "Native BSIM3/BSIM4, PSP103 OSDI, and BSIM-CMG OSDI real-device smokes pass in the v2 environment."
+summary = "Native BSIM3/BSIM4 and PSP103/BSIM-CMG OSDI real-device smokes pass with ngspice 47."
+
+[[gate]]
+id = "runtime.noise_sparse"
+required = true
+validation = "real_tool_and_log_audit"
+summary = "All required stationary-noise jobs execute with normal Sparse and no required KLU path."
 
 [[gate]]
 id = "catalog.manifest_driven"
 required = true
 validation = "tests_and_audit"
-summary = "Technology/Family/Device discovery and normal dispatch are manifest-driven; fixture-family tests prove no new technology-specific production loader is required."
-
-[[gate]]
-id = "catalog.required_families"
-required = true
-validation = "tests_and_audit"
-summary = "All five technologies and all 13 required Electrical Families are discoverable with valid device/operating-profile/backend-binding contracts."
-
-[[gate]]
-id = "models.apm130_lv_hv"
-required = true
-validation = "real_tool_and_audit"
-summary = "APM130 LV/HV audited IHP families execute with correct family/device-specific geometry and operating-profile semantics."
-
-[[gate]]
-id = "models.apm045_families"
-required = true
-validation = "real_tool_and_audit"
-summary = "APM045 VTL/VTG/VTH/THKOX audited families execute and expose the required threshold/gate-stack comparison sets."
-
-[[gate]]
-id = "models.apm022_multivt"
-required = true
-validation = "tests_and_real_tool"
-summary = "APM022 independently authored LVT/SVT/HVT families satisfy threshold-isolated provenance and nominal Vth/Ion/Ioff ordering."
-
-[[gate]]
-id = "models.apm016f_multivt"
-required = true
-validation = "tests_and_real_tool"
-summary = "APM016F workfunction-dominant LVT/SVT/HVT families genuinely execute BSIM-CMG and preserve NFIN integrity."
+summary = "Manifest discovery provides exactly five technologies, 13 families, and 26 family-qualified devices with native planar/FinFET geometry and no v1 runtime SSOT regression."
 
 [[gate]]
 id = "characterization.v2"
 required = true
 validation = "real_tool"
-summary = "Every required family/device completes v2 terminal characterization including Ion/Ioff/log ratio/SS at required temperatures with v2 result semantics."
+summary = "Every required family/device completes the existing v2 terminal characterization contract at required temperatures."
 
 [[gate]]
 id = "comparison.v2"
 required = true
 validation = "real_tool"
-summary = "Cross-process anchors, threshold equal-bias/equal-inversion, and gate-stack native/common-overlap comparisons execute with correct geometry/current basis semantics."
+summary = "Cross-process, threshold, and gate-stack comparisons execute with explicit profiles and correct planar/FinFET basis handling."
 
 [[gate]]
-id = "variation.benchmark_v2"
+id = "variation.v2"
 required = true
 validation = "tests_and_real_tool"
-summary = "Benchmark Global/Local/All and fixed benchmark corners work across required families using persisted technology/polarity latents and calibrated family adapters."
+summary = "Benchmark Global/Local/All, corners, passives, and independent IHP APM130 LV/HV upstream variation pass without false correlation claims."
 
 [[gate]]
-id = "variation.apm130_upstream"
+id = "noise.foundation"
 required = true
-validation = "real_tool"
-summary = "Selected available IHP LV/HV upstream corners/statistical/process/mismatch flows are validated without invented cross-family correlation or native All mode."
+validation = "analytic_reference_and_real_tool"
+summary = "V3-N0 resistor, CCVS, OSDI white/flicker/correlated fixtures and four compact-model paths pass."
 
 [[gate]]
-id = "passives.benchmark"
+id = "noise.method"
 required = true
-validation = "tests_and_real_tool"
-summary = "Rbench/Cbench preserve technology-neutral Global/Local/All value, matching, temperature, and native resistor-noise behavior."
+validation = "synthetic_and_real_tool"
+summary = "Frozen N1 acquisition/fit identities, eight deterministic fit cases, four engines, low-VDS diagnostics, and correlated BSIM-CMG capability pass."
+
+[[gate]]
+id = "noise.catalog"
+required = true
+validation = "fresh_real_tool"
+summary = "Fresh V3-N2 catalog execution covers the deterministic 5/13/26 plan, explicit terminal states, temperature/inversion/length/NFIN datasets, comparisons, raw spectra, and provenance."
+
+[[gate]]
+id = "noise.resume_integrity"
+required = true
+validation = "real_tool_and_adversarial_audit"
+summary = "Strict resume safely reuses only exact validated results and rejects request mismatch, tampering, incompleteness, and stale identities."
+
+[[gate]]
+id = "models.claims_immutability"
+required = true
+validation = "git_hash_and_claim_audit"
+summary = "APM350/APM022/APM016F model cards remain byte-identical to v2.0.0; noise provenance/default boundaries and claim exclusions remain explicit."
 
 [[gate]]
 id = "spectre.model_only"
 required = true
 validation = "structural"
-summary = "All required v2 families provide model-only Spectre artifacts and Benchmark Global/Local/All structure with explicit experimental/unverified status."
+summary = "All family model-only Spectre artifacts remain structurally checked and explicitly experimental/unverified."
 
 [[gate]]
 id = "licensing.provenance"
 required = true
 validation = "audit"
-summary = "Every shipped third-party v2 family/model asset has exact-file provenance/redistribution evidence and repository-wide REUSE/SPDX audit passes."
+summary = "Exact third-party provenance, redistribution terms/notices, independent authorship, and repository-wide REUSE/SPDX pass."
 
 [[gate]]
-id = "distribution.self_contained_models"
+id = "distribution.public_hygiene"
 required = true
-validation = "clean_clone"
-summary = "A fresh clone contains every transistor-model source asset required by all v2 families; generated OSDI is rebuilt locally."
-
-[[gate]]
-id = "migration.no_v1_runtime_ssot"
-required = true
-validation = "tests_and_audit"
-summary = "Current v2 runtime no longer depends on v1 kit.toml, v1 canonical result/adapter schemas, unqualified v1 aliases, or normal technology-specific family loaders."
+validation = "clean_clone_and_audit"
+summary = "Distributed sources are self-contained and tracked content contains no generated state, credentials, private artifacts, inappropriate private paths, or unnecessary large binaries."
 
 [[gate]]
 id = "release.metadata_complete"
 required = true
 validation = "tests_and_audit"
-summary = "Package/runtime/changelog/target identify 2.0.0 and no release-critical unresolved research placeholder remains."
+summary = "Package/runtime/CLI/changelog/docs/release target identify 3.0.0 with no release-critical placeholder."
 
 [[gate]]
 id = "release.clean_clone"
 required = true
 validation = "clean_clone"
-summary = "Exact-commit fresh-clone bootstrap, doctor, tests, all-family real-tool validations, audits, and release validator pass from documented source."
+summary = "The exact candidate fresh HTTPS clone completes source bootstrap, doctor, static validation, v2 regressions, fresh N0/N1/N2 qualification, strict resume, and all v3 gates."
 
 [[gate]]
 id = "release.claim_audit"
 required = true
-validation = "manual_audit"
-summary = "Public claims match v2 evidence and do not overstate foundry/silicon/reliability/Spectre validation or benchmark physical correlation."
+validation = "hash_bound_manual_and_static_audit"
+summary = "Public v3 claims match evidence and explicitly exclude silicon/foundry calibration, unsupported noise modes, planar/FinFET normalization, reliability, and real Spectre validation."

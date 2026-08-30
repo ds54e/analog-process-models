@@ -1,255 +1,222 @@
-# APM V3-N2 Catalog-Wide Noise Dataset Goal
+# APM V3-N3 v3.0.0 Release-Hardening Goal
 
 ## 0. Repository state
 
 Work on the existing repository:
 
-- repository: `https://github.com/ds54e/analog-process-models`
-- project: Analog Process Models (APM)
-- released baseline: `v2.0.0` at `3cc6cfea4932cc40f2d693784d0a569926cdf399`
-- completed V3-N0 implementation commit: `9c9f5b132829bda0e06045981e34e0dd2a41deb4`
-- completed V3-N1 implementation commit: `0aab87b98697bd8806d13d244595a989cd81a0e3`
-- V3-N0 exact-commit evidence: `validation/evidence/v3_n0_noise_spike.json`
-- V3-N1 exact-commit evidence: `validation/evidence/v3_n1_noise_method.json`
+- repository: `https://github.com/ds54e/analog-process-models`;
+- project: Analog Process Models (APM);
+- immutable releases: `v1.0.0` and `v2.0.0`;
+- released v2 commit: `3cc6cfea4932cc40f2d693784d0a569926cdf399`;
+- completed V3-N0 implementation: `9c9f5b132829bda0e06045981e34e0dd2a41deb4`;
+- completed V3-N1 implementation: `0aab87b98697bd8806d13d244595a989cd81a0e3`;
+- completed V3-N2 implementation: `ca977af3ba08b9dfdee8556e5781f647f99cabdd`;
+- completed V3-N2 evidence/status commit:
+  `bbd4932d325270ddd37711e7e2c7e0b00e91670f`.
 
-APM v2.0.0 is complete, released, and immutable. V3-N0 and V3-N1 are complete. Current `main` is the post-v2 development line.
+V3-N0, V3-N1, and V3-N2 are complete and exact-implementation-commit
+qualified. Current `main` is authorized to advance to the v3.0.0 release
+candidate line.
 
-Do not change repository visibility. Do not move/rewrite the v2 tag. Do not create/tag v3.0.0 as part of this goal.
+Do not change repository visibility, create a GitHub Release, or create/move
+the final `v3.0.0` tag under this goal.
 
 ## 1. Goal
 
-Implement and validate **V3-N2: Catalog-Wide Noise Dataset and Comparison Qualification**.
+Implement and validate **V3-N3: v3.0.0 Release Hardening**.
 
-Read and follow `NOISE_N2.md` completely. It is the normative technical contract for this milestone. `NOISE_CHARACTERIZATION.md` and `NOISE_N1.md` define the already validated measurement/acquisition/fitting foundations that N2 must preserve.
+Read and follow `RELEASE_V3.md` completely. It is the normative technical and
+release contract for this milestone. The existing v2 and V3-N0/N1/N2
+specifications remain authoritative for the capabilities they define.
 
-The main deliverable is a manifest-driven, resumable, machine-readable stationary-noise dataset covering the current 26 public MOS devices, plus auditable temperature/inversion/geometry and family/process comparison summaries.
+The outcome is a coherent, immutable v3.0.0 release-candidate commit, followed
+by a separate compact evidence/status commit proving that exact candidate from
+a genuinely fresh HTTPS clone on the documented reference environment.
 
-N2 characterizes the noise predictions of the existing compact models. It does not create a new process-noise calibration.
+This goal prepares a release candidate only. Final human review and explicit
+authorization remain required before tagging, publishing a GitHub Release, or
+changing repository visibility.
 
-## 2. Preserve validated baselines
-
-Do not redesign or weaken V2, V3-N0, or V3-N1 behavior.
+## 2. Preserve validated functionality and history
 
 Preserve:
 
 - Technology -> Electrical Family -> Device manifest architecture;
-- released `apm.characterization.v2` behavior;
-- `apm.noise-characterization.v1` per-device result domain;
-- the 1-ohm CCVS external drain-current probe;
-- canonical external drain-terminal and gate-referred PSD semantics;
-- precise bounded gm/Id bias resolution;
-- parameter-level effective noise provenance;
-- raw backend source breakdown;
+- all 5 technologies, 13 families, and 26 public MOS devices;
+- `apm.characterization.v2`;
+- `apm.noise-characterization.v1`;
+- `apm.noise-comparison.v1`;
+- V3-N0 analytic harness and four-engine qualification;
 - `apm.noise-fit.contiguous-regions@1.0.0`;
 - `apm.noise-acquisition.bounded-white-search@1.0.0`;
-- the V3-N0 analytic harness fixtures;
-- the V3-N1 low-VDS/correlation capability regression;
-- ngspice 47 normal Sparse solver reference path;
-- existing model cards and immutable v2 tag.
-
-V3-N0 and V3-N1 exact-commit qualification flows must remain reproducible and green after N2 changes.
-
-## 3. Manifest-driven all-device expansion
-
-Discover the public catalog from manifests; do not hand-code 26 runtime selectors.
-
-Current expected baseline:
-
-```text
-5 technologies
-13 electrical families
-26 public MOS devices
-```
-
-Build an explicit deterministic catalog job plan and bind it to a stable plan hash.
-
-## 4. Required dataset matrix
-
-Implement all required datasets in `NOISE_N2.md`.
-
-### Canonical temperature matrix
-
-All 26 public devices at:
-
-```text
-T = -40, 27, 85, 125 degC
-L/Lmin = 2
-Planar W = default
-FinFET NFIN = 1
-VOUT = 0.5 * reference_vdd
-gm/Id = 15 1/V target
-```
-
-Use the frozen adaptive acquisition independently at each point.
-
-### Inversion sweep
-
-All 26 public devices at 27 degC:
-
-```text
-gm/Id = 5, 10, 15, 20, 25 1/V
-L/Lmin = 2
-VOUT = 0.5 * reference_vdd
-```
-
-Reuse identical requests rather than rerun them.
-
-### Length scaling
-
-At 27 degC and gm/Id=15, run every manifest-declared valid characterization length for every public device, with planar W default and FinFET NFIN=1.
-
-### FinFET NFIN scaling
-
-For all APM016F public devices at 27 degC and gm/Id=15, use L/Lmin=2 and all manifest-declared `characterization_nfin` values.
-
-Do not invent planar width sweeps in N2.
-
-## 5. Target reachability
-
-Do not force requested gm/Id values at invalid bias endpoints.
-
-Every logical request must have an explicit result status such as:
-
-- validated;
-- target_not_reachable;
-- simulation_failed.
-
-A valid spectrum with a null white/flicker/corner fit remains a valid characterization result.
-
-Never silently clip a target or drop a device from a summary because a derived metric is unavailable.
-
-## 6. Stable request identity, deduplication, and resume
-
-Implement the strict request identity and resume semantics defined in `NOISE_N2.md`.
-
-Overlapping requests from temperature, inversion, geometry, and comparison views must reuse one validated physical result when semantic/tool/model/request hashes match.
-
-Prefer a command such as:
-
-```text
-apm noise-catalog-check --output <dir>
-apm noise-catalog-check --output <dir> --resume
-```
-
-The command must plan before execution, persist job identity/coverage, safely reuse only verified matching completed results, and reject stale/mismatched artifacts.
-
-Do not require a complete restart after an interrupted large catalog run.
-
-## 7. Required comparisons
-
-Generate machine-readable comparison outputs referencing exact source result identities/hashes.
-
-### Threshold siblings
-
-At 27 degC for both polarities where present:
-
-- APM045 `vtl/vtg/vth`;
-- APM022 `lvt/svt/hvt`;
-- APM016F `lvt/svt/hvt`.
-
-Provide distinct:
-
-- equal-inversion gm/Id=15 view;
-- equal-bias VCTRL=0.5*VDD, VOUT=0.5*VDD view.
-
-Do not impose a required noise ordering across Vt families.
-
-### Cross-process anchors
-
-Compare separately by polarity:
-
-```text
-apm350/general
-apm130/lv
-apm045/vtg
-apm022/svt
-apm016f/svt
-```
-
-at canonical gm/Id=15, L/Lmin=2, VOUT=0.5*each reference VDD, 27 degC.
-
-Preserve planar-versus-FinFET geometry/basis differences. Do not create fake cross-basis drain-noise ratios.
-
-## 8. Summary quantities
-
-At minimum expose comparison values/status at common frequencies:
-
-```text
-1 Hz
-1 kHz
-1 MHz
-10 MHz
-```
-
-plus valid fit metrics such as white floor, flicker coefficient/exponent, corner, and `gamma_eff_total`.
-
-Also provide common-band integrated gate-referred noise over:
-
-```text
-1 Hz -> 10 MHz
-```
-
-with explicit V^2 integral and optional V RMS presentation value.
-
-Raw spectra remain authoritative.
-
-## 9. Interpretation boundaries
-
-Do not claim:
-
-- silicon/foundry noise accuracy for APM-authored families;
-- universal multi-Vt noise ordering;
-- universal monotonic temperature behavior;
-- exact width/NFIN scaling laws;
-- universal planar/FinFET effective width;
-- process-noise coefficient variation/correlation.
-
-APM022/APM016F multi-Vt comparisons are controlled generic-model experiments, not foundry multi-Vt noise characterization.
-
-## 10. Implementation and validation
-
-Prefer a new orchestration/comparison layer over bloating `characterize.py` or duplicating the low-level N1 noise engine.
-
-Continue through implementation, real-tool execution, restart/resume qualification, debugging, unit/property/integration tests, regression tests, provenance checks, model-immutability checks, and exact-commit evidence.
-
-At minimum rerun:
-
+- V3-N2 planning, request identity, deduplication, strict resume, and stale
+  rejection;
+- parameter-level noise provenance and raw backend source breakdown;
+- native planar `w,l` and FinFET `l,nfin` geometry semantics;
+- ngspice 47 normal Sparse solver for required `.noise` jobs;
+- ngspice as the validated reference backend;
+- Spectre as model-only experimental/unverified;
+- immutable v1.0.0 and v2.0.0 tags/history.
+
+Do not tune or add process-noise coefficients for release aesthetics. The
+existing APM350/APM022/APM016F spectra remain compact-model predictions with
+their recorded provenance/default boundaries.
+
+## 3. Freeze v3.0.0 scope and claims
+
+The v3 release includes the complete v2 electrical baseline plus stationary
+small-signal MOS-noise characterization, analytically qualified harnesses,
+fail-closed fitting, bounded acquisition, catalog-wide noise datasets,
+threshold/cross-process noise comparisons, and strict resumable execution.
+
+The release must explicitly exclude silicon/foundry noise-accuracy claims for
+APM-authored models, new noise calibration, noise Monte Carlo, RTS/RTN,
+transient noise, PSS/PNoise, oscillator phase noise, full terminal
+noise-correlation matrices, reliability qualification, layout/signoff scope,
+real Spectre numerical validation, Virtuoso automation, and any universal
+planar/FinFET effective-width conversion.
+
+## 4. Version and current-main contract transition
+
+Update all current runtime/package/release metadata that represents the active
+release line from `2.0.0` to `3.0.0`, including the Python package/runtime,
+README, changelog, release validator, current status, and current release
+documentation.
+
+Do not rewrite historical v1/v2 evidence or historical text that correctly
+describes an older release.
+
+Schema names represent independent data contracts. Do not rename
+`apm.characterization.v2`, `apm.noise-characterization.v1`, or
+`apm.noise-comparison.v1` merely because the package becomes 3.0.0.
+
+## 5. v3 release contract
+
+Replace the active current-main v2 release-gate SSOT with a concise,
+machine-readable v3 contract. The immutable v2 tag preserves the old v2 gate
+implementation.
+
+`apm validate --release` must implement the exact required v3 gate IDs and
+fail closed on every missing, failed, skipped, unimplemented, or evidence-free
+required gate.
+
+Required coverage includes:
+
+- reference runtime/toolchain and all four compact-model engine paths;
+- normal Sparse/no-KLU required noise execution;
+- manifest-driven 5/13/26 catalog and geometry semantics;
+- full v2 electrical characterization/comparison/variation behavior;
+- V3-N0 analytic resistor, CCVS, white, flicker, and correlated fixtures;
+- V3-N1 method identities, synthetic cases, four engines, low-VDS, and
+  correlation diagnostic;
+- V3-N2 complete catalog plan/status/coverage/comparisons/resume integrity;
+- model-card immutability and honest claims;
+- provenance, licensing, REUSE, self-contained distribution, and public-repo
+  hygiene;
+- 3.0.0 metadata, exact clean-clone qualification, and final claim audit.
+
+Keep the gate count manageable and auditable.
+
+## 6. Documentation and hygiene
+
+Harden README, CHANGELOG, release documentation, status, and user-facing
+claims for a future public review. Remove obsolete current-main claims such as
+"MOS noise is out of scope", "current release is 2.0.0", or "V3-N0/N1/N2 is
+incomplete", while preserving explicitly historical statements.
+
+Audit tracked content for credentials, tokens, private paths or personal data,
+generated results/caches, editor/temp artifacts, unnecessary binaries, stale
+planning material, unsupported claims, and licensing/provenance gaps.
+
+Do not delete useful reproducibility metadata merely because it records normal
+public tool versions or platform structure.
+
+## 7. Development qualification
+
+Before the candidate commit, run and require at minimum:
+
+- `apm doctor`;
 - V3-N0 regression;
-- V3-N1 method regression;
-- V3-N2 catalog qualification;
-- full pytest suite;
+- V3-N1 regression;
+- fresh V3-N2 catalog qualification;
+- strict V3-N2 resume qualification;
+- full Pytest;
 - Ruff;
 - REUSE;
-- provenance audit;
-- repository static validation.
+- provenance validation;
+- normal repository validation;
+- candidate `apm validate --release`.
 
-No required `.noise` job may use KLU.
+Fix real failures. Do not weaken tests or gates to obtain a pass.
 
-## 11. Evidence and completion
+## 8. Candidate and exact fresh-clone qualification
 
-Commit compact exact-implementation-commit evidence, preferred path:
+Create one coherent v3.0.0 release-candidate implementation commit after the
+development tree is internally consistent and green. Record its exact SHA and
+do not amend or mutate it afterward. It is the future tag target, but do not
+tag it under this goal.
 
-```text
-validation/evidence/v3_n2_noise_catalog.json
-```
+From a genuinely fresh HTTPS clone on WSL2 + RHEL-compatible/AlmaLinux 9.x +
+x86_64 on a Linux filesystem:
 
-Large raw simulator output remains reproducible/ignored.
+1. attest the clone before bootstrap, including exact candidate commit, clean
+   state, environment/filesystem identity, and absence of project-local
+   generated state;
+2. bootstrap the documented toolchain and Python environment from source;
+3. build PSP103 and BSIM-CMG OSDI models;
+4. run doctor and normal validation;
+5. run the complete release validator, including fresh V3-N0/N1/N2 evidence;
+6. run the full V3-N2 catalog fresh; a prior development result may not
+   substitute for the first release qualification;
+7. exercise strict resume only after the fresh catalog run;
+8. verify the exact candidate worktree remains clean and no v3 tag exists.
 
-Update `STATUS.md` with at least:
+Do not copy `.apm`, `.venv`, OSDI binaries, raw results, or caches from the
+development checkout.
 
-- exact implementation commit/evidence hash;
-- planned and completed unique request counts;
-- fresh versus safely reused job counts;
-- target_not_reachable and simulation-failure counts;
-- adaptive frequency-stop distribution;
-- fit-status coverage;
-- temperature/inversion/length/NFIN coverage;
-- threshold-family comparison highlights;
-- cross-process-anchor comparison highlights;
-- regression/test/static/provenance hashes;
-- model immutability result;
-- evidence-based recommendation for the next milestone.
+## 9. Exact evidence and completion
 
-V3-N2 may recommend v3 release hardening next if catalog-wide behavior is stable. That recommendation does not authorize a package version bump, tag, public release, or process-noise coefficient tuning.
+After the exact candidate passes, commit compact evidence at:
 
-Do not stop at planning or scaffolding. Complete the current goal with real-tool evidence.
+`validation/evidence/v3_release_candidate.json`
+
+The evidence must bind the exact candidate commit, clean-clone attestation,
+environment/tool/bootstrap identities, ordered release gates, report hashes,
+N0/N1/N2 hashes and catalog plan, fresh/reused counts, test/lint/REUSE/
+provenance results, model-card immutability, package version, claim/hygiene
+audit, clean worktree, and absence of a v3 tag during qualification.
+
+Update `STATUS.md` and commit only compact evidence/status/review material
+after the candidate. The evidence commit must not become the future tag target.
+
+V3-N3 is complete only when:
+
+- the v3 release contract is implemented and passes;
+- version/docs/claims are coherent at 3.0.0;
+- all development regressions pass;
+- an immutable coherent candidate commit exists;
+- that exact commit passes the genuine fresh-clone source/bootstrap flow;
+- compact exact-candidate evidence is committed afterward;
+- blockers are none;
+- final `v3.0.0` tag is absent;
+- GitHub Release is absent;
+- repository visibility is unchanged.
+
+At completion, report the candidate SHA, evidence commit SHA, gate count/result,
+fresh-clone result, any non-blocking caveats, and the exact recommended next
+human release action.
+
+## 10. Explicit prohibitions
+
+Do not:
+
+- make the repository public or change visibility/security settings;
+- create or move `v3.0.0`;
+- create a GitHub Release;
+- force-push or rewrite v1/v2 history/tags;
+- add or tune process-noise calibration;
+- add noise Monte Carlo, RTS/RTN, transient noise, PSS/PNoise, oscillator phase
+  noise, or full terminal noise-correlation matrices;
+- make real-Spectre claims without a real Spectre environment;
+- invent silicon/foundry accuracy or planar/FinFET normalization claims;
+- weaken fail-closed validation.

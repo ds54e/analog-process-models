@@ -21,7 +21,9 @@ APM v2.0.0 is released and immutable.
 
 Do not modify the v2 tag or reinterpret current v3 work as evidence that the v2 release was incomplete.
 
-Current `main` is the post-v2 development line. The current goal is defined by `GOAL.md` and presently begins the v3 stationary small-signal MOS-noise characterization work.
+V3-N0, V3-N1, and V3-N2 are complete and exact-implementation-commit
+qualified. Current `main` is the V3-N3 v3.0.0 release-hardening line. The
+current goal is defined by `GOAL.md` and `RELEASE_V3.md`.
 
 ## Mission
 
@@ -36,7 +38,9 @@ For the current v3 phase, optimize for:
 - reuse of the validated v2 manifest-driven family/device architecture;
 - minimal disruption to the released v2 DC/Y/capacitance framework.
 
-The current goal is an evidence-producing noise foundation/spike, not permission to tag v3.0.0. Do not change package/release version or create a v3 tag unless a later repository goal explicitly requires it.
+The current goal explicitly authorizes transition of current runtime/package
+and release-candidate metadata to `3.0.0`. It does not authorize the final
+`v3.0.0` tag, a GitHub Release, or a repository-visibility change.
 
 ## Required reading before substantive work
 
@@ -44,30 +48,35 @@ Read completely, in this order:
 
 1. `AGENTS.md`
 2. `GOAL.md`
-3. `NOISE_CHARACTERIZATION.md`
-4. `DEVICE_FAMILY_MODEL.md`
-5. `RESULT_CONTRACT.md`
-6. `PROJECT_CONTEXT.md`
-7. `ENVIRONMENT.md`
-8. `RESEARCH_BASELINE.md`
-9. `UNATTENDED_EXECUTION.md`
-10. `README.md`
-11. `validation/release_gates.toml`
-12. `STATUS.md`
+3. `RELEASE_V3.md`
+4. `NOISE_CHARACTERIZATION.md`
+5. `NOISE_N1.md`
+6. `NOISE_N2.md`
+7. `DEVICE_FAMILY_MODEL.md`
+8. `RESULT_CONTRACT.md`
+9. `PROJECT_CONTEXT.md`
+10. `ENVIRONMENT.md`
+11. `RESEARCH_BASELINE.md`
+12. `UNATTENDED_EXECUTION.md`
+13. `README.md`
+14. `validation/release_gates.toml`
+15. `STATUS.md`
 
 Authority on conflict:
 
 1. applicable safety/security requirements and explicit user instructions;
 2. `AGENTS.md`;
 3. `GOAL.md`;
-4. `NOISE_CHARACTERIZATION.md` for noise work;
-5. `DEVICE_FAMILY_MODEL.md`;
-6. `UNATTENDED_EXECUTION.md`;
-7. `RESULT_CONTRACT.md` for the existing v2 result domain;
-8. `PROJECT_CONTEXT.md`;
-9. `ENVIRONMENT.md`;
-10. `RESEARCH_BASELINE.md`;
-11. `README.md`.
+4. `RELEASE_V3.md` for V3-N3 release hardening;
+5. `NOISE_CHARACTERIZATION.md`, `NOISE_N1.md`, and `NOISE_N2.md` for the
+   preserved noise domain;
+6. `DEVICE_FAMILY_MODEL.md`;
+7. `UNATTENDED_EXECUTION.md`;
+8. `RESULT_CONTRACT.md` for the existing v2 result domain;
+9. `PROJECT_CONTEXT.md`;
+10. `ENVIRONMENT.md`;
+11. `RESEARCH_BASELINE.md`;
+12. `README.md`.
 
 Do not resolve a material conflict by silently dropping the harder requirement. Record material departures and evidence in `STATUS.md`.
 
@@ -126,11 +135,13 @@ Core rules:
 - distinguish explicit model-card values from compact-model/backend defaults;
 - canonical cross-engine comparison uses external-terminal observables, not raw compact-model internal source names;
 - do not call APM-authored default-noise behavior silicon-correlated or process-calibrated;
-- do not tune APM350/APM022/APM016F process-noise coefficients merely to make spectra look plausible or to pass the initial spike;
+- do not tune APM350/APM022/APM016F process-noise coefficients merely to make spectra look plausible or to pass characterization/release gates;
 - preserve raw source breakdown as backend evidence without forcing false cross-engine source equivalence;
 - fail closed when a bias target, fit, parameter snapshot, or backend capability cannot be established.
 
-The initial v3 spike must validate the harness before trusting MOS spectra, including analytic resistor noise, transparent current probing, OSDI white/flicker sources, and an analytic correlated-noise network.
+The completed V3-N0 harness qualification remains required evidence before
+trusting MOS spectra, including analytic resistor noise, transparent current
+probing, OSDI white/flicker sources, and an analytic correlated-noise network.
 
 ## APM-authored family independence
 
@@ -156,7 +167,9 @@ For noise, preserve the actual complex gate-to-drain small-signal transfer used 
 
 Keep APM Benchmark Global/Local/All and upstream/native variation distinct.
 
-The initial v3 noise phase does not add noise-coefficient variation, noise mismatch, or benchmark noise-correlation models. Do not invent them from the existing v2 Vth/drive benchmark variation.
+The v3.0.0 scope does not add noise-coefficient variation, noise mismatch, or
+benchmark noise-correlation models. Do not invent them from the existing v2
+Vth/drive benchmark variation.
 
 ## Licensing and provenance
 
@@ -175,13 +188,17 @@ Do not infer file rights from a repository root license when model-specific term
 
 Never commit proprietary PDK content, credentials, tokens, passwords, or user secrets.
 
-The current noise spike should not require new third-party model assets; prefer the already vendored/pinned v2 engines and cards.
+V3-N3 requires no new third-party model assets; use the already
+vendored/pinned engines and cards unless a release-blocking defect establishes
+a narrowly documented need.
 
 ## Spectre boundary
 
 ngspice remains the validated reference backend.
 
-Spectre remains model-only **experimental/unverified** unless a real Spectre environment actually validates it. The v3 noise spike does not promote Spectre to a validated noise backend.
+Spectre remains model-only **experimental/unverified** unless a real Spectre
+environment actually validates it. The v3 stationary-noise domain does not
+promote Spectre to a validated noise backend.
 
 Do not add SKILL, CDF, symbols, OA libraries, ADE/Maestro state, OCEAN, or Virtuoso automation unless a later explicit goal requires them.
 
@@ -210,13 +227,18 @@ Prefer property/regression/analytic-reference tests over fragile exact snapshots
 
 Do not weaken legitimate tests to match broken behavior.
 
-Every validated v3 noise spike claim must have compact auditable evidence under `validation/evidence/` or another explicitly documented current evidence path. Missing evidence is not pass.
+Every validated v3 stationary-noise or release claim must have compact
+auditable evidence under `validation/evidence/` or another explicitly
+documented current evidence path. Missing evidence is not pass.
 
 Audit simulator logs for critical diagnostics, unsupported parameters/features, convergence failures, or silent fallback behavior.
 
 Do not replace failed fit/bias/capability results with clipped or fabricated values. Persist explicit failure status.
 
-The existing `validation/release_gates.toml` defines the already released v2 gate contract. Do not rewrite history by making those old v2 gates pretend to be v3 gates. Introduce new v3/spike validation structures only when implementation requires them.
+The v2 tag preserves the historical v2 gate contract. For V3-N3,
+`validation/release_gates.toml` becomes the active current-main v3 release
+contract. Do not edit historical v1/v2 tracked evidence to pretend it was v3
+evidence.
 
 ## Git and autonomy
 
@@ -228,12 +250,9 @@ Stop/escalate only for a genuine blocker such as unresolved redistribution right
 
 ## Completion for the current goal
 
-The current goal is complete only when:
-
-- every required item in `GOAL.md` and the initial-spike acceptance criteria in `NOISE_CHARACTERIZATION.md` has real-tool evidence;
-- the harness itself is analytically validated before MOS results are accepted;
-- all four required compact-model engine paths execute the provisional noise experiment;
-- effective noise parameters/provenance are captured without overstating calibration;
-- unresolved frequency/fit/correlation decisions are explicitly reported rather than guessed;
-- v2 release/tag/evidence remain untouched;
-- no v3 release/tag is created from the spike alone.
+The current goal is complete only when every item in `GOAL.md` and
+`RELEASE_V3.md` is evidenced, including a coherent immutable v3.0.0 candidate
+commit, genuine exact-commit fresh-clone source/bootstrap qualification, and a
+separate compact evidence/status commit. Historical release tags/evidence must
+remain unchanged, and the final v3 tag, GitHub Release, and visibility change
+must remain unperformed.

@@ -5,12 +5,11 @@ models and a terminal-characterization framework for cross-process and
 within-process analog device studies. This repository is the APM project;
 within it, APM always means Analog Process Models.
 
-Version **2.0.0** introduces first-class electrical families, 13 characterized
-families across five technologies, and a fail-closed 20-gate release flow.
-Post-v2 `main` also contains the V3-N0 stationary small-signal MOS-noise
-foundation, V3-N1 acquisition/fit-method qualification, and the V3-N2
-manifest-driven catalog dataset/comparison layer. These are development
-milestones, not a v3.0.0 release or a silicon-noise calibration claim.
+Version **3.0.0** preserves the released v2 manifest-driven electrical-family
+and terminal-characterization baseline and adds stationary small-signal MOS
+noise as a separate, provenance-aware characterization domain. The catalog
+contains 13 electrical families and 26 public MOS devices across five
+technologies.
 
 ## Scope
 
@@ -21,9 +20,11 @@ technology-neutral benchmark R/C devices, and exact model provenance.
 APM is **not a manufacturable PDK**. It does not provide layout, PCells, DRC,
 LVS, PEX, standard cells, signoff, reliability qualification, foundry
 correlation, yield prediction, RF devices, silicon-calibrated process-noise
-models, AMS integration, or Virtuoso automation. V3-N0/V3-N1 characterize the
-noise predictions already present in the compact models and preserve their
-parameter provenance.
+models, AMS integration, or Virtuoso automation. The v3 noise datasets
+characterize predictions already present in the compact models and preserve
+their parameter provenance; they do not establish silicon or foundry noise
+accuracy. Noise Monte Carlo, RTS/RTN, transient noise, PSS/PNoise, oscillator
+phase noise, and full terminal noise-correlation matrices are outside v3.0.0.
 
 ## Device-family domain model
 
@@ -122,9 +123,10 @@ Those bases are never silently equated. See
 ## Stationary noise characterization
 
 The independent `apm.noise-characterization.v1` domain preserves the released
-`apm.characterization.v2` DC/Y/capacitance behavior. Run one public device,
-the V3-N0 harness/four-engine regression, the complete V3-N1 method
-qualification, or the V3-N2 catalog qualification with:
+`apm.characterization.v2` DC/Y/capacitance behavior. Schema versions identify
+data contracts rather than package releases. Run one public device, the
+analytic harness/four-engine regression, the complete method qualification,
+or the catalog-wide qualification with:
 
 ```console
 .venv/bin/apm noise apm130/lv/nmos --output .apm/results/noise-apm130-lv-nmos
@@ -134,7 +136,7 @@ qualification, or the V3-N2 catalog qualification with:
 .venv/bin/apm noise-catalog-check --output .apm/results/v3-n2-noise-catalog --resume
 ```
 
-The spike first qualifies the 1-ohm drain-current probe against an analytic
+The harness first qualifies the 1-ohm drain-current probe against an analytic
 resistor, APM-owned OSDI white/flicker fixtures, and a decisive correlated
 internal-noise network. It then runs native BSIM3, PSP103 OSDI, native BSIM4,
 and BSIM-CMG OSDI with ngspice's normal Sparse solver. The canonical point is
@@ -159,7 +161,8 @@ without modifying the production card. See
 [`NOISE_CHARACTERIZATION.md`](NOISE_CHARACTERIZATION.md) and
 [`NOISE_N1.md`](NOISE_N1.md) for the normative contracts and claim boundaries.
 
-V3-N2 discovers all 26 public MOS devices from the five-technology/13-family
+The catalog-wide dataset discovers all 26 public MOS devices from the
+five-technology/13-family
 manifest catalog and plans the complete temperature, inversion, length, NFIN,
 threshold-sibling, and cross-process-anchor matrix before simulation. Its
 stable request hash binds the exact selector/profile/bias/geometry, frozen
@@ -168,7 +171,10 @@ generated OSDI artifacts, and reference-tool binaries. Identical physical
 requests are simulated once even when several dataset/comparison views use
 them.
 
-Every logical request retains an explicit `validated`,
+This dataset is a reproducible audit of the existing compact-model predictions
+at the recorded temperature, inversion, bias, and native geometry—not a
+silicon-calibrated process-noise model or a reliability statement. Every
+logical request retains an explicit `validated`,
 `target_not_reachable`, or `simulation_failed` state. Resume accepts only a
 completed result whose request identity and complete artifact inventory still
 hash-match; incomplete, tampered, or semantically stale results are rejected
@@ -247,25 +253,25 @@ not establish numerical equivalence with ngspice. See
 
 ## Release validation
 
-The authoritative v2 contract is
+The authoritative v3 contract is
 [`validation/release_gates.toml`](validation/release_gates.toml). The release
-command implements exactly its 20 required gates and fails for a missing,
+command implements exactly its 18 required gates and fails for a missing,
 skipped, evidence-free, or failed gate:
 
 ```console
 .venv/bin/apm validate
-.venv/bin/apm validate --release --output .apm/results/v2-release
+.venv/bin/apm validate --release --output .apm/results/v3-release-candidate
 ```
 
-The final release gate additionally requires an exact-commit clean-clone
-attestation captured immediately after cloning on the designated WSL2 + EL9
-host. See [`docs/release-validation.md`](docs/release-validation.md) for the
-complete sequence. Historical v1 evidence does not satisfy a v2 gate.
-
-V3-N0/V3-N1/V3-N2 do not change this released v2 contract, the package
-version, or any release tag. Their separate noise qualification commands
-validate development milestones and are not substitutes for
-`apm validate --release`.
+The final release gate additionally requires an exact-candidate clean-clone
+attestation captured immediately after HTTPS cloning on the designated WSL2 +
+EL9 host, before `.apm`, `.venv`, generated OSDI artifacts, or results exist.
+The release command then runs the v2 electrical baseline, a fresh complete
+V3-N2 catalog qualification (including nested N0/N1), and a strict all-reuse
+resume qualification. See
+[`docs/release-validation.md`](docs/release-validation.md) for the complete
+sequence. Historical v1/v2 or tracked milestone evidence cannot substitute
+for this current run.
 
 Repository policy, implementation scope, and result semantics are defined by
 [`AGENTS.md`](AGENTS.md), [`GOAL.md`](GOAL.md), and

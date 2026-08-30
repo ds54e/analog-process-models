@@ -1,310 +1,194 @@
-# Unattended Execution Protocol for APM v2
+# Unattended Execution Protocol for APM V3-N3
 
-This document defines how a long-running autonomous implementation agent should execute the current v2 `GOAL.md` after the v1.0.0 baseline has already been completed.
-
-It is process guidance, subordinate to `AGENTS.md`, `GOAL.md`, and `DEVICE_FAMILY_MODEL.md`.
+This document defines the long-running execution procedure for the current
+v3.0.0 release-hardening goal. It is subordinate to `AGENTS.md`, `GOAL.md`, and
+`RELEASE_V3.md`.
 
 ## 1. Authority
 
 Use this order on conflict:
 
-1. safety/security requirements and explicit user instructions
-2. `AGENTS.md`
-3. `GOAL.md`
-4. `DEVICE_FAMILY_MODEL.md`
-5. this file
-6. `RESULT_CONTRACT.md`
-7. `PROJECT_CONTEXT.md`
-8. `ENVIRONMENT.md`
-9. `RESEARCH_BASELINE.md`
-10. `README.md`
-
-Do not silently weaken a requirement. Record material departures and evidence in `STATUS.md`.
-
-## 2. Continuation context: do not throw away solved v1 work
-
-v2 is expected to begin in the same WSL2/AlmaLinux working environment that successfully completed v1.0.0.
-
-The implementation agent may have a compacted continuation of the v1 Codex session. Treat repository files as the authoritative contract, while retaining useful operational knowledge from the v1 run.
-
-Before rebuilding anything, inventory the existing local project state:
-
-- `.apm/toolchain`;
-- generated OSDI artifacts;
-- `.venv`;
-- ngspice/OpenVAF/LLVM/Rust versions;
-- current `apm doctor` behavior;
-- current git status/origin/HEAD.
-
-If the existing toolchain matches the validated v1 baseline and works, reuse it for v2 development. Do not rebuild ngspice 47/OpenVAF merely to reenact M0.
-
-The final v2 release must still rebuild/validate from a genuinely fresh clone. Development reuse and release reproducibility are separate questions.
-
-## 3. Startup sequence after v2 specification pull
-
-1. Confirm repository origin is `https://github.com/ds54e/analog-process-models`.
-2. Inspect `git status`; preserve user changes.
-3. Read all required files listed in `AGENTS.md` completely.
-4. Confirm `STATUS.md` says v2 is not yet release-eligible and that v1 evidence is historical baseline only.
-5. Inventory/reuse the existing validated local toolchain.
-6. Run a lightweight baseline smoke such as current `apm doctor` if practical before large migration; record failures as v2 migration work rather than rebuilding blindly.
-7. Inspect current v1 code architecture and identify obsolete canonical SSOT that v2 will replace.
-8. Start V2-M0. Do not stop at a migration plan.
-
-The specification commit intentionally makes current `main` a v2-development branch while implementation still reflects v1. Existing v1 tests/release validation may fail until migrated. This is expected and must not be “fixed” by weakening v2 requirements.
-
-## 4. v1 evidence handling
-
-Historical v1 evidence remains useful for:
-
-- toolchain versions/build methods;
-- known simulator quirks;
-- v1 model/provenance hashes;
-- current family baseline terminal behavior;
-- reproducible bootstrap knowledge.
-
-It does **not** automatically validate:
-
-- v2 manifests/domain architecture;
-- new LV/HV/Vt/THKOX families;
-- v2 Ion/Ioff/SS methodology;
-- v2 Benchmark Global/Local/All semantics;
-- v2 family-specific adapters;
-- v2 public device names/result schemas;
-- v2 clean-clone release.
-
-When reusing a v1 asset unchanged, explicitly bind v2 evidence to its unchanged hash/revision plus current v2 integration test rather than rerunning irrelevant research.
-
-## 5. Milestone loop
-
-For each V2-M0 through V2-M9 milestone:
-
-1. re-read the relevant `GOAL.md` section and `DEVICE_FAMILY_MODEL.md` boundary;
-2. re-check any dated upstream fact that becomes a new vendored file, frozen profile, generic target, or release claim;
-3. implement the smallest complete milestone design;
-4. run real simulator/tool checks as soon as meaningful;
-5. investigate failures rather than weakening properties;
-6. record compact evidence under `validation/evidence/` using clearly v2-labeled filenames;
-7. update `STATUS.md` with current milestone, evidence, blockers, and material decisions;
-8. commit a coherent checkpoint;
-9. continue unless there is a genuine blocker.
-
-Do not create a large narrative work log. `STATUS.md` is an index; evidence files hold reproducible claims.
-
-## 6. V2-M0 migration discipline
-
-Migrate architecture before multiplying family-specific code.
-
-The target is a straightforward manifest-driven catalog, not a plugin framework.
-
-V2-M0 should:
-
-- introduce semantic Technology/Family/Device/OperatingProfile/Validity structures;
-- introduce simulator Backend Binding data;
-- migrate the existing five representative v1 families first;
-- prove generic discovery and generic characterize dispatch;
-- preserve current numerical behavior sufficiently to detect migration regressions;
-- add fixture-based tests proving a normal new family does not require a new production technology loader.
-
-Do not immediately add 13 special-case loaders and plan to “generalize later”.
-
-During migration, old and new structures may coexist temporarily. By v2 release, obsolete v1 canonical SSOT/aliases required to be removed by `GOAL.md` must be gone from current runtime.
-
-## 7. Native-family implementation discipline
-
-Implement APM130 LV/HV before generic multi-Vt variants because it stresses real architecture differences:
-
-- distinct gate-stack/operating profiles;
-- N/P-specific Lmin for HV;
-- upstream corners/statistical/mismatch;
-- same pinned IHP source lineage.
-
-Then implement APM045 VTL/VTG/VTH/THKOX to establish real multi-Vt/gate-stack characterization.
-
-Do not decide generic APM022/APM016F Vt spacing before these native/open data exist.
-
-## 8. Upstream acquisition/licensing
-
-Before adding a third-party family/model file:
-
-1. identify authoritative upstream source;
-2. prefer the already pinned v1 revision if the file exists there;
-3. inspect exact pinned file header/terms;
-4. hash the file;
-5. record provenance/license/notice requirements;
-6. vendor only if redistribution is clear.
-
-Repository-root licensing alone is insufficient when model-file provenance/terms may differ.
-
-Do not upgrade IHP/FreePDK45 revisions merely for freshness. Upgrade only for a documented technical/licensing reason and rerun affected provenance/behavior validation.
-
-## 9. Research-dependent values
-
-The following are deliberate research tasks, not permission to choose convenient constants:
-
-- THKOX operating profile;
-- common-overlap gate-stack bias;
-- SS extraction method/window;
-- generic APM022 Vt spacing;
-- generic APM016F Vt spacing/secondary adjustments;
-- v2 benchmark severity and adapter coefficients.
-
-For each:
-
-1. gather primary/open evidence;
-2. distinguish observed evidence from inference;
-3. characterize with current real-tool framework;
-4. surface plausible alternative choices;
-5. choose a simple documented value/method;
-6. freeze it in machine-readable config plus evidence;
-7. add tests for the frozen semantic contract.
-
-No release-critical TBD may remain at v2.0.0.
-
-## 10. Generic APM variant discipline
-
-### APM022
-
-Start from SVT. Define observable LVT/HVT targets before changing card parameters. Prefer threshold-isolated changes. Secondary changes require explicit evidence/rationale.
-
-Do not use PTM cards as numeric source/fitting target.
-
-### APM016F
-
-Start from SVT. Use PHIG/workfunction as dominant control. Validate terminal behavior. Make secondary changes only when necessary and justified. Do not copy ASAP7/PTM-MG numeric parameters.
-
-For both technologies, tests should enforce intended nominal ordering for Vth/Ion/Ioff but must not invent universal monotonic ordering of every secondary metric.
-
-## 11. Characterization-method freeze discipline
-
-Ion/Ioff definitions are already specified in `RESULT_CONTRACT.md`.
-
-SS method is not yet frozen. Use APM130/APM045 real family curves to compare candidate methods. A good final method must:
-
-- be deterministic;
-- be applicable across the required model families;
-- record its extraction window and quality diagnostics;
-- fail visibly when insufficient subthreshold range exists;
-- avoid device-specific silent window manipulation.
-
-Once chosen, freeze/version it and rerun all families.
-
-## 12. Benchmark v2 discipline
-
-Do not rename modes only cosmetically. Migrate sample/config/result semantics to Global/Local/All.
-
-Global:
-
-- draw technology/polarity observable latents;
-- share the latent across the technology’s relevant families;
-- resolve through family/device-specific calibrated adapters;
-- document that this is synthetic common stress, not real family correlation.
-
-Local:
-
-- instance-local;
-- deterministic Python sampling;
-- explicit matching-size law.
-
-All:
-
-- Global + Local with documented composition.
-
-Persist latents and resolved sample identity. Never introduce hidden correlation.
-
-Re-evaluate v1 sigma/corner strength only after enough family adapters exist. If retaining v1 values, record evidence that they remain sensible rather than treating history as proof.
-
-## 13. Tests/evidence standard
-
-A v2 requirement is not validated because:
-
-- old v1 evidence passed;
-- a manifest exists;
-- a model file visually parses;
-- a static Spectre check passed;
-- the agent says the behavior is plausible.
-
-Evidence should include as applicable:
-
-- milestone/gate ID;
-- date/time;
-- git commit/working state;
-- tool versions;
-- exact commands;
-- exit status;
-- concise measured observations;
-- report/artifact hashes;
-- evidence status (`validated`, `structurally_checked`, `experimental_unverified`, `blocked`).
-
-Large raw results stay untracked; commit compact summaries and reproducible source/config.
-
-## 14. Blockers
-
-When blocked:
-
-- classify the blocker (licensing/upstream/model/runtime/spec contradiction);
-- investigate compliant alternatives;
-- continue independent work;
-- record exact blocker/evidence in `STATUS.md`;
-- never waive a gate because substantial work has already been done.
-
-Spectre real execution remains explicitly non-required; keep it experimental/unverified if unavailable.
-
-## 15. Git discipline
-
-- coherent milestone commits;
-- no force push/history rewrite;
-- preserve unrelated user work;
-- no repository visibility/security changes;
-- no generated OSDI/raw/log/cache commits unless intentionally required source evidence;
-- do not create a replacement repository.
-
-## 16. Release-validator migration
-
-The authoritative v2 gate file is `validation/release_gates.toml`.
-
-Current v1 release-validator code is expected to become stale immediately after the v2 specification commit. Migrate it deliberately.
-
-The final `apm validate --release` (or documented equivalent) must:
-
-- verify implemented required gate IDs exactly match required contract IDs;
-- fail on missing/skipped/unimplemented/evidence-free gates;
-- regenerate current real-tool family validation rather than trusting old milestone reports;
-- verify current v2 result/manifest schemas;
-- reject obsolete v1 canonical SSOT/public alias requirements forbidden by v2;
-- audit licensing/provenance/distribution/claims;
-- require exact-commit clean-clone attestation.
-
-## 17. Final clean-clone protocol
-
-Before v2.0.0:
-
-1. start from a genuinely fresh network clone on the WSL Linux filesystem;
-2. attest clean origin/path/commit/platform before bootstrap state exists;
-3. follow only documented setup;
-4. build/reconstruct required ngspice/OpenVAF/OSDI artifacts from source/cache rules allowed by release docs;
-5. run doctor;
-6. run complete tests/lint/REUSE/provenance/distribution audits;
-7. run full all-technology/all-family characterization and comparisons;
-8. run Benchmark Global/Local/All validations;
-9. run APM130 upstream LV/HV variation validation;
-10. run Spectre structural checks with explicit unverified boundary;
-11. run fail-closed `apm validate --release`;
-12. verify package/runtime/changelog version 2.0.0;
-13. verify no release-critical TBD/obsolete-v1 SSOT remains;
-14. verify README/claim review;
-15. only then tag `v2.0.0`.
-
-## 18. Completion report
-
-Leave `STATUS.md` concise and current with:
-
-- v1 baseline reference;
-- v2 milestone states;
-- validated development/reference toolchain;
-- v2 release-gate status;
-- known limitations/deferred scope;
-- evidence index;
-- final release commit/tag state.
-
-The repository must be sufficient for a reviewer without access to conversational or hidden agent reasoning.
+1. safety/security requirements and explicit user instructions;
+2. `AGENTS.md`;
+3. `GOAL.md`;
+4. `RELEASE_V3.md`;
+5. the preserved N0/N1/N2 and device/result contracts;
+6. this file;
+7. informative project/environment/research context.
+
+Do not silently weaken a requirement. Record material departures and evidence
+in `STATUS.md`.
+
+## 2. Continuation and toolchain reuse
+
+V3-N3 begins after exact-commit qualification of V3-N0, V3-N1, and V3-N2 in
+the same WSL2/AlmaLinux workspace. Development may reuse valid project-local:
+
+- ngspice 47;
+- OpenVAF-Re-Loaded;
+- LLVM/Rust/source caches;
+- compiled PSP103 and BSIM-CMG OSDI artifacts;
+- Python virtual environment;
+- ignored simulator results for diagnostic comparison only.
+
+Before rebuilding, inspect `.apm`, `.venv`, tool versions, `apm doctor`, Git
+state, origin, HEAD, and tags. Repair or rebuild only when evidence shows that
+the local development state is missing, stale, or incompatible.
+
+Development reuse never satisfies final clean-clone qualification.
+
+## 3. Startup sequence
+
+1. Confirm the authoritative GitHub origin.
+2. Inspect status and preserve unrelated/user work.
+3. Pull only by fast-forward.
+4. Read every file required by `AGENTS.md` completely.
+5. Confirm V3-N0/N1/N2 exact evidence and immutable v1/v2 tags.
+6. Advance `GOAL.md`/`STATUS.md` and add the dedicated release contract before
+   substantive implementation.
+7. Inventory release/version/claim/validator code and current documentation.
+8. Continue into implementation; do not stop at a release plan.
+
+## 4. Release-hardening loop
+
+For each coherent change:
+
+1. map it to a named V3-N3 requirement and evidence source;
+2. preserve working electrical/noise schemas unless a release-blocking defect
+   requires a narrowly compatible correction;
+3. update tests together with fail-closed behavior;
+4. run the smallest relevant static/unit check immediately;
+5. run real ngspice/OpenVAF/OSDI validation when the changed behavior reaches
+   simulator orchestration or evidence semantics;
+6. investigate failures rather than weakening properties;
+7. keep `STATUS.md` current at milestone boundaries;
+8. keep large generated results under ignored `.apm` paths.
+
+## 5. Release contract migration
+
+Current `validation/release_gates.toml` is the active v3 release SSOT. The
+historical v2 implementation remains available at immutable tag `v2.0.0`; do
+not maintain a second active current-main v2 gate list.
+
+The v3 evaluator must:
+
+- implement exactly every required contract gate;
+- fail missing/skipped/unimplemented/evidence-free gates;
+- run current electrical and noise components rather than trusting tracked
+  milestone summaries;
+- verify current 3.0.0 metadata and hash-bound public claims;
+- require exact candidate clean-clone attestation;
+- retain diagnostic output after failures where safe.
+
+One fresh V3-N2 catalog run may supply nested current V3-N1/V3-N0 evidence.
+The subsequent strict resume run may reuse that freshly produced catalog; the
+first release catalog run may not reuse development output.
+
+## 6. Public-repository and provenance discipline
+
+Before the candidate, audit:
+
+- exact third-party file hashes, terms, and notices;
+- complete self-contained model/include closure;
+- independent APM022/APM016F authorship boundaries;
+- REUSE/SPDX;
+- credentials, tokens, private keys, personal/private paths, and suspicious
+  filenames;
+- accidentally tracked generated results, caches, virtual environments,
+  OSDI binaries, editor/temp files, or unnecessary large artifacts;
+- obsolete current-main claims/planning statements;
+- Spectre, silicon/foundry, reliability, correlation, and geometry-basis
+  wording.
+
+Do not remove legitimate historical evidence or harmless public platform/tool
+metadata merely because it contains a reproducibility path or version.
+
+## 7. Development qualification before candidate
+
+Run from clean/controlled output directories:
+
+- doctor;
+- complete N0 regression;
+- complete N1 regression;
+- fresh N2 catalog qualification;
+- unchanged strict N2 resume;
+- full Pytest;
+- Ruff;
+- REUSE;
+- provenance validation;
+- normal repository validation;
+- all release components possible before exact-clone attestation.
+
+Never treat a prior V3-N2 evidence JSON as current release execution.
+
+## 8. Candidate commit discipline
+
+After implementation, documentation, release metadata, review hashes, tests,
+and development real-tool qualification are coherent:
+
+1. verify `git diff --check`, status, version, tag immutability, and no generated
+   files staged;
+2. create one clear v3.0.0 release-candidate commit;
+3. record and push its exact SHA to the authoritative origin so HTTPS clone can
+   retrieve it;
+4. do not amend, rebase, or otherwise mutate it after qualification starts;
+5. do not tag it yet.
+
+The candidate, not the later compact evidence commit, is the future tag target.
+
+## 9. Exact-candidate fresh clone
+
+Use a newly created Linux-filesystem directory. Clone over HTTPS from the
+authoritative origin and check out the exact candidate. Before bootstrap:
+
+1. require clean tracked/untracked state;
+2. prove `.apm`, `.venv`, OSDI artifacts, build/caches/results are absent;
+3. record origin, exact SHA, branch/detached state;
+4. record WSL2/EL9/x86_64/filesystem/mount identity;
+5. prove `v3.0.0` does not exist;
+6. run `python3 tools/attest_clean_clone.py`.
+
+Then use only repository-documented bootstrap/setup/build commands. Do not
+copy any state from the development checkout. Run doctor, normal validation,
+and `apm validate --release`. Poll long-running commands and preserve the live
+process rather than restarting after an observation timeout.
+
+## 10. Evidence and failure handling
+
+Every release component report must identify exact commit, tool/model/method
+identity, status, commands or reproducible invocation, and report/artifact
+hashes. Missing or stale evidence is failure.
+
+If a component fails:
+
+- retain its generated report/logs under ignored output;
+- classify the real cause;
+- continue independent checks where useful;
+- fix the candidate only through a new coherent commit;
+- qualify the new commit from another genuine fresh clone;
+- never move a release tag or waive a gate.
+
+## 11. Compact post-candidate evidence
+
+After all 18 gates pass on the exact candidate, commit only compact
+`validation/evidence/v3_release_candidate.json`, final `STATUS.md`, and any
+required hash-bound review refresh. Bind the exact candidate, attestation,
+environment/tools, release report, N0/N1/N2, catalog plan/fresh/resume counts,
+static tests, immutability, claims, and tag absence.
+
+Do not add raw simulator output or generated binaries. Do not reinterpret the
+evidence commit as the candidate future tag target.
+
+## 12. Completion report
+
+Leave `STATUS.md` sufficient for an independent reviewer and report:
+
+- candidate SHA;
+- later evidence commit SHA;
+- exact fresh-clone 18/18 result and report hash;
+- package/runtime 3.0.0;
+- blockers/caveats;
+- immutable v1/v2 tags;
+- absent final v3 tag and GitHub Release;
+- unchanged visibility;
+- exact next human authorization/action.

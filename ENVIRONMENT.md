@@ -1,6 +1,8 @@
-# APM v2 Development Environment
+# APM v3 Reference and Release-Candidate Environment
 
-This file records the expected continuation environment for the v2 implementation. Unlike the original v1 startup, v2 begins after a successful v1.0.0 implementation in the same WSL2/AlmaLinux workspace.
+This file records the validated continuation and exact-clone environment for
+the v3.0.0 candidate. V3-N3 begins after successful v1/v2 releases and
+V3-N0/N1/N2 qualification in the same WSL2/AlmaLinux workspace.
 
 ## Validated v1 baseline
 
@@ -20,9 +22,10 @@ The v1 release evidence established a working direct environment with:
 
 See the v1 tag and historical evidence for exact commands/hashes.
 
-## v2 startup expectation
+## Development continuation expectation
 
-The current Codex session may be compacted after v1 completion and continue in the same repository/environment.
+The current implementation session may continue in the same repository and
+environment after V3-N2.
 
 Before installing/building anything:
 
@@ -49,13 +52,20 @@ When code/model bindings change, rebuild only affected generated artifacts as re
 
 If an existing artifact's source/binding/revision changes, do not assume its v1 binary remains valid; rebuild and record the new dependency chain.
 
-## Final release boundary
+## Final v3 release-candidate boundary
 
-Local reuse accelerates development but does not satisfy the v2 clean-clone release gate.
+Local reuse accelerates development but does not satisfy the v3 clean-clone
+release gate.
 
-Before v2.0.0, a fresh clone must prove the documented source bootstrap/build/doctor/test/characterization/release-validation flow on WSL2 + RHEL-compatible EL9 x86_64.
+Before V3-N3 completion, the exact immutable candidate commit must prove the
+documented source bootstrap/build/doctor/test/electrical/noise/release-
+validation flow from a genuine HTTPS clone on WSL2 + RHEL-compatible EL9
+x86_64. The first release N2 catalog run must be fresh; strict resume follows
+only after it.
 
-The final clean clone may use documented external network downloads/cache mechanisms allowed by the release flow, but it must not depend on untracked files copied from the development checkout.
+The final clean clone may use documented external network downloads/cache
+mechanisms allowed by the release flow, but it must not depend on untracked
+files copied from the development checkout.
 
 ## Platform policy
 
@@ -73,7 +83,7 @@ Containers/CI may supplement validation but do not replace the final reference e
 
 ## Spectre/Virtuoso
 
-No real Spectre/Virtuoso environment is assumed for v2 development.
+No real Spectre/Virtuoso environment is assumed for v3 release hardening.
 
 Spectre remains model-only experimental/unverified unless real Spectre access is actually available and intentionally used.
 

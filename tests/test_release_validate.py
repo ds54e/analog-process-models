@@ -44,10 +44,19 @@ def _git(root: Path, *arguments: str) -> None:
 def test_release_contract_and_implementation_are_exact() -> None:
     contract = load_gate_contract(ROOT)
     required = {gate["id"] for gate in contract["gate"] if gate["required"] is True}
-    assert contract["schema"] == "apm.release-gates.v2"
-    assert contract["target"] == "v2.0.0"
-    assert len(required) == 20
+    assert contract["schema"] == "apm.release-gates.v3"
+    assert contract["target"] == "v3.0.0"
+    assert len(required) == 18
     assert required == IMPLEMENTED_GATE_IDS
+    assert {
+        "runtime.noise_sparse",
+        "noise.foundation",
+        "noise.method",
+        "noise.catalog",
+        "noise.resume_integrity",
+        "models.claims_immutability",
+        "distribution.public_hygiene",
+    } <= required
 
 
 @pytest.mark.parametrize(
@@ -89,7 +98,15 @@ def test_release_repository_audits_pass() -> None:
     assert audit_release_metadata(ROOT, contract)["status"] == "pass"
     assert audit_catalog(ROOT, contract)["status"] == "pass"
     assert audit_migration(ROOT)["status"] == "pass"
-    assert audit_distribution(ROOT)["status"] == "pass"
+    distribution = audit_distribution(ROOT)
+    assert distribution["status"] == "pass"
+    assert distribution["private_path_hits"] == []
+    assert distribution["secret_hits"] == []
+    assert {
+        item["path"] for item in distribution[
+            "allowed_historical_reproducibility_path_observations"
+        ]
+    } == {"validation/evidence/m0-runtime.md", "validation/evidence/m10-release.md"}
     assert audit_claims(ROOT, contract)["status"] == "pass"
 
 
@@ -123,7 +140,7 @@ def test_clean_clone_attestation_is_tied_to_exact_commit(
     root.mkdir()
     (root / "validation").mkdir()
     (root / "validation/release_gates.toml").write_text(
-        'schema = "apm.release-gates.v2"\n', encoding="utf-8"
+        'schema = "apm.release-gates.v3"\n', encoding="utf-8"
     )
     (root / ".gitignore").write_text(".apm/\n", encoding="utf-8")
     _git(root, "init")
@@ -148,16 +165,40 @@ def test_clean_clone_attestation_is_tied_to_exact_commit(
     monkeypatch.setattr(clean_clone, "_platform_observation", lambda _: observation)
 
     created = clean_clone.create_clean_clone_attestation(root)
-    assert created["schema"] == "apm.clean-clone-attestation.v2"
+    assert created["schema"] == "apm.clean-clone-attestation.v3"
     assert clean_clone.verify_clean_clone_attestation(root)["status"] == "verified"
 
     (root / "validation/release_gates.toml").write_text(
-        'schema = "apm.release-gates.v2"\ntarget = "v2.0.0"\n', encoding="utf-8"
+        'schema = "apm.release-gates.v3"\ntarget = "v3.0.0"\n', encoding="utf-8"
     )
     _git(root, "add", ".")
     _git(root, "commit", "-m", "later commit")
     with pytest.raises(clean_clone.CleanCloneError, match="exact_attested_commit"):
         clean_clone.verify_clean_clone_attestation(root)
+
+
+def test_clean_clone_inventory_detects_ignored_generated_state(tmp_path: Path) -> None:
+    (tmp_path / ".venv").mkdir()
+    (tmp_path / "models/fixture").mkdir(parents=True)
+    (tmp_path / "models/fixture/generated.osdi").write_bytes(b"fixture")
+    assert clean_clone._generated_state_paths(tmp_path) == [
+        ".venv",
+        "models/fixture/generated.osdi",
+    ]
+
+
+def test_clean_clone_tag_audit_detects_final_v3_tag(tmp_path: Path) -> None:
+    root = tmp_path / "repo"
+    root.mkdir()
+    (root / "file.txt").write_text("fixture\n", encoding="utf-8")
+    _git(root, "init")
+    _git(root, "config", "user.name", "APM test")
+    _git(root, "config", "user.email", "apm-test@example.invalid")
+    _git(root, "add", ".")
+    _git(root, "commit", "-m", "fixture")
+    assert clean_clone._tag_exists(root, "v3.0.0") is False
+    _git(root, "tag", "v3.0.0")
+    assert clean_clone._tag_exists(root, "v3.0.0") is True
 
 
 def test_validate_cli_exposes_release_output() -> None:
@@ -172,8 +213,8 @@ def test_validate_cli_exposes_release_output() -> None:
 def test_contract_mismatch_is_an_error(tmp_path: Path) -> None:
     (tmp_path / "validation").mkdir()
     (tmp_path / "validation/release_gates.toml").write_text(
-        """schema = "apm.release-gates.v2"
-target = "v2.0.0"
+        """schema = "apm.release-gates.v3"
+target = "v3.0.0"
 [[gate]]
 id = "unknown.required"
 required = true

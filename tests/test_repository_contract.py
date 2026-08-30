@@ -24,6 +24,8 @@ from apm.characterize import (
 from apm.cli import build_parser
 from apm.doctor import _extract_observables
 from apm.model_build import MODEL_SOURCES
+from apm.noise import ACQUISITION_POLICY_ID, ACQUISITION_POLICY_VERSION
+from apm.noise_fit import FIT_METHOD_IDENTITY
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_TECHNOLOGIES = ("apm350", "apm130", "apm045", "apm022", "apm016f")
@@ -72,6 +74,19 @@ def test_reference_runtime_contract_is_el9_ngspice47_osdi() -> None:
     assert runtime["required_ngspice_major"] == 47
     assert runtime["osdi_required"] is True
     assert runtime["python_minimum"] == "3.9"
+
+
+def test_v3_noise_release_contract_freezes_validated_method_identities() -> None:
+    noise = load_toml("validation/release_gates.toml")["noise"]
+    assert noise["result_schema"] == "apm.noise-characterization.v1"
+    assert noise["comparison_schema"] == "apm.noise-comparison.v1"
+    assert noise["fit_method_identity"] == FIT_METHOD_IDENTITY
+    assert noise["acquisition_policy_identity"] == (
+        f"{ACQUISITION_POLICY_ID}@{ACQUISITION_POLICY_VERSION}"
+    )
+    assert noise["catalog_planned_logical_request_count"] == 376
+    assert noise["catalog_unique_request_count"] == 290
+    assert noise["process_noise_tuning_authorized"] is False
 
 
 def test_public_geometry_and_identity_contract_is_manifest_enforced() -> None:
@@ -339,25 +354,25 @@ def test_release_validation_and_provenance_commands_are_cli_contracts(tmp_path: 
 
 def test_spectre_is_model_only_experimental_and_not_real_tool_gate() -> None:
     spectre = load_toml("validation/release_gates.toml")["spectre"]
-    assert spectre["artifacts_required_for_all_v2_families"] is True
+    assert spectre["artifacts_required_for_all_families"] is True
     assert spectre["model_only"] is True
     assert spectre["status"] == "experimental_unverified"
     assert spectre["real_tool_validation_required"] is False
     assert spectre["virtuoso_integration_required"] is False
 
 
-def test_release_contract_requires_v2_metadata_and_all_20_gates() -> None:
+def test_release_contract_requires_v3_metadata_and_all_18_gates() -> None:
     contract = load_toml("validation/release_gates.toml")
     release = contract["release_metadata"]
-    assert contract["schema"] == "apm.release-gates.v2"
-    assert contract["target"] == "v2.0.0"
-    assert release["target_version"] == "2.0.0"
+    assert contract["schema"] == "apm.release-gates.v3"
+    assert contract["target"] == "v3.0.0"
+    assert release["target_version"] == "3.0.0"
     assert release["package_version_must_match_target"] is True
     assert release["unresolved_release_placeholders_forbidden"] is True
     gates = contract["gate"]
-    assert len(gates) == 20
+    assert len(gates) == 18
     assert all(gate["required"] is True for gate in gates)
-    assert len({gate["id"] for gate in gates}) == 20
+    assert len({gate["id"] for gate in gates}) == 18
 
 
 def test_reference_clean_clone_and_fail_closed_policy_remain_required() -> None:
@@ -366,4 +381,6 @@ def test_reference_clean_clone_and_fail_closed_policy_remain_required() -> None:
     assert policy["repository_visibility_may_change"] is False
     assert policy["missing_evidence_is_failure"] is True
     assert policy["required_skipped_check_is_failure"] is True
-    assert policy["v1_evidence_satisfies_v2"] is False
+    assert policy["historical_evidence_satisfies_v3"] is False
+    assert policy["final_tag_creation_authorized"] is False
+    assert policy["github_release_creation_authorized"] is False
