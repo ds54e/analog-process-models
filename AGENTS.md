@@ -9,25 +9,34 @@ This repository is **Analog Process Models (APM)**:
 - repository: `https://github.com/ds54e/analog-process-models`
 - acronym: **APM = Analog Process Models**
 
-Within this repository, APM always means this project. Do not reinterpret it as an unrelated product, package, Microsoft technology, or application-performance-monitoring system.
+Within this repository, APM always means this project. Work in this existing repository. Do not create or substitute another authoritative repository. Do not change repository visibility. Do not force-push or rewrite published history.
 
-Work in this existing repository. Do not create or substitute another authoritative repository. Do not change repository visibility. Do not force-push or rewrite published history.
+## Released baseline and current development line
 
-The tagged `v1.0.0` release is the validated historical baseline. Current `main` is the breaking APM v2 development line. The v1 tag is immutable history, not a compatibility requirement for v2.
+APM v2.0.0 is released and immutable.
+
+- released tag: `v2.0.0`
+- released commit: `3cc6cfea4932cc40f2d693784d0a569926cdf399`
+- post-release exact-tag requalification is recorded on `main` under `validation/evidence/v2_post_release_requalification.json`
+
+Do not modify the v2 tag or reinterpret current v3 work as evidence that the v2 release was incomplete.
+
+Current `main` is the post-v2 development line. The current goal is defined by `GOAL.md` and presently begins the v3 stationary small-signal MOS-noise characterization work.
 
 ## Mission
 
-Implement the current `GOAL.md` faithfully and deliver **APM v2.0.0**.
+Implement the current `GOAL.md` faithfully.
 
-Optimize for:
+For the current v3 phase, optimize for:
 
-- physically and semantically honest device-family modeling;
+- physically and semantically honest noise-model claims;
 - reproducible real-tool validation;
-- explicit provenance and licensing boundaries;
+- explicit parameter-level noise provenance;
 - machine-readable result semantics;
-- a small manifest-driven architecture that can grow without technology-specific Python branches.
+- reuse of the validated v2 manifest-driven family/device architecture;
+- minimal disruption to the released v2 DC/Y/capacitance framework.
 
-Completion is evidence-based. Do not tag or declare v2.0.0 complete unless every required gate in `validation/release_gates.toml` has actually passed with the required evidence.
+The current goal is an evidence-producing noise foundation/spike, not permission to tag v3.0.0. Do not change package/release version or create a v3 tag unless a later repository goal explicitly requires it.
 
 ## Required reading before substantive work
 
@@ -35,228 +44,196 @@ Read completely, in this order:
 
 1. `AGENTS.md`
 2. `GOAL.md`
-3. `DEVICE_FAMILY_MODEL.md`
-4. `RESULT_CONTRACT.md`
-5. `PROJECT_CONTEXT.md`
-6. `ENVIRONMENT.md`
-7. `RESEARCH_BASELINE.md`
-8. `UNATTENDED_EXECUTION.md`
-9. `README.md`
-10. `validation/release_gates.toml`
-11. `STATUS.md`
+3. `NOISE_CHARACTERIZATION.md`
+4. `DEVICE_FAMILY_MODEL.md`
+5. `RESULT_CONTRACT.md`
+6. `PROJECT_CONTEXT.md`
+7. `ENVIRONMENT.md`
+8. `RESEARCH_BASELINE.md`
+9. `UNATTENDED_EXECUTION.md`
+10. `README.md`
+11. `validation/release_gates.toml`
+12. `STATUS.md`
 
 Authority on conflict:
 
-1. applicable safety/security requirements and explicit user instructions
-2. `AGENTS.md`
-3. `GOAL.md`
-4. `DEVICE_FAMILY_MODEL.md`
-5. `UNATTENDED_EXECUTION.md`
-6. `RESULT_CONTRACT.md`
-7. `PROJECT_CONTEXT.md`
-8. `ENVIRONMENT.md`
-9. `RESEARCH_BASELINE.md`
-10. `README.md`
+1. applicable safety/security requirements and explicit user instructions;
+2. `AGENTS.md`;
+3. `GOAL.md`;
+4. `NOISE_CHARACTERIZATION.md` for noise work;
+5. `DEVICE_FAMILY_MODEL.md`;
+6. `UNATTENDED_EXECUTION.md`;
+7. `RESULT_CONTRACT.md` for the existing v2 result domain;
+8. `PROJECT_CONTEXT.md`;
+9. `ENVIRONMENT.md`;
+10. `RESEARCH_BASELINE.md`;
+11. `README.md`.
 
 Do not resolve a material conflict by silently dropping the harder requirement. Record material departures and evidence in `STATUS.md`.
 
-## v1 baseline reuse versus v2 validation
+## Reference environment and baseline reuse
 
-The v1.0.0 implementation established a useful validated development baseline: WSL2 + AlmaLinux/RHEL-compatible EL9 x86_64, ngspice 47 with OSDI, project-local OpenVAF-ReLoaded, PSP103 OSDI, BSIM-CMG OSDI, and a working Python environment.
+Reuse the existing validated local development environment when present and valid:
 
-During v2 development, reuse the existing project-local `.apm` toolchain, generated OSDI artifacts, caches, and `.venv` when they are present and still match the recorded versions/hashes. Do not gratuitously rebuild ngspice/OpenVAF or rediscover solved bootstrap work.
+- WSL2;
+- AlmaLinux/RHEL-compatible EL9 x86_64;
+- Python 3.9 baseline;
+- ngspice 47 with OSDI/predictor support;
+- project-local OpenVAF-ReLoaded;
+- native BSIM3 and BSIM4;
+- PSP103 OSDI;
+- BSIM-CMG 112.1.0 OSDI.
 
-However:
+Do not gratuitously rebuild ngspice/OpenVAF or rediscover solved bootstrap work. If the toolchain is missing, corrupted, or incompatible with the current work, repair/rebuild it reproducibly.
 
-- v1 validation evidence does **not** satisfy v2 release gates;
-- changed v2 model/family paths must be re-exercised with real tools;
-- the final v2 release still requires a genuinely fresh clone and documented clean-clone validation from source;
-- if the existing local toolchain is missing, corrupted, or incompatible with v2 changes, repair or rebuild it reproducibly rather than pretending it is valid.
+For required noise `.noise` validation, use the normal Sparse solver path; do not use KLU as the required reference noise solver.
 
-## Breaking redesign policy
+The v2 release evidence remains historical release evidence. New v3 noise claims require new current evidence.
 
-APM v2 is intentionally allowed to break v1 interfaces because v1 has not been publicly adopted as a compatibility contract.
+## Stable v2 architecture boundary
 
-Do not preserve obsolete v1 structures merely for compatibility. By v2 release, remove superseded canonical sources of truth, including where applicable:
-
-- one-family-per-technology `kit.toml` manifests;
-- technology-specific characterization loaders/branches that the v2 catalog makes unnecessary;
-- v1 public aliases such as unqualified `apm045_nmos` when a family-qualified v2 name replaces them;
-- v1 result schemas as the current runtime output contract;
-- v1 benchmark adapter/config schemas as the current benchmark contract.
-
-Historical v1 source and evidence remain available from the `v1.0.0` tag. Do not maintain a dual-schema compatibility layer unless `GOAL.md` explicitly requires one.
-
-## Device-family architecture
-
-Follow `DEVICE_FAMILY_MODEL.md`.
-
-The core domain model is:
+Preserve the released manifest-driven domain model:
 
 `Technology -> Electrical Family -> Device`
 
-with these orthogonal concepts:
+with orthogonal:
 
-- Operating Profile
-- Backend Binding
-- Variation
-- Comparison Set
+- Operating Profile;
+- Backend Binding;
+- Variation;
+- Comparison Set.
 
-Do not collapse these concepts into one device-type string.
+Do not reintroduce technology-specific normal-family loaders or collapse electrical family, voltage profile, gate stack, threshold class, backend, and usage labels into one type string.
 
-Important boundaries:
+Public geometry remains native:
 
-- Electrical Family means a distinct nominal electrical model/parameterization identity.
-- Family IDs are technology-local; cross-technology semantics come from explicit metadata.
-- `core`, `io`, `analog`, `rf`, `standard-cell`, and similar usage labels are not primary electrical-family identities.
-- gate-stack class, threshold class, operating voltage/profile, and isolation/layout view are distinct concepts.
-- do not require every family to contain both N and P devices;
-- do not treat an RF/layout/isolation view as a new electrical family without electrical-model evidence;
-- do not infer undocumented voltage limits, reliability/breakdown guarantees, or family-to-family statistical correlation.
+- planar devices: `w`, `l`;
+- FinFET devices: `l`, `nfin`.
 
-The v2 implementation must be manifest-driven. Adding a normal new technology/family/device should not require a new technology-specific loader or large `if/elif` branch in characterization/benchmark code.
+Do not invent a common effective width for FinFETs. Do not expose a fake universal compact-model parameter API.
 
-Avoid speculative plugin systems. The manifest-driven abstraction is justified by the concrete v2 family set; keep the implementation straightforward.
+The existing v2 characterization/result domain remains valid. Prefer a separate noise schema/domain, e.g. `apm.noise-characterization.v1`, instead of unnecessarily rewriting `apm.characterization.v2`.
 
-## Public model boundaries
+## Noise characterization policy
 
-Do not force BSIM3, PSP103, BSIM4, and BSIM-CMG raw parameter APIs into a fake universal compact-model API.
+Follow `NOISE_CHARACTERIZATION.md`.
 
-Commonize terminal characterization and result semantics, not compact-model knobs.
+Core rules:
 
-Public sizing remains geometry-native:
+- simulator execution is not a calibration claim;
+- distinguish backend capability from model/noise-parameter fidelity;
+- preserve parameter-level effective-value provenance;
+- distinguish explicit model-card values from compact-model/backend defaults;
+- canonical cross-engine comparison uses external-terminal observables, not raw compact-model internal source names;
+- do not call APM-authored default-noise behavior silicon-correlated or process-calibrated;
+- do not tune APM350/APM022/APM016F process-noise coefficients merely to make spectra look plausible or to pass the initial spike;
+- preserve raw source breakdown as backend evidence without forcing false cross-engine source equivalence;
+- fail closed when a bias target, fit, parameter snapshot, or backend capability cannot be established.
 
-- planar devices: `w`, `l`
-- FinFET devices: `l`, `nfin`
-
-Do not invent a universal effective width for FinFETs. Do not expose common `m`, `nf`, `ng`, or finger/layout semantics in the v2 common interface.
-
-Use APM-owned, family-qualified public wrapper names.
+The initial v3 spike must validate the harness before trusting MOS spectra, including analytic resistor noise, transparent current probing, OSDI white/flicker sources, and an analytic correlated-noise network.
 
 ## APM-authored family independence
 
 APM022 and APM016F remain independently authored generic models.
 
-Official PTM/PTM-MG parameter cards must not be copied, transcribed, interpolated, optimized against as a numeric fitting target, or used as numeric source material for APM-authored decks/variants. They may be local, non-redistributed sanity oracles only.
+Official PTM/PTM-MG parameter cards must not be copied, transcribed, interpolated, optimized against as a numeric fitting target, or used as numeric source material for APM-authored decks/variants. Public literature/open models may be used to understand qualitative behavior or later generic behavior envelopes, subject to licensing/provenance rules.
 
-For generic multi-Vt families:
+APM022 LVT/HVT remain threshold-isolated variants around SVT. APM016F LVT/HVT remain documented PHIG/workfunction-dominant variants around SVT.
 
-- APM022 `lvt`/`hvt` are controlled APM-derived variants around the `svt` basis and must be documented as threshold-isolated generic variants, not foundry options.
-- APM016F `lvt`/`hvt` are workfunction-dominant generic variants around the `svt` basis. Start with gate-workfunction adjustment and permit only evidence-backed minimal secondary parameter changes when terminal behavior requires them.
+Noise characterization of those variants must not be generalized into a claim that real foundry Vt options share the same noise coefficients.
 
-Write behavioral targets before tuning parameters. Keep published facts separate from APM engineering choices. Never claim foundry or silicon correlation for APM-authored families.
+## Characterization and bias policy
 
-## Characterization policy
+Existing canonical gm/gds remain terminal finite differences. Internal simulator OP quantities remain oracles unless an explicit contract says otherwise.
 
-Canonical gm/gds come from terminal finite differences. Internal simulator OP quantities are validation oracles only.
+For noise equal-inversion points, do not merely take the nearest old DC sweep row. Resolve the requested gm/Id target using existing DC data as a bracket, re-run/recompute the operating point and finite-difference gm/gds, and persist the achieved target/error diagnostics.
 
-Canonical capacitance comes from the terminal AC Y matrix. Preserve all 16 complex entries and the measurement convention.
+Preserve raw signed terminal quantities separately from canonical magnitude/comparison quantities.
 
-Preserve raw signed simulator quantities separately from canonical positive-magnitude N/P comparison quantities.
+For noise, preserve the actual complex gate-to-drain small-signal transfer used for input-referred results. Do not assume `gm` alone is the full transfer at high frequency.
 
-Required v2 characterization extends v1 with family-oriented metrics including Ion, Ioff, log10(Ion/Ioff), and subthreshold swing. Do not freeze a dubious SS extraction window merely to satisfy implementation progress; use native-family data to select and document a robust method before release.
+## Variation boundary
 
-Use comparison modes appropriate to the question:
+Keep APM Benchmark Global/Local/All and upstream/native variation distinct.
 
-- cross-technology anchor comparison;
-- equal-bias threshold-family comparison;
-- equal-inversion comparison, typically around documented gm/Id;
-- native-profile gate-stack comparison;
-- explicitly documented common-overlap-bias gate-stack comparison.
-
-Do not compare unrelated voltage/gate-stack families as though a normalized VDD view alone removes all physical differences.
-
-## Variation policy
-
-Keep APM synthetic benchmark variation and upstream/native variation distinct in code, metadata, plots, and documentation.
-
-APM v2 benchmark terminology is:
-
-- **Benchmark Global** — synthetic die-wide/common observable stress;
-- **Benchmark Local** — synthetic instance-local mismatch stress;
-- **Benchmark All** — Global + Local.
-
-These names deliberately avoid claiming that Benchmark Global represents a physically correct foundry process-correlation model.
-
-Canonical MOS benchmark intents remain observable `vth_shift` and `drive_shift`, not universal raw compact-model parameters.
-
-For v2 multi-family technologies, a technology/polarity benchmark Global latent stress is shared across its electrical families and each family uses its own calibrated raw adapter. This is a common comparison stress, not a claim of real full family-to-family correlation.
-
-Do not invent numeric partial-correlation coefficients. Preserve a latent-variable namespace that can be extended later if evidence supports residual family-specific terms.
-
-Benchmark Local remains per-instance with the explicit synthetic matching law. Upstream/native family-to-family correlation must not be invented when upstream does not provide it.
-
-Generate ngspice benchmark randomness in Python, persist seeds/latents/resolved samples, and keep replay deterministic.
+The initial v3 noise phase does not add noise-coefficient variation, noise mismatch, or benchmark noise-correlation models. Do not invent them from the existing v2 Vth/drive benchmark variation.
 
 ## Licensing and provenance
 
-License correctness is a release gate.
+License correctness remains mandatory.
 
-Before vendoring any new third-party family/model file:
+Before vendoring any new third-party asset:
 
-1. identify authoritative upstream source;
-2. pin exact revision;
-3. inspect exact file-level header and applicable license/redistribution terms;
+1. identify the authoritative upstream source;
+2. pin the exact revision;
+3. inspect exact file-level licensing/redistribution terms;
 4. record source URL/revision/path/hash/modifications;
-5. preserve notices and license text;
+5. preserve notices/license text;
 6. only then ship the asset.
 
 Do not infer file rights from a repository root license when model-specific terms may differ. Do not relicense third-party assets. If rights remain ambiguous, do not ship the file.
 
-Prefer preserving the already validated v1 upstream revisions when the required v2 family assets exist in the same pinned snapshots; avoid revision churn without a technical or licensing reason.
-
 Never commit proprietary PDK content, credentials, tokens, passwords, or user secrets.
+
+The current noise spike should not require new third-party model assets; prefer the already vendored/pinned v2 engines and cards.
 
 ## Spectre boundary
 
 ngspice remains the validated reference backend.
 
-Spectre support remains model-only **experimental/unverified** unless a real Spectre environment actually validates it. Do not claim real Spectre parsing or numerical validation from static inspection.
+Spectre remains model-only **experimental/unverified** unless a real Spectre environment actually validates it. The v3 noise spike does not promote Spectre to a validated noise backend.
 
-Virtuoso integration remains user-managed. Do not add SKILL, CDF, symbols, OA libraries, ADE/Maestro state, OCEAN, or Virtuoso automation in v2.
+Do not add SKILL, CDF, symbols, OA libraries, ADE/Maestro state, OCEAN, or Virtuoso automation unless a later explicit goal requires them.
 
-## Scope exclusions
+## Scope exclusions for the current v3 phase
 
-Unless `GOAL.md` explicitly changes them, v2 still excludes:
+Unless `GOAL.md` explicitly expands them, the current phase excludes:
 
 - layout/PCells/DRC/LVS/PEX;
 - standard cells;
-- RF-specific model/view support;
-- MOS noise as a required cross-family characterization metric;
-- APM016F thick-oxide/high-voltage I/O family;
+- new RF/layout/isolation device families;
+- transient noise and RTS;
+- PSS/PNoise and oscillator phase noise;
+- RF noise figure/NFmin as a required metric;
+- a canonical full four-terminal noise-correlation matrix;
+- noise variation/mismatch/correlation models;
+- APM016F thick-oxide/high-voltage I/O;
 - native Windows/macOS reference support;
+- real Spectre validation;
 - Virtuoso automation.
 
-Do not expand scope because an upstream PDK happens to contain additional devices.
+Do not expand scope because an upstream PDK/model happens to support additional effects.
 
 ## Tests and evidence
 
-Prefer property/regression tests over fragile exact snapshots.
+Prefer property/regression/analytic-reference tests over fragile exact snapshots.
 
 Do not weaken legitimate tests to match broken behavior.
 
-Every validated milestone/gate must have compact auditable evidence under `validation/evidence/` or another explicitly documented v2 evidence path. Missing evidence is not pass.
+Every validated v3 noise spike claim must have compact auditable evidence under `validation/evidence/` or another explicitly documented current evidence path. Missing evidence is not pass.
 
-A release-oriented command, preferably `apm validate --release`, must fail closed if any required v2 automatic gate is failed, skipped, unimplemented, or evidence-free.
+Audit simulator logs for critical diagnostics, unsupported parameters/features, convergence failures, or silent fallback behavior.
 
-The existing v1 release validator may intentionally fail immediately after the v2 specification commit; that is expected until Codex migrates it. Do not weaken v2 gates merely to restore old v1 green status.
+Do not replace failed fit/bias/capability results with clipped or fabricated values. Persist explicit failure status.
+
+The existing `validation/release_gates.toml` defines the already released v2 gate contract. Do not rewrite history by making those old v2 gates pretend to be v3 gates. Introduce new v3/spike validation structures only when implementation requires them.
 
 ## Git and autonomy
 
-High autonomy is authorized for in-scope research, local dependency installation/repair, implementation, refactoring, simulations, tests, documentation, commits, and pushes.
+High autonomy is authorized for in-scope research, local dependency installation/repair, implementation, refactoring, simulations, tests, documentation, coherent commits, and pushes.
 
-Keep coherent milestone commits. Do not force-push. Do not alter repository visibility/security settings.
+Do not force-push. Do not change repository visibility/security settings. Do not move or rewrite released tags.
 
-Stop/escalate only for a genuine blocker such as unresolved redistribution rights, unavailable required credentials, or a real contradiction in the normative v2 contract.
+Stop/escalate only for a genuine blocker such as unresolved redistribution rights, unavailable required credentials, or a real contradiction in the normative current contract.
 
-## Completion
+## Completion for the current goal
 
-Do not tag v2.0.0 until:
+The current goal is complete only when:
 
-- all v2 release gates pass with current evidence;
-- obsolete v1 canonical SSOT/compatibility artifacts forbidden by the v2 contract are removed from current main;
-- all release-critical research-dependent values are frozen with evidence or the corresponding feature is legitimately removed from scope;
-- package/runtime/release metadata consistently identify 2.0.0;
-- a fresh clone on the required WSL2/EL9 reference environment builds/validates from source;
-- README/release claims match evidence;
-- Spectre remains correctly bounded as experimental/unverified unless genuinely validated.
+- every required item in `GOAL.md` and the initial-spike acceptance criteria in `NOISE_CHARACTERIZATION.md` has real-tool evidence;
+- the harness itself is analytically validated before MOS results are accepted;
+- all four required compact-model engine paths execute the provisional noise experiment;
+- effective noise parameters/provenance are captured without overstating calibration;
+- unresolved frequency/fit/correlation decisions are explicitly reported rather than guessed;
+- v2 release/tag/evidence remain untouched;
+- no v3 release/tag is created from the spike alone.
