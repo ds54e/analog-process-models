@@ -12,11 +12,11 @@ This is the compact persistent progress index. It is not validation evidence by 
 - v2 post-release exact-tag requalification: complete, 20/20 required gates passed
 - v3 post-release exact-tag requalification: complete, 18/18 required gates passed
 - Current development line: post-v3 release-evidence `main`
-- Current target: create the GitHub Release only after this post-tag evidence/status update is pushed
+- Current target: human review and separate explicit authorization before any repository publicization
 - Completed milestones: `V3-N0 Four-engine noise spike`; `V3-N1 Noise acquisition and fit-method qualification`; `V3-N2 Catalog-wide noise dataset and comparison qualification`; `V3-N3 v3.0.0 Release Hardening`
 - Current milestone: `V3-N3 v3.0.0 Release Hardening` (complete)
-- State: `V3_0_0_TAGGED_REQUALIFIED_RELEASE_PENDING`
-- v3 release eligible: YES — immutable exact tag independently requalified; GitHub Release may now be created
+- State: `V3_0_0_RELEASED`
+- v3 release state: RELEASED — immutable exact tag independently requalified and GitHub Release created
 - Blockers: none
 
 APM v1.0.0, v2.0.0, and v3.0.0 are immutable. V3-N0, V3-N1, V3-N2, and
@@ -37,7 +37,8 @@ present. Package/runtime version is 3.0.0. Immutable annotated tag `v3.0.0`
 has object `afecec29ea6ed0703ef441d4839fd40a238bef0b` and peels to candidate
 `995e0ce7cdd0c37ef9f3397008637f9d239c746e`. Exact-tag post-release
 requalification passed 18/18 from a genuine fresh HTTPS clone. GitHub Release:
-not yet created. Repository visibility: PRIVATE and unchanged.
+created. Repository visibility: PRIVATE and unchanged. Publicization: not
+performed.
 
 ## Reference toolchain
 
@@ -463,7 +464,7 @@ release state is recorded below.
 
 ## v3.0.0 exact-tag post-release requalification
 
-Release state before GitHub Release creation:
+Final release state:
 
 ```text
 Release: v3.0.0
@@ -473,7 +474,7 @@ Tag target: 995e0ce7cdd0c37ef9f3397008637f9d239c746e
 Exact-tag post-release requalification: PASS
 Release gates: 18/18 PASS
 Repository visibility: PRIVATE
-GitHub Release: NOT YET CREATED
+GitHub Release: CREATED
 Publicization: NOT PERFORMED
 Blockers: none
 ```
@@ -545,7 +546,15 @@ Whole-file SHA-256:
 `7001b976642ee1296e3bdea18af86381eddc56d4363f99bf2b32409049b3814b`
 
 The GitHub Release did not exist during validation and was not used as evidence.
-Repository visibility remained PRIVATE throughout. After this compact
-evidence/status commit is pushed, the existing `v3.0.0` tag is qualified for
-GitHub Release creation. Making the repository public remains a separate human
-decision requiring explicit authorization.
+After the compact evidence/status commit was pushed, GitHub Release
+`Analog Process Models v3.0.0` was created at the existing tag and published at
+2026-08-30T08:22:17Z:
+
+`https://github.com/ds54e/analog-process-models/releases/tag/v3.0.0`
+
+The Release is neither draft nor prerelease and has no attached generated
+simulator artifacts. The tag still has object
+`afecec29ea6ed0703ef441d4839fd40a238bef0b` and peels to
+`995e0ce7cdd0c37ef9f3397008637f9d239c746e`. Repository visibility remained
+PRIVATE throughout. Making the repository public is the only next action and
+requires separate explicit human authorization.
