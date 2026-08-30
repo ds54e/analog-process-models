@@ -1,0 +1,195 @@
+{
+  "schema": "apm.publication.v3.v1",
+  "status": "pass",
+  "created_utc": "2026-08-30T09:26:44Z",
+  "publication_timestamp_utc": "2026-08-30T09:18:57Z",
+  "publication_timestamp_basis": "GitHub repository updated_at observed immediately after the visibility transition and before main-protection creation",
+  "repository": "https://github.com/ds54e/analog-process-models",
+  "main_commit_before_publication": "535138eab120af6396dc23a1fcef62f57544bb59",
+  "qualified_publication_documentation_commit": "b1a8fb31efc083b2c1a39eef6d39f5965ae3aba9",
+  "commit_binding_note": "This report binds the exact pushed publication-documentation implementation commit above. The later normal main commit that adds this report is intentionally not self-referential and is not a release or tag target.",
+  "pre_publication_readiness": {
+    "status": "pass",
+    "evidence_path": "validation/evidence/public_readiness_v3.json",
+    "evidence_sha256": "6a5832b836bc42e606645250d2f4ce5b44dca4db70cbe747cbe2352f045079cf",
+    "unresolved_blockers": [],
+    "worktree_clean": true,
+    "main_exactly_qualified_evidence_commit": true,
+    "github_visibility": "private",
+    "ruleset_creation_attempt": {
+      "status": "unavailable_while_private",
+      "http_status": 403,
+      "github_message": "Upgrade to GitHub Pro or make this repository public to enable this feature.",
+      "subsequent_action": "Protection was created immediately after publicization and before any development push."
+    },
+    "visibility_consequence_preflight": {
+      "forks": 0,
+      "stargazers": 0,
+      "subscribers": 0,
+      "actions_runs": 0,
+      "existing_rulesets": 0,
+      "material_destructive_consequence_found": false
+    }
+  },
+  "publicization": {
+    "status": "complete",
+    "from_visibility": "private",
+    "to_visibility": "public",
+    "authenticated_github_native_operation": true,
+    "owner_unchanged": true,
+    "repository_name_unchanged": true,
+    "default_branch": "main",
+    "default_branch_unchanged": true,
+    "visibility_reverted_or_repeated": false,
+    "public_verification": {
+      "authenticated_api": "public",
+      "unauthenticated_api": "public",
+      "unauthenticated_repository_page_http_status": 200,
+      "public_https_git_tag_query_succeeded": true
+    }
+  },
+  "main_protection": {
+    "status": "enabled",
+    "effective_ref": "refs/heads/main",
+    "force_push_blocked": true,
+    "deletion_blocked": true,
+    "invented_required_status_checks": false,
+    "rulesets": [
+      {
+        "id": 21850319,
+        "name": "Protect main history",
+        "target": "branch",
+        "enforcement": "active",
+        "created_at": "2026-08-30T18:19:07.799+09:00",
+        "rules": [
+          "deletion",
+          "non_fast_forward"
+        ],
+        "bypass_actors": [],
+        "current_owner_can_bypass": "never"
+      },
+      {
+        "id": 21850335,
+        "name": "Require pull requests for main contributions",
+        "target": "branch",
+        "enforcement": "active",
+        "created_at": "2026-08-30T18:19:30.217+09:00",
+        "rules": [
+          "pull_request"
+        ],
+        "required_approving_review_count": 0,
+        "required_status_checks": [],
+        "allowed_merge_methods": [
+          "merge",
+          "squash",
+          "rebase"
+        ],
+        "owner_bypass": {
+          "actor_id": 17592097,
+          "actor_type": "User",
+          "bypass_mode": "always",
+          "purpose": "Permit practical normal owner maintenance while external contributions use pull requests."
+        }
+      }
+    ],
+    "normal_fast_forward_publication_documentation_push": "pass",
+    "history_safety_rules_bypassed_during_push": false,
+    "pull_request_rule_owner_bypass_recorded_by_github": true
+  },
+  "github_security": {
+    "private_vulnerability_reporting": "enabled",
+    "secret_scanning": "enabled",
+    "secret_scanning_push_protection": "enabled",
+    "existing_security_feature_disabled": false,
+    "personal_email_added": false
+  },
+  "release_integrity": {
+    "release": "v3.0.0",
+    "annotated_tag_object": "afecec29ea6ed0703ef441d4839fd40a238bef0b",
+    "peeled_commit": "995e0ce7cdd0c37ef9f3397008637f9d239c746e",
+    "tag_object_type": "tag",
+    "only_v3_tag": "v3.0.0",
+    "tag_unchanged_after_publication": true,
+    "github_release": {
+      "id": 379221176,
+      "name": "Analog Process Models v3.0.0",
+      "tag_name": "v3.0.0",
+      "url": "https://github.com/ds54e/analog-process-models/releases/tag/v3.0.0",
+      "draft": false,
+      "prerelease": false,
+      "assets_count": 0,
+      "created_at": "2026-08-30T08:01:26Z",
+      "published_at": "2026-08-30T08:22:17Z",
+      "unchanged_after_publication": true
+    },
+    "release_artifact_recreated": false,
+    "released_history_rewritten": false,
+    "force_push_performed": false
+  },
+  "repository_metadata": {
+    "description": "Open compact models and reproducible analog device/noise characterization across process generations",
+    "topics": [
+      "analog",
+      "bsim",
+      "compact-models",
+      "finfet",
+      "gmid",
+      "mosfet",
+      "ngspice",
+      "spice",
+      "verilog-a"
+    ]
+  },
+  "documentation_transition": {
+    "status": "pass",
+    "goal": "Post-v3.0.0 Public Maintenance",
+    "readme_reports_public_state": true,
+    "status_reports_publication_complete": true,
+    "security_policy_uses_private_vulnerability_reporting": true,
+    "agents_policy_reports_public_state": true,
+    "historical_public_readiness_evidence_modified": false,
+    "visibility_changes_technical_fidelity": false
+  },
+  "validation": {
+    "qualified_commit": "b1a8fb31efc083b2c1a39eef6d39f5965ae3aba9",
+    "clean_worktree": true,
+    "pytest": {
+      "status": "pass",
+      "result": "94 passed"
+    },
+    "ruff": {
+      "status": "pass",
+      "result": "All checks passed"
+    },
+    "reuse": {
+      "status": "pass",
+      "result": "247/247 files compliant"
+    },
+    "provenance": {
+      "status": "pass",
+      "result": "7/7 checks passed",
+      "schema": "apm.provenance-validation.v2",
+      "report_sha256": "5225b42a256d3120fdf6f511ca9ae5cd620bfa23a89950d5ecdd41789efb6ec6"
+    },
+    "normal_repository_validation": {
+      "status": "pass",
+      "schema": "apm.repository-validation.v3",
+      "repository_head": "b1a8fb31efc083b2c1a39eef6d39f5965ae3aba9",
+      "report_sha256": "03b84340016194ad6723f90334bce89cf49d75d74cc6f9ff4c0376ae3a2309b4",
+      "claim_audit": "pass",
+      "distribution_public_hygiene": "pass",
+      "tracked_file_count": 254
+    },
+    "candidate_era_release_validator_rerun": false,
+    "candidate_era_release_validator_note": "The immutable exact-tag 18/18 evidence remains authoritative; visibility-only maintenance did not rerun or reinterpret the frozen release validator."
+  },
+  "claim_boundaries": {
+    "manufacturable_pdk_claimed": false,
+    "silicon_or_foundry_calibrated_noise_claimed": false,
+    "new_model_or_calibration_claimed": false,
+    "new_package_version_or_release_created": false,
+    "spectre_status": "experimental_unverified"
+  },
+  "unresolved_blockers": [],
+  "final_conclusion": "The controlled private-to-public transition completed after a passing audit. Main history and contribution flow are protected, supported GitHub security features are enabled, v3.0.0 and its GitHub Release are unchanged, exact-commit maintenance validation passed, and no history rewrite occurred."
+}
