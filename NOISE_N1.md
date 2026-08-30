@@ -1,6 +1,13 @@
 # APM V3-N1 — Noise Acquisition and Fit-Method Qualification
 
-This document is normative for the V3-N1 milestone together with `AGENTS.md`, `GOAL.md`, and `NOISE_CHARACTERIZATION.md`.
+> **Historical/frozen milestone contract.** This document specified V3-N1 and
+> is retained unchanged in technical substance behind the released v3 method.
+> V3-N1 completed at `0aab87b98697bd8806d13d244595a989cd81a0e3`;
+> APM v3.0.0 has since been released. It is not the current goal or project
+> status. See `README.md`, `STATUS.md`, and `AGENTS.md`.
+
+This document was normative for the V3-N1 milestone together with the policy,
+goal, and V3-N0 foundation then in force.
 
 APM v2.0.0 remains immutable. V3-N0 is complete and validated by `validation/evidence/v3_n0_noise_spike.json`. V3-N1 must preserve the V3-N0 measurement contract while resolving the remaining acquisition/fitting uncertainties before catalog-wide noise characterization.
 

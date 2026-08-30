@@ -1,8 +1,13 @@
 # Unattended Execution Protocol for APM V3-N3
 
-This document defines the long-running execution procedure for the current
-v3.0.0 release-hardening goal. It is subordinate to `AGENTS.md`, `GOAL.md`, and
-`RELEASE_V3.md`.
+> **Historical record — preserved V3-N3 procedure.** This was the unattended
+> execution loop used to create and qualify the v3.0.0 candidate. v3.0.0 has
+> since been tagged, exactly requalified, and published as a GitHub Release.
+> The procedure remains for reproducibility and does not describe the current
+> maintenance workflow. See `AGENTS.md`, `GOAL.md`, and `STATUS.md`.
+
+This document defined the long-running V3-N3 release-hardening procedure and
+was subordinate to the policy, goal, and release contract then in force.
 
 ## 1. Authority
 

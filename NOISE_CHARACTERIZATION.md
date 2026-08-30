@@ -1,6 +1,14 @@
 # APM Noise Characterization — v3 Foundation
 
-This document is normative for the APM v3 noise-characterization work unless a higher-authority repository policy overrides it.
+> **Released technical foundation / historical V3-N0 scope.** This document
+> defined the V3-N0 spike and the external-terminal semantics preserved in APM
+> v3.0.0. Its provisional spike questions were subsequently resolved by the
+> frozen V3-N1/V3-N2 milestones. It remains a technical contract for the
+> released foundation, but it is not the current implementation goal. See
+> `README.md`, `STATUS.md`, and `AGENTS.md` for current state.
+
+This document defined the APM v3 noise-characterization foundation unless a
+higher-authority repository policy overrode it.
 
 APM v2.0.0 is an immutable released baseline. v3 adds a new characterization domain; it does not invalidate or silently redefine the validated v2 DC/Y/capacitance/result semantics.
 

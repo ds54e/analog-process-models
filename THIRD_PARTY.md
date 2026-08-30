@@ -48,6 +48,14 @@ The cards identify PSP 103.6 and are executed with the pinned backward-compatibl
 terms, developer acknowledgements, notices, changelog, README, and release
 notes are preserved, with the applicable terms reproduced under `LICENSES/`.
 
+As required by the Si2/CMC PSP terms, Analog Process Models acknowledges **NXP
+Semiconductors, Delft University of Technology, and the Commissariat à
+l'énergie atomique et aux énergies alternatives (CEA)** for developing the
+PSP/JUNCAP software distributed with APM. The complete copyright notice,
+disclaimer, conditions, contributor record, and release notes remain in
+`LICENSES/LicenseRef-Si2-PSP-103.8.2.txt` and
+`models/apm130/vendor/psp103/releasenotesPSP103.8.2.txt`.
+
 Generated LV and HV Spectre TT cards select the pinned QS model blocks, preserve
 all selected parameter values and notices, rename only the OpenVAF module type
 to Spectre's native PSP type, and fix wrapper-only inputs. Source/output hashes

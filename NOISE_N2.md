@@ -1,6 +1,14 @@
 # APM V3-N2 — Catalog-Wide Noise Dataset and Comparison Qualification
 
-This document is normative for the V3-N2 milestone together with `AGENTS.md`, `GOAL.md`, `NOISE_CHARACTERIZATION.md`, and `NOISE_N1.md`.
+> **Historical/frozen milestone contract.** This document specified V3-N2 and
+> is retained unchanged in technical substance behind the released catalog
+> dataset and comparison framework. V3-N2 completed at
+> `ca977af3ba08b9dfdee8556e5781f647f99cabdd`; APM v3.0.0 has since been
+> released. It is not the current goal or project status. See `README.md`,
+> `STATUS.md`, and `AGENTS.md`.
+
+This document was normative for the V3-N2 milestone together with the policy,
+goal, V3-N0 foundation, and frozen V3-N1 method then in force.
 
 APM v2.0.0 remains immutable. V3-N0 and V3-N1 are complete. V3-N2 expands the frozen stationary-noise measurement and fitting method across the manifest-discovered public MOS catalog and produces auditable comparison datasets. It does not calibrate new process-noise coefficients and it is not a v3.0.0 release.
 

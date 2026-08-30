@@ -45,6 +45,47 @@ EXPECTED_FAMILIES = {
 }
 
 
+def test_post_v3_policy_and_historical_document_status_are_explicit() -> None:
+    agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
+    goal = (ROOT / "GOAL.md").read_text(encoding="utf-8")
+    assert "APM v1.0.0, v2.0.0, and v3.0.0 are released and immutable" in agents
+    assert "afecec29ea6ed0703ef441d4839fd40a238bef0b" in agents
+    assert "post-v3.0.0 public-readiness" in goal.lower()
+    assert "APM v3.0.0 is already released and immutable" in goal
+    assert "does not authorize publicization" in goal
+
+    historical_markers = {
+        "RELEASE_V3.md": "Historical record — frozen V3-N3 candidate contract",
+        "UNATTENDED_EXECUTION.md": "Historical record — preserved V3-N3 procedure",
+        "PROJECT_CONTEXT.md": "Historical record — v2 design rationale",
+        "RESEARCH_BASELINE.md": "Historical record — dated v2 research baseline",
+        "NOISE_N1.md": "Historical/frozen milestone contract",
+        "NOISE_N2.md": "Historical/frozen milestone contract",
+    }
+    for relative, marker in historical_markers.items():
+        assert marker in (ROOT / relative).read_text(encoding="utf-8")
+
+    assert (ROOT / "SECURITY.md").is_file()
+    assert (ROOT / "CONTRIBUTING.md").is_file()
+
+
+def test_psp_product_documentation_acknowledgement_is_preserved() -> None:
+    third_party = (ROOT / "THIRD_PARTY.md").read_text(encoding="utf-8")
+    normalized_third_party = " ".join(third_party.split())
+    for developer in (
+        "NXP Semiconductors",
+        "Delft University of Technology",
+        "Commissariat",
+    ):
+        assert developer in normalized_third_party
+    terms = (ROOT / "LICENSES/LicenseRef-Si2-PSP-103.8.2.txt").read_text(
+        encoding="utf-8"
+    )
+    normalized = " ".join(terms.split())
+    assert "right to modify, copy, and redistribute" in normalized
+    assert "acknowledge NXP Semiconductors" in normalized
+
+
 def load_toml(relative: str) -> dict:
     with (ROOT / relative).open("rb") as handle:
         return tomllib.load(handle)

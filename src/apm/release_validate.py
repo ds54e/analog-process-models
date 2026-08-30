@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: APM contributors
 # SPDX-License-Identifier: Apache-2.0
 
-"""Fail-closed repository and v3.0.0 release-candidate validation."""
+"""Fail-closed current repository and frozen v3.0.0 release validation."""
 
 from __future__ import annotations
 
@@ -62,12 +62,20 @@ IMPLEMENTED_GATE_IDS = frozenset(
 )
 REQUIRED_REVIEWED_FILES = frozenset(
     {
+        "AGENTS.md",
         "README.md",
         "CHANGELOG.md",
+        "CONTRIBUTING.md",
+        "DEVICE_FAMILY_MODEL.md",
+        "ENVIRONMENT.md",
         "GOAL.md",
         "RELEASE_V3.md",
+        "RESEARCH_BASELINE.md",
+        "PROJECT_CONTEXT.md",
+        "SECURITY.md",
         "STATUS.md",
         "THIRD_PARTY.md",
+        "UNATTENDED_EXECUTION.md",
         "NOISE_CHARACTERIZATION.md",
         "NOISE_N1.md",
         "NOISE_N2.md",
@@ -77,6 +85,8 @@ REQUIRED_REVIEWED_FILES = frozenset(
         "docs/native-variation.md",
         "docs/release-validation.md",
         "docs/spectre.md",
+        "validation/evidence/README.md",
+        "validation/release_gates.toml",
     }
 )
 TRACKED_FORBIDDEN_PARTS = {
@@ -570,15 +580,29 @@ def audit_claims(root: Path, contract: dict[str, Any]) -> dict[str, Any]:
     checks = {
         "manual_review_record_complete": review.get("schema") == "apm.release-review.v3"
         and review.get("status") == "complete",
-        "manual_review_decisions": review.get("spectre_real_tool_run") is False
+        "manual_review_decisions": review.get("release_state") == "released"
+        and review.get("v3_tag_object")
+        == "afecec29ea6ed0703ef441d4839fd40a238bef0b"
+        and review.get("v3_tag_commit")
+        == "995e0ce7cdd0c37ef9f3397008637f9d239c746e"
+        and review.get("github_release_url")
+        == "https://github.com/ds54e/analog-process-models/releases/tag/v3.0.0"
+        and review.get("spectre_real_tool_run") is False
         and review.get("foundry_or_silicon_correlation_claimed") is False
         and review.get("benchmark_physical_family_correlation_claimed") is False
         and review.get("process_noise_calibration_claimed") is False
         and review.get("universal_planar_finfet_width_claimed") is False
         and review.get("unsupported_noise_modes_claimed") is False
         and review.get("repository_visibility_changed") is False
-        and review.get("v3_tag_created") is False
-        and review.get("github_release_created") is False
+        and review.get("repository_visibility") == "private"
+        and review.get("publicization_performed") is False
+        and review.get("v3_tag_created") is True
+        and review.get("github_release_created") is True
+        and review.get("public_readiness_cleanup_complete") is True
+        and review.get("current_tree_sensitive_data_audit") == "pass"
+        and review.get("whole_history_secret_scan") == "pass"
+        and review.get("historical_proprietary_model_audit") == "pass"
+        and review.get("third_party_redistribution_audit") == "pass"
         and review.get("unresolved_claim_findings") == [],
         "manual_review_identity_and_time_present": bool(review.get("reviewer"))
         and bool(

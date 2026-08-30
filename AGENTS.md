@@ -1,258 +1,201 @@
 # AGENTS.md
 
-This file is mandatory repository policy for implementation agents.
+This file is mandatory repository policy for implementation and maintenance
+agents.
 
 ## Repository identity
 
 This repository is **Analog Process Models (APM)**:
 
-- repository: `https://github.com/ds54e/analog-process-models`
-- acronym: **APM = Analog Process Models**
+- repository: `https://github.com/ds54e/analog-process-models`;
+- acronym: **APM = Analog Process Models**.
 
-Within this repository, APM always means this project. Work in this existing repository. Do not create or substitute another authoritative repository. Do not change repository visibility. Do not force-push or rewrite published history.
+Within this repository, APM always means this project. Work in this existing
+repository; do not create or substitute another project authority.
 
-## Released baseline and current development line
+## Released baseline and current line
 
-APM v2.0.0 is released and immutable.
+APM v1.0.0, v2.0.0, and v3.0.0 are released and immutable.
 
-- released tag: `v2.0.0`
-- released commit: `3cc6cfea4932cc40f2d693784d0a569926cdf399`
-- post-release exact-tag requalification is recorded on `main` under `validation/evidence/v2_post_release_requalification.json`
+- v2.0.0 commit: `3cc6cfea4932cc40f2d693784d0a569926cdf399`;
+- v3.0.0 annotated-tag object:
+  `afecec29ea6ed0703ef441d4839fd40a238bef0b`;
+- v3.0.0 tagged commit:
+  `995e0ce7cdd0c37ef9f3397008637f9d239c746e`;
+- v3.0.0 exact-tag requalification: 18/18 required gates passed;
+- GitHub Release: `Analog Process Models v3.0.0`;
+- post-tag evidence:
+  `validation/evidence/v3_post_release_requalification.json`.
 
-Do not modify the v2 tag or reinterpret current v3 work as evidence that the v2 release was incomplete.
+Do not modify, move, recreate, or delete a released tag. Do not amend the
+tagged commits, rewrite published history, or force-push. Current `main` is the
+post-v3 development and public-maintenance line; it is not the v3.0.0 tag
+target.
 
-V3-N0, V3-N1, and V3-N2 are complete and exact-implementation-commit
-qualified. Current `main` is the V3-N3 v3.0.0 release-hardening line. The
-current goal is defined by `GOAL.md` and `RELEASE_V3.md`.
+The repository remains private pending a separate human decision. Never change
+repository visibility without explicit authorization for that exact action.
 
-## Mission
+## Current mission and instruction hierarchy
 
-Implement the current `GOAL.md` faithfully.
+Implement the current `GOAL.md` faithfully. For post-v3 work, preserve the
+released electrical/noise behavior and claim boundaries unless a later goal
+explicitly and deliberately changes them.
 
-For the current v3 phase, optimize for:
+Read before substantive work:
 
-- physically and semantically honest noise-model claims;
-- reproducible real-tool validation;
-- explicit parameter-level noise provenance;
-- machine-readable result semantics;
-- reuse of the validated v2 manifest-driven family/device architecture;
-- minimal disruption to the released v2 DC/Y/capacitance framework.
-
-The current goal explicitly authorizes transition of current runtime/package
-and release-candidate metadata to `3.0.0`. It does not authorize the final
-`v3.0.0` tag, a GitHub Release, or a repository-visibility change.
-
-## Required reading before substantive work
-
-Read completely, in this order:
-
-1. `AGENTS.md`
-2. `GOAL.md`
-3. `RELEASE_V3.md`
-4. `NOISE_CHARACTERIZATION.md`
-5. `NOISE_N1.md`
-6. `NOISE_N2.md`
-7. `DEVICE_FAMILY_MODEL.md`
-8. `RESULT_CONTRACT.md`
-9. `PROJECT_CONTEXT.md`
-10. `ENVIRONMENT.md`
-11. `RESEARCH_BASELINE.md`
-12. `UNATTENDED_EXECUTION.md`
-13. `README.md`
-14. `validation/release_gates.toml`
-15. `STATUS.md`
+1. `AGENTS.md`;
+2. `GOAL.md`;
+3. `README.md`;
+4. `STATUS.md`;
+5. the technical contract(s) relevant to the change;
+6. `THIRD_PARTY.md` and `CONTRIBUTING.md` when models, provenance, or shipped
+   assets are involved;
+7. `ENVIRONMENT.md` and the applicable validation documentation when real-tool
+   execution is involved.
 
 Authority on conflict:
 
 1. applicable safety/security requirements and explicit user instructions;
 2. `AGENTS.md`;
-3. `GOAL.md`;
-4. `RELEASE_V3.md` for V3-N3 release hardening;
-5. `NOISE_CHARACTERIZATION.md`, `NOISE_N1.md`, and `NOISE_N2.md` for the
-   preserved noise domain;
-6. `DEVICE_FAMILY_MODEL.md`;
-7. `UNATTENDED_EXECUTION.md`;
-8. `RESULT_CONTRACT.md` for the existing v2 result domain;
-9. `PROJECT_CONTEXT.md`;
-10. `ENVIRONMENT.md`;
-11. `RESEARCH_BASELINE.md`;
-12. `README.md`.
+3. the current `GOAL.md`;
+4. current preserved technical contracts, including
+   `DEVICE_FAMILY_MODEL.md`, `RESULT_CONTRACT.md`, and
+   `NOISE_CHARACTERIZATION.md`;
+5. current user and validation documentation.
 
-Do not resolve a material conflict by silently dropping the harder requirement. Record material departures and evidence in `STATUS.md`.
+`RELEASE_V3.md`, `UNATTENDED_EXECUTION.md`, `PROJECT_CONTEXT.md`,
+`RESEARCH_BASELINE.md`, `NOISE_N1.md`, and `NOISE_N2.md` are retained
+historical/frozen milestone records. They provide design rationale and
+reproducibility, but they are not current goals and do not prohibit or undo an
+already-completed release.
 
-## Reference environment and baseline reuse
+Do not resolve a material conflict by silently dropping the harder
+requirement. Record material departures and evidence in `STATUS.md`.
 
-Reuse the existing validated local development environment when present and valid:
+## Preserved architecture and result contracts
 
-- WSL2;
-- AlmaLinux/RHEL-compatible EL9 x86_64;
-- Python 3.9 baseline;
-- ngspice 47 with OSDI/predictor support;
-- project-local OpenVAF-ReLoaded;
-- native BSIM3 and BSIM4;
-- PSP103 OSDI;
-- BSIM-CMG 112.1.0 OSDI.
-
-Do not gratuitously rebuild ngspice/OpenVAF or rediscover solved bootstrap work. If the toolchain is missing, corrupted, or incompatible with the current work, repair/rebuild it reproducibly.
-
-For required noise `.noise` validation, use the normal Sparse solver path; do not use KLU as the required reference noise solver.
-
-The v2 release evidence remains historical release evidence. New v3 noise claims require new current evidence.
-
-## Stable v2 architecture boundary
-
-Preserve the released manifest-driven domain model:
+Preserve the manifest-driven domain model:
 
 `Technology -> Electrical Family -> Device`
 
-with orthogonal:
-
-- Operating Profile;
-- Backend Binding;
-- Variation;
-- Comparison Set.
-
-Do not reintroduce technology-specific normal-family loaders or collapse electrical family, voltage profile, gate stack, threshold class, backend, and usage labels into one type string.
+Operating Profile, Backend Binding, Variation, and Comparison Set remain
+orthogonal. Do not reintroduce technology-specific normal-family loaders or
+collapse electrical family, voltage profile, gate stack, threshold class,
+backend, and usage labels into one type string.
 
 Public geometry remains native:
 
 - planar devices: `w`, `l`;
-- FinFET devices: `l`, `nfin`.
+- FinFET devices: `l`, integer `nfin`.
 
-Do not invent a common effective width for FinFETs. Do not expose a fake universal compact-model parameter API.
+Do not invent a universal planar/FinFET effective width or expose a fake common
+compact-model parameter API. Preserve the released schemas unless a later goal
+requires a versioned change:
 
-The existing v2 characterization/result domain remains valid. Prefer a separate noise schema/domain, e.g. `apm.noise-characterization.v1`, instead of unnecessarily rewriting `apm.characterization.v2`.
+- `apm.characterization.v2`;
+- `apm.noise-characterization.v1`;
+- `apm.noise-comparison.v1`;
+- `apm.noise-fit.contiguous-regions@1.0.0`;
+- `apm.noise-acquisition.bounded-white-search@1.0.0`.
 
-## Noise characterization policy
+Canonical gm/gds remain terminal finite differences. Canonical capacitance
+remains derived from the raw complex terminal Y matrix. Preserve raw signed
+terminal quantities separately from positive-magnitude comparison quantities.
 
-Follow `NOISE_CHARACTERIZATION.md`.
+## Noise and model-fidelity policy
 
-Core rules:
+Released v3 stationary-noise results characterize existing compact-model
+predictions. They are not silicon/foundry calibration, reliability
+qualification, or a manufacturable-PDK claim.
 
-- simulator execution is not a calibration claim;
-- distinguish backend capability from model/noise-parameter fidelity;
-- preserve parameter-level effective-value provenance;
-- distinguish explicit model-card values from compact-model/backend defaults;
-- canonical cross-engine comparison uses external-terminal observables, not raw compact-model internal source names;
-- do not call APM-authored default-noise behavior silicon-correlated or process-calibrated;
-- do not tune APM350/APM022/APM016F process-noise coefficients merely to make spectra look plausible or to pass characterization/release gates;
-- preserve raw source breakdown as backend evidence without forcing false cross-engine source equivalence;
-- fail closed when a bias target, fit, parameter snapshot, or backend capability cannot be established.
+Preserve:
 
-The completed V3-N0 harness qualification remains required evidence before
-trusting MOS spectra, including analytic resistor noise, transparent current
-probing, OSDI white/flicker sources, and an analytic correlated-noise network.
+- the 1-ohm CCVS external drain-current probe and analytic harness evidence;
+- canonical `s_idrain_terminal_a2_per_hz` and
+  `s_vgate_equivalent_v2_per_hz` semantics;
+- actual complex external gate-to-drain transfer;
+- parameter-level effective noise provenance;
+- raw backend source names without false cross-engine equivalence;
+- fail-closed bias, acquisition, and fit semantics;
+- normal Sparse/no-KLU required `.noise` execution;
+- native planar-W and FinFET-NFIN comparison bases.
 
-## APM-authored family independence
+Do not infer calibration from successful simulator execution. Do not silently
+fill unavailable fit metrics or clip unreachable gm/Id requests. Do not tune or
+add process-noise coefficients for APM350, APM022, or APM016F without a later
+explicit calibration goal backed by defensible targets. Process-noise
+calibration is not implicitly authorized by maintenance work.
 
-APM022 and APM016F remain independently authored generic models.
+APM022 and APM016F remain independently authored generic models. Official
+PTM/PTM-MG parameter cards must not be copied, transcribed, interpolated,
+optimized against as a numeric fitting target, or used as numeric source
+material for their decks or variants.
 
-Official PTM/PTM-MG parameter cards must not be copied, transcribed, interpolated, optimized against as a numeric fitting target, or used as numeric source material for APM-authored decks/variants. Public literature/open models may be used to understand qualitative behavior or later generic behavior envelopes, subject to licensing/provenance rules.
+## Reference backend and Spectre boundary
 
-APM022 LVT/HVT remain threshold-isolated variants around SVT. APM016F LVT/HVT remain documented PHIG/workfunction-dominant variants around SVT.
+ngspice 47 remains the validated reference simulator. The documented reference
+environment is WSL2 with RHEL-compatible EL9 Linux on x86_64, using the
+project-local OpenVAF-Re-Loaded and pinned PSP103/BSIM-CMG sources. Keep normal
+build/run state on a Linux filesystem and below ignored project-local paths.
 
-Noise characterization of those variants must not be generalized into a claim that real foundry Vt options share the same noise coefficients.
+Spectre remains model-only **experimental/unverified**. Do not claim real
+Spectre parsing, simulation, or numerical equivalence without evidence from a
+real Spectre environment. Do not add Virtuoso/ADE/OA automation unless a later
+goal explicitly requires it.
 
-## Characterization and bias policy
+## Licensing, provenance, and public hygiene
 
-Existing canonical gm/gds remain terminal finite differences. Internal simulator OP quantities remain oracles unless an explicit contract says otherwise.
-
-For noise equal-inversion points, do not merely take the nearest old DC sweep row. Resolve the requested gm/Id target using existing DC data as a bracket, re-run/recompute the operating point and finite-difference gm/gds, and persist the achieved target/error diagnostics.
-
-Preserve raw signed terminal quantities separately from canonical magnitude/comparison quantities.
-
-For noise, preserve the actual complex gate-to-drain small-signal transfer used for input-referred results. Do not assume `gm` alone is the full transfer at high frequency.
-
-## Variation boundary
-
-Keep APM Benchmark Global/Local/All and upstream/native variation distinct.
-
-The v3.0.0 scope does not add noise-coefficient variation, noise mismatch, or
-benchmark noise-correlation models. Do not invent them from the existing v2
-Vth/drive benchmark variation.
-
-## Licensing and provenance
-
-License correctness remains mandatory.
-
-Before vendoring any new third-party asset:
+License correctness is mandatory. Before adding a third-party asset:
 
 1. identify the authoritative upstream source;
-2. pin the exact revision;
-3. inspect exact file-level licensing/redistribution terms;
-4. record source URL/revision/path/hash/modifications;
-5. preserve notices/license text;
+2. pin the exact revision and imported path;
+3. inspect exact file-level licensing and redistribution terms;
+4. preserve notices, acknowledgements, and license text;
+5. record source/output hashes and modifications;
 6. only then ship the asset.
 
-Do not infer file rights from a repository root license when model-specific terms may differ. Do not relicense third-party assets. If rights remain ambiguous, do not ship the file.
+Do not infer rights from a repository root license when file-specific terms may
+differ. Do not relicense third-party material. If rights are ambiguous, do not
+ship the file.
 
-Never commit proprietary PDK content, credentials, tokens, passwords, or user secrets.
+Never commit proprietary PDK/model content, private comparison/oracle decks,
+credentials, tokens, passwords, personal/private data, generated OSDI
+binaries, virtual environments, caches, or large simulator output. Keep those
+under ignored local paths where legitimate. Public-readiness work must inspect
+Git history as well as the current tree; do not rewrite history unless a real
+sensitive or redistribution-blocking artifact is found and separate human
+remediation is authorized.
 
-V3-N3 requires no new third-party model assets; use the already
-vendored/pinned engines and cards unless a release-blocking defect establishes
-a narrowly documented need.
+## Scope discipline
 
-## Spectre boundary
+APM is not a manufacturable PDK. Unless a later goal explicitly expands scope,
+do not add layout/PCells/DRC/LVS/PEX, standard cells, reliability/signoff
+claims, noise Monte Carlo, RTS/RTN, transient noise, PSS/PNoise, oscillator
+phase noise, full terminal noise-correlation matrices, real Spectre claims, or
+Virtuoso automation.
 
-ngspice remains the validated reference backend.
+Keep the repository small and explicit. Avoid speculative plugin systems,
+generic factories, and premature abstraction. Prefer straightforward Python,
+TOML, SPICE/Spectre model files, and small shell helpers.
 
-Spectre remains model-only **experimental/unverified** unless a real Spectre
-environment actually validates it. The v3 stationary-noise domain does not
-promote Spectre to a validated noise backend.
+## Tests, evidence, and Git discipline
 
-Do not add SKILL, CDF, symbols, OA libraries, ADE/Maestro state, OCEAN, or Virtuoso automation unless a later explicit goal requires them.
+Prefer property/regression/analytic-reference tests over fragile exact
+snapshots. Do not weaken legitimate tests to match broken behavior. Missing,
+skipped, static-only, stale, or unavailable real-tool evidence is not a pass.
 
-## Scope exclusions for the current v3 phase
+Write compact auditable summaries under `validation/evidence/`; keep raw
+simulator data ignored and reproducible. `apm validate` is the normal
+current-tree validation path. The frozen `apm validate --release` contract is a
+maintainer/release-engineering workflow and must not be reinterpreted as an
+ordinary post-release user requirement.
 
-Unless `GOAL.md` explicitly expands them, the current phase excludes:
+High autonomy is authorized for in-scope research, implementation, local
+toolchain repair, tests, documentation, coherent commits, and normal pushes.
+Do not force-push, rewrite history, change repository visibility/security
+settings, or alter released tags/releases.
 
-- layout/PCells/DRC/LVS/PEX;
-- standard cells;
-- new RF/layout/isolation device families;
-- transient noise and RTS;
-- PSS/PNoise and oscillator phase noise;
-- RF noise figure/NFmin as a required metric;
-- a canonical full four-terminal noise-correlation matrix;
-- noise variation/mismatch/correlation models;
-- APM016F thick-oxide/high-voltage I/O;
-- native Windows/macOS reference support;
-- real Spectre validation;
-- Virtuoso automation.
-
-Do not expand scope because an upstream PDK/model happens to support additional effects.
-
-## Tests and evidence
-
-Prefer property/regression/analytic-reference tests over fragile exact snapshots.
-
-Do not weaken legitimate tests to match broken behavior.
-
-Every validated v3 stationary-noise or release claim must have compact
-auditable evidence under `validation/evidence/` or another explicitly
-documented current evidence path. Missing evidence is not pass.
-
-Audit simulator logs for critical diagnostics, unsupported parameters/features, convergence failures, or silent fallback behavior.
-
-Do not replace failed fit/bias/capability results with clipped or fabricated values. Persist explicit failure status.
-
-The v2 tag preserves the historical v2 gate contract. For V3-N3,
-`validation/release_gates.toml` becomes the active current-main v3 release
-contract. Do not edit historical v1/v2 tracked evidence to pretend it was v3
-evidence.
-
-## Git and autonomy
-
-High autonomy is authorized for in-scope research, local dependency installation/repair, implementation, refactoring, simulations, tests, documentation, coherent commits, and pushes.
-
-Do not force-push. Do not change repository visibility/security settings. Do not move or rewrite released tags.
-
-Stop/escalate only for a genuine blocker such as unresolved redistribution rights, unavailable required credentials, or a real contradiction in the normative current contract.
-
-## Completion for the current goal
-
-The current goal is complete only when every item in `GOAL.md` and
-`RELEASE_V3.md` is evidenced, including a coherent immutable v3.0.0 candidate
-commit, genuine exact-commit fresh-clone source/bootstrap qualification, and a
-separate compact evidence/status commit. Historical release tags/evidence must
-remain unchanged, and the final v3 tag, GitHub Release, and visibility change
-must remain unperformed.
+Stop and report a genuine credential, proprietary model, ambiguous
+redistribution right, personal/private history artifact, or any issue that
+would require rewriting released history. Do not hide such a finding by
+deleting only the current-tree copy.

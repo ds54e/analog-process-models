@@ -1,6 +1,8 @@
 # Device Family Domain Model
 
-This file is normative for APM v2 unless `AGENTS.md` or `GOAL.md` says otherwise.
+This file defined the APM v2 domain model and remains the preserved electrical
+taxonomy in released v3.0.0 unless current `AGENTS.md` or a later explicit goal
+introduces a versioned change.
 
 Its purpose is to prevent device taxonomy, operating conditions, simulator bindings, and variation semantics from becoming entangled as APM expands beyond one representative MOS pair per technology.
 

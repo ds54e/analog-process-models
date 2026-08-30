@@ -1,105 +1,80 @@
-# v3.0.0 release-candidate validation
+# APM v3.0.0 release validation and reproducibility
 
-APM 3.0.0 has one active machine-readable release contract:
-`validation/release_gates.toml`. Its 18 required gates cover:
+APM v3.0.0 is released and immutable.
 
-- the exact WSL2 + RHEL-compatible EL9 x86_64 runtime, ngspice 47, project-
-  pinned OpenVAF, and native/OSDI compact-model execution;
-- normal Sparse/no-KLU required noise execution;
-- manifest-driven five-technology/13-family/26-device discovery and native
-  planar/FinFET geometry;
-- the complete existing v2 electrical characterization, comparison, benchmark,
-  passive, and APM130 upstream-variation baseline;
-- V3-N0 analytic harness/four-engine qualification;
-- the frozen V3-N1 acquisition/fit method, synthetic cases, low-VDS, and
-  correlation diagnostics;
-- fresh V3-N2 catalog-wide temperature/inversion/length/NFIN datasets,
-  comparisons, explicit statuses, raw spectra/provenance, and strict resume;
-- model-card immutability and honest model/default claim boundaries;
-- Spectre's model-only experimental/unverified boundary;
-- exact licensing/provenance, REUSE, self-contained distribution, public-
-  repository hygiene, 3.0.0 metadata, exact clone, and claim review.
+| Item | Released identity/status |
+| --- | --- |
+| Qualified candidate | `995e0ce7cdd0c37ef9f3397008637f9d239c746e` |
+| Annotated tag | `v3.0.0` |
+| Tag object | `afecec29ea6ed0703ef441d4839fd40a238bef0b` |
+| Peeled tag commit | `995e0ce7cdd0c37ef9f3397008637f9d239c746e` |
+| Candidate qualification | 18/18 PASS |
+| Exact-tag post-release qualification | 18/18 PASS |
+| GitHub Release | `Analog Process Models v3.0.0` |
+| Post-tag evidence | `validation/evidence/v3_post_release_requalification.json` |
 
-Historical v1/v2 evidence remains immutable and useful context, but never
-satisfies a v3 gate.
+The later evidence/status commits on `main` are not release tag targets. The
+tagged candidate, tag object, and GitHub Release are not modified by normal
+post-release maintenance.
 
-## Fail-closed evaluator
+## Current reproducibility
 
-`apm validate --release` loads required gate IDs in declaration order and
-refuses to run when the implemented set differs. A required gate passes only
-when:
-
-1. status is exactly `pass`;
-2. evidence is nonempty;
-3. every evidence path exists;
-4. the supporting current-run component passed; and
-5. its semantic observations satisfy the frozen contract.
-
-Missing, skipped, blocked, failed, unimplemented, stale, evidence-free, or
-hash-mismatched required gates make the command exit nonzero. Independent
-components continue after many failures so the report remains diagnostic.
-
-The final report uses `apm.release-validation.v3` and binds the target, exact
-Git commit, gate-contract hash, component report paths/hashes/durations, every
-ordered gate result, evidence validity, and required/pass counts.
-
-## Repository validation
-
-Without `--release`, `apm validate` writes
-`apm.repository-validation.v3` and runs:
-
-- the full Pytest suite;
-- Ruff and Python import/compile coverage through the tests;
-- REUSE/SPDX;
-- exact provenance, notices, independent-authorship, and redistribution
-  audits;
-- manifest/catalog/geometry and v1-runtime-migration audits;
-- tracked source/include closure and generated-output checks;
-- credential, secret-signature, inappropriate private-path, editor/temp,
-  oversized-artifact, and ignore-policy audits;
-- 3.0.0 package/runtime/CLI/changelog/placeholder checks;
-- hash-bound public-claim review; and
-- deterministic Spectre structural checking with no real-tool claim.
-
-Release mode repeats this static layer from the exact candidate and then runs
-every required real-tool component.
-
-## Pre-bootstrap clean-clone attestation
-
-The clean-clone gate cannot be satisfied by deleting outputs from a development
-checkout. From a genuinely new HTTPS clone, immediately after selecting the
-candidate commit and before any setup command, run:
-
-```console
-python3 tools/attest_clean_clone.py
-```
-
-The standard-library-only command writes ignored
-`.apm/clean-clone-attestation.json` with schema
-`apm.clean-clone-attestation.v3`. It verifies and records:
-
-- exact origin `https://github.com/ds54e/analog-process-models`;
-- initially clean tracked/untracked worktree;
-- exact commit and branch/detached state;
-- absence of `.apm`, `.venv`, model OSDI binaries, caches, build/results, and
-  other project-local generated state before attestation;
-- absence of a `v3.0.0` tag;
-- WSL2 kernel, RHEL-compatible EL9, x86_64, and Linux-filesystem checkout
-  outside `/mnt/c`, with observed filesystem/mount identity.
-
-Release validation later requires the same checkout path, origin, exact commit,
-qualifying platform, clean worktree, and continued absence of the final tag.
-Copying the attestation or committing a later change invalidates it.
-
-## Reproducible exact-candidate sequence
-
-The coherent candidate must already be reachable from the authoritative origin
-so the qualification is a real network clone rather than a copied local tree:
+For ordinary installation and repository checks, bootstrap the project-local
+toolchain and run doctor plus normal validation:
 
 ```console
 git clone https://github.com/ds54e/analog-process-models.git
 cd analog-process-models
-git checkout --detach <exact-candidate-sha>
+tools/bootstrap-el9.sh
+tools/setup-python.sh
+.venv/bin/apm build-models
+.venv/bin/apm doctor
+.venv/bin/apm validate --output .apm/results/validation
+```
+
+`apm doctor` executes native BSIM3/BSIM4 and PSP103/BSIM-CMG OSDI smoke tests.
+Normal `apm validate` runs the current Pytest, Ruff/import, REUSE, exact
+provenance, catalog/migration, distribution/privacy, claim-review, and Spectre
+structural checks. Generated output remains under ignored `.apm/` paths.
+
+The validated reference host is WSL2 with RHEL-compatible EL9 Linux on x86_64,
+using ngspice 47 and the project-pinned OpenVAF-Re-Loaded. APM does not depend
+on GUI state or user-global `~/.spiceinit` configuration.
+
+## Maintainer release-engineering workflow
+
+`apm validate --release` implements the frozen 18-gate v3.0.0 release contract
+in `validation/release_gates.toml`. It is a maintainer/release-engineering flow,
+not a command ordinary users must run. Its complete execution includes:
+
+- exact WSL2/EL9/x86_64 clean-clone identity and source-built tools;
+- native BSIM3/BSIM4 and PSP103/BSIM-CMG OSDI execution;
+- normal Sparse and no required KLU `.noise` path;
+- five technologies, 13 electrical families, and 26 public devices;
+- the complete v2 electrical, comparison, benchmark/passive, and APM130
+  upstream-variation baseline;
+- the analytic noise harness, frozen fit/acquisition method, diagnostics, and
+  all eight synthetic fit cases;
+- a fresh 290-request catalog run covering 376 logical memberships, followed
+  by strict 290/290 reuse and stale/tampered/incomplete rejection;
+- model-card immutability, provenance/licensing, distribution hygiene, release
+  metadata, and public-claim review.
+
+The candidate-era contract intentionally required the final tag to be absent
+during qualification. It is preserved as release evidence, not silently
+redefined for post-release maintenance. Normal current-main documentation-only
+changes should use `apm validate`; they do not need to manufacture a pre-tag
+state or weaken the frozen release gate.
+
+## Historical v3.0.0 candidate qualification flow
+
+Before the release tag existed, the coherent candidate was pushed and checked
+out detached from a genuine HTTPS clone:
+
+```console
+git clone https://github.com/ds54e/analog-process-models.git
+cd analog-process-models
+git checkout --detach 995e0ce7cdd0c37ef9f3397008637f9d239c746e
 python3 tools/attest_clean_clone.py
 tools/bootstrap-el9.sh
 tools/setup-python.sh
@@ -110,65 +85,69 @@ tools/setup-python.sh
   --output .apm/results/v3-release-candidate
 ```
 
-Bootstrap builds or verifies project-local ngspice 47, OpenVAF-Re-Loaded,
-PSP103 QS/NQS, and BSIM-CMG 112.1.0 OSDI artifacts from documented sources.
-No `.apm`, `.venv`, OSDI artifact, simulator result, or cache may be copied
-from another checkout.
+The standard-library-only pre-bootstrap attestation required the authoritative
+HTTPS origin, exact detached commit, clean worktree, empty project-generated
+state, WSL2/EL9/x86_64/Linux-filesystem identity, and absence of the future
+`v3.0.0` tag. Bootstrap then created `.apm`, `.venv`, ngspice 47,
+OpenVAF-Re-Loaded, PSP103 QS/NQS, and BSIM-CMG 112.1.0 OSDI artifacts from
+documented sources.
 
-## Real-tool components
+The candidate qualification is recorded at
+`validation/evidence/v3_release_candidate.json`. That evidence identified the
+candidate as the future tag target; its later evidence commit was never a tag
+target.
 
-One release execution produces and hash-links:
+## Exact-tag post-release qualification
 
-- initial and final exact clean-clone verification;
-- repository static/regression report;
-- doctor report for native BSIM3/BSIM4 and PSP103/BSIM-CMG OSDI;
-- complete 13-family/26-device electrical characterization;
-- five required electrical comparison jobs;
-- Benchmark Global/Local/All, fixed corners, Rbench/Cbench, adapter/replay, and
-  statistical validation;
-- independent APM130 LV/HV upstream corner/process/mismatch validation;
-- a fresh 290-unique-request V3-N2 catalog execution from empty output, whose
-  nested regression executes the complete V3-N1 method and V3-N0 harness;
-- a second unchanged V3-N2 invocation that must safely reuse all 290 physical
-  results and freshly requalify strict mismatch/tamper/incomplete/stale
-  rejection.
+After the annotated tag was pushed, a second fresh authoritative HTTPS clone
+independently established the tag object and peeled commit, checked out the tag
+detached, attested empty generated state, rebuilt the complete toolchain, and
+reran all 18 gates. The release report SHA-256 was:
 
-The first catalog execution cannot be satisfied by reuse. Valid
-`target_not_reachable` results and fail-closed null fit metrics remain valid
-scientific outcomes; `simulation_failed`, silent clipping, missing request
-states, or forced fit values fail the release contract.
+`8c506183ad09e655021349430ebf57cb82f7ba815b61c2c73118066096dc94af`
 
-## Public claims and model immutability
+The post-tag evidence whole-file SHA-256 was:
 
-`validation/release_review.toml` records decisions and SHA-256 hashes for all
-reviewed current user-facing/release/noise documents. Editing reviewed content
-invalidates the claim gate until the review is refreshed.
+`7001b976642ee1296e3bdea18af86381eddc56d4363f99bf2b32409049b3814b`
 
-The review and automated audit require:
+### Frozen-validator compatibility detail
 
-- no silicon/foundry noise-accuracy claim for APM-authored models;
-- no new process-noise calibration/tuning;
-- no unsupported noise Monte Carlo, RTS/RTN, transient-noise, PSS/PNoise,
-  oscillator phase-noise, or full terminal-correlation claim;
-- no universal planar/FinFET effective-width claim;
-- no reliability/manufacturing/signoff claim;
-- no real Spectre parsing/simulation claim;
+The immutable candidate-era clean-clone validator expected no local
+`v3.0.0` ref. The post-tag run therefore first proved the authoritative
+annotated tag object and peeled commit and checked out that exact commit
+detached. It then temporarily removed **only the disposable fresh clone's local
+tag ref** while detached `HEAD` stayed at the candidate. The authoritative
+remote tag, tag object, candidate commit, and release were never modified.
+
+After the unchanged 18-gate run, the fresh clone fetched the tag again and
+reverified the same object and peeled commit. This compatibility detail is
+explicit in `validation/evidence/v3_post_release_requalification.json`; it is
+not hidden, and it does not weaken or reinterpret the frozen validator.
+
+## Fail-closed evidence semantics
+
+The release evaluator loads the required gate IDs in declaration order. A gate
+passes only with `status = pass`, nonempty existing evidence, a passing
+current-run component, and direct semantic observations. Missing, skipped,
+blocked, failed, stale, evidence-free, or hash-mismatched gates fail the
+command.
+
+Tracked milestone summaries do not substitute for current real-tool release
+execution. Conversely, scientifically valid `target_not_reachable` results and
+null fit metrics remain honest outcomes; silent clipping, fabricated fit
+values, or `simulation_failed` catalog jobs fail the release contract.
+
+`validation/release_review.toml` hash-binds reviewed current user-facing and
+technical documents. Post-release documentation changes must refresh that
+review and keep these boundaries explicit:
+
+- no silicon/foundry calibration claim for APM-authored models;
+- no process-noise calibration, noise Monte Carlo, transient noise, RTS/RTN,
+  PSS/PNoise, oscillator phase noise, or full terminal-correlation claim;
+- no universal planar/FinFET effective-width conversion;
+- no reliability, manufacturing, or signoff claim;
 - no physical Benchmark Global family-correlation claim;
-- APM350/APM022/APM016F production cards byte-identical to `v2.0.0`.
+- no real Spectre parsing/simulation claim.
 
-## Candidate/evidence boundary
-
-Once development regressions pass, create one coherent candidate commit. That
-exact commit is the future `v3.0.0` tag target and must not be amended after
-qualification starts.
-
-After its fresh clone reports `status = "pass"`, 18 required gates, 18 passed
-required gates, and valid evidence for every gate, add only compact evidence
-and final status/review changes on `main`, preferably at
-`validation/evidence/v3_release_candidate.json`. The later evidence commit is
-not the future tag target.
-
-V3-N3 does not authorize a tag, GitHub Release, or visibility change. The next
-human action is explicit review/authorization to create immutable tag
-`v3.0.0` at the already-qualified candidate commit. Post-tag requalification,
-GitHub Release creation, and any publication/visibility decision are separate.
+Current release state and the public-readiness result are summarized in
+`STATUS.md`. Any repository-visibility change remains a separate human action.

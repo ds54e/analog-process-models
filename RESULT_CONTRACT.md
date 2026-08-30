@@ -1,8 +1,10 @@
 # APM v2 Result Contract
 
-This file defines the stable semantic minimum for APM v2 persisted characterization results.
+This file defines the stable semantic minimum for the
+`apm.characterization.v2` results preserved by APM v3.0.0.
 
-If this file conflicts with `AGENTS.md`, `GOAL.md`, or `DEVICE_FAMILY_MODEL.md`, those files win.
+If this file conflicts with current `AGENTS.md`, an explicit later goal, or
+`DEVICE_FAMILY_MODEL.md`, those files win.
 
 ## 1. Principles
 

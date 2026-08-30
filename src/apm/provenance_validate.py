@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: APM contributors
 # SPDX-License-Identifier: Apache-2.0
 
-"""Fail-closed APM v2 model provenance and distribution audit."""
+"""Fail-closed APM model provenance and distribution audit."""
 
 from __future__ import annotations
 
@@ -203,6 +203,100 @@ def _audit_redistribution(root: Path) -> dict[str, Any]:
         apm130["source"].get("engine_license") == "LicenseRef-Si2-PSP-103.8.2",
         "apm130: PSP engine license identity drifted",
     )
+    psp_terms = (
+        root / "LICENSES/LicenseRef-Si2-PSP-103.8.2.txt"
+    ).read_text(encoding="utf-8")
+    psp_release_notes = (
+        root / "models/apm130/vendor/psp103/releasenotesPSP103.8.2.txt"
+    ).read_text(encoding="utf-8")
+    normalized_psp_terms = " ".join(psp_terms.split())
+    normalized_psp_release_notes = " ".join(psp_release_notes.split())
+    for required in (
+        "right to modify, copy, and redistribute",
+        "acknowledge NXP",
+        "copyright notice, disclaimer, and list of conditions",
+    ):
+        _require(
+            required in normalized_psp_terms
+            and required in normalized_psp_release_notes,
+            f"apm130: PSP redistribution condition is missing: {required}",
+        )
+    third_party = (root / "THIRD_PARTY.md").read_text(encoding="utf-8")
+    normalized_third_party = " ".join(third_party.split())
+    for developer in (
+        "NXP Semiconductors",
+        "Delft University of Technology",
+        "Commissariat",
+    ):
+        _require(
+            developer in normalized_third_party,
+            f"THIRD_PARTY.md is missing the required PSP acknowledgement: {developer}",
+        )
+    ihp_imported = {
+        path
+        for path in apm130["source"]["imported_files"]
+        if path.startswith("vendor/ihp-sg13g2-models/")
+    }
+    _require(bool(ihp_imported), "apm130: no pinned IHP model cards are declared")
+    for relative in ihp_imported:
+        text = (root / "models/apm130" / relative).read_text(
+            encoding="utf-8", errors="replace"
+        )
+        _require(
+            "Apache License, Version 2.0" in text,
+            f"apm130: IHP file lacks its Apache-2.0 header: {relative}",
+        )
+    details["apm130"].update(
+        {
+            "psp_external_redistribution_terms_preserved": True,
+            "psp_product_documentation_acknowledgement_present": True,
+            "ihp_apache_header_file_count": len(ihp_imported),
+        }
+    )
+
+    apm045_root = root / "models/apm045"
+    apm045 = _load_toml(apm045_root / "provenance.toml")
+    apm045_imported = set(apm045["source"]["imported_files"])
+    _require(
+        not any(
+            "svrf" in path.lower() or "eula" in path.lower()
+            for path in apm045_imported
+        ),
+        "apm045: an SVRF/EULA path entered the shipped inventory",
+    )
+    freepdk_readme = (
+        apm045_root / "vendor/freepdk45/UPSTREAM-README.txt"
+    ).read_text(encoding="utf-8")
+    _require(
+        "SVRF files removed" in freepdk_readme
+        and "All files are licensed under the Apache License" in freepdk_readme,
+        "apm045: open-source-clean mirror boundary is not preserved",
+    )
+    details["apm045"].update(
+        {
+            "open_source_clean_mirror_boundary_preserved": True,
+            "svrf_or_eula_paths_shipped": [],
+        }
+    )
+
+    bsim_root = root / "models/apm016f/vendor/bsim-cmg-112.1.0"
+    bsim_license = (bsim_root / "LICENSE.txt").read_text(encoding="utf-8")
+    bsim_notice = (bsim_root / "NOTICE.txt").read_text(encoding="utf-8")
+    _require(
+        "Educational Community License, Version 2.0" in bsim_license,
+        "apm016f: BSIM-CMG ECL-2.0 license text is missing",
+    )
+    _require(
+        "Silicon Integration Initiative" in bsim_notice,
+        "apm016f: BSIM-CMG notice text is missing",
+    )
+    details["apm016f"].update(
+        {
+            "ecl_2_0_license_preserved": True,
+            "upstream_notice_preserved": True,
+        }
+    )
+
     reuse_text = (root / "REUSE.toml").read_text(encoding="utf-8")
     for required in (
         "models/apm130/vendor/psp103/**",

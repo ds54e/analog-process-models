@@ -1,6 +1,13 @@
 # Project Context and Design Rationale — APM v2
 
-This file records why the v2 contract looks the way it does. It is informative; `AGENTS.md`, `GOAL.md`, and `DEVICE_FAMILY_MODEL.md` are normative on conflict.
+> **Historical record — v2 design rationale.** This document describes the
+> architecture decisions made for v2. APM v3.0.0 has since been released. The
+> file is retained for rationale and reproducibility and is not current release
+> status or an active implementation goal. See `README.md`, `STATUS.md`, and
+> `AGENTS.md` for the current state.
+
+This file records why the v2 contract looks the way it does. It is informative;
+current policy and preserved technical contracts win on conflict.
 
 ## 1. v1 outcome and why v2 exists
 
@@ -19,7 +26,10 @@ v2 therefore changes the object of study from only **technology scaling** to bot
 
 ## 2. Why the redesign is breaking rather than compatibility-preserving
 
-The repository has not been publicly adopted as a stable compatibility ecosystem. Preserving v1 aliases/schemas would make implementation more complex without real user benefit.
+At the time of the v2 redesign, the repository had not been publicly adopted
+as a stable compatibility ecosystem. Preserving v1 aliases/schemas would have
+made implementation more complex without real user benefit. This is a dated
+design premise, not a current adoption or visibility claim.
 
 The v1 tag already preserves the complete validated historical release.
 

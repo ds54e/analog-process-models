@@ -9,16 +9,19 @@ Historical `m0-*.md` through `m10-*.md` files document v1.0.0 only. They do
 not satisfy a v2 or v3 gate. Historical v2 release evidence uses a `v2_`
 prefix.
 
-Post-v2 development milestones use a `v3_` prefix. V3-N0/V3-N1/V3-N2 noise
-summaries establish only the stated real-tool characterization, method, and
-catalog/comparison capability; they are not v3 release attestations and do not
-amend the immutable v2 release evidence. The summaries are
+Post-v2 development milestones use a `v3_` prefix. The frozen V3-N0/V3-N1/V3-N2
+noise summaries establish the stated real-tool characterization, method, and
+catalog/comparison capability behind released v3.0.0. They are development
+history rather than standalone release attestations and do not amend immutable
+v1/v2 evidence. The summaries are
 `v3_n0_noise_spike.json`, `v3_n1_noise_method.json`, and
 `v3_n2_noise_catalog.json`.
 
-V3-N3 exact-candidate evidence is recorded separately as
-`v3_release_candidate.json` only after the immutable candidate future tag
-target has passed the genuine fresh-clone source/bootstrap release flow.
+V3-N3 exact-candidate evidence is `v3_release_candidate.json`. The annotated
+tag now exists at that exact candidate. Exact-tag post-release evidence is
+`v3_post_release_requalification.json`; it records the independent fresh-clone
+18/18 result before the GitHub Release was created. Post-v3 public-readiness
+maintenance is recorded separately in `public_readiness_v3.json`.
 
 ## Status vocabulary
 
@@ -99,12 +102,13 @@ Static audits cover every family binding, public name, benchmark
 Global/Local/All structure, deterministic generation, and prohibited Virtuoso
 scope. They do not establish parse validity or numerical conformance.
 
-## Clean-clone evidence
+## Released clean-clone evidence
 
-The authoritative v3 candidate evidence is produced by
-`apm validate --release --output DIR` from an exact-commit fresh clone after
-`tools/attest_clean_clone.py`. The report must show 18/18 required gates,
-nonempty existing evidence for each gate, and status `pass`. A development
-checkout or historical v1/v2 clean clone cannot satisfy that gate. The release
-run must execute the complete N2 catalog from empty output before its strict
-all-reuse resume qualification.
+The v3 candidate evidence was produced by `apm validate --release --output
+DIR` from an exact-commit fresh clone after `tools/attest_clean_clone.py`. It
+shows 18/18 required gates, nonempty existing evidence for each gate, and
+status `pass`. The exact annotated tag was then independently requalified from
+a second fresh HTTPS clone with the complete catalog executed from empty output
+before strict all-reuse resume qualification. See
+`docs/release-validation.md` for the current reproducibility path and the
+historical tag-absence compatibility detail.

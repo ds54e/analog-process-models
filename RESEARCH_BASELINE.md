@@ -1,6 +1,14 @@
 # Upstream Research Baseline for APM v2
 
-This file records researched facts that seed v2 implementation. It is dated guidance, not immutable policy. Re-check authoritative upstream sources before pinning, vendoring, freezing a release claim, or deriving a generic target.
+> **Historical record — dated v2 research baseline.** This document records
+> research used to implement v2. The listed implementation questions were
+> resolved before v2.0.0 and the resulting architecture is preserved by
+> v3.0.0. This file is not current status or an active TODO list. See
+> `README.md`, `STATUS.md`, and the provenance manifests for current facts.
+
+This file records researched facts that seeded v2 implementation. It is dated
+guidance, not immutable policy. Re-check authoritative upstream sources before
+new pinning, vendoring, or release claims.
 
 Baseline date: **2026-08-30**
 
@@ -218,9 +226,12 @@ When a v2 fact matters to a release claim:
 6. record final decision in provenance/status/evidence;
 7. never treat absence of public evidence as proof of a hidden/proprietary property.
 
-## 11. Deliberately unresolved implementation research
+## 11. Historical v2 implementation questions (resolved for v2.0.0)
 
-The implementation agent must resolve with evidence before v2 release:
+The v2 implementation was required to resolve the following with evidence
+before release. Their outcomes are recorded in the v2 tag, provenance files,
+and validation evidence; this list is retained to show the original research
+boundary:
 
 - exact FreePDK45 VTL/VTH/THKOX imported file set and file-level audit;
 - THKOX reference operating profile/VDD;

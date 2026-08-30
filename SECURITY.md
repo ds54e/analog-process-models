@@ -1,0 +1,36 @@
+# Security policy
+
+## Supported release
+
+Security and provenance maintenance targets the latest released line,
+currently APM v3.0.0 and post-release `main`. Older immutable release tags are
+retained for reproducibility; fixes are normally made on `main` rather than by
+moving a released tag.
+
+## Reporting privately
+
+For a security vulnerability, accidentally exposed credential, or a
+licensing/provenance concern that should not initially be public, use GitHub's
+**Report a vulnerability** action on the repository Security tab when that
+private-vulnerability-reporting option is available.
+
+GitHub documents [Private Vulnerability Reporting](https://docs.github.com/en/code-security/how-tos/report-and-fix-vulnerabilities/configure-vulnerability-reporting)
+for public repositories, so it is not currently exposed for this private
+repository. If the private reporting action is unavailable, open a minimal
+GitHub issue asking the maintainers to establish a private channel.
+Do not include exploit details, credentials, proprietary model content,
+personal information, or other sensitive evidence in that public issue.
+
+If a credential belongs to you, revoke or rotate it immediately; reporting it
+to this project is not a substitute for revocation.
+
+## What to include
+
+Once a private channel exists, provide the affected version/commit and path,
+the impact, minimal reproduction steps, and any suggested remediation. For a
+licensing concern, include the upstream source, exact revision/file, and the
+specific redistribution or notice issue.
+
+Please allow maintainers time to verify and coordinate a fix before public
+disclosure. This policy does not create a warranty, support SLA, or security
+guarantee.

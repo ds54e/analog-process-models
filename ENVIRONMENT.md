@@ -1,8 +1,13 @@
-# APM v3 Reference and Release-Candidate Environment
+# APM v3 Reference Environment and Release Record
 
-This file records the validated continuation and exact-clone environment for
-the v3.0.0 candidate. V3-N3 begins after successful v1/v2 releases and
-V3-N0/N1/N2 qualification in the same WSL2/AlmaLinux workspace.
+APM v3.0.0 is released. This file records the reference environment used for
+development, exact-candidate qualification, and exact-tag post-release
+requalification. It is current environment guidance plus historical release
+context; it is not an active candidate checklist.
+
+The annotated `v3.0.0` tag peels to
+`995e0ce7cdd0c37ef9f3397008637f9d239c746e`, and exact-tag qualification passed
+18/18 on the documented WSL2/AlmaLinux reference environment.
 
 ## Validated v1 baseline
 
@@ -22,10 +27,10 @@ The v1 release evidence established a working direct environment with:
 
 See the v1 tag and historical evidence for exact commands/hashes.
 
-## Development continuation expectation
+## Post-release development continuation
 
-The current implementation session may continue in the same repository and
-environment after V3-N2.
+Post-release development may continue in the same repository and environment
+when the project-local toolchain remains valid.
 
 Before installing/building anything:
 
@@ -35,7 +40,8 @@ Before installing/building anything:
 4. run the existing doctor/smoke path if practical;
 5. reuse valid local toolchain state.
 
-Do **not** treat v2 as a bare-machine M0 unless the existing toolchain is actually absent/broken/incompatible.
+Do **not** treat maintenance work as a bare-machine bootstrap unless the
+existing toolchain is actually absent, broken, or incompatible.
 
 ## Reuse policy
 
@@ -52,20 +58,21 @@ When code/model bindings change, rebuild only affected generated artifacts as re
 
 If an existing artifact's source/binding/revision changes, do not assume its v1 binary remains valid; rebuild and record the new dependency chain.
 
-## Final v3 release-candidate boundary
+## Historical v3 release qualification boundary
 
-Local reuse accelerates development but does not satisfy the v3 clean-clone
+Local reuse accelerated development but did not satisfy the v3 clean-clone
 release gate.
 
-Before V3-N3 completion, the exact immutable candidate commit must prove the
-documented source bootstrap/build/doctor/test/electrical/noise/release-
-validation flow from a genuine HTTPS clone on WSL2 + RHEL-compatible EL9
-x86_64. The first release N2 catalog run must be fresh; strict resume follows
-only after it.
+Before V3-N3 completion, the exact immutable candidate commit was required to
+prove the documented source bootstrap/build/doctor/test/electrical/noise/
+release-validation flow from a genuine HTTPS clone on WSL2 + RHEL-compatible
+EL9 x86_64. The first release N2 catalog run was fresh; strict resume followed
+only after it. Exact-tag post-release requalification independently repeated
+that flow; see `validation/evidence/v3_post_release_requalification.json`.
 
-The final clean clone may use documented external network downloads/cache
-mechanisms allowed by the release flow, but it must not depend on untracked
-files copied from the development checkout.
+The release clone used documented external network downloads/cache mechanisms
+allowed by the release flow and did not depend on untracked files copied from
+the development checkout.
 
 ## Platform policy
 
@@ -77,13 +84,15 @@ Do not depend on:
 - user-global `~/.spiceinit` state;
 - GUI state;
 - shell-startup-file modification as required setup;
-- nested container/VM substitution for the required final WSL2/EL9 gate.
+- nested container/VM substitution for any future required WSL2/EL9 gate.
 
-Containers/CI may supplement validation but do not replace the final reference environment.
+Containers/CI may supplement validation but do not replace an explicitly
+required reference-environment qualification.
 
 ## Spectre/Virtuoso
 
-No real Spectre/Virtuoso environment is assumed for v3 release hardening.
+No real Spectre/Virtuoso environment was used for v3 release hardening or is
+assumed for post-release maintenance.
 
 Spectre remains model-only experimental/unverified unless real Spectre access is actually available and intentionally used.
 

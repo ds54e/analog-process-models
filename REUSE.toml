@@ -18,6 +18,8 @@ path = [
   "STATUS.md",
   "CHANGELOG.md",
   "THIRD_PARTY.md",
+  "SECURITY.md",
+  "CONTRIBUTING.md",
   ".gitignore",
   "pyproject.toml",
   "src/**",

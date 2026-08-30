@@ -11,6 +11,11 @@ noise as a separate, provenance-aware characterization domain. The catalog
 contains 13 electrical families and 26 public MOS devices across five
 technologies.
 
+The immutable annotated `v3.0.0` tag has passed exact-tag post-release
+qualification (18/18 gates), and the GitHub Release exists. Post-release
+`main` contains evidence and public-readiness maintenance only. Repository
+visibility remains private pending a separate human decision.
+
 ## Scope
 
 APM supplies family-qualified MOS model wrappers, manifest-driven discovery,
@@ -124,12 +129,16 @@ Those bases are never silently equated. See
 
 The independent `apm.noise-characterization.v1` domain preserves the released
 `apm.characterization.v2` DC/Y/capacitance behavior. Schema versions identify
-data contracts rather than package releases. Run one public device, the
-analytic harness/four-engine regression, the complete method qualification,
-or the catalog-wide qualification with:
+data contracts rather than package releases. Run one public device with:
 
 ```console
 .venv/bin/apm noise apm130/lv/nmos --output .apm/results/noise-apm130-lv-nmos
+```
+
+Maintainer/research qualification commands are also available for the analytic
+harness, frozen acquisition/fit method, and catalog-wide dataset:
+
+```console
 .venv/bin/apm noise-check --output .apm/results/v3-n0-noise-spike
 .venv/bin/apm noise-method-check --output .apm/results/v3-n1-noise-method
 .venv/bin/apm noise-catalog-check --output .apm/results/v3-n2-noise-catalog
@@ -140,8 +149,8 @@ The harness first qualifies the 1-ohm drain-current probe against an analytic
 resistor, APM-owned OSDI white/flicker fixtures, and a decisive correlated
 internal-noise network. It then runs native BSIM3, PSP103 OSDI, native BSIM4,
 and BSIM-CMG OSDI with ngspice's normal Sparse solver. The canonical point is
-27 °C, `L/Lmin=2`, `VOUT/VDD=0.5`, and resolved `gm/Id=15 1/V`. V3-N1 freezes
-the starting sweep at 1 Hz through 100 MHz and 20 points/decade, then repeats
+27 °C, `L/Lmin=2`, `VOUT/VDD=0.5`, and resolved `gm/Id=15 1/V`. The released
+acquisition starts at 1 Hz through 100 MHz and 20 points/decade, then repeats
 the complete sweep with bounded upper endpoints of 1 GHz, 10 GHz, and 100 GHz
 only while no valid white region is observed. Absence at the 100 GHz cap
 remains an explicit null result rather than a fabricated fit.
@@ -151,15 +160,16 @@ spectrum, complex external gate-to-drain transfer, backend source names, and
 parameter-level effective noise provenance. Canonical spectrum fields are
 `s_idrain_terminal_a2_per_hz`, `s_vgate_equivalent_v2_per_hz`,
 `y_dg_real_s`, and `y_dg_imag_s`. Fits are secondary, versioned, and fail
-closed when a white or flicker region is not observed. The frozen
+closed when a white or flicker region is not observed. The released frozen
 `apm.noise-fit.contiguous-regions@1.0.0` method uses an approximately
 half-decade centered local log-slope, deterministic contiguous-region
 selection, span/point/quality gates, and can select an interior white plateau
-before later high-frequency shaping. V3-N1 also retains four-engine 50 mV
+before later high-frequency shaping. The qualification also retains four-engine 50 mV
 VOUT diagnostics and a runtime-only BSIM-CMG `TNOIMOD=1` capability check
 without modifying the production card. See
-[`NOISE_CHARACTERIZATION.md`](NOISE_CHARACTERIZATION.md) and
-[`NOISE_N1.md`](NOISE_N1.md) for the normative contracts and claim boundaries.
+[`NOISE_CHARACTERIZATION.md`](NOISE_CHARACTERIZATION.md) and the frozen
+historical [`NOISE_N1.md`](NOISE_N1.md) contract for method details and claim
+boundaries.
 
 The catalog-wide dataset discovers all 26 public MOS devices from the
 five-technology/13-family
@@ -182,7 +192,8 @@ and never silently reused. Machine-readable `apm.noise-comparison.v1` outputs
 reference exact source request/result hashes, expose 1 Hz, 1 kHz, 1 MHz, and
 10 MHz values plus 1 Hz–10 MHz gate-referred integration, preserve native
 planar-W versus integer-NFIN geometry, and produce no fake cross-basis ratios.
-See [`NOISE_N2.md`](NOISE_N2.md).
+See the frozen historical [`NOISE_N2.md`](NOISE_N2.md) milestone contract for
+the complete dataset specification.
 
 At exceptionally low transconductance, ngspice 47's convenience
 `inoise_spectrum` vector exhibits an empirically audited gain-squared clamp
@@ -253,26 +264,26 @@ not establish numerical equivalence with ngspice. See
 
 ## Release validation
 
-The authoritative v3 contract is
-[`validation/release_gates.toml`](validation/release_gates.toml). The release
-command implements exactly its 18 required gates and fails for a missing,
-skipped, evidence-free, or failed gate:
+For normal installation and current-tree confidence, users should run:
 
 ```console
+.venv/bin/apm doctor
 .venv/bin/apm validate
-.venv/bin/apm validate --release --output .apm/results/v3-release-candidate
 ```
 
-The final release gate additionally requires an exact-candidate clean-clone
-attestation captured immediately after HTTPS cloning on the designated WSL2 +
-EL9 host, before `.apm`, `.venv`, generated OSDI artifacts, or results exist.
-The release command then runs the v2 electrical baseline, a fresh complete
-V3-N2 catalog qualification (including nested N0/N1), and a strict all-reuse
-resume qualification. See
-[`docs/release-validation.md`](docs/release-validation.md) for the complete
-sequence. Historical v1/v2 or tracked milestone evidence cannot substitute
-for this current run.
+The frozen v3 contract is
+[`validation/release_gates.toml`](validation/release_gates.toml).
+`apm validate --release` is a maintainer/release-engineering workflow whose
+18-gate exact-candidate and exact-tag runs are already complete; it is not an
+ordinary usage requirement. It includes clean-clone attestation, the complete
+v2 electrical baseline, fresh catalog-wide noise execution, and strict resume
+qualification. See
+[`docs/release-validation.md`](docs/release-validation.md) for current
+reproducibility, the historical candidate procedure, and exact-tag evidence.
 
 Repository policy, implementation scope, and result semantics are defined by
 [`AGENTS.md`](AGENTS.md), [`GOAL.md`](GOAL.md), and
 [`RESULT_CONTRACT.md`](RESULT_CONTRACT.md).
+
+Security or provenance concerns should follow [`SECURITY.md`](SECURITY.md).
+Contribution guidance is in [`CONTRIBUTING.md`](CONTRIBUTING.md).

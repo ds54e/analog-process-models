@@ -1,8 +1,17 @@
 # APM V3-N3 — v3.0.0 Release-Hardening Contract
 
-This document is normative for V3-N3 together with `AGENTS.md` and `GOAL.md`.
-The existing electrical and noise specifications remain normative for the
-capabilities they define. On conflict, `AGENTS.md` and `GOAL.md` win.
+> **Historical record — frozen V3-N3 candidate contract.** This document was
+> the normative release-hardening procedure before v3.0.0 was tagged. The
+> candidate phase is complete: annotated tag `v3.0.0` now exists at
+> `995e0ce7cdd0c37ef9f3397008637f9d239c746e`, exact-tag requalification passed
+> 18/18, and the GitHub Release exists. Candidate-phase prohibitions and
+> future-tense language below are retained exactly as engineering history; they
+> are not current instructions. See `AGENTS.md`, `GOAL.md`, `README.md`, and
+> `STATUS.md` for current state.
+
+This document was normative for V3-N3 together with the policy and goal then in
+force. The existing electrical and noise specifications remain useful for the
+capabilities they define.
 
 ## 1. Purpose and release boundary
 

@@ -1,3 +1,7 @@
+# Frozen machine-readable contract used to qualify APM v3.0.0.
+# Candidate-phase authorization flags below are historical release controls,
+# not the current repository/tag/GitHub-Release state. See STATUS.md and
+# validation/evidence/v3_post_release_requalification.json.
 schema = "apm.release-gates.v3"
 target = "v3.0.0"
 status = "authoritative-gate-definition"

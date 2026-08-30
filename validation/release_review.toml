@@ -1,23 +1,27 @@
 schema = "apm.release-review.v3"
 status = "complete"
-reviewed_utc = "2026-08-30T07:35:51Z"
+reviewed_utc = "2026-08-30T08:59:50Z"
 reviewer = "APM implementation agent"
+release_state = "released"
+v3_tag_object = "afecec29ea6ed0703ef441d4839fd40a238bef0b"
+v3_tag_commit = "995e0ce7cdd0c37ef9f3397008637f9d239c746e"
+github_release_url = "https://github.com/ds54e/analog-process-models/releases/tag/v3.0.0"
 scope = [
-  "v3.0.0 installation, runtime, schema, and release-candidate wording",
+  "released v3.0.0 tag, exact-tag qualification, GitHub Release, and private visibility state",
+  "post-v3 policy/goal/status hierarchy and frozen historical milestone classification",
+  "3.0.0 installation, runtime, schema, reproducibility, and maintainer validation wording",
   "Technology/Electrical-Family/Device public interfaces and native geometry",
-  "complete preserved v2 electrical characterization/comparison/variation claims",
-  "V3-N0 analytic noise harness and four-engine capability boundary",
-  "V3-N1 acquisition, fail-closed fit, low-VDS, and correlation diagnostics",
-  "V3-N2 manifest-wide datasets, strict resume, comparison, and null semantics",
+  "preserved v2 electrical characterization/comparison/variation claims",
+  "released analytic noise harness, adaptive acquisition, fail-closed fitting, and catalog datasets",
   "parameter-level noise provenance and compact-model-default boundaries",
   "APM350/APM022/APM016F model-card immutability relative to v2.0.0",
   "silicon/foundry calibration, unsupported noise mode, and geometry-basis exclusions",
   "Operating Profile versus validity/reliability boundaries",
   "Benchmark Global/Local/All versus upstream-native variation semantics",
   "Spectre structural-only experimental/unverified boundary",
-  "third-party redistribution, notices, and independent-authorship summaries",
-  "public-repository hygiene and exact-candidate clean-clone condition",
-  "candidate/evidence/tag/GitHub-Release/visibility separation",
+  "third-party redistribution, notices, PSP acknowledgement, and independent-authorship summaries",
+  "current-tree and whole-history secret/privacy/proprietary-model audit conclusions",
+  "SECURITY/CONTRIBUTING guidance and post-release evidence documentation",
 ]
 spectre_real_tool_run = false
 foundry_or_silicon_correlation_claimed = false
@@ -26,24 +30,41 @@ process_noise_calibration_claimed = false
 universal_planar_finfet_width_claimed = false
 unsupported_noise_modes_claimed = false
 repository_visibility_changed = false
-v3_tag_created = false
-github_release_created = false
+repository_visibility = "private"
+publicization_performed = false
+v3_tag_created = true
+github_release_created = true
+public_readiness_cleanup_complete = true
+current_tree_sensitive_data_audit = "pass"
+whole_history_secret_scan = "pass"
+historical_proprietary_model_audit = "pass"
+third_party_redistribution_audit = "pass"
 unresolved_claim_findings = []
-conclusion = "APM 3.0.0 claims a reproducible stationary small-signal MOS-noise characterization framework and catalog dataset for existing compact-model predictions, not silicon/foundry noise accuracy or new process-noise calibration. Raw external-terminal spectra and parameter provenance remain authoritative; fit nulls and unreachable targets remain explicit. No universal multi-Vt, temperature, geometry, or planar/FinFET effective-width law is asserted. Noise Monte Carlo, RTS/RTN, transient noise, PSS/PNoise, oscillator phase noise, full terminal noise-correlation matrices, reliability/signoff, real Spectre validation, and Virtuoso automation remain excluded. Historical v1/v2 releases stay immutable; the final v3 tag, GitHub Release, and visibility change are not created by V3-N3."
+conclusion = "APM 3.0.0 is released at immutable annotated tag v3.0.0 and has passed exact-tag 18/18 qualification. Post-release main now distinguishes current maintenance policy from frozen milestone/release history. The current tree and all reachable Git history passed secret/privacy/proprietary-model review; shipped third-party bytes, terms, notices, and PSP acknowledgement remain defensible. APM claims reproducible stationary small-signal MOS-noise characterization of existing compact-model predictions, not silicon/foundry calibration, reliability, or new process-noise calibration. No unsupported noise mode, universal planar/FinFET width equivalence, real Spectre validation, history rewrite, release mutation, or visibility change is claimed. Repository visibility remains private pending separate human authorization."
 
 [reviewed_files]
-"README.md" = "2193fbe8de787448f715228002083655268121f4d7a14a9375ea44e999010ae6"
+"AGENTS.md" = "879b594bbf3ccec0e862d17cf9c3678c6ba832f5e4cbf22b31b49942feee4fb6"
+"README.md" = "bdc6f84b00f3ebd658f93495a1cbd6b8b6b76642e83f240058d0d78482f2c6e5"
 "CHANGELOG.md" = "5b265a75763537c1b9651301d3ae82462582fac584956f08ddb73037fe9be0a7"
-"GOAL.md" = "c5f75551e359dd70e49aebcfa74d3b5c51aa8dcf11e4ae5b3742b3026f692492"
-"RELEASE_V3.md" = "d8c1b534c0583d14c0a9efc1607cecff78fa7a4ef9ce428647061096a520c7a8"
-"STATUS.md" = "3f648a8cba998027ff1702c956bd1fc21a7c327b16ada8fb37a415104c727996"
-"THIRD_PARTY.md" = "dfbe14117cd9c5f475e692f95d1e61e72723bf8c617bbb5671abb3d70db24304"
-"NOISE_CHARACTERIZATION.md" = "f86839fcda7c294501734e1b74b01247504567f45477c1291888b74877385002"
-"NOISE_N1.md" = "3b3de0f73da04dfc7df42b55e487505d2ba96a2c19127691985fc1bc0a447447"
-"NOISE_N2.md" = "ac4bf8af8db61c603d759955d629c469d548091f03264e34c12e8a25db7a16b1"
-"RESULT_CONTRACT.md" = "8006b253dda14cc83b9ba8b2b54fd46f73eb01d0f78acc5341367a5c7b4d19b1"
+"CONTRIBUTING.md" = "562c0c6e7c2d0f98b5c6ac21d31c3db43115ad3cf7184d0b98947c1dd35dd141"
+"DEVICE_FAMILY_MODEL.md" = "f6cba49b8344c476e4605c0ed2c84e8f083f2f079c1f9940562020112e0620dd"
+"ENVIRONMENT.md" = "68fa00c833722b622354a70908135a9b8c6b1d680642b11f548576a404452698"
+"GOAL.md" = "21b09bd45b460c88316c2410d578c1aa0f610fe52f7eeb4fd4572bff0b5b35b4"
+"RELEASE_V3.md" = "3d4836939490fd74387a2dd553a3c2b38de0e65680a0ee5fa889eeec2eb247db"
+"RESEARCH_BASELINE.md" = "5051a8740e661d71323222d34c97e9e169bc2ce6579f909a83c1393c53686868"
+"PROJECT_CONTEXT.md" = "335bfbdb8d5488c1a345fb4ab7ba27cfa5e3d3af27e39484ae727253bbdb5d80"
+"SECURITY.md" = "c56444382ab2067253ab81066b9c870a6305938122794a0e178064f20f3403ab"
+"STATUS.md" = "bd6818e2aa78689e1e58bb6147bdce1ca5544164b85c371b6484edefb9cdc828"
+"THIRD_PARTY.md" = "b972236cbdbc88eb1637c5169a47e6deda7d0df83a4d3cf525bcd0e20c5eb073"
+"UNATTENDED_EXECUTION.md" = "a5b6cc5ac4067408f868a864b4836df298a5231a75ada46c7b8edcfa29cce9ff"
+"NOISE_CHARACTERIZATION.md" = "57c643cb544e0cb20a1c87a3eb3530f6a0be921579cb9c2170e2ead54a6af4a0"
+"NOISE_N1.md" = "36c01e0a1e4963a80dcf93d9571859d899f51edc51e0462a762f461928de3734"
+"NOISE_N2.md" = "b31683f8790450f825edc5380842cd53da39e8182a16820bc91dc18003a38c5f"
+"RESULT_CONTRACT.md" = "79ef7e75dbee8b43c84b3aad97847b02e34486eab4cffb3ed930e3930c55434b"
 "docs/benchmark-variation.md" = "71911c1474324a8529cd7754f98dd9afe26b231ca7bf8a04cc57a8ddba76fbe6"
 "docs/characterization.md" = "1e684b948ad89bdecb276c8bfce23c2eeadb2df09e082a50f4cbc2a0e55924eb"
 "docs/native-variation.md" = "329e858f6cf323fd302efda1e8b4a2f6c6dccf861b9e71b69d71bbaf5b80aae5"
-"docs/release-validation.md" = "c00926b730c81c43481fe0ada9666db7b2085fee74499b1a7e34c798836ab1dd"
+"docs/release-validation.md" = "2eb6153a8d7055e096a94e30a2d5d8d8d007130d9a7e7580624baffda53f0eb4"
 "docs/spectre.md" = "a4f3689878bfa9a46e5ac2c6536bfcb21e0b6f6a641ead2f5d439aa30602b6c1"
+"validation/evidence/README.md" = "e30e914f8013fe48b5479c0420f6852ac27a214ff5e46315837fbc37a3dec1db"
+"validation/release_gates.toml" = "c493214dab3401f82ed472f761c87ee985271818a422658f88e7be53749dc995"
