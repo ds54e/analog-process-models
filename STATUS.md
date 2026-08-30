@@ -1,130 +1,168 @@
-# APM v2.0.0 implementation status
+# APM development status
 
-This is the compact persistent progress index. It is not validation evidence by
-itself; authoritative gates come from `validation/release_gates.toml`.
+This is the compact persistent progress index. It is not validation evidence by itself.
 
 ## Overall state
 
 - Project: Analog Process Models (APM)
 - Repository: `https://github.com/ds54e/analog-process-models`
-- Historical baseline: `v1.0.0` at
-  `e7bba6aaba1487a1116459a6b7b2c3c5add93318`
-- Release: `v2.0.0`
-- State: `RELEASED`
-- Current milestone: V2-M9 complete; post-release independent requalification
-  complete
-- Released tag: `v2.0.0` at
-  `3cc6cfea4932cc40f2d693784d0a569926cdf399`
-- Blockers: none recorded
+- Released baseline: `v2.0.0`
+- Released tag commit: `3cc6cfea4932cc40f2d693784d0a569926cdf399`
+- v2 post-release exact-tag requalification: complete, 20/20 required gates passed
+- Current development line: post-v2 `main`
+- Current target: v3 stationary small-signal MOS-noise characterization foundation
+- Current milestone: `V3-N0 Four-engine noise spike`
+- State: `V3_NOISE_FOUNDATION_NOT_STARTED`
+- v3 release eligible: NO
+- Blockers: none recorded before implementation
 
-Historical v1 evidence is useful baseline context only and cannot satisfy a v2
-gate.
+APM v2.0.0 is immutable history and remains the validated electrical/DC/Y/capacitance/variation baseline. Current v3 work does not invalidate or modify the v2 release.
 
-## Reference toolchain in use
+## Reference toolchain to reuse
 
-The current WSL2 + AlmaLinux 9.7 x86_64 workspace has verified:
+Validated v2 development/reference environment:
 
-- Python 3.9.25;
-- ngspice 47 built with OSDI and predictor support;
-- project-local OpenVAF-Re-Loaded v24.0.2mob;
-- native BSIM3 and BSIM4 execution;
-- PSP103 OSDI execution; and
-- BSIM-CMG 112.1.0 OSDI execution.
+- WSL2
+- AlmaLinux 9.7 x86_64
+- Linux ext4 workspace
+- Python 3.9.25
+- ngspice 47 with predictor/OSDI
+- project-local OpenVAF-ReLoaded v24.0.2mob
+- native BSIM3
+- native BSIM4
+- PSP103 OSDI
+- BSIM-CMG 112.1.0 OSDI
 
-The immutable release tag was independently requalified from a fresh HTTPS
-clone with pre-bootstrap attestation, project-local bootstrap, rebuild, and the
-complete release validator. Compact evidence is
-`validation/evidence/v2_post_release_requalification.json`.
+The v3 noise spike should inventory and reuse this environment rather than rebuild solved infrastructure without reason.
 
-## Family matrix
+Required `.noise` reference runs use the normal Sparse solver path, not KLU.
 
-| Technology | Families | Implementation state |
+## Released v2 family matrix
+
+| Technology | Families | v2 state |
 | --- | --- | --- |
-| APM350 | `general` | Manifest-driven family, native BSIM3, characterization and benchmark pass |
-| APM130 | `lv`, `hv` | Audited IHP PSP103 families, comparison, benchmark, and independent native cohorts pass |
-| APM045 | `vtl`, `vtg`, `vth`, `thkox` | All four audited BSIM4 families and both comparison sets pass |
-| APM022 | `lvt`, `svt`, `hvt` | Independent VTH0-isolated variants, ordering, characterization, and benchmark pass |
-| APM016F | `lvt`, `svt`, `hvt` | Independent PHIG-only BSIM-CMG variants, ordering, NFIN, characterization, and benchmark pass |
+| APM350 | `general` | released/validated |
+| APM130 | `lv`, `hv` | released/validated |
+| APM045 | `vtl`, `vtg`, `vth`, `thkox` | released/validated |
+| APM022 | `lvt`, `svt`, `hvt` | released/validated |
+| APM016F | `lvt`, `svt`, `hvt` | released/validated |
 
-Catalog total: five technologies, 13 Electrical Families, and 26 public
-family-qualified devices.
+Catalog total: five technologies, 13 Electrical Families, 26 public family-qualified MOS devices.
 
-## Milestones
+## v3 noise design state
 
-| Milestone | Status | Evidence / result |
-| --- | --- | --- |
-| V2-M0 Domain/catalog migration | VALIDATED | Declarative technology/family/backend manifests, generic fixture-family tests, and no v1 runtime SSOT/alias dependency |
-| V2-M1 APM130 LV/HV | VALIDATED | `validation/evidence/v2_apm130_native.json` |
-| V2-M2 APM045 VTL/VTG/VTH/THKOX | VALIDATED | All-family real-tool run and `validation/evidence/v2_comparisons.json` |
-| V2-M3 Characterization/result/comparison v2 | VALIDATED | 13-family real-tool run and `validation/evidence/v2_comparisons.json` |
-| V2-M4 Benchmark Global/Local/All | VALIDATED | `validation/evidence/v2_benchmark_adapters.json` |
-| V2-M5 APM022 multi-VT | VALIDATED | Independent provenance, all-temperature ordering, benchmark, and comparison evidence |
-| V2-M6 APM016F multi-VT | VALIDATED | Independent provenance, genuine BSIM-CMG/NFIN, benchmark, and comparison evidence |
-| V2-M7 Integrated all-family validation | VALIDATED | Real ngspice all-family, five-anchor, four within-technology comparison jobs, benchmark, and native variation |
-| V2-M8 Spectre/provenance/docs | VALIDATED | `validation/evidence/v2_spectre_structural.json`, `v2_provenance.json`, rewritten public docs, and hash-bound claim review |
-| V2-M9 Release validation | VALIDATED | Released tag commit `3cc6cfea4932cc40f2d693784d0a569926cdf399` independently passed an exact-tag fresh-clone 20/20 requalification; compact post-release evidence is `validation/evidence/v2_post_release_requalification.json` |
+Normative design:
 
-Status values are `NOT_STARTED`, `IN_PROGRESS`, `VALIDATED`, and `BLOCKED`.
+- `GOAL.md`
+- `NOISE_CHARACTERIZATION.md`
 
-## Frozen implementation decisions
+Current design decisions:
 
-- Runtime discovery and dispatch are driven by `technology.toml`,
-  `family.toml`, and backend `binding.toml` manifests.
-- Canonical identity is `technology_id/family_id/device_id`.
-- Planar public sizing is `w,l`; FinFET sizing is `l,nfin`; no common
-  multiplicity/finger interface exists.
-- APM045 THKOX uses an APM-selected 2.0 V native behavior profile and an
-  explicitly simulated 1.0 V VTG/THKOX common overlap.
-- APM130 LV/HV uses upstream 1.2/3.3 V native profiles and a 1.2 V comparison
-  overlap.
-- APM022 LVT/HVT vary only polarity-correct VTH0 by −0.08/+0.10 V threshold
-  intent around independently authored SVT.
-- APM016F LVT/HVT vary only polarity-correct PHIG with 0.10 eV spacing around
-  independently authored SVT.
-- SS uses fixed method
-  `apm.ss.threshold_relative_two_decade_linear_fit@1.0.0`: 0.003–0.3 of the
-  threshold criterion, 0.05 V drain bias, at least five OLS points, R² ≥ 0.995.
-- Generated characterization netlists set `gmin=1e-15 S`.
-- Benchmark Global sigma is 12 mV Vth and 3% drive; Benchmark Local reference
-  sigma is 8 mV and 2.5%, with explicit planar/FinFET/passive size laws.
-- Benchmark Global shares observable latents across sibling families by
-  technology/polarity/intent; this is not a physical correlation claim.
-- IHP-native LV/HV cohorts remain independent, retain upstream profile
-  semantics, and do not invent a native All mode.
-- Spectre covers all families structurally but remains model-only
-  experimental/unverified.
+- keep `apm.characterization.v2` intact;
+- add an independent noise domain, preferred schema `apm.noise-characterization.v1`;
+- stationary small-signal noise only for the initial phase;
+- ngspice remains the validated reference backend;
+- Spectre remains model-only experimental/unverified;
+- canonical common result is external drain-terminal total short-circuit current-noise PSD, not compact-model internal `sid`;
+- persist gate-referred PSD using actual small-signal transfer;
+- persist parameter-level effective noise-model provenance;
+- distinguish backend execution capability from physical/calibration claims;
+- do not tune new APM350/APM022/APM016F process-noise coefficients during the initial spike;
+- do not add noise variation/mismatch/correlation models in the initial phase;
+- do not create/tag v3.0.0 from the spike alone.
 
-## Latest checks
+## V3-N0 required four-engine spike
 
-Completed development checks on 2026-08-30 include:
+Required model paths:
 
-- all 13 families and 26 devices characterized by real ngspice at −40, 27, 85,
-  and 125 °C with finite-difference gm/gds, Ion/Ioff/log ratio/SS, raw signed
-  currents, and both 4×4 complex-Y bias views;
-- five cross-process anchors plus APM045 threshold/gate-stack and
-  APM022/APM016F multi-VT comparisons, all `apm.comparison.v2` validated;
-- all family/device Benchmark Global/Local/All adapters, five fixed corners,
-  deterministic PCG64 replay, local size scaling, passives, temperature, and
-  resistor noise;
-- independent 128-sample IHP-native LV and HV process/mismatch cohorts plus
-  corners and replay;
-- all-family deterministic Spectre generation/structure with no real-tool,
-  parse, or numerical claim;
-- 57 Pytest tests passing; and
-- complete staged model provenance, tracked-distribution, REUSE, catalog,
-  migration, metadata, and hash-bound claim audits passing.
+| Engine | Selector |
+| --- | --- |
+| native BSIM3 | `apm350/general/nmos` |
+| PSP103 OSDI | `apm130/lv/nmos` |
+| native BSIM4 | `apm045/vtg/nmos` |
+| BSIM-CMG OSDI | `apm016f/svt/nfet` |
 
-## Release gate state
+Provisional common operating point:
 
-The release evaluator implements the exact 20 IDs in
-`validation/release_gates.toml` and rejects a missing, skipped, evidence-free,
-or failed gate. Package/runtime metadata now identifies 2.0.0.
+```text
+T = 27 degC
+L/Lmin = 2
+Planar W = family/device default
+FinFET NFIN = 1
+VOUT = 0.5 * reference_vdd
+gm/Id target = 15 1/V
+frequency = 1 Hz ... 100 MHz
+20 points/decade
+```
 
-The annotated `v2.0.0` tag is released at exact commit
-`3cc6cfea4932cc40f2d693784d0a569926cdf399`. An independent fresh HTTPS clone
-of that tag was attested before bootstrap on WSL2 + AlmaLinux 9.7 x86_64 on
-ext4, rebuilt the documented ngspice 47/OpenVAF/OSDI toolchain, and passed
-doctor, static validation, and all 20 required release gates with valid
-evidence. The final release-report SHA-256 is
-`2aca40f311e9bac6a20c3aced1db08936999da973fff6f9d681a94971303f161`.
-The tag object and peeled commit were verified unchanged after validation.
+The gm/Id point must be actively resolved/revalidated rather than taken from the nearest old DC sweep row.
+
+## V3-N0 harness validation required before MOS acceptance
+
+1. analytic resistor current-noise reference;
+2. candidate 1-ohm CCVS/current-probe transparency;
+3. OpenVAF/OSDI white-noise fixture;
+4. OpenVAF/OSDI flicker-noise fixture;
+5. analytic correlated internal-noise network through OpenVAF -> OSDI -> ngspice.
+
+The correlated fixture is intended to decide capability from real evidence rather than from OSDI-version assumptions.
+
+## Noise provenance baseline to verify during implementation
+
+### APM130
+
+Pinned IHP PSP cards contain explicit family-specific noise parameters. Treat as upstream-explicit parameterization, but do not overstate silicon calibration without stronger authoritative evidence.
+
+### APM045
+
+Pinned FreePDK45 BSIM4 cards explicitly select some noise modes such as `FNOIMOD`/`TNOIMOD`, while some coefficients may resolve from BSIM defaults. Provenance therefore needs to be parameter-level.
+
+### APM350 / APM022 / APM016F
+
+Current APM-authored cards were not intentionally process-noise calibrated. Compact-model default noise behavior may still produce valid simulator spectra; such results must be labeled compact-model-default predictions rather than APM process-noise calibration.
+
+## V3-N0 planned output contract
+
+Preferred per-run artifacts:
+
+```text
+metadata.json
+operating_points.csv
+noise_spectrum.csv
+noise_metrics.csv
+source_breakdown.json
+noise_model_snapshot.json
+```
+
+Canonical spectrum fields include:
+
+```text
+s_idrain_terminal_a2_per_hz
+s_vgate_equivalent_v2_per_hz
+y_dg_real_s
+y_dg_imag_s
+```
+
+Derived metrics such as flicker exponent, white floor, flicker corner, `gamma_eff_total`, and integrated noise are secondary to raw spectra and must be null/invalid when fitting is not justified.
+
+## Decisions intentionally unfrozen until V3-N0 evidence
+
+- final required frequency range;
+- final points/decade;
+- final white/flicker fitting method and thresholds;
+- exact PSP/BSIM-CMG correlated-noise support claim through current OSDI path;
+- reliable effective-parameter interrogation mechanism per engine;
+- whether all 26 devices can use one required frequency profile;
+- whether a low-VDS diagnostic profile becomes required;
+- whether APM-authored generic noise coefficients should be researched later;
+- whether a full terminal noise-correlation matrix is worth a later extension.
+
+Do not resolve these by guesswork before the spike.
+
+## v2 release evidence retained
+
+The immutable `v2.0.0` tag independently passed the documented exact-commit fresh-clone release flow on WSL2 + AlmaLinux 9.7 x86_64. The post-release evidence remains:
+
+`validation/evidence/v2_post_release_requalification.json`
+
+The existing `validation/release_gates.toml` remains the historical/current implementation of the v2 release-gate contract until a later v3 release goal introduces separate v3 release gates. Do not rewrite it merely to start the spike.
