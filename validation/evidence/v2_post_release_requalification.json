@@ -1,0 +1,66 @@
+{
+  "schema": "apm.validation-evidence.v2",
+  "milestone": "V2-M9-post-release-exact-tag-requalification",
+  "date": "2026-08-30",
+  "status": "validated",
+  "release": {
+    "repository": "https://github.com/ds54e/analog-process-models",
+    "tag": "v2.0.0",
+    "annotated_tag_object": "89b9ce70cfa15e92ca6473f1916d50f77c7b95dc",
+    "tagged_commit": "3cc6cfea4932cc40f2d693784d0a569926cdf399",
+    "remote_tag_verified_after_validation": true,
+    "tag_modified_or_moved": false
+  },
+  "fresh_clone": {
+    "source": "fresh HTTPS network clone of tag v2.0.0",
+    "attested_before_bootstrap": true,
+    "initial_worktree_clean": true,
+    "state_absent_before_attestation": true,
+    "worktree_clean_after_validation": true,
+    "detached_head_commit": "3cc6cfea4932cc40f2d693784d0a569926cdf399",
+    "attestation_sha256": "7a274767f3941310155b94b20ee591d587c2f118584099c983f5f98c11f20798"
+  },
+  "environment": {
+    "platform": "WSL2",
+    "kernel_release": "6.18.33.2-microsoft-standard-WSL2",
+    "distribution": "AlmaLinux 9.7 (Moss Jungle Cat)",
+    "architecture": "x86_64",
+    "filesystem": "ext4 on /dev/sdd, outside /mnt/c",
+    "python": "3.9.25",
+    "ngspice": "47 with OSDI",
+    "openvaf_reloaded_tag": "v24.0.2mob",
+    "openvaf_reloaded_commit": "fdf2522b70f42793f64b1c72f0195c96dea0cc19"
+  },
+  "commands": [
+    "git clone --branch v2.0.0 --single-branch https://github.com/ds54e/analog-process-models.git analog-process-models",
+    "python3 tools/attest_clean_clone.py",
+    "tools/bootstrap-el9.sh",
+    "tools/setup-python.sh",
+    ".venv/bin/apm build-models",
+    ".venv/bin/apm doctor",
+    ".venv/bin/apm validate --output .apm/results/v2-postrelease-static",
+    ".venv/bin/apm validate --release --output .apm/results/v2-postrelease-requalification"
+  ],
+  "reports": {
+    "static_validation_status": "pass",
+    "static_validation_sha256": "beba981c1f64e078f9c6ffd3dee3e6e22f9e72790fae9a56033216ad9b8b8720",
+    "doctor_status": "pass",
+    "doctor_sha256": "c6319b2e81697e6be2b43274c0bc460f3ab4151e8b11cce08e31a8d44076ff52"
+  },
+  "release_report": {
+    "schema": "apm.release-validation.v2",
+    "target": "v2.0.0",
+    "status": "pass",
+    "repository_head": "3cc6cfea4932cc40f2d693784d0a569926cdf399",
+    "created_utc": "2026-08-30T02:47:37.047922+00:00",
+    "completed_utc": "2026-08-30T02:51:31.654033+00:00",
+    "sha256": "2aca40f311e9bac6a20c3aced1db08936999da973fff6f9d681a94971303f161",
+    "contract_sha256": "331213875bb557ed1635bea6059a922f3a8cea59303bdd3af3c0ebec1c592768",
+    "required_gate_count": 20,
+    "passed_required_gate_count": 20,
+    "every_required_gate_status_pass": true,
+    "every_required_gate_passed": true,
+    "every_required_gate_evidence_valid": true
+  },
+  "conclusion": "The immutable v2.0.0 tag independently passed the documented exact-commit fresh-clone release flow after publication. All 20 required gates passed with valid evidence."
+}

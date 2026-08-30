@@ -9,11 +9,12 @@ itself; authoritative gates come from `validation/release_gates.toml`.
 - Repository: `https://github.com/ds54e/analog-process-models`
 - Historical baseline: `v1.0.0` at
   `e7bba6aaba1487a1116459a6b7b2c3c5add93318`
-- Target: `v2.0.0`
-- State: `V2_RELEASE_VALIDATED`
-- Current milestone: V2-M9 final evidence-bound commit requalification
-- Release eligible: **YES after the final evidence-bound commit receives its
-  own exact-clone 20/20 pass**; the tag remains prohibited before that rerun
+- Release: `v2.0.0`
+- State: `RELEASED`
+- Current milestone: V2-M9 complete; post-release independent requalification
+  complete
+- Released tag: `v2.0.0` at
+  `3cc6cfea4932cc40f2d693784d0a569926cdf399`
 - Blockers: none recorded
 
 Historical v1 evidence is useful baseline context only and cannot satisfy a v2
@@ -30,9 +31,10 @@ The current WSL2 + AlmaLinux 9.7 x86_64 workspace has verified:
 - PSP103 OSDI execution; and
 - BSIM-CMG 112.1.0 OSDI execution.
 
-Development may reuse this verified state. The release still requires a new
-clone, pre-bootstrap attestation, project-local bootstrap, rebuild, and complete
-rerun at the exact release commit.
+The immutable release tag was independently requalified from a fresh HTTPS
+clone with pre-bootstrap attestation, project-local bootstrap, rebuild, and the
+complete release validator. Compact evidence is
+`validation/evidence/v2_post_release_requalification.json`.
 
 ## Family matrix
 
@@ -60,7 +62,7 @@ family-qualified devices.
 | V2-M6 APM016F multi-VT | VALIDATED | Independent provenance, genuine BSIM-CMG/NFIN, benchmark, and comparison evidence |
 | V2-M7 Integrated all-family validation | VALIDATED | Real ngspice all-family, five-anchor, four within-technology comparison jobs, benchmark, and native variation |
 | V2-M8 Spectre/provenance/docs | VALIDATED | `validation/evidence/v2_spectre_structural.json`, `v2_provenance.json`, rewritten public docs, and hash-bound claim review |
-| V2-M9 Release validation | VALIDATED | GitHub clone of `7a83620f2504539f5bf0c1e4637594d3b0232e94` passed 20/20; compact evidence is `validation/evidence/v2_release_candidate.json`; this evidence-bound successor commit must be requalified before tagging |
+| V2-M9 Release validation | VALIDATED | Released tag commit `3cc6cfea4932cc40f2d693784d0a569926cdf399` independently passed an exact-tag fresh-clone 20/20 requalification; compact post-release evidence is `validation/evidence/v2_post_release_requalification.json` |
 
 Status values are `NOT_STARTED`, `IN_PROGRESS`, `VALIDATED`, and `BLOCKED`.
 
@@ -118,12 +120,11 @@ The release evaluator implements the exact 20 IDs in
 `validation/release_gates.toml` and rejects a missing, skipped, evidence-free,
 or failed gate. Package/runtime metadata now identifies 2.0.0.
 
-An attested GitHub clone of candidate commit
-`7a83620f2504539f5bf0c1e4637594d3b0232e94` passed all 20 required gates with
-valid evidence; the full report SHA-256 is
-`76f643882c67bbe937a5ccfbd2c57b403de49ed78d1f4ad1fe63fa9a0682f32b`.
-
-Committing that compact evidence changes `HEAD`. Before tagging, the resulting
-final evidence-bound commit must repeat the exact-clone attestation/bootstrap
-and 20/20 release validator. The tag is authorized only by that final generated
-report.
+The annotated `v2.0.0` tag is released at exact commit
+`3cc6cfea4932cc40f2d693784d0a569926cdf399`. An independent fresh HTTPS clone
+of that tag was attested before bootstrap on WSL2 + AlmaLinux 9.7 x86_64 on
+ext4, rebuilt the documented ngspice 47/OpenVAF/OSDI toolchain, and passed
+doctor, static validation, and all 20 required release gates with valid
+evidence. The final release-report SHA-256 is
+`2aca40f311e9bac6a20c3aced1db08936999da973fff6f9d681a94971303f161`.
+The tag object and peeled commit were verified unchanged after validation.
