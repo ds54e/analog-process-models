@@ -1,0 +1,199 @@
+{
+  "schema": "apm.public-readiness.v3.v1",
+  "status": "pass",
+  "created_utc": "2026-08-30T09:08:49Z",
+  "repository": "https://github.com/ds54e/analog-process-models",
+  "qualified_main_commit": "2523098314e1149067d2c4a3fbbef4878e93e2c1",
+  "commit_binding_note": "This report binds the exact cleanup implementation commit above. The later commit that adds this report is intentionally not self-referential and is not a release candidate or tag target.",
+  "release_state": {
+    "release": "v3.0.0",
+    "state": "released",
+    "annotated_tag_object": "afecec29ea6ed0703ef441d4839fd40a238bef0b",
+    "peeled_commit": "995e0ce7cdd0c37ef9f3397008637f9d239c746e",
+    "tag_immutable_and_unchanged": true,
+    "exact_tag_requalification": "18/18 PASS",
+    "github_release_name": "Analog Process Models v3.0.0",
+    "github_release_url": "https://github.com/ds54e/analog-process-models/releases/tag/v3.0.0",
+    "github_release_unchanged": true,
+    "released_history_rewritten": false
+  },
+  "repository_state": {
+    "visibility": "PRIVATE",
+    "visibility_changed_by_cleanup": false,
+    "publicization_performed": false,
+    "publicization_state": "ready_for_separate_human_decision",
+    "description": "Open compact models and reproducible analog device/noise characterization across process generations",
+    "topics": [
+      "analog",
+      "bsim",
+      "compact-models",
+      "finfet",
+      "gmid",
+      "mosfet",
+      "ngspice",
+      "spice",
+      "verilog-a"
+    ]
+  },
+  "documentation_cleanup": {
+    "status": "pass",
+    "active_policy_updated": true,
+    "active_goal": "Post-v3.0.0 Public-Readiness and Maintenance",
+    "current_release_state_consistent": true,
+    "normal_user_validation_commands": [
+      "apm doctor",
+      "apm validate"
+    ],
+    "release_validation_classified_as_maintainer_workflow": true,
+    "historical_files": [
+      "RELEASE_V3.md",
+      "UNATTENDED_EXECUTION.md",
+      "PROJECT_CONTEXT.md",
+      "RESEARCH_BASELINE.md",
+      "NOISE_N1.md",
+      "NOISE_N2.md"
+    ],
+    "released_foundation_file": "NOISE_CHARACTERIZATION.md",
+    "changelog_rewritten": false,
+    "security_policy": "SECURITY.md",
+    "contribution_guide": "CONTRIBUTING.md"
+  },
+  "current_tree_audit": {
+    "status": "pass",
+    "tracked_file_count": 253,
+    "credential_or_private_key_hits": 0,
+    "private_network_or_internal_url_hits": 0,
+    "personal_contact_or_machine_identity_hits": 0,
+    "suspicious_secret_filenames": 0,
+    "generated_or_scratch_artifacts_tracked": 0,
+    "generated_osdi_binaries_tracked": 0,
+    "oversized_tracked_artifacts": 0,
+    "tracked_binary_files": 0,
+    "private_path_hits": 0,
+    "allowed_historical_reproducibility_path_observations": [
+      "validation/evidence/m0-runtime.md",
+      "validation/evidence/m10-release.md"
+    ],
+    "allowed_observation_reason": "These two frozen v1 evidence documents contain generic Linux build-path metadata only; no personal username, hostname, credential, private network, or corporate path was found.",
+    "normal_validation_distribution_audit": "pass"
+  },
+  "history_secret_scan": {
+    "status": "pass",
+    "tool": "gitleaks",
+    "version": "8.30.1",
+    "source": "authoritative gitleaks GitHub release archive",
+    "binary_sha256": "88f91962aa2f93ac6ab281d553b9e125f5197bbbce38f9f2437f7299c32e5509",
+    "archive_sha256": "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb",
+    "archive_checksum_verified_against_upstream_checksums": true,
+    "command": "gitleaks git --no-banner --no-color --redact=100 --report-format json --report-path .apm/public-readiness-gitleaks-exact.json .",
+    "qualified_commit": "2523098314e1149067d2c4a3fbbef4878e93e2c1",
+    "reachable_commit_count": 109,
+    "findings": 0,
+    "ignored_report_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+  },
+  "manual_history_audit": {
+    "status": "pass",
+    "historical_unique_path_count": 274,
+    "current_path_count": 253,
+    "deleted_historical_path_count": 21,
+    "historical_unique_blob_count": 563,
+    "historical_blobs_over_one_mib": 0,
+    "historical_binary_blobs": 0,
+    "current_vendor_path_count": 52,
+    "historical_vendor_path_count": 52,
+    "deleted_vendor_paths": 0,
+    "suspicious_historical_filename_hits": 0,
+    "credential_pattern_hits": 0,
+    "private_network_hits": 0,
+    "commit_identity": "ds54e <17592097+ds54e@users.noreply.github.com>",
+    "official_ptm_or_ptm_mg_cards_found": false,
+    "proprietary_pdk_or_company_model_files_found": false,
+    "freedpk45_svrf_or_eula_files_found": false,
+    "private_oracle_decks_found": false,
+    "committed_external_local_or_scratch_content_found": false,
+    "history_rewrite_required": false
+  },
+  "third_party_redistribution_audit": {
+    "status": "pass",
+    "psp103_si2": {
+      "pinned_ihp_revision": "331c00484213b13414777eec1336ef5c29b969bd",
+      "shipped_files_match_pinned_upstream": true,
+      "external_redistribution_conditions_preserved": true,
+      "copyright_notice_preserved": true,
+      "disclaimer_preserved": true,
+      "required_acknowledgement_in_product_documentation": true,
+      "acknowledged_parties": [
+        "NXP Semiconductors",
+        "Delft University of Technology",
+        "CEA"
+      ]
+    },
+    "ihp": {
+      "pinned_revision": "331c00484213b13414777eec1336ef5c29b969bd",
+      "all_shipped_git_blobs_match_pinned_upstream": true,
+      "apache_2_0_header_file_count": 14,
+      "license_boundary_preserved": true
+    },
+    "freepdk45": {
+      "pinned_open_source_clean_mirror_revision": "688ee68ec5301e5fe11ebee5e53c1109d3cfd51d",
+      "all_11_shipped_git_blobs_match_pinned_upstream": true,
+      "apache_2_0_boundary_preserved": true,
+      "svrf_or_eula_assets_in_current_tree_or_history": 0
+    },
+    "bsim_cmg": {
+      "version": "112.1.0",
+      "authoritative_archive_sha256": "9c70a7c9fcfafe66fb1582655bbfd36714b90ecba137a9dd83c76b3a0bd9e50a",
+      "all_11_shipped_files_match_archive": true,
+      "ecl_2_0_license_preserved": true,
+      "si2_notice_preserved": true
+    }
+  },
+  "model_card_immutability": {
+    "status": "pass",
+    "baseline": "v2.0.0",
+    "apm350_sha256": "2cd8e7fd7bd9dbec3e269959b2342d6d7a1a1609c6198c89931de676d47c8dc1",
+    "apm022_sha256": "c7616b942d4bc0e5f9d6fad78b6a4a48945b8dc04bb8125264617d6bbb860c90",
+    "apm016f_sha256": "54ffca52b7a9c19bbb47589a1933d439917163d9b5ffa1548981ec2e3a2556eb"
+  },
+  "validation": {
+    "qualified_commit": "2523098314e1149067d2c4a3fbbef4878e93e2c1",
+    "pytest": {
+      "status": "pass",
+      "result": "94 passed",
+      "stdout_sha256": "a2363c9ce288e86ddbd9529f5bafb5990067308aac60e8397d224a09c1c68a89"
+    },
+    "ruff": {
+      "status": "pass",
+      "result": "All checks passed",
+      "stdout_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    "reuse": {
+      "status": "pass",
+      "result": "246/246 files compliant",
+      "stdout_sha256": "ba29b0f1ae14139e6adaa1ebf9def41c1823da3947bb0e1a4a9fb85b1be78e8e"
+    },
+    "provenance": {
+      "status": "pass",
+      "result": "7/7 checks passed",
+      "report_sha256": "78cf8db92d07962269c2f836e1a43461f7dbccc41b95bc1c1f8aca65a8cd8283"
+    },
+    "normal_repository_validation": {
+      "status": "pass",
+      "schema": "apm.repository-validation.v3",
+      "report_sha256": "d35009d55e7365e5d5427a42f83ee1aa122a6c0292b0541cf551db2f2af26960",
+      "claim_audit": "pass",
+      "distribution_public_hygiene": "pass"
+    },
+    "candidate_era_release_validator_rerun": false,
+    "candidate_era_release_validator_note": "The immutable v3.0.0 candidate and exact-tag 18/18 evidence remain authoritative. The candidate-era release workflow was intentionally not repurposed for this post-release documentation cleanup."
+  },
+  "claim_boundaries": {
+    "manufacturable_pdk_claimed": false,
+    "silicon_or_foundry_calibrated_noise_claimed": false,
+    "process_noise_monte_carlo_claimed": false,
+    "spectre_status": "experimental_unverified",
+    "planar_finfet_width_equivalence_claimed": false
+  },
+  "unresolved_blockers": [],
+  "final_conclusion": "Public-readiness cleanup and audit passed. The repository remained private; changing visibility requires separate explicit human authorization."
+}
