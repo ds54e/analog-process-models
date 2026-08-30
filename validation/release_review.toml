@@ -1,6 +1,6 @@
 schema = "apm.release-review.v3"
 status = "complete"
-reviewed_utc = "2026-08-30T07:17:21Z"
+reviewed_utc = "2026-08-30T07:35:51Z"
 reviewer = "APM implementation agent"
 scope = [
   "v3.0.0 installation, runtime, schema, and release-candidate wording",
@@ -36,7 +36,7 @@ conclusion = "APM 3.0.0 claims a reproducible stationary small-signal MOS-noise 
 "CHANGELOG.md" = "5b265a75763537c1b9651301d3ae82462582fac584956f08ddb73037fe9be0a7"
 "GOAL.md" = "c5f75551e359dd70e49aebcfa74d3b5c51aa8dcf11e4ae5b3742b3026f692492"
 "RELEASE_V3.md" = "d8c1b534c0583d14c0a9efc1607cecff78fa7a4ef9ce428647061096a520c7a8"
-"STATUS.md" = "ec518067029e73db7d1fedaa8a2e4a901f5daadc20e2a00e32e5edd572cc5f47"
+"STATUS.md" = "3f648a8cba998027ff1702c956bd1fc21a7c327b16ada8fb37a415104c727996"
 "THIRD_PARTY.md" = "dfbe14117cd9c5f475e692f95d1e61e72723bf8c617bbb5671abb3d70db24304"
 "NOISE_CHARACTERIZATION.md" = "f86839fcda7c294501734e1b74b01247504567f45477c1291888b74877385002"
 "NOISE_N1.md" = "3b3de0f73da04dfc7df42b55e487505d2ba96a2c19127691985fc1bc0a447447"

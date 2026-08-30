@@ -11,10 +11,10 @@ This is the compact persistent progress index. It is not validation evidence by 
 - v2 post-release exact-tag requalification: complete, 20/20 required gates passed
 - Current development line: post-v2 `main`
 - Current target: v3.0.0 release candidate hardening
-- Completed milestones: `V3-N0 Four-engine noise spike`; `V3-N1 Noise acquisition and fit-method qualification`; `V3-N2 Catalog-wide noise dataset and comparison qualification`
-- Current milestone: `V3-N3 v3.0.0 Release Hardening`
-- State: `V3_N3_IN_PROGRESS`
-- v3 release eligible: NO
+- Completed milestones: `V3-N0 Four-engine noise spike`; `V3-N1 Noise acquisition and fit-method qualification`; `V3-N2 Catalog-wide noise dataset and comparison qualification`; `V3-N3 v3.0.0 Release Hardening`
+- Current milestone: `V3-N3 v3.0.0 Release Hardening` (complete)
+- State: `V3_N3_COMPLETE`
+- v3 release eligible: YES — exact candidate qualified; final human authorization is still required
 - Blockers: none
 
 APM v2.0.0 is immutable. V3-N0, V3-N1, and V3-N2 are complete. V3-N3 is
@@ -29,8 +29,10 @@ Normative current release-hardening contract:
 V3-N3 began from clean synchronized `main` at
 `bbd4932d325270ddd37711e7e2c7e0b00e91670f`; both the V3-N2 implementation
 commit `ca977af3ba08b9dfdee8556e5781f647f99cabdd` and evidence/status commit are
-present. Candidate commit: not yet created. Final `v3.0.0` tag: not created.
-GitHub Release: not created. Repository visibility: unchanged.
+present. Package/runtime candidate version is 3.0.0. The immutable future tag
+target is `995e0ce7cdd0c37ef9f3397008637f9d239c746e`, qualified 18/18 from a genuine
+fresh HTTPS clone. Final `v3.0.0` tag: not created. GitHub Release: not created.
+Repository visibility: PRIVATE and unchanged.
 
 ## Reference toolchain
 
@@ -366,38 +368,92 @@ Tracked compact evidence:
 
 `validation/evidence/v3_n2_noise_catalog.json`
 
-## V3-N3 release-hardening progress
+## V3-N3 exact-candidate qualification
 
-The active `GOAL.md` and `RELEASE_V3.md` freeze package/runtime candidate
-version 3.0.0 and an 18-gate current-main release contract. The candidate tree
-now contains the v3 contract/evaluator, strengthened clean-clone attestation,
-hash-bound claim review, public-hygiene audit, 3.0.0 package/CLI metadata, and
-release documentation. The electrical/noise/comparison result schema
-identities remain unchanged.
+The active `GOAL.md` and `RELEASE_V3.md` freeze package/runtime version 3.0.0
+and the ordered 18-gate current-main release contract. The immutable coherent
+candidate and future `v3.0.0` tag target is:
 
-Development real-tool qualification on the documented environment currently
-passes:
+`995e0ce7cdd0c37ef9f3397008637f9d239c746e`
 
-- `apm doctor` for native BSIM3/BSIM4 and PSP103/BSIM-CMG OSDI;
-- fresh V3-N2 16/16 with 290 fresh executions, nested V3-N1 10/10, nested
-  V3-N0 13/13, and zero simulation failures;
-- unchanged strict resume 16/16 with 290 safe reuses and zero fresh/stale
-  executions;
-- all-family electrical characterization, all five comparison suites,
-  Benchmark variation/passives, and APM130 native LV/HV variation.
+It was pushed before qualification and was checked out detached from a genuine
+fresh HTTPS network clone. Pre-bootstrap attestation proved an empty generated
+state inventory, a clean worktree, exact authoritative origin and commit,
+absence of `v3.0.0`, and the documented WSL2 / AlmaLinux 9.7 / x86_64 / ext4
+environment. The attestation SHA-256 is:
+
+`07c934c3419f73171d86080a39723e487fe2e42afa596a00cb6c34304bb6c52f`
+
+The documented source bootstrap then produced ngspice 47 and OpenVAF Re-Loaded
+v24.0.2mob, Python 3.9.25 and APM 3.0.0 were installed, all three required OSDI
+artifacts were built, and `apm doctor` passed native BSIM3, native BSIM4,
+PSP103 OSDI, and BSIM-CMG OSDI. Normal repository validation passed before the
+release command.
+
+The exact-candidate release run completed at 2026-08-30T07:28:25Z with every
+required gate passing and every gate carrying valid existing evidence:
+
+```text
+release report schema       apm.release-validation.v3
+release target              v3.0.0
+candidate                   995e0ce7cdd0c37ef9f3397008637f9d239c746e
+required/passed gates       18/18
+release report SHA-256      13f95d50a1237b30fa907e0b9062ff32f8d11b0d4cca5f3caa7d2e79b70eab66
+gate contract SHA-256       4cd09e1ba6c90611e0e15c9b4bfb955dd4d99943bc5e8e8cb7802ec696feeef7
+normal validation SHA-256   df798a3ff23c6d2253484396b4207ec367421967bf4f9f7e42dbed11c13d8171
+release static SHA-256      4b1ddd3874496452e36de53818bcb7edb36649eb6c378f57a41570baa26826b0
+doctor SHA-256              52794d0532fd8f18af4a0ec9690410d342daafe71f84c2427cfe3327447f1369
+```
+
+The release evaluator freshly ran the complete V2 electrical/comparison/
+variation regression surface and the complete V3 noise surface. V3-N0 passed
+13/13, V3-N1 passed 10/10 with its eight synthetic cases passing, and V3-N2
+passed 16/16. The N2 release plan contained 376 logical memberships and 290
+unique physical requests. The empty-output pass executed all 290; 261 were
+validated, 29 were explicitly `target_not_reachable`, and none failed. The
+unchanged resume pass safely reused all 290 with zero fresh or stale results,
+and the exact/mismatch/tamper/incomplete adversarial qualifier passed 4/4.
+
+```text
+fresh N2 report             9db3e98c5e34f3bd47d36173814ea78aa3c6f7f0e60f86f151c828c9efa59895
+resume N2 report            ca6c2f359d79e0545f9fca761f15c582cce1c9628005f6a7504e6810032a3775
+plan file                   e8152efb6c0734ec8d730785d1b987d9d1977d708ffb687e103018f083f8d40d
+plan semantic hash          79085abe1c469f42fc607ffdba033c8b388847d41e5ddf4aa946e48abeb58cad
+coverage                    dace6846927b7181e183f083878bb129fae896b0e720a18756e1969166b52b89
+comparisons                 94101e51808a23c2bb81b679dbdcaea7c2d0d4a7be464bd11ab93ace0d123812
+resume qualification        b71babb536dd047cc9c4bd988c03ecccb7a2d0bed834a69946bee543c77ab8f7
+V3-N1 regression            75adfb77af6a17066be5a226e4e113909f14ef076c4929bbc6f8fcd732cc9120
+V3-N1 synthetic cases       a0eaa991f8de7fe111d9f272f737aea764f92373e370c68bd15bd502e52df2ac
+nested V3-N0               287f051273e39fee07c0aedbd37c704432f41ca0b9f0f136be764df583c45145
+```
+
+All required noise jobs used normal Sparse and no KLU path. The ngspice binary
+was compiled with optional KLU capability, but that capability was not selected
+for any required `.noise` job. Pytest passed 92 tests, Ruff passed, REUSE passed
+242/242 candidate files, provenance passed, the hash-bound public-claim review
+passed, and the tracked-distribution hygiene audit found no credentials,
+private paths, oversized artifacts, or unresolved model includes. Spectre
+remains model-only, structurally checked, and experimental/unverified.
+
+APM350/APM022/APM016F model cards remain byte-identical to `v2.0.0`; no
+process-noise coefficient was tuned or added. The final exact-candidate
+worktree remained clean and `v3.0.0` remained absent. The compact tracked
+evidence is:
+
+`validation/evidence/v3_release_candidate.json`
+
+Its whole-file SHA-256 is:
+
+`7099ea90d5cd51707f793ad19cf332dec9ec1f88776d34f6380fe2c60f07a589`
 
 An initial candidate commit `0a411c4e316c74021055e71b3844c766344db1af`
-was rejected before bootstrap: the standard-library attestation launcher
-imported the project before inventory and thereby created its own
-`src/apm/__pycache__`. The gate failed closed as designed. That commit remains
-unchanged and is not the future tag target; the launcher now disables bytecode
-creation before importing the inventory implementation, and a new exact
-candidate must be committed and requalified from another fresh clone.
+was rejected before bootstrap because the attestation launcher created its own
+`src/apm/__pycache__` before inventory. The gate failed closed. That rejected
+commit remains unchanged and is not the future tag target.
 
-Remaining work is to finish the final static/hash audit, create and push one
-immutable candidate future tag-target commit, qualify that exact commit from a
-genuine fresh HTTPS clone, and commit compact exact-candidate evidence/status
-afterward.
-
-Process-noise calibration remains unauthorized. Final `v3.0.0` tag, GitHub
-Release, and repository visibility changes remain explicitly unperformed.
+V3-N3 is complete. The final `v3.0.0` tag, GitHub Release, and visibility
+change remain explicitly unperformed; repository visibility is still PRIVATE.
+The next human action is to review this evidence and explicitly authorize an
+immutable annotated `v3.0.0` tag at candidate commit
+`995e0ce7cdd0c37ef9f3397008637f9d239c746e`. Post-tag requalification and any
+GitHub Release or visibility/publicity action are separate later steps.
