@@ -10,10 +10,10 @@ itself; authoritative gates come from `validation/release_gates.toml`.
 - Historical baseline: `v1.0.0` at
   `e7bba6aaba1487a1116459a6b7b2c3c5add93318`
 - Target: `v2.0.0`
-- State: `V2_RELEASE_CANDIDATE_INTEGRATION`
-- Current milestone: V2-M9 exact-commit clean-clone validation
-- Release eligible: **NO** until the final fresh-clone report passes all 20
-  required gates
+- State: `V2_RELEASE_VALIDATED`
+- Current milestone: V2-M9 final evidence-bound commit requalification
+- Release eligible: **YES after the final evidence-bound commit receives its
+  own exact-clone 20/20 pass**; the tag remains prohibited before that rerun
 - Blockers: none recorded
 
 Historical v1 evidence is useful baseline context only and cannot satisfy a v2
@@ -60,7 +60,7 @@ family-qualified devices.
 | V2-M6 APM016F multi-VT | VALIDATED | Independent provenance, genuine BSIM-CMG/NFIN, benchmark, and comparison evidence |
 | V2-M7 Integrated all-family validation | VALIDATED | Real ngspice all-family, five-anchor, four within-technology comparison jobs, benchmark, and native variation |
 | V2-M8 Spectre/provenance/docs | VALIDATED | `validation/evidence/v2_spectre_structural.json`, `v2_provenance.json`, rewritten public docs, and hash-bound claim review |
-| V2-M9 Release validation | IN_PROGRESS | Requires committed/pushed exact clone, attestation, bootstrap, all 20 gates, and only then the v2.0.0 tag |
+| V2-M9 Release validation | VALIDATED | GitHub clone of `7a83620f2504539f5bf0c1e4637594d3b0232e94` passed 20/20; compact evidence is `validation/evidence/v2_release_candidate.json`; this evidence-bound successor commit must be requalified before tagging |
 
 Status values are `NOT_STARTED`, `IN_PROGRESS`, `VALIDATED`, and `BLOCKED`.
 
@@ -118,6 +118,12 @@ The release evaluator implements the exact 20 IDs in
 `validation/release_gates.toml` and rejects a missing, skipped, evidence-free,
 or failed gate. Package/runtime metadata now identifies 2.0.0.
 
-No final v2 release gate is claimed yet. V2-M9 will run the full validator in a
-fresh exact-commit clone; `v2.0.0` must not be tagged unless that report shows
-20/20 required gates passed with valid evidence.
+An attested GitHub clone of candidate commit
+`7a83620f2504539f5bf0c1e4637594d3b0232e94` passed all 20 required gates with
+valid evidence; the full report SHA-256 is
+`76f643882c67bbe937a5ccfbd2c57b403de49ed78d1f4ad1fe63fa9a0682f32b`.
+
+Committing that compact evidence changes `HEAD`. Before tagging, the resulting
+final evidence-bound commit must repeat the exact-clone attestation/bootstrap
+and 20/20 release validator. The tag is authorized only by that final generated
+report.

@@ -3,8 +3,8 @@
 Gate / milestone: V2-M8 public-claim/provenance integration and V2-M9 release
 candidate preparation
 
-Status: release-candidate implementation complete; exact-commit clean-clone
-release gate pending
+Status: validated candidate; final evidence-bound commit requalification
+pending before tag
 
 Date: 2026-08-30
 
@@ -42,7 +42,8 @@ Compact summaries are:
 - `validation/evidence/v2_benchmark_adapters.json`;
 - `validation/evidence/v2_apm130_native.json`; and
 - `validation/evidence/v2_spectre_structural.json`; and
-- `validation/evidence/v2_provenance.json`.
+- `validation/evidence/v2_provenance.json`; and
+- `validation/evidence/v2_release_candidate.json`.
 
 The complete implementation regression suite reported 57 passing tests after
 documentation integration. Ruff, Python compilation, REUSE, exact provenance,
@@ -72,13 +73,36 @@ Spectre has not run in the reference environment. Its artifacts are model-only
 experimental/unverified; structural checking does not claim parse validity,
 numerical conformance, or compatibility with a particular Spectre version.
 
-## Final evidence condition
+## Exact-commit candidate result
 
-This file records readiness and development milestones; it does not substitute
-for V2-M9. The authoritative final evidence must come from an untouched,
-attested WSL2 + RHEL-compatible EL9 x86_64 clone at the exact candidate commit,
-after documented bootstrap. The final
-`apm validate --release --output .apm/results/v2-release` report must show:
+An untouched GitHub clone of commit
+`7a83620f2504539f5bf0c1e4637594d3b0232e94` was attested before bootstrap on
+WSL2 + AlmaLinux 9.7 x86_64 on ext4. The documented bootstrap rebuilt ngspice
+47, OpenVAF-Re-Loaded, PSP103/PSP103-NQS OSDI, and BSIM-CMG OSDI. The complete
+release command ran from 2026-08-30T02:14:39Z through 02:18:39Z and reported:
+
+```text
+schema: apm.release-validation.v2
+target: v2.0.0
+status: pass
+required_gate_count: 20
+passed_required_gate_count: 20
+every required gate passed: true
+every required gate evidence valid: true
+report sha256: 76f643882c67bbe937a5ccfbd2c57b403de49ed78d1f4ad1fe63fa9a0682f32b
+```
+
+The exact component report hashes and ordered gate IDs are retained in
+`validation/evidence/v2_release_candidate.json`.
+
+## Final tag condition
+
+Committing this evidence changes `HEAD`, so the candidate result does not by
+itself authorize a tag on the successor commit. The authoritative final
+evidence must come from another untouched, attested WSL2 + RHEL-compatible EL9
+x86_64 clone at the exact evidence-bound commit after documented bootstrap.
+The final `apm validate --release --output .apm/results/v2-release` report
+must again show:
 
 ```text
 schema: apm.release-validation.v2

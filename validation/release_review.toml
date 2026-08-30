@@ -1,6 +1,6 @@
 schema = "apm.release-review.v2"
 status = "complete"
-reviewed_utc = "2026-08-30T02:10:04Z"
+reviewed_utc = "2026-08-30T02:20:12Z"
 reviewer = "APM implementation agent"
 scope = [
   "v2.0.0 installation, runtime, and release-condition wording",
@@ -23,11 +23,11 @@ conclusion = "Public v2 claims match the implemented development evidence and pr
 [reviewed_files]
 "README.md" = "75492ce4a367319c28f790b8b1f949241a19dab0a439219cb60ce8b19f76cc30"
 "CHANGELOG.md" = "c549437bf6bbbf7f8ea1c154f3ac54fb19c97cc19829d706d7e4898677a17fd8"
-"STATUS.md" = "63f3f6761202b194ca7de1f34e600767325d1869a47b731401669ccf2afd51be"
+"STATUS.md" = "adbb16c6232f31f312e1b19090f2b1ec578385b4ace4a40042199f706c90c979"
 "THIRD_PARTY.md" = "24cf582a44a170285545cfa2ae3556360a805367f81742459a2feba36b3b5a0e"
 "docs/benchmark-variation.md" = "71911c1474324a8529cd7754f98dd9afe26b231ca7bf8a04cc57a8ddba76fbe6"
 "docs/characterization.md" = "1e684b948ad89bdecb276c8bfce23c2eeadb2df09e082a50f4cbc2a0e55924eb"
 "docs/native-variation.md" = "329e858f6cf323fd302efda1e8b4a2f6c6dccf861b9e71b69d71bbaf5b80aae5"
 "docs/release-validation.md" = "bb7b146670856343e923ef65152147bffc48721446e89abaddffc5cac6a6d878"
 "docs/spectre.md" = "a4f3689878bfa9a46e5ac2c6536bfcb21e0b6f6a641ead2f5d439aa30602b6c1"
-"validation/evidence/v2_release_readiness.md" = "4b3f3809c09292d71ab913bc413a408cea3d4557dc107a686ab55896cf43fe63"
+"validation/evidence/v2_release_readiness.md" = "6e629b3dc5876526b399df35c35eae4cd903e1d174a2640a7180a0b483eef41f"
