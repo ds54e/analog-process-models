@@ -10,6 +10,10 @@ import json
 import sys
 from pathlib import Path
 
+# This launcher is itself part of the pre-bootstrap observation. Importing the
+# project must not create __pycache__ before clean_clone inventories the tree.
+sys.dont_write_bytecode = True
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 

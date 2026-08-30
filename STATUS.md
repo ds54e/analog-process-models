@@ -386,6 +386,14 @@ passes:
 - all-family electrical characterization, all five comparison suites,
   Benchmark variation/passives, and APM130 native LV/HV variation.
 
+An initial candidate commit `0a411c4e316c74021055e71b3844c766344db1af`
+was rejected before bootstrap: the standard-library attestation launcher
+imported the project before inventory and thereby created its own
+`src/apm/__pycache__`. The gate failed closed as designed. That commit remains
+unchanged and is not the future tag target; the launcher now disables bytecode
+creation before importing the inventory implementation, and a new exact
+candidate must be committed and requalified from another fresh clone.
+
 Remaining work is to finish the final static/hash audit, create and push one
 immutable candidate future tag-target commit, qualify that exact commit from a
 genuine fresh HTTPS clone, and commit compact exact-candidate evidence/status

@@ -201,6 +201,13 @@ def test_clean_clone_tag_audit_detects_final_v3_tag(tmp_path: Path) -> None:
     assert clean_clone._tag_exists(root, "v3.0.0") is True
 
 
+def test_attestation_launcher_disables_bytecode_before_project_import() -> None:
+    source = (ROOT / "tools/attest_clean_clone.py").read_text(encoding="utf-8")
+    disable = source.index("sys.dont_write_bytecode = True")
+    project_import = source.index("from apm.clean_clone import")
+    assert disable < project_import
+
+
 def test_validate_cli_exposes_release_output() -> None:
     args = build_parser().parse_args(
         ["validate", "--release", "--output", "/tmp/apm-release-test"]
