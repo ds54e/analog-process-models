@@ -50,9 +50,11 @@ def test_post_v3_policy_and_historical_document_status_are_explicit() -> None:
     goal = (ROOT / "GOAL.md").read_text(encoding="utf-8")
     assert "APM v1.0.0, v2.0.0, and v3.0.0 are released and immutable" in agents
     assert "afecec29ea6ed0703ef441d4839fd40a238bef0b" in agents
-    assert "post-v3.0.0 public-readiness" in goal.lower()
-    assert "APM v3.0.0 is already released and immutable" in goal
-    assert "does not authorize publicization" in goal
+    assert "The repository is public" in agents
+    assert "post-v3.0.0 public maintenance" in goal.lower()
+    assert "APM v3.0.0 is released and immutable" in goal
+    assert "repository visibility: PUBLIC" in goal
+    assert "Public visibility does not change technical fidelity" in goal
 
     historical_markers = {
         "RELEASE_V3.md": "Historical record — frozen V3-N3 candidate contract",
@@ -67,6 +69,10 @@ def test_post_v3_policy_and_historical_document_status_are_explicit() -> None:
 
     assert (ROOT / "SECURITY.md").is_file()
     assert (ROOT / "CONTRIBUTING.md").is_file()
+    security = (ROOT / "SECURITY.md").read_text(encoding="utf-8")
+    normalized_security = " ".join(security.split())
+    assert "Report a vulnerability" in normalized_security
+    assert "Private Vulnerability Reporting is enabled" in normalized_security
 
 
 def test_psp_product_documentation_acknowledgement_is_preserved() -> None:

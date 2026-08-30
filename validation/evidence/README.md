@@ -21,7 +21,10 @@ V3-N3 exact-candidate evidence is `v3_release_candidate.json`. The annotated
 tag now exists at that exact candidate. Exact-tag post-release evidence is
 `v3_post_release_requalification.json`; it records the independent fresh-clone
 18/18 result before the GitHub Release was created. Post-v3 public-readiness
-maintenance is recorded separately in `public_readiness_v3.json`.
+maintenance is recorded separately in `public_readiness_v3.json`. That file's
+PRIVATE observations remain the historical pre-publication audit. The later
+controlled publication, `main` protection, and GitHub security-feature state
+are recorded in `publication_v3.json` without rewriting the earlier evidence.
 
 ## Status vocabulary
 

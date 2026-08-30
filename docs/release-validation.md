@@ -149,5 +149,8 @@ review and keep these boundaries explicit:
 - no physical Benchmark Global family-correlation claim;
 - no real Spectre parsing/simulation claim.
 
-Current release state and the public-readiness result are summarized in
-`STATUS.md`. Any repository-visibility change remains a separate human action.
+Current release, public-readiness, and completed publication state are
+summarized in `STATUS.md`. The historical pre-publication audit remains in
+`validation/evidence/public_readiness_v3.json`; the later controlled
+visibility/protection/security transition is recorded separately in
+`validation/evidence/publication_v3.json`.

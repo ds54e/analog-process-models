@@ -34,19 +34,27 @@ GitHub Release:
   CREATED / unchanged
 
 Repository visibility:
-  PRIVATE
+  PUBLIC
 
 Publicization:
-  READY FOR HUMAN DECISION
+  COMPLETE
+
+main protection:
+  ENABLED
+
+Private Vulnerability Reporting:
+  ENABLED
+
+Secret scanning / push protection:
+  ENABLED / ENABLED
 
 Blockers:
   none
 ```
 
-The current goal is post-v3 public-readiness and maintenance. It does not
-recreate a release artifact or authorize a visibility change. Current `main`
-contains post-release evidence/status and maintenance changes after the tagged
-commit.
+The current goal is stable post-v3 public maintenance. Publication did not
+recreate or modify a release artifact. Current `main` contains post-release
+evidence/status and maintenance changes after the tagged commit.
 
 ## Immutable releases
 
@@ -182,7 +190,33 @@ Key conclusions:
   visibility or unrelated features.
 
 No history rewrite, force-push, tag/release mutation, or visibility change
-occurred. Repository visibility remains PRIVATE.
+occurred during that audit. Its PRIVATE/pre-publication observations remain
+historically correct and were not rewritten after publication.
+
+## Controlled publication
+
+After the public-readiness audit passed with no blockers, the repository was
+changed once from PRIVATE to PUBLIC through GitHub's authenticated repository
+API. The unauthenticated GitHub API and public repository page independently
+confirmed the new state. Compact publication evidence is recorded separately
+at:
+
+`validation/evidence/publication_v3.json`
+
+The transition preserved repository name/owner, default branch `main`, all Git
+history, the annotated `v3.0.0` tag object, its peeled commit, and GitHub
+Release ID `379221176`. The two active repository rulesets are:
+
+- `Protect main history` (ID `21850319`): `deletion` and
+  `non_fast_forward` rules on `refs/heads/main`, with no bypass actor;
+- `Require pull requests for main contributions` (ID `21850335`): a
+  zero-approval pull-request rule on `refs/heads/main`, with an explicit owner
+  bypass for practical normal maintenance and no invented required checks.
+
+Private Vulnerability Reporting, secret scanning, and secret-scanning push
+protection are enabled. The existing description and topics remain present.
+Publication changes visibility and collaboration/security state only; it adds
+no technical-fidelity, calibration, or release claim.
 
 ## Claim boundaries
 
@@ -196,5 +230,6 @@ numeric source material for APM022/APM016F.
 
 ## Next action
 
-The only next action is **human review and separate explicit authorization to
-change repository visibility from private to public**.
+Future maintenance or model/release work requires a separately scoped task.
+There is no pending visibility decision and no active calibration or new
+release objective.

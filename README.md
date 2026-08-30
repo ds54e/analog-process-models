@@ -13,8 +13,8 @@ technologies.
 
 The immutable annotated `v3.0.0` tag has passed exact-tag post-release
 qualification (18/18 gates), and the GitHub Release exists. Post-release
-`main` contains evidence and public-readiness maintenance only. Repository
-visibility remains private pending a separate human decision.
+`main` contains release evidence and public maintenance. The repository is
+public, and APM v3.0.0 is the current released baseline.
 
 ## Scope
 

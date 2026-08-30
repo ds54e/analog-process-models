@@ -11,13 +11,13 @@ moving a released tag.
 
 For a security vulnerability, accidentally exposed credential, or a
 licensing/provenance concern that should not initially be public, use GitHub's
-**Report a vulnerability** action on the repository Security tab when that
-private-vulnerability-reporting option is available.
+**Report a vulnerability** action on the repository Security tab. Private
+Vulnerability Reporting is enabled for this public repository.
 
 GitHub documents [Private Vulnerability Reporting](https://docs.github.com/en/code-security/how-tos/report-and-fix-vulnerabilities/configure-vulnerability-reporting)
-for public repositories, so it is not currently exposed for this private
-repository. If the private reporting action is unavailable, open a minimal
-GitHub issue asking the maintainers to establish a private channel.
+and sends the report privately to repository maintainers. If GitHub's private
+reporting action is temporarily unavailable, open a minimal GitHub issue
+asking the maintainers to establish a private channel.
 Do not include exploit details, credentials, proprietary model content,
 personal information, or other sensitive evidence in that public issue.
 

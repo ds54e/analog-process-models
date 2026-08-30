@@ -593,9 +593,15 @@ def audit_claims(root: Path, contract: dict[str, Any]) -> dict[str, Any]:
         and review.get("process_noise_calibration_claimed") is False
         and review.get("universal_planar_finfet_width_claimed") is False
         and review.get("unsupported_noise_modes_claimed") is False
-        and review.get("repository_visibility_changed") is False
-        and review.get("repository_visibility") == "private"
-        and review.get("publicization_performed") is False
+        and review.get("repository_visibility_changed") is True
+        and review.get("repository_visibility") == "public"
+        and review.get("publicization_performed") is True
+        and review.get("publication_complete") is True
+        and review.get("main_protection_enabled") is True
+        and review.get("private_vulnerability_reporting_enabled") is True
+        and review.get("secret_scanning_enabled") is True
+        and review.get("push_protection_enabled") is True
+        and review.get("released_history_rewritten") is False
         and review.get("v3_tag_created") is True
         and review.get("github_release_created") is True
         and review.get("public_readiness_cleanup_complete") is True

@@ -32,8 +32,10 @@ tagged commits, rewrite published history, or force-push. Current `main` is the
 post-v3 development and public-maintenance line; it is not the v3.0.0 tag
 target.
 
-The repository remains private pending a separate human decision. Never change
-repository visibility without explicit authorization for that exact action.
+The repository is public. Publication followed a passing pre-publication audit
+and is recorded in `validation/evidence/publication_v3.json`. Do not change the
+repository owner, name, default branch, visibility, or security settings
+without explicit authorization for that exact action.
 
 ## Current mission and instruction hierarchy
 
@@ -161,10 +163,10 @@ ship the file.
 Never commit proprietary PDK/model content, private comparison/oracle decks,
 credentials, tokens, passwords, personal/private data, generated OSDI
 binaries, virtual environments, caches, or large simulator output. Keep those
-under ignored local paths where legitimate. Public-readiness work must inspect
-Git history as well as the current tree; do not rewrite history unless a real
-sensitive or redistribution-blocking artifact is found and separate human
-remediation is authorized.
+under ignored local paths where legitimate. Public maintenance must preserve
+the completed current-tree and whole-history audit boundary; do not rewrite
+history unless a real sensitive or redistribution-blocking artifact is found
+and separate human remediation is authorized.
 
 ## Scope discipline
 
@@ -192,8 +194,9 @@ ordinary post-release user requirement.
 
 High autonomy is authorized for in-scope research, implementation, local
 toolchain repair, tests, documentation, coherent commits, and normal pushes.
-Do not force-push, rewrite history, change repository visibility/security
-settings, or alter released tags/releases.
+Do not force-push, rewrite history, alter released tags/releases, or change
+repository visibility/security settings without explicit authorization for
+that exact action.
 
 Stop and report a genuine credential, proprietary model, ambiguous
 redistribution right, personal/private history artifact, or any issue that
