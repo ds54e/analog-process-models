@@ -12,12 +12,12 @@ This is the compact persistent progress index. It is not validation evidence by 
 - Current development line: post-v2 `main`
 - Current target: v3 stationary small-signal MOS-noise characterization
 - Completed milestones: `V3-N0 Four-engine noise spike`; `V3-N1 Noise acquisition and fit-method qualification`
-- Current milestone: `V3-N1 complete`; V3-N2 has not started
-- State: `V3_N1_COMPLETE`
+- Current milestone: `V3-N2 Catalog-wide noise dataset and comparison qualification`
+- State: `V3_N2_NOT_STARTED`
 - v3 release eligible: NO
-- Blockers: none
+- Blockers: none recorded before V3-N2 implementation
 
-APM v2.0.0 is immutable. V3-N0 is complete and does not modify the released v2 model-card baseline.
+APM v2.0.0 is immutable. V3-N0 and V3-N1 are complete. V3-N2 begins catalog-wide application of the already qualified noise measurement/acquisition/fitting method.
 
 ## Reference toolchain
 
@@ -28,7 +28,7 @@ Reuse the validated environment unless evidence requires repair:
 - Linux ext4 workspace
 - Python 3.9.25
 - ngspice 47 with predictor/OSDI
-- project-local OpenVAF-ReLoaded v24.0.2mob
+- project-local OpenVAF-Re-Loaded v24.0.2mob
 - native BSIM3
 - native BSIM4
 - PSP103 OSDI
@@ -36,7 +36,7 @@ Reuse the validated environment unless evidence requires repair:
 
 Required `.noise` reference jobs use the normal Sparse solver, not KLU.
 
-## V3-N0 retained baseline
+## Frozen V3-N0 foundation
 
 Normative base specification:
 
@@ -50,138 +50,19 @@ Compact exact-commit evidence:
 
 `validation/evidence/v3_n0_noise_spike.json`
 
-V3-N0 status:
+Key retained conclusions:
 
-- acceptance: 13/13 pass;
-- repository regression: 68 tests passed;
-- Ruff / REUSE / provenance / static validation passed;
-- resistor `4*k*T/R` reference passed;
-- 1-ohm CCVS current probe demonstrated transparent/noiseless behavior;
-- OpenVAF -> OSDI white/flicker fixtures passed;
-- internal correlated-noise fixture matched the correlated result and decisively rejected the independent interpretation;
-- native BSIM3, PSP103 OSDI, native BSIM4, and BSIM-CMG OSDI all completed the canonical four-engine spike;
-- parameter-level effective-noise provenance was captured;
-- APM350/APM022/APM016F model cards remained unchanged from `v2.0.0`.
+- analytic resistor/probe/white/flicker/correlated OSDI fixtures passed;
+- native BSIM3, PSP103 OSDI, native BSIM4, and BSIM-CMG OSDI execute real stationary noise;
+- canonical external drain-terminal/gate-referred noise semantics are established;
+- parameter-level effective noise provenance is available;
+- APM-authored model cards were not noise-tuned.
 
-Canonical V3-N0 point:
+## Frozen V3-N1 method
 
-```text
-T = 27 degC
-L/Lmin = 2
-Planar W = family/device default
-FinFET NFIN = 1
-VOUT = 0.5 * reference_vdd
-gm/Id target = 15 1/V
-1 Hz -> 100 MHz
-20 points/decade
-```
+Normative method specification:
 
-Representative V3-N0 observations:
-
-| Engine / selector | gm/Id | Provisional fit result |
-| --- | ---: | --- |
-| BSIM3 `apm350/general/nmos` | 14.99089 | white valid; flicker/corner not observed |
-| PSP103 `apm130/lv/nmos` | 14.99458 | white/flicker/corner valid; corner about 2.77 MHz |
-| BSIM4 `apm045/vtg/nmos` | 15.00039 | flicker valid; white/corner not observed by 100 MHz |
-| BSIM-CMG `apm016f/svt/nfet` | 14.99705 | white/flicker/corner valid; corner about 569 kHz |
-
-The BSIM4 result is the primary reason V3-N1 must qualify the acquisition/fitting method before all-device expansion.
-
-## V3-N1 normative contract
-
-Current goal:
-
-- `GOAL.md`
 - `NOISE_N1.md`
-
-V3-N1 preserves the V3-N0 measurement semantics and resolves the remaining method questions.
-
-### Acquisition policy to implement/qualify
-
-Every canonical job begins at:
-
-```text
-1 Hz -> 100 MHz
-20 points/decade
-```
-
-If a valid white region is not observed, rerun the complete spectrum using bounded upper-frequency extension:
-
-```text
-1 GHz
-10 GHz
-100 GHz
-```
-
-Stop at the first valid white region. If no valid white region appears by 100 GHz, preserve an explicit null result; do not force a fit.
-
-The intended long-term model is adaptive acquisition rather than forcing every technology to one unnecessarily large common frequency endpoint.
-
-### Fit method to implement/qualify
-
-Preferred identity:
-
-`apm.noise-fit.contiguous-regions@1.0.0`
-
-Required properties:
-
-- local log-slope classification;
-- contiguous flicker/white regions;
-- minimum logarithmic spans and point counts;
-- whole-region fit/flatness quality gates;
-- deterministic candidate selection;
-- support for an interior white plateau before later high-frequency shaping;
-- fail-closed null metrics when no valid region exists;
-- no silent movement of windows to manufacture a result.
-
-The V3-N0 fixed-window method remains historical/provisional evidence only.
-
-### Low-VDS diagnostics
-
-Run all four representative engines at:
-
-```text
-VOUT = 50 mV effective
-gm/Id = 15 1/V within 1%
-T = 27 degC
-L/Lmin = 2
-```
-
-Also run one diagnostic-only BSIM-CMG low-VDS case with runtime `TNOIMOD=1`, without editing the production APM016F card.
-
-## V3-N1 completion criteria (satisfied)
-
-The exact implementation commit was required to demonstrate, and did demonstrate:
-
-1. V3-N0 regression remains green;
-2. deterministic synthetic tests qualify the new region detector;
-3. four canonical engines use bounded adaptive acquisition;
-4. APM045/VTG receives the required >100 MHz diagnostic when necessary;
-5. four low-VDS diagnostics complete with explicit raw/status evidence;
-6. diagnostic BSIM-CMG `TNOIMOD=1` low-VDS capability is exercised without card modification;
-7. effective parameter provenance remains complete;
-8. Sparse/no-KLU requirements remain satisfied;
-9. pytest, Ruff, REUSE, provenance, and static validation pass;
-10. compact exact-commit evidence is committed, preferred path `validation/evidence/v3_n1_noise_method.json`;
-11. the resulting method/acquisition policy is frozen in repository documentation;
-12. an evidence-based V3-N2 all-26-device readiness decision is recorded.
-
-## Current exclusions
-
-V3-N1 does not include:
-
-- all 26-device noise expansion;
-- process-noise coefficient tuning/calibration;
-- noise variation/Monte Carlo;
-- transient noise;
-- RTS/RTN;
-- PSS/PNoise;
-- oscillator phase noise;
-- full terminal noise-correlation matrices;
-- real Spectre validation;
-- package version bump or v3 tag.
-
-## V3-N1 completion freeze
 
 Exact implementation commit:
 
@@ -191,87 +72,207 @@ Compact exact-commit evidence:
 
 `validation/evidence/v3_n1_noise_method.json`
 
-Evidence SHA-256:
+Frozen identities:
 
-`687841b8f912812e511be7af741cf90ed283325808b4926b816969c78967a5f7`
+```text
+apm.noise-fit.contiguous-regions@1.0.0
+apm.noise-acquisition.bounded-white-search@1.0.0
+```
 
-Frozen implementation:
+Frozen acquisition starts at:
 
-- fit identity `apm.noise-fit.contiguous-regions@1.0.0`;
-- centered approximately 0.5-decade local log-slope estimator (11 points at
-  20 points/decade);
-- exact flicker and white thresholds from `NOISE_N1.md`, deterministic
-  contiguous-run selection, candidate diagnostics, median white floor,
-  boundary-checked corner, and fail-closed null metrics;
-- frozen acquisition policy
-  `apm.noise-acquisition.bounded-white-search@1.0.0` with complete sweeps at
-  100 MHz, 1 GHz, 10 GHz, and 100 GHz, stopping at the first valid white
-  region;
-- per-attempt raw spectrum, source breakdown, parameter snapshot, fit
-  diagnostics, hashes, and Sparse/no-KLU audit;
-- `apm noise-method-check` combining the retained V3-N0 regression, eight
-  deterministic synthetic cases, four canonical adaptive runs, four 50 mV
-  VOUT adaptive runs, and the low-VDS BSIM-CMG `TNOIMOD=1` diagnostic.
+```text
+1 Hz -> 100 MHz
+20 points/decade
+```
 
-The fresh-output exact-implementation-commit run passed all 10 N1 checks, the
-nested V3-N0 regression passed 13/13, and the deterministic synthetic fit
-qualification passed 8/8. Exact results:
+and extends complete sweeps only as needed to:
 
-| Selector | Canonical selected stop | 50 mV selected stop | Canonical white result | 50 mV white result |
-| --- | ---: | ---: | --- | --- |
-| `apm350/general/nmos` | 100 MHz | 100 MHz | valid | valid |
-| `apm130/lv/nmos` | 1 GHz | 1 GHz | valid | valid |
-| `apm045/vtg/nmos` | 10 GHz | 1 GHz | valid | valid |
-| `apm016f/svt/nfet` | 100 MHz | 100 MHz | valid | valid |
+```text
+1 GHz
+10 GHz
+100 GHz
+```
 
-APM045 canonical acquisition did not expose an eligible plateau in the
-100 MHz or 1 GHz attempts. The 10 GHz attempt selected the first eligible
-interior plateau, approximately 79.43 MHz through 5.623 GHz, and stopped
-without a 100 GHz run. The white floor was about
-`5.392e-24 A^2/Hz` and the fitted corner about 9.28 MHz.
+stopping at the first valid white region. Missing fit regions remain explicit null results.
 
-All four low-VDS biases resolved within 0.071% of gm/Id=15 1/V.
-The runtime-only low-VDS BSIM-CMG diagnostic changed effective `TNOIMOD` from
-the production value 0 to 1, exposed a nonzero `corl` source, used Sparse, and
-left the production APM016F card hash unchanged.
+V3-N1 exact qualification passed 10/10, nested V3-N0 13/13, deterministic fit cases 8/8, 79 pytest tests, Ruff, REUSE 236/236, provenance, and static validation.
 
-Exact generated-report hashes:
+Representative canonical selected stops from V3-N1:
 
-- V3-N1 full report:
-  `b986f93b9844628627ccbd4e8446f58fb4552e2e7a4662904e747f497f6442dd`;
-- nested V3-N0 report:
-  `8f6e723069ce94d32deb112cfa232109d4c8f6b0766c07b2973ea80274d6fa46`;
-- retained V3-N0 harness report:
-  `78ee676ffda3eb17520c23505350c9b0737b122886c2159ff0b519a039c8ff70`;
-- synthetic fit report:
-  `a0eaa991f8de7fe111d9f272f737aea764f92373e370c68bd15bd502e52df2ac`;
-- exact static validation:
-  `591037e3c3db60c95c52d68a6ccff685aa1d09f1d1e7fa50627e978a8dfd0811`;
-- exact provenance validation:
-  `cebed1aecf4b55b4a3e946f9d674283758ae939047ec001cd877dc72ef473c63`;
-- exact doctor report:
-  `de97c84171d304b1362c5f21bd1dfd9498d74b9f8efd60fe0eb37c47f76d0f4f`.
+| Selector | Selected stop |
+| --- | ---: |
+| `apm350/general/nmos` | 100 MHz |
+| `apm130/lv/nmos` | 1 GHz |
+| `apm045/vtg/nmos` | 10 GHz |
+| `apm016f/svt/nfet` | 100 MHz |
 
-Exact-commit repository validation also passed 79 tests, Ruff, REUSE 236/236,
-provenance, claim/distribution/catalog/migration audits, and static Spectre
-structure. Every required acquisition attempt attested normal Sparse, no
-attempt selected KLU, and no critical simulator diagnostic was retained.
+The APM045/VTG 10 GHz attempt found an interior white plateau around 79.43 MHz through 5.623 GHz, demonstrating why fixed terminal review windows are not used.
 
-Parameter interrogation remains frozen per engine: targeted final `showmod`
-values for native BSIM3/BSIM4 (with only the documented ngspice-47 BSIM4
-`LINTNOI=0` query fallback), and OSDI `showmod` values bound to explicit card
-occurrences or pinned Verilog-A defaults for PSP103/BSIM-CMG. Raw backend
-source names remain model-specific and are not mapped into a fake universal
-taxonomy.
+The 50 mV diagnostic profile remains diagnostic. A runtime-only BSIM-CMG `TNOIMOD=1` diagnostic demonstrated the correlated path without modifying the production APM016F card.
 
-The N1 method is ready for V3-N2 expansion to all 26 public MOS devices. That
-recommendation covers characterization of existing compact-model predictions;
-it does not authorize process-noise coefficient tuning or a silicon accuracy
-claim. Retain the 50 mV VOUT case as a diagnostic profile, not a replacement
-for the canonical half-VDD point.
+## V3-N2 normative contract
+
+Current goal/specification:
+
+- `GOAL.md`
+- `NOISE_N2.md`
+
+V3-N2 applies the frozen N1 method to the full manifest-discovered public MOS catalog.
+
+Current catalog baseline:
+
+```text
+5 technologies
+13 Electrical Families
+26 public MOS devices
+```
+
+Runtime orchestration must discover these from manifests rather than use a hard-coded 26-device list.
+
+## V3-N2 required dataset plan
+
+### A. Canonical temperature matrix
+
+Every public device:
+
+```text
+T = -40, 27, 85, 125 degC
+L/Lmin = 2
+Planar W = default
+FinFET NFIN = 1
+VOUT = 0.5 * reference_vdd
+gm/Id = 15 1/V target
+```
+
+Current logical request count before cross-dataset deduplication: 104.
+
+### B. Inversion sweep
+
+Every public device at 27 degC:
+
+```text
+gm/Id = 5, 10, 15, 20, 25 1/V
+```
+
+with canonical geometry and half-VDD output bias.
+
+Reuse the identical 15 1/V request from the temperature matrix.
+
+### C. Length scaling
+
+Every public device at 27 degC / gm/Id=15 using each manifest-declared valid `characterization_lengths_m`, default planar W, and FinFET NFIN=1.
+
+### D. FinFET NFIN scaling
+
+Every APM016F public NFET/PFET at 27 degC / gm/Id=15 / L/Lmin=2 using every manifest-declared `characterization_nfin`.
+
+Planar width scaling is explicitly deferred because the current manifests do not define a research-backed characterization width grid.
+
+## V3-N2 request orchestration
+
+N2 must create a deterministic job plan and stable request identity before execution.
+
+Overlapping physical requests from temperature/inversion/geometry/comparison views should be simulated once and reused only when the request and semantic/tool/model hashes match.
+
+N2 must support strict resume semantics for a large interrupted catalog run. Preferred interface:
+
+```text
+apm noise-catalog-check --output <dir>
+apm noise-catalog-check --output <dir> --resume
+```
+
+Resume must reject stale/mismatched artifacts rather than silently treating them as current evidence.
+
+## V3-N2 reachability semantics
+
+Requested gm/Id targets are not silently clipped.
+
+Every logical request must have an explicit terminal state, including at least:
+
+- `validated`;
+- `target_not_reachable`;
+- `simulation_failed`.
+
+A valid spectrum with unavailable white/flicker/corner metrics remains a valid spectrum result and must remain visible in summaries.
+
+## V3-N2 required comparisons
+
+### Threshold-family comparisons
+
+At 27 degC, both polarities where present:
+
+```text
+APM045: vtl / vtg / vth
+APM022: lvt / svt / hvt
+APM016F: lvt / svt / hvt
+```
+
+Produce separate:
+
+- equal-inversion gm/Id=15 view;
+- equal-bias VCTRL=0.5*VDD, VOUT=0.5*VDD view.
+
+No universal multi-Vt noise ordering is assumed.
+
+### Cross-process anchors
+
+At canonical 27 degC equal inversion, compare N and P separately:
+
+```text
+apm350/general
+apm130/lv
+apm045/vtg
+apm022/svt
+apm016f/svt
+```
+
+Do not create planar-per-width versus FinFET-per-fin drain-noise ratios.
+
+Common comparison frequencies are intended to include 1 Hz, 1 kHz, 1 MHz, and 10 MHz. Common-band integrated gate-referred noise is 1 Hz through 10 MHz.
+
+## V3-N2 explicit exclusions
+
+Do not add in this milestone:
+
+- new/tuned process-noise coefficients;
+- noise Monte Carlo/variation;
+- process-noise correlation models;
+- transient noise;
+- RTS/RTN;
+- PSS/PNoise;
+- oscillator phase noise;
+- full terminal noise-correlation matrices;
+- invented planar width sweeps;
+- fake planar/FinFET effective width conversion;
+- real Spectre validation;
+- package version bump;
+- v3 tag/release;
+- repository visibility changes.
+
+## V3-N2 completion evidence required
+
+V3-N2 is not complete until a coherent implementation commit is qualified from fresh output and compact exact-commit evidence is committed, preferred path:
+
+`validation/evidence/v3_n2_noise_catalog.json`
+
+At minimum the exact implementation commit must demonstrate:
+
+1. V3-N0 regression green;
+2. V3-N1 method regression green;
+3. 5/13/26 manifest coverage;
+4. complete explicit-status temperature plan;
+5. complete explicit-status gm/Id plan;
+6. length and NFIN scaling coverage;
+7. threshold-family equal-bias/equal-inversion comparisons;
+8. N/P cross-process anchor comparisons;
+9. strict resume/reuse qualification including stale-result rejection;
+10. Sparse/no-KLU compliance;
+11. pytest/Ruff/REUSE/provenance/static validation pass;
+12. APM350/APM022/APM016F model-card immutability relative to v2.0.0;
+13. final coverage/fit/adaptive-stop/comparison summary in `STATUS.md`;
+14. an evidence-based recommendation for the next milestone.
 
 ## Current next action
 
-Await the next repository goal for V3-N2 all-device expansion. Do not change
-package version, create a v3 tag, or begin process-noise calibration from the
-V3-N1 capability result alone.
+Implement `GOAL.md` completely using `NOISE_N2.md` as the N2 technical contract. Produce real-tool catalog evidence and then decide whether the next milestone should be v3 release hardening or additional characterization work.
