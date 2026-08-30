@@ -1,4 +1,4 @@
-# APM v3 Noise Characterization Foundation Goal
+# APM V3-N1 Noise Method Qualification Goal
 
 ## 0. Repository state
 
@@ -7,155 +7,64 @@ Work on the existing repository:
 - repository: `https://github.com/ds54e/analog-process-models`
 - project: Analog Process Models (APM)
 - released baseline: `v2.0.0` at `3cc6cfea4932cc40f2d693784d0a569926cdf399`
+- completed V3-N0 implementation commit: `9c9f5b132829bda0e06045981e34e0dd2a41deb4`
+- V3-N0 exact-commit evidence: `validation/evidence/v3_n0_noise_spike.json`
 
-APM v2.0.0 is complete, released, and immutable. Current `main` is the post-v2 development line.
+APM v2.0.0 is complete, released, and immutable. V3-N0 is complete. Current `main` is the post-v2 development line.
 
 Do not change repository visibility. Do not move/rewrite the v2 tag. Do not create/tag v3.0.0 as part of this goal.
 
 ## 1. Goal
 
-Build and validate the **v3 stationary small-signal MOS-noise characterization foundation** and complete the required four-engine spike defined in `NOISE_CHARACTERIZATION.md`.
+Implement and validate **V3-N1: Noise Acquisition and Fit-Method Qualification**.
 
-This goal is deliberately evidence-first. Do not jump directly to a full v3 release or tune new APM process-noise coefficients before the framework/harness/backend behavior is proven.
+Read and follow `NOISE_N1.md` completely. It is the normative technical contract for this milestone, with `NOISE_CHARACTERIZATION.md` providing the V3-N0/base noise semantics.
 
-The main deliverable is a working, tested, machine-readable noise characterization path that demonstrates what the existing APM models actually predict and records where those predictions come from.
+The purpose of V3-N1 is to freeze the acquisition and fitting methodology before expanding noise characterization to all 26 public MOS devices.
 
-## 2. Preserve the v2 baseline
+Specifically:
 
-Do not redesign working v2 functionality merely because v3 is starting.
+1. replace the provisional fixed-frequency fit windows with a versioned contiguous-region detector;
+2. implement bounded adaptive upper-frequency extension when a white plateau is not observed;
+3. diagnose FreePDK45 VTG above 100 MHz rather than forcing a white fit;
+4. add low-VDS diagnostics on all four representative engines;
+5. qualify a BSIM-CMG `TNOIMOD=1` low-VDS diagnostic without modifying the production APM016F card;
+6. produce exact-implementation-commit evidence and a decision on readiness for V3-N2 all-device expansion.
 
-Keep the existing:
+## 2. Preserve validated baselines
+
+Do not redesign or weaken working V2/V3-N0 functionality.
+
+Preserve:
 
 - Technology -> Electrical Family -> Device manifest architecture;
-- Operating Profile and Backend Binding structure;
-- public family-qualified device identities;
-- planar `w,l` and FinFET `l,nfin` geometry semantics;
-- canonical finite-difference gm/gds methodology;
-- existing `apm.characterization.v2` result domain;
-- v2 comparison/benchmark/native-variation behavior unless a narrow shared helper refactor is clearly justified.
+- released `apm.characterization.v2` behavior;
+- independent `apm.noise-characterization.v1` domain;
+- canonical 1-ohm CCVS drain-current probe;
+- canonical external drain-terminal and gate-referred PSD semantics;
+- precise gm/Id bias refinement;
+- parameter-level noise provenance;
+- raw source breakdown;
+- the V3-N0 analytic harness fixtures;
+- ngspice 47 + normal Sparse solver reference path;
+- existing model cards and v2 tag.
 
-Prefer a separate `apm.noise-characterization.v1` result domain.
+The V3-N0 exact-commit qualification must remain reproducible and passing after V3-N1 changes.
 
-## 3. Required reading and implementation authority
+## 3. Required four-engine set
 
-Follow `AGENTS.md` and `NOISE_CHARACTERIZATION.md` completely.
+Continue using:
 
-Treat `NOISE_CHARACTERIZATION.md` as the normative technical contract for this goal. When it deliberately leaves a value unfrozen, resolve it from real spike evidence rather than guessing.
+- native BSIM3: `apm350/general/nmos`
+- PSP103 OSDI: `apm130/lv/nmos`
+- native BSIM4: `apm045/vtg/nmos`
+- BSIM-CMG OSDI: `apm016f/svt/nfet`
 
-## 4. Reuse the existing toolchain
+Do not expand to all 26 devices in this milestone.
 
-First inventory the current local environment and reuse it when valid:
+## 4. Canonical acquisition
 
-- WSL2 + AlmaLinux/RHEL-compatible EL9 x86_64;
-- Python environment;
-- ngspice 47 reference build;
-- project-local OpenVAF-ReLoaded;
-- existing PSP103 and BSIM-CMG OSDI build artifacts/caches.
-
-Do not rebuild solved infrastructure without a reason.
-
-If repair/rebuild is required, keep it reproducible and record the reason/evidence.
-
-## 5. Implement an independent noise domain
-
-Create a small dedicated implementation rather than growing `characterize.py` into a monolith.
-
-Preferred responsibilities, names may differ if a smaller design is better:
-
-- `noise.py` — operating-point resolution, fixture generation, ngspice execution, parsing, result persistence;
-- `noise_fit.py` — optional spectrum fitting/derived metrics, with explicit invalid/failure status;
-- `noise_validate.py` — analytic fixtures, four-engine spike validation, evidence generation.
-
-Add CLI surface sufficient to run the spike and individual selectors, for example:
-
-```text
-apm noise <technology/family/device> --output ...
-apm noise-check --output ...
-```
-
-Do not create a generic compact-model plugin system. Small engine-specific snapshot adapters are acceptable where parameter-provenance interrogation genuinely differs.
-
-## 6. Validate the measurement harness before MOS devices
-
-Implement and run, in order:
-
-1. analytic resistor short-circuit noise reference;
-2. CCVS/current-probe transparency check;
-3. minimal APM-owned Verilog-A `white_noise` OSDI fixture;
-4. minimal APM-owned Verilog-A `flicker_noise` OSDI fixture;
-5. analytic APM-owned correlated internal-noise network through OpenVAF -> OSDI -> ngspice.
-
-The correlated fixture must distinguish a correctly correlated result from an independent-source interpretation by a large deterministic ratio, not by visual inspection.
-
-Persist fixture source, generated artifacts/hashes as appropriate, commands, tool identities, numerical expected/observed values, tolerances, and logs/evidence.
-
-Use the normal Sparse solver for required `.noise` validation. Do not use KLU as the reference noise solver.
-
-## 7. Implement precise equal-inversion bias resolution
-
-For the canonical noise point, resolve:
-
-- `gm/Id target = 15 1/V`;
-- `VOUT = 0.5 * reference_vdd`;
-- `L/Lmin = 2`;
-- planar default width or FinFET `NFIN=1`;
-- 27 degC.
-
-Do not merely select the nearest old DC sweep row.
-
-Use existing DC characterization as a bracket/prior, then re-run/refine the control bias and recompute canonical finite-difference gm/gds until the target is met within the provisional 1% relative error requirement or a real reachability failure is recorded.
-
-Persist the complete target-resolution diagnostics.
-
-## 8. Implement the canonical noise harness/result
-
-Implement the candidate 1-ohm ideal transimpedance/current-probe approach from `NOISE_CHARACTERIZATION.md`, subject to the analytic probe validation.
-
-Required canonical persisted quantities include:
-
-- `s_idrain_terminal_a2_per_hz`;
-- `s_vgate_equivalent_v2_per_hz`;
-- complex external gate-to-measured-drain transfer (`y_dg_real_s`, `y_dg_imag_s`);
-- the resolved DC operating point and finite-difference gm/gds;
-- frequency profile/method identity;
-- source breakdown when ngspice exposes it;
-- complete noise-model/effective-parameter snapshot and provenance.
-
-Do not call the APM canonical external result `sid`.
-
-Use ngspice PSD rather than amplitude spectral density as the stored canonical numeric basis. Human-facing derived/display quantities may use square roots if clearly named.
-
-## 9. Effective noise-parameter snapshot
-
-For each of the four required engines, determine and persist the effective noise selectors/coefficients actually used by the simulation.
-
-Distinguish:
-
-- explicit upstream/model-card values;
-- explicit APM values;
-- compact-model defaults;
-- backend-resolved defaults;
-- values derived internally by the model;
-- unknown/unresolvable values.
-
-For native BSIM3/BSIM4, investigate ngspice model interrogation such as `showmod` as the preferred final-value source.
-
-For PSP103/BSIM-CMG OSDI, experimentally determine whether backend interrogation is sufficiently complete. If not, implement a narrow engine-specific resolver based on the pinned vendored Verilog-A parameter declarations plus explicit model-card overrides.
-
-Do not hardcode a universal raw compact-model parameter API.
-
-## 10. Complete the four-engine spike
-
-Required selectors:
-
-```text
-apm350/general/nmos
-apm130/lv/nmos
-apm045/vtg/nmos
-apm016f/svt/nfet
-```
-
-Required provisional conditions:
+Canonical operating point remains:
 
 ```text
 T = 27 degC
@@ -163,126 +72,109 @@ L/Lmin = 2
 Planar W = family/device default
 FinFET NFIN = 1
 VOUT = 0.5 * reference_vdd
-gm/Id target = 15 1/V
-frequency = 1 Hz ... 100 MHz
+gm/Id = 15 1/V within 1%
+```
+
+Base spectrum remains:
+
+```text
+1 Hz -> 100 MHz
 20 points/decade
 ```
 
-For every engine:
-
-- real ngspice execution must complete;
-- required PSD values must be finite/non-negative at retained points;
-- gate-referred PSD and complex transfer must be persisted;
-- source summaries must be captured when available;
-- effective noise parameter/provenance snapshot must be produced;
-- logs must be audited for unsupported/noise-specific/critical diagnostics.
-
-Do not change APM350/APM022/APM016F noise coefficients to make the spike pass.
-
-## 11. PSP and BSIM-CMG correlation handling
-
-Do not assume OSDI correlated noise is supported or unsupported solely from the OSDI version number.
-
-Use the analytic correlated-network fixture to establish what the current OpenVAF/OSDI/ngspice path actually preserves.
-
-Inspect the pinned PSP/BSIM-CMG Verilog-A implementation as necessary to understand its internal-node correlation construction.
-
-If the generic fixture passes, additionally exercise representative PSP/BSIM-CMG model modes and record what correlation claim is justified by real-tool evidence.
-
-Do not enable/change production model selectors merely to obtain a desired result unless the selector is explicitly part of a separate diagnostic experiment and the baseline model remains unchanged.
-
-## 12. APM130 native noise oracle investigation
-
-Investigate PSP native operating-point noise quantities such as `sid` and `sfl` using the existing native-vector binding mechanism or a narrow extension.
-
-Use them as validation oracles/trend evidence only when their semantics are established.
-
-Do not demand equality between PSP internal/native channel quantities and the APM external drain-terminal total PSD.
-
-Persist any oracle comparison and its semantic caveats.
-
-## 13. Spectrum fitting is secondary to raw evidence
-
-Persist raw spectra first.
-
-Implement fitting only after the four-engine spectra exist. Candidate outputs include:
-
-- flicker exponent;
-- flicker coefficient;
-- white floor;
-- flicker corner;
-- `gamma_eff_total`;
-- explicitly band-limited integrated noise.
-
-Do not silently choose a last-frequency point as a white floor or move fitting windows until something passes.
-
-If a fit is not justified, persist explicit invalid/not-observed status and null derived metric.
-
-Do not freeze final fit thresholds before the four-engine evidence is reviewed. If you implement provisional thresholds, label/version them provisional and make them easy to replace without changing the raw result contract.
-
-## 14. Tests
-
-Add unit/property/integration tests sufficient to prevent:
-
-- FinFET fake-width regression;
-- wrong gm/Id target resolution;
-- probe sign/scale errors;
-- accidental ASD/PSD unit confusion;
-- source-breakdown names being treated as universal semantics;
-- missing parameter-level provenance;
-- silent fit fallback;
-- KLU use in required noise jobs;
-- OSDI correlation regression after the analytic fixture is established.
-
-Keep existing v2 tests green unless a deliberate, documented shared-helper change requires a narrowly justified update.
-
-## 15. Evidence and status
-
-Create compact machine-readable evidence under `validation/evidence/` for the v3 spike.
-
-Record in `STATUS.md`:
-
-- spike implementation state;
-- exact four-engine results;
-- harness/correlation results;
-- parameter-interrogation results;
-- any unresolved decisions;
-- explicit recommendations for the next v3 milestone.
-
-Do not claim a full v3 release from this goal.
-
-## 16. Decisions to make only after evidence
-
-After the spike, use the results to decide and document, but do not guess beforehand:
-
-- final required frequency range/points-per-decade;
-- final white/flicker fit method/tolerances;
-- the exact PSP/BSIM-CMG correlation-support claim;
-- whether backend model interrogation or source parsing is authoritative per engine;
-- whether one common frequency profile works for all 26 public devices;
-- whether a low-VDS diagnostic profile should become required;
-- whether the next phase should characterize all 26 devices;
-- whether APM-authored generic noise coefficients should be researched for a later v3.1-style milestone;
-- whether a full terminal noise-correlation matrix is worth a later extension.
-
-## 17. Completion criteria
-
-Do not stop at planning/scaffolding.
-
-This goal is complete only when every initial-spike acceptance criterion in `NOISE_CHARACTERIZATION.md` is exercised with real evidence or a genuine blocker is documented.
-
-A successful completion should leave the repository in this state:
+If no valid white region is detected, extend the complete sweep in bounded decade steps through:
 
 ```text
-v2.0.0 release remains immutable and valid
-+
-working v3 noise domain
-+
-validated analytic noise fixtures
-+
-validated BSIM3 / PSP103-OSDI / BSIM4 / BSIM-CMG-OSDI spike
-+
-parameter-level noise provenance snapshots
-+
-explicit evidence-based list of what is ready for the next v3 milestone
+1 GHz
+10 GHz
+100 GHz
 ```
+
+Stop at the first valid white region. If none is observed by 100 GHz, record the explicit null result and do not force a fit.
+
+## 5. Fit-method implementation
+
+Implement the method specified in `NOISE_N1.md`, preferred identity:
+
+```text
+apm.noise-fit.contiguous-regions@1.0.0
+```
+
+The detector must use local log-slope plus contiguous span/point-count/quality checks. It must be capable of finding an interior white plateau before later high-frequency spectral shaping.
+
+Do not reinterpret the historical V3-N0 fixed-window fit results. Persist new method identity/version and candidate-region diagnostics.
+
+Add deterministic synthetic tests including pure white, pure flicker, known flicker+white corner, interior plateau with high-frequency rise, truncated no-white, no-flicker, insufficient-span, and malformed input cases.
+
+## 6. Low-VDS diagnostics
+
+Run the same four engines at:
+
+```text
+VOUT = 50 mV effective
+gm/Id = 15 1/V within 1%
+T = 27 degC
+L/Lmin = 2
+```
+
+Preserve raw PSD, gate-referred PSD, complex transfer, source breakdown, provenance, fit status, bias diagnostics, and simulator-log audit.
+
+Also run the diagnostic-only BSIM-CMG `TNOIMOD=1` low-VDS case required by `NOISE_N1.md`. Do not modify the production card.
+
+## 7. Model/provenance boundaries
+
+Do not tune or add APM-authored process-noise coefficients.
+
+Do not alter FreePDK45 or IHP upstream model values.
+
+Continue the V3-N0 effective-parameter provenance strategy unless real evidence requires a narrow documented correction.
+
+A successful simulator spectrum remains a compact-model prediction, not a silicon/process-noise calibration claim.
+
+## 8. Implementation and validation
+
+Prefer extending the existing noise modules rather than adding noise logic to `characterize.py`.
+
+A dedicated real-tool command such as:
+
+```text
+apm noise-method-check --output <dir>
+```
+
+is preferred.
+
+Continue through implementation, real-tool simulation, debugging, unit/property tests, regression tests, provenance checks, and exact-commit qualification. Do not stop at planning/scaffolding.
+
+At minimum rerun:
+
+- V3-N0 noise/harness validation;
+- V3-N1 real-tool method qualification;
+- full pytest suite;
+- Ruff;
+- REUSE;
+- provenance audit;
+- repository static validation.
+
+## 9. Evidence and completion
+
+Commit compact exact-implementation-commit evidence, preferred path:
+
+```text
+validation/evidence/v3_n1_noise_method.json
+```
+
+Large raw simulator output should remain reproducible/ignored.
+
+Update `STATUS.md` with:
+
+- final acquisition policy;
+- final fit-method identity/thresholds;
+- APM045 upper-frequency diagnostic result;
+- four low-VDS results;
+- BSIM-CMG correlated low-VDS capability result;
+- exact-commit validation hashes/status;
+- evidence-based recommendation on V3-N2 all-26-device expansion.
+
+V3-N1 may be complete even if a model does not expose a valid white plateau by the bounded search cap, provided the null result is explicit and the acquisition/fitting method behaved fail-closed.
+
+Do not bump package version or create a v3 tag.
