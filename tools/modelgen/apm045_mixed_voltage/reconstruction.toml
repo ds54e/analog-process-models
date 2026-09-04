@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 schema = "apm.modelgen.reconstruction-input.v1"
-kernel = "apm.modelgen.observable-kernel@1.1.0"
+kernel = "apm.modelgen.observable-kernel@1.2.0"
 reference_simulator_major = 47
 purpose = "Behavior-only reconstruction qualification; reference card parameters are not fitting inputs."
 seeds = [41001, 41002, 41003]

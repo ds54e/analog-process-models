@@ -38,11 +38,18 @@ from tools.modelgen.apm045_mixed_voltage.synthesize_families import (
     _validate_configuration,
     _width_challenge_audit,
 )
+from tools.modelgen.apm045_mixed_voltage.terminal_observables import (
+    BodySweep,
+    GateTrajectory,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIGURATION = ROOT / "tools/modelgen/apm045_mixed_voltage/reconstruction.toml"
 GENERATION_CONFIGURATION = (
     ROOT / "tools/modelgen/apm045_mixed_voltage/generation_epoch_1.toml"
+)
+QUALIFICATION_CONFIGURATION = (
+    ROOT / "tools/modelgen/apm045_mixed_voltage/qualification_epoch_1.toml"
 )
 NGSPICE = ROOT / ".apm/toolchain/ngspice-47/bin/ngspice"
 
@@ -159,6 +166,8 @@ def test_renderer_is_canonical_and_disables_unqualified_features() -> None:
     assert "igcmod=0 igbmod=0 gidlmod=0" in first
     assert "rbodymod=0 rgatemod=0 acnqsmod=0 trnqsmod=0" in first
     assert "k3=0 k3b=0 w0=0" in first
+    assert "\n+ dtox=" not in first
+    assert "toxe=" in first and "dtox=0" in first
     assert "SPDX-License-Identifier: Apache-2.0" in first
 
 
@@ -168,7 +177,7 @@ def test_generation_epoch_is_sealed_and_matches_frozen_geometry_search() -> None
 
     assert configuration["generation_epoch"] == 1
     assert configuration["epoch_state"] == "SEALED_BEFORE_FINAL_CANDIDATE_GENERATION"
-    assert configuration["kernel"] == "apm.modelgen.observable-kernel@1.1.0"
+    assert configuration["kernel"] == "apm.modelgen.observable-kernel@1.2.0"
     assert configuration["seeds"] == [52001, 52002, 52003, 52004, 52005]
     assert audit["stage_parameter_counts"] == {
         "electrostatics": 8,
@@ -182,6 +191,51 @@ def test_generation_epoch_is_sealed_and_matches_frozen_geometry_search() -> None
     assert all(audit["calibration_holdout_separation"].values())
     assert math.isclose(_geometry(configuration, "io18").lmin_m, 0.08e-6)
     assert math.isclose(_geometry(configuration, "io25").lmin_m, 0.18e-6)
+
+
+def test_qualification_epoch_seals_methods_before_unsealing() -> None:
+    with QUALIFICATION_CONFIGURATION.open("rb") as handle:
+        qualification = tomllib.load(handle)
+    generation = _generation_configuration()
+
+    assert qualification["qualification_epoch"] == 1
+    assert qualification["state"] == "SEALED_BEFORE_FIRST_HOLDOUT_EVALUATION"
+    assert qualification["failed_holdout_reuse_for_repair"] is False
+    assert qualification["canonical_selection"] == "observable_space_medoid"
+    assert qualification["terminal_y"]["criteria"]["terminal_order"] == [
+        "d",
+        "g",
+        "s",
+        "b",
+    ]
+    assert qualification["circuit_holdout"]["fixture_classes"] == generation[
+        "sealed_circuit_holdout"
+    ]["fixture_classes"]
+    assert qualification["circuit_holdout"]["temperatures_c"] == generation[
+        "sealed_circuit_holdout"
+    ]["temperatures_c"]
+    assert qualification["circuit_holdout"]["pass_scenarios"] == generation[
+        "sealed_circuit_holdout"
+    ]["pass_scenarios"]
+    assert qualification["ensemble"]["minimum_retained_candidates_per_family"] >= 3
+    assert qualification["selection"]["metric_names"] == [
+        "vth",
+        "dibl",
+        "id_per_width_vs_gmid",
+        "gds_over_id",
+        "gm_over_gds",
+        "cgg_per_width_or_area",
+        "cgd_over_cgg",
+        "body_effect",
+        "temperature",
+    ]
+
+
+def test_terminal_observable_requests_fail_closed_on_invalid_coordinates() -> None:
+    with pytest.raises(ModelgenError):
+        GateTrajectory("duplicate", 27, 1e-7, 1e-6, 0.5, (0.0, 0.1, 0.1, 0.2, 0.3))
+    with pytest.raises(ModelgenError):
+        BodySweep("too-short", 27, 1e-7, 1e-6, 0.5, 0.0, 1.0, 4)
 
 
 def test_generation_draws_are_deterministic_independent_and_center_bounded() -> None:

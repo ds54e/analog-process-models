@@ -25,7 +25,7 @@ import numpy as np
 from scipy.optimize import least_squares, minimize
 
 KERNEL_ID = "apm.modelgen.observable-kernel"
-KERNEL_VERSION = "1.1.0"
+KERNEL_VERSION = "1.2.0"
 MODEL_DIALECT = "4.8.2"
 TERMINAL_AC_FREQUENCY_HZ = 1.0e6
 STAGE_ORDER = ("electrostatics", "transport", "output", "charge", "temperature")
@@ -271,7 +271,7 @@ def render_bsim4_card(
         ),
         (
             f"+ toxe={values['toxe']} toxp={values['toxe']} toxm={values['toxe']} "
-            "+ dtox=0 epsrox=3.9"
+            "dtox=0 epsrox=3.9"
         ),
         f"+ xj={values['xj']} ndep={values['ndep']} nsd={values['nsd']} ngate=0",
         (

@@ -11,10 +11,10 @@ Target release: v4.0.0
 State: ACTIVE DEVELOPMENT
 
 V4 required gates:
-  2/16 proven
+  1/16 proven
 
 Current milestone:
-  GENERATION EPOCH 1 CALIBRATION SEALED / KERNEL 1.1 QUALIFIED
+  QUALIFICATION EPOCH 1 SEALED / KERNEL 1.2 EXACT REQUALIFICATION PENDING
 
 Public-readiness cleanup:
   COMPLETE
@@ -68,23 +68,29 @@ commit `0e216fe` was fast-forwarded into this development checkout on
 2026-09-04. The required local ngspice 47, OpenVAF-Re-Loaded, PSP103, and
 BSIM-CMG toolchain passed `apm doctor` before v4 implementation began.
 
-The `evidence.public_matrix` and `modelgen.reconstruction` gates are proven.
-Kernel 1.1.0 explicitly neutralizes an otherwise uncontrolled BSIM4
-narrow-width term. Its unfiltered exact-clean-commit run at
-`bcc6f5ad6f1fec348811884f42e02e95620fc17b` passed all four APM022/SVT and
-APM045/VTG N/P reconstruction records. Compact evidence is
-`validation/evidence/v4_modelgen_foundation.json`.
+The `evidence.public_matrix` gate is proven. Kernel 1.1.0's unfiltered
+exact-clean-commit run at `bcc6f5ad6f1fec348811884f42e02e95620fc17b`
+passed all four APM022/SVT and APM045/VTG N/P reconstruction records. Kernel
+1.2.0 removes a stray continuation token that ngspice ignored with a warning;
+the electrical parameters are unchanged, but the current kernel and rendered
+card bytes require a new exact clean-commit reconstruction before the
+`modelgen.reconstruction` gate is reclaimed. The 1.1 evidence remains recorded
+as engineering history in `validation/evidence/v4_modelgen_foundation.json`.
 
-Mixed-voltage generation epoch 1 is sealed. A calibration-only development run
-retained five independently seeded io18 and io25 N/P candidate pairs after
+Mixed-voltage generation epoch 1 and qualification epoch 1 are sealed. A
+kernel-1.2 calibration-only development replay retained five independently
+seeded io18 and io25 N/P candidate pairs after
 literal electrostatics/transport/output/charge/temperature staged release and
 final cross-domain rechecks. The prescribed geometry study selected provisional
 APM-supported floors of 0.08 um for io18 and 0.18 um for io25, and every retained
 candidate passed the 0.25--16 um width challenge with
 `WIDTH_INVARIANT_IN_SCOPE`. Sealed device, charge, Y-matrix, and circuit
-holdouts have not been unsealed; no new family is promoted yet.
-The exact calibration report reproduced its development content after
-excluding only the timestamp; compact pre-holdout evidence is
+holdouts have not been unsealed; no new family is promoted yet. The committed
+one-shot qualifier requires a clean worktree, writes an unseal receipt before
+evaluation, forbids output replacement during unsealing, and performs medoid
+selection only after circuit results. Kernel-1.2 exact calibration and
+reconstruction evidence is pending; the kernel-1.1 compact pre-holdout evidence
+remains engineering history in
 `validation/evidence/v4_generation_epoch1_calibration.json`.
 The released v3.0.0 tag, tagged commit, cards, evidence, and GitHub Release
 remain unchanged.
