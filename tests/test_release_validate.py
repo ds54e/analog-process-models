@@ -93,7 +93,7 @@ def test_gate_evaluation_rejects_stale_or_nonexistent_evidence(tmp_path: Path) -
     assert all(gate["evidence_valid"] is False for gate in ordered)
 
 
-def test_release_repository_audits_pass() -> None:
+def test_release_repository_audits_and_frozen_v3_claim_review_are_fail_closed() -> None:
     contract = load_gate_contract(ROOT)
     assert audit_release_metadata(ROOT, contract)["status"] == "pass"
     assert audit_catalog(ROOT, contract)["status"] == "pass"
@@ -107,7 +107,11 @@ def test_release_repository_audits_pass() -> None:
             "allowed_historical_reproducibility_path_observations"
         ]
     } == {"validation/evidence/m0-runtime.md", "validation/evidence/m10-release.md"}
-    assert audit_claims(ROOT, contract)["status"] == "pass"
+    claims = audit_claims(ROOT, contract)
+    assert claims["status"] == "fail"
+    # The v3 review remains immutable historical evidence and must not be silently
+    # accepted after GOAL.md moves to the separately reviewed v4 development contract.
+    assert "GOAL.md" in {item["path"] for item in claims["review_hash_mismatches"]}
 
 
 def test_metadata_audit_rejects_development_versions(tmp_path: Path) -> None:

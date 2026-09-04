@@ -45,16 +45,18 @@ EXPECTED_FAMILIES = {
 }
 
 
-def test_post_v3_policy_and_historical_document_status_are_explicit() -> None:
+def test_v4_goal_and_historical_document_status_are_explicit() -> None:
     agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
     goal = (ROOT / "GOAL.md").read_text(encoding="utf-8")
     assert "APM v1.0.0, v2.0.0, and v3.0.0 are released and immutable" in agents
     assert "afecec29ea6ed0703ef441d4839fd40a238bef0b" in agents
     assert "The repository is public" in agents
-    assert "post-v3.0.0 public maintenance" in goal.lower()
+    assert "# APM v4.0.0 — APM045 Mixed-Voltage Electrical Families" in goal
+    assert "Current `main` is the post-v3 development line" in goal
     assert "APM v3.0.0 is released and immutable" in goal
     assert "repository visibility: PUBLIC" in goal
-    assert "Public visibility does not change technical fidelity" in goal
+    assert "Status: **ACTIVE DEVELOPMENT**" in goal
+    assert "Target: **APM v4.0.0**" in goal
 
     historical_markers = {
         "RELEASE_V3.md": "Historical record — frozen V3-N3 candidate contract",

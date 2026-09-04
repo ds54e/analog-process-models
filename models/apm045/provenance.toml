@@ -31,6 +31,7 @@ license_basis = "The exact upstream root README states that all files are Apache
 
 [source.apm_authored_files]
 "technology.toml" = "5592f1c75fc7b6dfcb4219714e768140927dbd75b3874a00cd87bb7409661ccc"
+"mixed_voltage_evidence.toml" = "8c4e717b8b1b6b5c139d4469f6de83355910bb50b986c47ec9b028d8fff8786d"
 "families/vtl/family.toml" = "9875155c21a9e951b9887196ab47381cc6c8a2e9860acc70ed8db859bb661278"
 "families/vtl/ngspice/binding.toml" = "11aad1c1346390fc562ea07e95987d00308da1c49ee44a28f552dd6c826b141e"
 "families/vtl/ngspice/wrapper.inc" = "14dc7db5637f845dbf89b563854103483ffdc1808406c7cd09226defad588771"

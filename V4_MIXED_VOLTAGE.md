@@ -1,3 +1,6 @@
+<!-- SPDX-FileCopyrightText: APM contributors -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
 # APM v4.0.0 — APM045 Mixed-Voltage Electrical Families
 
 This document is the technical contract for the APM v4.0.0 mixed-voltage

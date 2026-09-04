@@ -1,0 +1,132 @@
+# SPDX-FileCopyrightText: APM contributors
+# SPDX-License-Identifier: Apache-2.0
+
+schema = "apm.public-evidence-matrix.v1"
+technology_id = "apm045"
+scope = "generic 45/55 nm-class mixed-voltage io18/io25 model synthesis"
+retrieval_date = "2026-09-04"
+private_or_proprietary_inputs_used = false
+
+# Evidence entries record source facts only.  They are intentionally not model
+# targets and do not authorize copying a foundry card or treating APM as a PDK.
+
+[[evidence]]
+id = "umc-55-65-90-io-offerings"
+title = "UMC 55/65/90 nm technology device offerings"
+source_kind = "official_foundry"
+source_locator = "https://www.umc.com/en/Product/technologies/Detail/55_65_90nm"
+observed_fact = "UMC publicly lists separate 55 nm-class core platforms and I/O offerings including 2.5 V and 2.5 V-underdriven-at-1.8 V device classes."
+confidence = "high"
+allowed_use = [
+  "Establish that distinct core and 2.5 V-class I/O device offerings exist in a public neighboring-node technology class.",
+  "Motivate a separately labeled common 1.8 V underdrive comparison for a generic 2.5 V-class APM family.",
+]
+forbidden_use = [
+  "Do not infer or copy any UMC compact-model parameter, geometry rule, electrical target, reliability rating, or correlation claim.",
+  "Do not describe io18 or io25 as UMC devices or as compatible with a UMC PDK.",
+]
+
+[[evidence]]
+id = "berkeley-bsim4-release"
+title = "UC Berkeley BSIM4 model and release archive"
+source_kind = "standards_document"
+source_locator = "https://www.bsim.berkeley.edu/models/bsim4/"
+observed_fact = "The UC Berkeley BSIM Group identifies BSIM4 as a bulk-MOSFET compact model used at 45/40 nm and lists BSIM4 4.8.2 as a released version dated 2020-01-01."
+confidence = "high"
+allowed_use = [
+  "Use BSIM4 parameter semantics and the already qualified 4.8.2 card dialect for independently authored APM models.",
+  "Use documented BSIM4 defaults only when the generation record makes that dependency explicit.",
+]
+forbidden_use = [
+  "Do not treat BSIM4 defaults as measurements of a 45/55 nm process.",
+  "Do not infer a foundry technology, voltage rating, geometry rule, or calibration from compact-model availability.",
+]
+
+[[evidence]]
+id = "ibm-65nm-dual-gate-oxide"
+title = "65nm CMOS technology for low power applications"
+source_kind = "measured_device_paper"
+source_locator = "https://research.ibm.com/publications/65nm-cmos-technology-for-low-power-applications"
+observed_fact = "The public IEDM 2005 abstract reports a measured neighboring-node low-power bulk CMOS technology with a dual-gate-oxide process and multiple threshold devices."
+confidence = "high"
+allowed_use = [
+  "Support the qualitative engineering prior that neighboring-node mixed-voltage platforms may use electrically distinct gate stacks.",
+  "Motivate independent terminal-capacitance qualification rather than family labels alone.",
+]
+forbidden_use = [
+  "Do not copy the paper's current, leakage, oxide, geometry, or reliability values into an APM target or card.",
+  "Do not infer IBM process correlation or use the paper as evidence for APM voltage reliability.",
+]
+
+[[evidence]]
+id = "chen-oxide-electrical-physical-distinction"
+title = "Experimental confirmation of an accurate CMOS gate delay model for gate oxide and voltage scaling"
+source_kind = "measured_device_paper"
+source_locator = "https://doi.org/10.1109/55.585355"
+observed_fact = "Measured MOS devices in the paper distinguish physical oxide thickness from capacitance-derived electrical oxide thickness and show that oxide, voltage, current, and load capacitance must be characterized together."
+confidence = "high"
+allowed_use = [
+  "Require terminal-capacitance evidence for an APM gate-stack ordering.",
+  "Support treating literature thickness as a qualitative prior rather than a direct BSIM TOXE assignment.",
+]
+forbidden_use = [
+  "Do not copy a reported physical or electrical thickness into BSIM TOXE.",
+  "Do not use the paper's older-node numerical curves as io18/io25 fitting targets or foundry evidence.",
+]
+
+[[evidence]]
+id = "freepdk45-vtg-open-anchor"
+title = "Pinned FreePDK45 1.4 VTG model and model-basis manual"
+source_kind = "open_model_documentation"
+source_locator = "models/apm045/vendor/freepdk45/FreePDK45_Manual.txt"
+observed_fact = "The already released APM045 VTG family is an open, pinned 1.0 V-class thin-oxide BSIM4 reference with exact local provenance and real-ngspice terminal characterization."
+confidence = "high"
+allowed_use = [
+  "Preserve VTG as the immutable cross-process anchor and as the thin-stack terminal-capacitance reference.",
+  "Use newly simulated VTG terminal observables in explicitly labeled reconstruction and comparison fixtures.",
+]
+forbidden_use = [
+  "Do not alter the pinned VTG card or silently transfer its parameters into io18/io25.",
+  "Do not reinterpret FreePDK45 behavior as silicon calibration, reliability evidence, or a foundry design-rule source for the new families.",
+]
+
+# Engineering priors are APM search decisions justified by source facts.  They
+# are not statements made by the cited sources.
+
+[[engineering_prior]]
+id = "mixed-voltage-separate-families"
+basis_evidence_ids = ["umc-55-65-90-io-offerings", "ibm-65nm-dual-gate-oxide"]
+statement = "Search independent io18 and io25 cards rather than scaling one runtime family by an operating profile."
+allowed_role = "model topology and bounded-search design"
+prohibited_inference = "No foundry family identity or process correlation is implied."
+
+[[engineering_prior]]
+id = "gate-stack-order"
+basis_evidence_ids = ["ibm-65nm-dual-gate-oxide", "chen-oxide-electrical-physical-distinction", "freepdk45-vtg-open-anchor"]
+statement = "Search for a robust terminal gate-capacitance-density ordering VTG > io18 > io25 at qualified comparable geometry and bias."
+allowed_role = "hard observable-space structural constraint"
+prohibited_inference = "No literature thickness is a BSIM TOXE value, and the ordering is not a reliability rating."
+
+[[engineering_prior]]
+id = "io25-common-underdrive"
+basis_evidence_ids = ["umc-55-65-90-io-offerings"]
+statement = "Include an explicitly labeled io25 common-overlap_1v8 operating profile in addition to nominal_2v5."
+allowed_role = "comparison-profile design"
+prohibited_inference = "Underdrive comparison does not prove compatibility with any UMC device or establish safe operating limits."
+
+# These are APM-selected behavior contracts, not extracted source claims.
+
+[[apm_behavior_contract]]
+id = "gmid-reachability"
+statement = "Bracket and fail closed for gm/Id targets 5, 10, 15, and 20 1/V without endpoint reuse."
+authority = "V4_MIXED_VOLTAGE.md section 7.3"
+
+[[apm_behavior_contract]]
+id = "electrical-distinctness"
+statement = "At common 1.8 V, io18 and io25 must differ robustly in capacitance density, current density, and a fixed-requirement realization metric."
+authority = "V4_MIXED_VOLTAGE.md section 8"
+
+[[apm_behavior_contract]]
+id = "claim-boundary"
+statement = "The generated families are generic APM-authored research models and provide no foundry, silicon, reliability, geometry-rule, or manufacturability claim."
+authority = "GOAL.md and V4_MIXED_VOLTAGE.md section 2"

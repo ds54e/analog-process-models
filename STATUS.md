@@ -6,8 +6,15 @@ supports validation and release claims.
 ## Current state
 
 ```text
-Release: v3.0.0
-State: RELEASED
+Released baseline: v3.0.0
+Target release: v4.0.0
+State: ACTIVE DEVELOPMENT
+
+V4 required gates:
+  0/16 proven
+
+Current milestone:
+  MODELGEN KERNEL IMPLEMENTED / EXACT-COMMIT REQUALIFICATION PENDING
 
 Public-readiness cleanup:
   COMPLETE
@@ -48,13 +55,28 @@ Private Vulnerability Reporting:
 Secret scanning / push protection:
   ENABLED / ENABLED
 
-Blockers:
+Current real-tool baseline:
+  apm doctor PASS (ngspice 47; 2026-09-04)
+
+V4 stop state:
   none
 ```
 
-The current goal is stable post-v3 public maintenance. Publication did not
-recreate or modify a release artifact. Current `main` contains post-release
-evidence/status and maintenance changes after the tagged commit.
+The current goal is the APM v4.0.0 mixed-voltage release defined by `GOAL.md`,
+`V4_MIXED_VOLTAGE.md`, and `validation/release_gates_v4.toml`. Upstream goal
+commit `0e216fe` was fast-forwarded into this development checkout on
+2026-09-04. The required local ngspice 47, OpenVAF-Re-Loaded, PSP103, and
+BSIM-CMG toolchain passed `apm doctor` before v4 implementation began.
+
+No v4 gate is claimed complete yet. The offline model-generation kernel and
+machine-readable public-evidence matrix are implemented. An unfiltered
+development-tree run passed all four APM022/SVT and APM045/VTG N/P
+reconstruction records with real ngspice 47, external-terminal finite
+differences, terminal-Y-derived Cgg, deterministic card rendering, hard
+candidate rejection, and sealed holdouts. The implementation must now be
+committed and rerun from that exact clean commit before compact milestone
+evidence claims `modelgen.reconstruction`. The released v3.0.0 tag, tagged
+commit, cards, evidence, and GitHub Release remain unchanged.
 
 ## Immutable releases
 
@@ -230,6 +252,8 @@ numeric source material for APM022/APM016F.
 
 ## Next action
 
-Future maintenance or model/release work requires a separately scoped task.
-There is no pending visibility decision and no active calibration or new
-release objective.
+Commit the model-generation/public-evidence foundation, rerun the unfiltered
+four-record reconstruction from that exact clean implementation commit, and
+record compact hash-bound evidence. Do not promote io18/io25 into the runtime
+catalog until this prerequisite has exact-commit real-ngspice reconstruction
+evidence.

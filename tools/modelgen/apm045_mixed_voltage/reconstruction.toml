@@ -1,0 +1,316 @@
+# SPDX-FileCopyrightText: APM contributors
+# SPDX-License-Identifier: Apache-2.0
+
+schema = "apm.modelgen.reconstruction-input.v1"
+kernel = "apm.modelgen.observable-kernel@1.0.0"
+reference_simulator_major = 47
+purpose = "Behavior-only reconstruction qualification; reference card parameters are not fitting inputs."
+seeds = [41001, 41002, 41003]
+starts_per_stage = 1
+local_max_nfev = 45
+sensitivity_fraction = 0.025
+current_floor_a = 1.0e-10
+current_log_tolerance_dec = 0.12
+gmid_log_tolerance = 0.18
+gdsid_log_tolerance = 0.25
+cgg_log_tolerance = 0.20
+
+[criteria]
+calibration_objective_rms_max = 3.0
+holdout_current_log_median_max_dec = 0.20
+holdout_current_log_p95_max_dec = 0.60
+holdout_threshold_error_p95_max_v = 0.10
+holdout_gmid_log_p95_max = 0.70
+holdout_gdsid_log_p95_max = 1.00
+holdout_cgg_log_p95_max = 0.65
+holdout_terminal_derivative_step_p95_max = 0.12
+required_trend_agreement_fraction = 0.90
+
+[fixed_parameters]
+xj = 1.5e-8
+ndep = 2.5e18
+nsd = 1.0e20
+k1 = 0.45
+k2 = -0.03
+dvt2 = -0.03
+etab = -0.03
+ub = 1.0e-18
+rdswmin = 10.0
+pdiblc2 = 0.0
+delta = 0.01
+fprout = 0.0
+pdits = 0.0
+cgbo = 0.0
+xpart = 0.5
+ckappad = 0.50
+acde = 1.0
+noff = 1.0
+voffcv = 0.0
+kt1l = 0.0
+at = 0.0
+
+[[parameter]]
+name = "toxe"
+stage = "electrostatics"
+lower = 7.0e-10
+initial_n = 1.8e-9
+initial_p = 2.0e-9
+upper = 4.0e-9
+transform = "log"
+
+[[parameter]]
+name = "vth0_magnitude"
+stage = "electrostatics"
+lower = 0.20
+initial_n = 0.50
+initial_p = 0.52
+upper = 0.95
+
+[[parameter]]
+name = "nfactor"
+stage = "electrostatics"
+lower = 1.0
+initial_n = 1.55
+initial_p = 1.60
+upper = 3.0
+
+[[parameter]]
+name = "voff"
+stage = "electrostatics"
+lower = -0.24
+initial_n = -0.10
+initial_p = -0.10
+upper = -0.015
+
+[[parameter]]
+name = "dvt0"
+stage = "electrostatics"
+lower = 0.15
+initial_n = 0.85
+initial_p = 0.90
+upper = 3.0
+transform = "log"
+
+[[parameter]]
+name = "dvt1"
+stage = "electrostatics"
+lower = 0.08
+initial_n = 0.45
+initial_p = 0.50
+upper = 3.0
+transform = "log"
+
+[[parameter]]
+name = "dsub"
+stage = "electrostatics"
+lower = 0.03
+initial_n = 0.50
+initial_p = 0.50
+upper = 1.50
+transform = "log"
+
+[[parameter]]
+name = "eta0"
+stage = "electrostatics"
+lower = 0.001
+initial_n = 0.035
+initial_p = 0.040
+upper = 0.25
+transform = "log"
+
+[[parameter]]
+name = "u0"
+stage = "transport"
+lower = 0.006
+initial_n = 0.035
+initial_p = 0.016
+upper = 0.10
+transform = "log"
+
+[[parameter]]
+name = "ua"
+stage = "transport"
+lower = 1.0e-12
+initial_n = 8.0e-10
+initial_p = 1.2e-9
+upper = 5.0e-9
+transform = "log"
+
+[[parameter]]
+name = "vsat"
+stage = "transport"
+lower = 2.0e4
+initial_n = 8.0e4
+initial_p = 6.0e4
+upper = 2.0e5
+transform = "log"
+
+[[parameter]]
+name = "rdsw"
+stage = "transport"
+lower = 5.0
+initial_n = 100.0
+initial_p = 120.0
+upper = 500.0
+transform = "log"
+
+[[parameter]]
+name = "pclm"
+stage = "output"
+lower = 0.01
+initial_n = 0.50
+initial_p = 0.60
+upper = 4.0
+transform = "log"
+
+[[parameter]]
+name = "pdiblc1"
+stage = "output"
+lower = 1.0e-5
+initial_n = 0.002
+initial_p = 0.002
+upper = 0.30
+transform = "log"
+
+[[parameter]]
+name = "drout"
+stage = "output"
+lower = 0.05
+initial_n = 0.45
+initial_p = 0.50
+upper = 1.20
+transform = "log"
+
+[[parameter]]
+name = "pscbe1"
+stage = "output"
+lower = 1.0e7
+initial_n = 4.0e8
+initial_p = 4.0e8
+upper = 2.0e9
+transform = "log"
+
+[[parameter]]
+name = "pscbe2"
+stage = "output"
+lower = 1.0e-9
+initial_n = 1.0e-6
+initial_p = 1.0e-6
+upper = 1.0e-4
+transform = "log"
+
+[[parameter]]
+name = "cgso"
+stage = "charge"
+lower = 2.0e-11
+initial_n = 1.2e-10
+initial_p = 1.2e-10
+upper = 6.0e-10
+transform = "log"
+
+[[parameter]]
+name = "cgdo"
+stage = "charge"
+lower = 2.0e-11
+initial_n = 1.2e-10
+initial_p = 1.2e-10
+upper = 6.0e-10
+transform = "log"
+
+[[parameter]]
+name = "ckappas"
+stage = "charge"
+lower = 0.02
+initial_n = 0.50
+initial_p = 0.50
+upper = 1.20
+transform = "log"
+
+[[parameter]]
+name = "moin"
+stage = "charge"
+lower = 5.0
+initial_n = 15.0
+initial_p = 15.0
+upper = 30.0
+
+[[parameter]]
+name = "kt1"
+stage = "temperature"
+lower = -0.22
+initial_n = -0.10
+initial_p = -0.10
+upper = -0.01
+
+[[parameter]]
+name = "kt2"
+stage = "temperature"
+lower = -0.08
+initial_n = 0.015
+initial_p = 0.015
+upper = 0.08
+
+[[parameter]]
+name = "ute"
+stage = "temperature"
+lower = -2.8
+initial_n = -1.2
+initial_p = -1.2
+upper = 0.2
+
+[[fixture]]
+id = "apm022_svt"
+selector = "apm022/svt"
+reference_include = "models/apm022/ngspice/apm022_multivt_models.inc"
+reference_model_n = "apm022_svt_ncore"
+reference_model_p = "apm022_svt_pcore"
+vdd_v = 0.8
+lmin_m = 2.5e-8
+lmax_m = 1.0e-7
+wmin_m = 1.0e-7
+wmax_m = 1.0e-4
+
+[fixture.calibration]
+temperatures_c = [-40, 27, 125]
+length_ratios = [1.0, 4.0]
+widths_um = [1.0]
+idvg_fixed_bias_fractions = [0.0625, 0.50, 0.80]
+idvd_fixed_bias_fractions = [0.55, 0.85]
+points = 25
+
+[fixture.holdout]
+temperatures_c = [85]
+length_ratios = [1.5, 3.0]
+widths_um = [0.5, 2.0]
+idvg_fixed_bias_fractions = [0.35, 0.65]
+idvd_fixed_bias_fractions = [0.475, 0.725]
+points = 81
+
+[[fixture]]
+id = "apm045_vtg"
+selector = "apm045/vtg"
+reference_include_n = "models/apm045/vendor/freepdk45/NMOS_VTG.inc"
+reference_include_p = "models/apm045/vendor/freepdk45/PMOS_VTG.inc"
+reference_model_n = "NMOS_VTG"
+reference_model_p = "PMOS_VTG"
+vdd_v = 1.0
+lmin_m = 5.0e-8
+lmax_m = 1.0e-6
+wmin_m = 9.0e-8
+wmax_m = 1.6e-5
+
+[fixture.calibration]
+temperatures_c = [-40, 27, 125]
+length_ratios = [1.0, 4.0]
+widths_um = [1.0]
+idvg_fixed_bias_fractions = [0.05, 0.50, 0.80]
+idvd_fixed_bias_fractions = [0.55, 0.85]
+points = 25
+
+[fixture.holdout]
+temperatures_c = [85]
+length_ratios = [1.5, 3.0]
+widths_um = [0.5, 2.0]
+idvg_fixed_bias_fractions = [0.35, 0.65]
+idvd_fixed_bias_fractions = [0.475, 0.725]
+points = 81
