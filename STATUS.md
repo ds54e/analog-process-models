@@ -11,10 +11,10 @@ Target release: v4.0.0
 State: ACTIVE DEVELOPMENT
 
 V4 required gates:
-  1/16 proven
+  2/16 proven
 
 Current milestone:
-  GENERATION EPOCH 1 CALIBRATION SEALED; KERNEL 1.1 EXACT RUN PENDING
+  GENERATION EPOCH 1 CALIBRATION SEALED / KERNEL 1.1 QUALIFIED
 
 Public-readiness cleanup:
   COMPLETE
@@ -68,13 +68,12 @@ commit `0e216fe` was fast-forwarded into this development checkout on
 2026-09-04. The required local ngspice 47, OpenVAF-Re-Loaded, PSP103, and
 BSIM-CMG toolchain passed `apm doctor` before v4 implementation began.
 
-The `evidence.public_matrix` gate is proven. The prior exact-clean-commit
-`modelgen.reconstruction` evidence remains a valid historical qualification of
-kernel 1.0.0, but kernel 1.1.0 now explicitly neutralizes an otherwise
-uncontrolled BSIM4 narrow-width term. Its unfiltered development run passed all
-four APM022/SVT and APM045/VTG N/P reconstruction records; exact-clean-commit
-requalification is pending before the gate is reclaimed for the current
-implementation.
+The `evidence.public_matrix` and `modelgen.reconstruction` gates are proven.
+Kernel 1.1.0 explicitly neutralizes an otherwise uncontrolled BSIM4
+narrow-width term. Its unfiltered exact-clean-commit run at
+`bcc6f5ad6f1fec348811884f42e02e95620fc17b` passed all four APM022/SVT and
+APM045/VTG N/P reconstruction records. Compact evidence is
+`validation/evidence/v4_modelgen_foundation.json`.
 
 Mixed-voltage generation epoch 1 is sealed. A calibration-only development run
 retained five independently seeded io18 and io25 N/P candidate pairs after
@@ -84,6 +83,9 @@ APM-supported floors of 0.08 um for io18 and 0.18 um for io25, and every retaine
 candidate passed the 0.25--16 um width challenge with
 `WIDTH_INVARIANT_IN_SCOPE`. Sealed device, charge, Y-matrix, and circuit
 holdouts have not been unsealed; no new family is promoted yet.
+The exact calibration report reproduced its development content after
+excluding only the timestamp; compact pre-holdout evidence is
+`validation/evidence/v4_generation_epoch1_calibration.json`.
 The released v3.0.0 tag, tagged commit, cards, evidence, and GitHub Release
 remain unchanged.
 

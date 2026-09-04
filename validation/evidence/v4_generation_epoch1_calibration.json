@@ -1,0 +1,117 @@
+{
+  "schema": "apm.v4-generation-calibration-evidence.v1",
+  "milestone": "V4-M1-CALIBRATION",
+  "status": "validated",
+  "created_utc": "2026-09-04T12:26:43.059953+00:00",
+  "implementation_commit": "bcc6f5ad6f1fec348811884f42e02e95620fc17b",
+  "release_claim": false,
+  "completion_state": "MIXED_VOLTAGE_CALIBRATION_CANDIDATES_FROZEN",
+  "claim_boundary": "This is calibration-only evidence. It freezes deterministic io18/io25 candidate cards before first evaluation of the committed sealed device, charge, terminal-Y, and circuit holdouts. It does not promote a public model or satisfy a device, distinctness, circuit, or deterministic-canonical-card gate.",
+  "full_report": {
+    "generated_path": ".apm/results/v4-generation-epoch1-calibration-exact-bcc6f5a/report.json",
+    "sha256": "02bd9854d55eef5255b7b3e16524518a4c479fe192a0128671cd128ad9bfa938",
+    "status": "pass",
+    "simulator_evaluation_count": 345,
+    "retention": "ignored reproducible full result"
+  },
+  "repeat_execution": {
+    "development_report_sha256": "a9f0be8eb39dffa3b9d22e24793dbd0058aee03262a81b87573e15a77ab632b2",
+    "exact_commit_report_sha256": "02bd9854d55eef5255b7b3e16524518a4c479fe192a0128671cd128ad9bfa938",
+    "canonical_content_identical_excluding_created_utc": true,
+    "canonical_content_sha256": "6065dbf45bcd1892d1c3e6efb2f482740b2d368a8ad0f0d924010466e9b98667"
+  },
+  "bound_inputs": {
+    "generation_contract": {
+      "path": "tools/modelgen/apm045_mixed_voltage/generation_epoch_1.toml",
+      "sha256": "7b955ab546ea7a65150f4ee01898a362def2d94516bbb35f60b59e8f7b618f93",
+      "epoch": 1,
+      "state": "SEALED_BEFORE_FINAL_CANDIDATE_GENERATION"
+    },
+    "kernel": {
+      "path": "tools/modelgen/apm045_mixed_voltage/kernel.py",
+      "identity": "apm.modelgen.observable-kernel@1.1.0",
+      "sha256": "469b139931a2ad064e3cf40281fd7a81214c610ca26fb0753506dddf7304516c"
+    },
+    "synthesis": {
+      "path": "tools/modelgen/apm045_mixed_voltage/synthesize_families.py",
+      "sha256": "575f642a829de8da022a1e2f4262aa7f428dc4895881c9f7c50de62f7c10acaf"
+    },
+    "public_evidence_matrix_sha256": "8c4e717b8b1b6b5c139d4469f6de83355910bb50b986c47ec9b028d8fff8786d",
+    "private_or_proprietary_parameter_input": false,
+    "source_card_parameter_input": false
+  },
+  "sealed_definitions": {
+    "device_holdout_sha256": "5000c3366c9729448d68c8db98b39a5c4ca05b2f6e366d58feedf04173e6ff0c",
+    "charge_holdout_sha256": "15988089e75155d77612e675cd2f0e243c0514c87db45aa2ec2cfdb9ac32b884",
+    "circuit_holdout_sha256": "50c9cb18c826b337e1b91a3519c879c3d57eb12cff4dcb7dd2684fafedaa116b",
+    "evaluated": false
+  },
+  "geometry": {
+    "study_status": "pass",
+    "io18_selected_l_floor_um": 0.08,
+    "io25_selected_l_floor_um": 0.18,
+    "selection_state": "PROVISIONAL_PENDING_SEALED_HOLDOUT",
+    "selected_w_floor_um": 0.25,
+    "challenged_widths_um": [0.25, 0.5, 1.0, 2.0, 5.0, 10.0, 16.0],
+    "width_outcome": "WIDTH_INVARIANT_IN_SCOPE",
+    "maximum_candidate_width_density_p95_relative": 3.809311444058491e-9,
+    "foundry_design_rule_claim": false
+  },
+  "staged_synthesis": {
+    "order": ["electrostatics", "transport", "output", "charge", "temperature"],
+    "free_parameter_counts": {
+      "electrostatics": 8,
+      "transport": 4,
+      "output": 5,
+      "charge": 4,
+      "temperature": 3
+    },
+    "hard_rejection": true,
+    "prior_stage_parameters_frozen": true,
+    "final_cross_domain_recheck": true,
+    "full_strength_stage_acceptances": 99,
+    "refined_stage_acceptances": [
+      {
+        "family": "io25",
+        "polarity": "p",
+        "seed": 52002,
+        "stage": "electrostatics",
+        "selected_scale": 0.75
+      }
+    ]
+  },
+  "ensemble": {
+    "candidate_seeds": [52001, 52002, 52003, 52004, 52005],
+    "io18_retained_pair_count": 5,
+    "io25_retained_pair_count": 5,
+    "minimum_required_pair_count": 3,
+    "all_parameter_hashes_independent": true,
+    "meaning": "epistemic model-construction alternatives, not process variation or Monte Carlo"
+  },
+  "card_hashes": {
+    "io18": {
+      "52001": {"n": "7a9c5e598354a6b83f96fc791091ed6747b08f05f2827b60845854b03adbd871", "p": "cae277e1894515858b9c30f0c4cb051533078069750473851f1cf0edd16e7e2b"},
+      "52002": {"n": "81aa4f7e6b682a4d38ad5af52878345dbf0c5179b0c9cb24a30199d65c7e297d", "p": "a25033492c0cb8d9fdc751b3c33f94abeb19810dd93909cda73e69cbbaa4257c"},
+      "52003": {"n": "9d2e72e06f56264256a613fcddfcd6052f76171c7f31c074b8efc4a8bc819447", "p": "b7bfaa274b266827a6c0854251a3d89a5ac23b7f2550e6fabcdb7c72cec70dff"},
+      "52004": {"n": "a54843389755d88bc0cbe8164769e87ce076ccca7647385ddde1ba6bdd34fb59", "p": "f729a81d4012cea3501d53f4c7f4aa3c77966408a67416382b612732eb6ff26c"},
+      "52005": {"n": "a44ce38fbcd03ac3a52e19a430b7f9704c0deaed4918956cbb27c1b13830ff3c", "p": "5ed74c31fabcd748036f1d3250b87cb306cbd6e3a7d0f7fdc29cd8a06e8d8c24"}
+    },
+    "io25": {
+      "52001": {"n": "2ad3090a95045bda26e20202c48c3cf6856150d42a6915d02d7f9ceaf479d7e1", "p": "e9d12182ee3952fadf6016896ea488d4809a079237fc342ccca3c07d258ba6e2"},
+      "52002": {"n": "3ba1a016b0de09a882955248d0f26ce0d7eb0a5f6ff8804b02ac3820d9d1a46f", "p": "1c944b113174cea3e66f312edb9a1e6f414bc92a716e616634e8311627c05785"},
+      "52003": {"n": "1f99994afd395c5310e3ee16fbf717315eb448a690648d5df222aedd26ae48be", "p": "fcbb8bdd022ddf5e6633aecc816f22f6fcab4d70ae9303ff779005f97798716f"},
+      "52004": {"n": "041960d0a9c77941ad57e481500d4ce860202f1319cb07254d532a91dfc4fc12", "p": "b5cc1eaa3b366e452d3b8683d746d4ad76d62882d233f90edd52fbaf8d6171c1"},
+      "52005": {"n": "9664fad53add4247ac7e65fbcdbaaf162b6c83590cb9c38b18aa3e0cbb0d6999", "p": "e7b4271b92f8bdeaafcc563f25111e84357c72bbee8b62f8919b38ae01f7c02e"}
+    }
+  },
+  "commands": [
+    {
+      "command": ".venv/bin/python -m tools.modelgen.apm045_mixed_voltage.synthesize_families --calibration-only --output .apm/results/v4-generation-epoch1-calibration-exact-bcc6f5a --replace-output",
+      "status": "pass"
+    },
+    {"command": ".venv/bin/pytest -q", "status": "pass", "result": "104 passed"},
+    {"command": ".venv/bin/ruff check .", "status": "pass"},
+    {"command": ".venv/bin/reuse lint", "status": "pass", "result": "262/262 files licensed"},
+    {"command": "audit_distribution(Path.cwd())", "status": "pass"}
+  ]
+}
