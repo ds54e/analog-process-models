@@ -22,8 +22,11 @@ requires 15/15 pre-tag gates; the exact-tag phase independently requires all
 16/16 gates before GitHub Release creation.
 
 Both runs require ngspice 47 and the pinned OpenVAF-Re-Loaded `v24.0.2mob`
-toolchain. Spectre remains model-only and **experimental/unverified**; a real
-Spectre or Virtuoso environment is neither assumed nor claimed.
+toolchain. The bootstrap uses the immutable rustup 1.29.1 archive, verified as
+SHA-256 `dda7234360b7f578ca8b0ddcb80145646fa61a67c1720a5abc7051b35c9fcb71`,
+to install the pinned Rust 1.98.0 toolchain. Spectre remains model-only and
+**experimental/unverified**; a real Spectre or Virtuoso environment is neither
+assumed nor claimed.
 
 ## Validated v1 baseline
 

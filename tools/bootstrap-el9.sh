@@ -21,8 +21,9 @@ apm_openvaf_commit="fdf2522b70f42793f64b1c72f0195c96dea0cc19"
 apm_openvaf_url="https://github.com/OpenVAF/OpenVAF-Reloaded.git"
 
 apm_rust_version="1.98.0"
-apm_rustup_url="https://static.rust-lang.org/rustup/dist/x86_64-unknown-linux-gnu/rustup-init"
-apm_rustup_sha256="4acc9acc76d5079515b46346a485974457b5a79893cfb01112423c89aeb5aa10"
+apm_rustup_version="1.29.1"
+apm_rustup_url="https://static.rust-lang.org/rustup/archive/${apm_rustup_version}/x86_64-unknown-linux-gnu/rustup-init"
+apm_rustup_sha256="dda7234360b7f578ca8b0ddcb80145646fa61a67c1720a5abc7051b35c9fcb71"
 
 apm_alma_vault="https://vault.almalinux.org/9.7/AppStream/x86_64/os/Packages"
 apm_llvm_rpms=(

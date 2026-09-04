@@ -60,6 +60,9 @@ families to APM045.
   rejection;
 - added exact public-generation lineage and license/provenance checks for all
   new APM-authored assets; and
+- changed the Rust bootstrap from a mutable distribution URL to the
+  checksum-verified rustup 1.29.1 archive so clean-clone setup remains
+  reproducible after upstream stable-channel changes; and
 - added a separate 16-gate v4 release validator with phase-aware clean-clone
   attestation: 15 pre-tag gates authorize tag creation, while all 16 gates must
   pass from a second fresh exact-tag clone before the GitHub Release.

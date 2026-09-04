@@ -1,7 +1,7 @@
 schema = "apm.release-review.v4"
 status = "complete"
 release_target = "v4.0.0"
-reviewed_utc = "2026-09-04T15:37:38Z"
+reviewed_utc = "2026-09-04T15:42:51Z"
 reviewer = "Codex release implementation agent"
 
 v3_history_immutable = true
@@ -20,10 +20,10 @@ unresolved_claim_findings = []
 [reviewed_files]
 "AGENTS.md" = "eaa9466658c9aa9b17c0aef36de006b38a3977de669775ebad681dfa806d152b"
 "README.md" = "f54de8bae742aa2b1c2c5a1cd5383ea9bb6e7823dd9acce1d958a85975d9fc12"
-"CHANGELOG.md" = "92e5350408a8411ba6d97541ca9cd50d58867c87469256e2cb2d81c060583ee3"
+"CHANGELOG.md" = "92b9adffd6aa7b9fdf76b7879999f930e6b5a9d701f31acb27d657e210475532"
 "CONTRIBUTING.md" = "562c0c6e7c2d0f98b5c6ac21d31c3db43115ad3cf7184d0b98947c1dd35dd141"
 "DEVICE_FAMILY_MODEL.md" = "bd376a92e16272c1607f864e50f1930794c8fa796981332753d2cf5af5ea0d18"
-"ENVIRONMENT.md" = "a4ba562cf217def913e74369cb253601bafe05940b2ee5596ced70394c69b348"
+"ENVIRONMENT.md" = "260cd03d5e9615aaf21188d534447016424f016821419be393ba5170b14a66c2"
 "GOAL.md" = "4e7fb17db4c6dc2b076fc235677bfec1870655596860414fda40a3fd51d8d989"
 "RELEASE_V3.md" = "3d4836939490fd74387a2dd553a3c2b38de0e65680a0ee5fa889eeec2eb247db"
 "RELEASE_V4.md" = "5974fc19da5bd857b773513241c2ca1dd01af854868eca42c3e8d4c47b05ad1a"
