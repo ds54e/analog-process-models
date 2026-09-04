@@ -145,12 +145,16 @@ def _validate_contracts(
         if sha256_file(prior_path) != qualification["prior_failure_evidence_sha256"]:
             raise QualificationError("prior failed-epoch evidence hash mismatch")
         prior = json.loads(prior_path.read_text(encoding="utf-8"))
+        reuse_for_repair = prior["failure_policy"].get(
+            "prior_holdout_reuse_for_repair",
+            prior["failure_policy"].get("epoch_1_holdout_reuse_for_repair"),
+        )
         if (
             prior.get("schema") != "apm.v4-mixed-voltage-qualification-failure.v1"
             or prior.get("status") != "failed_closed"
             or int(prior["qualification_epoch"])
             != int(qualification["prior_failed_qualification_epoch"])
-            or prior["failure_policy"]["epoch_1_holdout_reuse_for_repair"] is not False
+            or reuse_for_repair is not False
         ):
             raise QualificationError("prior failed epoch is not valid fail-closed evidence")
         if {int(seed) for seed in generation["seeds"]} & {
@@ -184,6 +188,16 @@ def _validate_contracts(
         and device_criteria.get("near_off_control_region_exclusion_required") is True
     ):
         raise QualificationError("later epoch must seal explicit near-off solver semantics")
+    if int(qualification["qualification_epoch"]) > 2:
+        distinctness = qualification["distinctness"]
+        minimum_pair_fraction = float(
+            distinctness["minimum_valid_pair_fraction_per_view_polarity_target"]
+        )
+        if not (
+            0.0 < minimum_pair_fraction <= 1.0
+            and distinctness.get("target_not_reachable_is_explicit_nonfailure") is True
+        ):
+            raise QualificationError("invalid distinctness reachability-coverage method")
     synthesis_path = Path(__file__).with_name("synthesize_families.py")
     terminal_path = Path(__file__).with_name("terminal_observables.py")
     circuit_path = Path(__file__).with_name("circuit_fixtures.py")
@@ -1432,8 +1446,57 @@ def _distinctness_qualification(
         >= float(settings["required_width_ratio_majority_min"])
         for item in design_records
     ]
+    coverage_groups: dict[tuple[str, str, float], list[Mapping[str, Any]]] = defaultdict(
+        list
+    )
+    for item in comparisons:
+        coverage_groups[
+            (
+                str(item["view"]),
+                str(item["polarity"]),
+                float(item["gmid_target_per_v"]),
+            )
+        ].append(item)
+    coverage = [
+        {
+            "view": key[0],
+            "polarity": key[1],
+            "gmid_target_per_v": key[2],
+            "candidate_pair_count": len(group),
+            "validated_pair_count": sum(item["validated"] for item in group),
+            "validated_pair_fraction": sum(item["validated"] for item in group)
+            / len(group),
+        }
+        for key, group in sorted(coverage_groups.items())
+    ]
+    solver_states = [
+        str(item["state"])
+        for values in observations.values()
+        for item in values
+    ]
+    reachability_checks = (
+        {
+            "solver_states_explicit": bool(solver_states)
+            and all(
+                state in {"validated", "target_not_reachable"}
+                for state in solver_states
+            ),
+            "qualified_comparison_coverage": bool(coverage)
+            and all(
+                item["validated_pair_fraction"]
+                >= float(
+                    settings[
+                        "minimum_valid_pair_fraction_per_view_polarity_target"
+                    ]
+                )
+                for item in coverage
+            ),
+        }
+        if int(qualification["qualification_epoch"]) > 2
+        else {"all_comparisons_reachable": len(valid) == len(comparisons) and bool(valid)}
+    )
     checks = {
-        "all_comparisons_reachable": len(valid) == len(comparisons) and bool(valid),
+        **reachability_checks,
         "IO18_IO25_CAPACITANCE_DISTINCTION": bool(capacitance_ratios)
         and min(capacitance_ratios) >= float(settings["capacitance_ratio_all_min"])
         and float(np.median(capacitance_ratios))
@@ -1477,7 +1540,16 @@ def _distinctness_qualification(
             / max(len(current_success), 1),
             "design_width_ratio_success_fraction": sum(design_success)
             / max(len(design_success), 1),
+            "validated_pair_fraction": len(valid) / max(len(comparisons), 1),
+            "minimum_validated_pair_fraction_by_view_polarity_target": _minimum(
+                item["validated_pair_fraction"] for item in coverage
+            ),
+            "solver_state_counts": {
+                state: solver_states.count(state)
+                for state in ("validated", "target_not_reachable")
+            },
         },
+        "comparison_coverage": coverage,
         "comparisons": comparisons,
         "design_realization": design_records,
         "candidate_observations": [
@@ -2200,7 +2272,7 @@ def _arguments() -> argparse.Namespace:
     parser.add_argument(
         "--config",
         type=Path,
-        default=Path(__file__).with_name("qualification_epoch_2.toml"),
+        default=Path(__file__).with_name("qualification_epoch_3.toml"),
     )
     parser.add_argument("--calibration-report", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)

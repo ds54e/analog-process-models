@@ -14,7 +14,7 @@ V4 required gates:
   2/16 proven
 
 Current milestone:
-  GENERATION/QUALIFICATION EPOCH 2 SEALED / EXACT CALIBRATION PENDING
+  GENERATION/QUALIFICATION EPOCH 3 SEALED / EXACT CALIBRATION PENDING
 
 Public-readiness cleanup:
   COMPLETE
@@ -86,15 +86,24 @@ No epoch-1 candidate was repaired, no failed holdout is reused, and no passing
 subdomain is promoted. Compact failure evidence is
 `validation/evidence/v4_qualification_epoch1_failure.json`.
 
-Generation and qualification epoch 2 are now sealed with disjoint seeds and
-new device, charge, Y-matrix, and circuit holdout definitions. Its method
-implements the release contract's explicit `target_not_reachable` and near-off
-classification while requiring at least two qualified intermediate gm/Id
-targets per curve. A calibration-only development run retained five new
-independently seeded io18 and io25 N/P candidate pairs, again with provisional
-APM-supported floors of 0.08 um and 0.18 um and full 0.25--16 um
-`WIDTH_INVARIANT_IN_SCOPE` behavior. Exact clean-commit calibration and the
-first epoch-2 unseal remain pending; no new family is promoted yet.
+Generation/qualification epoch 2 also failed closed. All five new seed pairs
+for both families passed device, charge, Y-matrix, body-effect, circuit, and
+structural qualification. Every reachable comparison passed all three
+required distinctness claims, with minimum io18/io25 capacitance- and
+current-density ratios of 1.335 and 1.299. The extra epoch-2 method nevertheless
+required all candidate-pair equal-inversion comparisons to be reachable;
+20 1/V coverage was 60--75% by polarity while targets 5/10/15 had 100%
+coverage. The report therefore failed, no candidate was promoted or repaired,
+and compact evidence is
+`validation/evidence/v4_qualification_epoch2_failure.json`.
+
+Generation and qualification epoch 3 are sealed with another disjoint seed
+set, new device/charge/Y/circuit holdouts, and new structural/distinctness
+coordinates. The distinctness method now follows the release contract's
+"where reachable" rule with explicit `target_not_reachable` states and a
+predeclared 50% candidate-pair coverage floor for every view, polarity, and
+target. Exact clean-commit calibration and the first epoch-3 unseal remain
+pending; no new family is promoted yet.
 The released v3.0.0 tag, tagged commit, cards, evidence, and GitHub Release
 remain unchanged.
 

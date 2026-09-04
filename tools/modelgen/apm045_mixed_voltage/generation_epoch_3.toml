@@ -1,0 +1,462 @@
+# SPDX-FileCopyrightText: APM contributors
+# SPDX-License-Identifier: Apache-2.0
+
+schema = "apm.modelgen.mixed-voltage-generation.v1"
+generation_epoch = 3
+epoch_state = "SEALED_BEFORE_FINAL_CANDIDATE_GENERATION"
+declared_date = "2026-09-04"
+kernel = "apm.modelgen.observable-kernel@1.2.0"
+reference_simulator_major = 47
+purpose = "Independent APM-authored generic mixed-voltage BSIM4 synthesis from public qualitative evidence and APM-selected observable contracts."
+parameter_source = "APM engineering choices within declared bounds; no foundry or private card parameters"
+seeds = [54001, 54002, 54003, 54004, 54005]
+minimum_retained_candidates_per_family = 3
+canonical_selection = "observable_space_medoid"
+card_dialect = "BSIM4 4.8.2"
+# Every seeded draw is bounded about its family/polarity center. A failed
+# stage may shrink only the newly released normalized displacement toward the
+# center using these predeclared refinement factors.
+stage_refinement_factors = [1.0, 0.75, 0.50, 0.25, 0.0]
+local_sensitivity_fraction_of_span = 0.10
+
+[claim_boundary]
+foundry_correlated = false
+silicon_calibrated = false
+reliability_qualified = false
+foundry_geometry_rules = false
+manufacturable_pdk = false
+layout_dependent_charge = false
+process_noise_calibrated = false
+
+[geometry.io18]
+lmin_m = 8.0e-8
+lmax_m = 2.0e-6
+wmin_m = 2.5e-7
+wmax_m = 1.6e-5
+native_vdd_v = 1.8
+profiles_v = [1.8, 1.0]
+
+[geometry.io25]
+lmin_m = 1.8e-7
+lmax_m = 2.0e-6
+wmin_m = 2.5e-7
+wmax_m = 1.6e-5
+native_vdd_v = 2.5
+profiles_v = [2.5, 1.8, 1.0]
+
+# Values in this table define the clean APM skeleton. They are not observations
+# from any source model. Features without explicit targets remain disabled.
+[card_defaults]
+xj = 1.5e-8
+ndep = 2.5e18
+nsd = 1.0e20
+k1 = 0.45
+k2 = -0.03
+dvt2 = -0.03
+etab = -0.03
+ub = 1.0e-18
+rdswmin = 10.0
+pdiblc2 = 0.0
+delta = 0.01
+fprout = 0.0
+pdits = 0.0
+cgbo = 0.0
+xpart = 0.5
+ckappad = 0.5
+acde = 1.0
+noff = 1.0
+voffcv = 0.0
+kt1l = 0.0
+at = 0.0
+
+[center.io18.n]
+toxe = 2.8e-9
+vth0_magnitude = 0.50
+nfactor = 1.50
+voff = -0.080
+dvt0 = 0.55
+dvt1 = 0.50
+dsub = 0.45
+eta0 = 0.035
+u0 = 0.040
+ua = 8.0e-10
+vsat = 9.0e4
+rdsw = 100.0
+pclm = 0.55
+pdiblc1 = 0.010
+drout = 0.50
+pscbe1 = 4.0e8
+pscbe2 = 1.0e-6
+cgso = 1.2e-10
+cgdo = 1.2e-10
+ckappas = 0.50
+moin = 15.0
+kt1 = -0.10
+kt2 = 0.015
+ute = -1.20
+
+[center.io18.p]
+toxe = 2.8e-9
+vth0_magnitude = 0.52
+nfactor = 1.50
+voff = -0.080
+dvt0 = 0.55
+dvt1 = 0.50
+dsub = 0.45
+eta0 = 0.035
+u0 = 0.018
+ua = 8.0e-10
+vsat = 7.0e4
+rdsw = 140.0
+pclm = 0.55
+pdiblc1 = 0.010
+drout = 0.50
+pscbe1 = 4.0e8
+pscbe2 = 1.0e-6
+cgso = 1.2e-10
+cgdo = 1.2e-10
+ckappas = 0.50
+moin = 15.0
+kt1 = -0.10
+kt2 = 0.015
+ute = -1.20
+
+[center.io25.n]
+toxe = 4.2e-9
+vth0_magnitude = 0.65
+nfactor = 1.50
+voff = -0.080
+dvt0 = 0.55
+dvt1 = 0.50
+dsub = 0.45
+eta0 = 0.035
+u0 = 0.032
+ua = 8.0e-10
+vsat = 8.5e4
+rdsw = 130.0
+pclm = 0.55
+pdiblc1 = 0.010
+drout = 0.50
+pscbe1 = 4.0e8
+pscbe2 = 1.0e-6
+cgso = 1.0e-10
+cgdo = 1.0e-10
+ckappas = 0.50
+moin = 15.0
+kt1 = -0.10
+kt2 = 0.015
+ute = -1.20
+
+[center.io25.p]
+toxe = 4.2e-9
+vth0_magnitude = 0.68
+nfactor = 1.50
+voff = -0.080
+dvt0 = 0.55
+dvt1 = 0.50
+dsub = 0.45
+eta0 = 0.035
+u0 = 0.014
+ua = 8.0e-10
+vsat = 6.5e4
+rdsw = 180.0
+pclm = 0.55
+pdiblc1 = 0.010
+drout = 0.50
+pscbe1 = 4.0e8
+pscbe2 = 1.0e-6
+cgso = 1.0e-10
+cgdo = 1.0e-10
+ckappas = 0.50
+moin = 15.0
+kt1 = -0.10
+kt2 = 0.015
+ute = -1.20
+
+[[variation_parameter]]
+name = "toxe"
+stage = "electrostatics"
+mode = "relative"
+span = 0.05
+
+[[variation_parameter]]
+name = "vth0_magnitude"
+stage = "electrostatics"
+mode = "absolute"
+span = 0.025
+
+[[variation_parameter]]
+name = "nfactor"
+stage = "electrostatics"
+mode = "absolute"
+span = 0.08
+
+[[variation_parameter]]
+name = "voff"
+stage = "electrostatics"
+mode = "absolute"
+span = 0.010
+
+[[variation_parameter]]
+name = "dvt0"
+stage = "electrostatics"
+mode = "relative"
+span = 0.12
+
+[[variation_parameter]]
+name = "dvt1"
+stage = "electrostatics"
+mode = "relative"
+span = 0.12
+
+[[variation_parameter]]
+name = "dsub"
+stage = "electrostatics"
+mode = "relative"
+span = 0.15
+
+[[variation_parameter]]
+name = "eta0"
+stage = "electrostatics"
+mode = "relative"
+span = 0.20
+
+[[variation_parameter]]
+name = "u0"
+stage = "transport"
+mode = "relative"
+span = 0.08
+
+[[variation_parameter]]
+name = "ua"
+stage = "transport"
+mode = "relative"
+span = 0.20
+
+[[variation_parameter]]
+name = "vsat"
+stage = "transport"
+mode = "relative"
+span = 0.10
+
+[[variation_parameter]]
+name = "rdsw"
+stage = "transport"
+mode = "relative"
+span = 0.15
+
+[[variation_parameter]]
+name = "pclm"
+stage = "output"
+mode = "relative"
+span = 0.15
+
+[[variation_parameter]]
+name = "pdiblc1"
+stage = "output"
+mode = "relative"
+span = 0.25
+
+[[variation_parameter]]
+name = "drout"
+stage = "output"
+mode = "relative"
+span = 0.15
+
+[[variation_parameter]]
+name = "pscbe1"
+stage = "output"
+mode = "relative"
+span = 0.20
+
+[[variation_parameter]]
+name = "pscbe2"
+stage = "output"
+mode = "relative"
+span = 0.30
+
+[[variation_parameter]]
+name = "cgso"
+stage = "charge"
+mode = "relative"
+span = 0.10
+
+[[variation_parameter]]
+name = "cgdo"
+stage = "charge"
+mode = "relative"
+span = 0.10
+
+[[variation_parameter]]
+name = "ckappas"
+stage = "charge"
+mode = "absolute"
+span = 0.08
+
+[[variation_parameter]]
+name = "moin"
+stage = "charge"
+mode = "absolute"
+span = 2.0
+
+[[variation_parameter]]
+name = "kt1"
+stage = "temperature"
+mode = "absolute"
+span = 0.015
+
+[[variation_parameter]]
+name = "kt2"
+stage = "temperature"
+mode = "absolute"
+span = 0.010
+
+[[variation_parameter]]
+name = "ute"
+stage = "temperature"
+mode = "absolute"
+span = 0.15
+
+[calibration.dc]
+temperatures_c = [27]
+length_ratios = [1.0, 2.0, 4.0]
+widths_um = [0.25, 1.0, 10.0]
+idvg_fixed_bias_fractions = [0.02, 0.50, 0.80, 1.00]
+idvd_fixed_bias_fractions = [0.55, 0.80, 1.00]
+points = 101
+
+[width_challenge]
+temperatures_c = [27]
+length_ratios = [1.0, 2.0, 4.0]
+widths_um = [0.25, 0.5, 1.0, 2.0, 5.0, 10.0, 16.0]
+idvg_fixed_bias_fractions = [0.50, 1.00]
+idvd_fixed_bias_fractions = [0.80, 1.00]
+points = 41
+
+[calibration.charge]
+temperatures_c = [27]
+length_ratios = [1.0, 3.0]
+widths_um = [1.0]
+idvg_fixed_bias_fractions = [0.25, 0.65]
+points = 21
+frequencies_hz = [1.0e5, 1.0e6]
+
+[calibration.temperature]
+temperatures_c = [0, 27, 60]
+length_ratios = [1.0, 3.0]
+widths_um = [1.0]
+idvg_fixed_bias_fractions = [0.80]
+idvd_fixed_bias_fractions = [0.80]
+points = 61
+
+[calibration.utility]
+gmid_targets_per_v = [5.0, 10.0, 15.0, 20.0]
+gmid_length_ratios = [1.0, 2.0, 4.0]
+gmid_vds_fractions = [0.50, 0.80]
+endpoint_guard_points = 2
+
+[calibration.criteria]
+threshold_over_vdd_min = 0.12
+threshold_over_vdd_max = 0.55
+dibl_min_v_per_v = -0.02
+dibl_max_v_per_v = 0.35
+gmid_target_relative_tolerance_max = 0.03
+width_current_density_p95_relative_max = 0.03
+width_outcome = "WIDTH_INVARIANT_IN_SCOPE"
+required_length_current_order_fraction = 0.90
+calibration_temperature_current_ratio_min = 0.02
+calibration_temperature_current_ratio_max = 50.0
+temperature_threshold_span_over_vdd_max = 0.30
+cgg_density_min_f_per_m2 = 1.0e-4
+cgg_density_max_f_per_m2 = 0.10
+
+# This definition is hashed before candidate construction. Full qualification
+# evaluates it only after all candidate parameters and cards are frozen.
+[sealed_device_holdout]
+temperatures_c = [-40, 85, 125]
+length_ratios = [1.375, 2.75]
+widths_um = [0.625, 4.0, 14.0]
+idvg_fixed_bias_fractions = [0.475, 0.775]
+idvd_fixed_bias_fractions = [0.575, 0.825]
+points = 87
+intermediate_gmid_targets_per_v = [7.0, 14.0, 19.0]
+endpoint_guard_points = 2
+
+[sealed_charge_holdout]
+temperatures_c = [-40, 85, 125]
+length_ratios = [1.375, 3.25]
+widths_um = [0.625, 4.0]
+idvg_fixed_bias_fractions = [0.50, 0.80]
+points = 27
+frequencies_hz = [4.0e5, 4.0e6]
+
+[terminal_y]
+terminal_order = ["d", "g", "s", "b"]
+calibration_bias_fractions = [[0.35, 0.25], [0.65, 0.50], [0.85, 0.75]]
+holdout_bias_fractions = [[0.55, 0.475], [0.825, 0.70]]
+calibration_length_ratios = [1.0, 3.0]
+holdout_length_ratios = [1.375]
+calibration_widths_um = [1.0]
+holdout_widths_um = [0.625, 4.0]
+calibration_temperatures_c = [27]
+holdout_temperatures_c = [-40, 85, 125]
+calibration_frequencies_hz = [1.0e5, 1.0e6]
+holdout_frequencies_hz = [4.0e5, 4.0e6]
+y_kcl_normalized_residual_max = 1.0e-6
+frequency_relative_change_max = 0.05
+
+[numerical]
+current_floor_a = 1.0e-10
+finite_difference_p95_relative_max = 0.02
+native_oracle_p95_relative_max = 0.02
+nan_inf_forbidden = true
+silent_endpoint_reuse_forbidden = true
+
+[structural]
+capacitance_density_order = ["apm045/vtg", "apm045/io18", "apm045/io25"]
+comparison_physical_lengths_m = [3.0e-7, 4.0e-7, 6.0e-7]
+comparison_width_um = 1.0
+comparison_vdd_v = 1.0
+comparison_vctrl_v = 0.75
+comparison_vout_v = 0.50
+
+[distinctness]
+common_vdd_v = 1.8
+gmid_targets_per_v = [5.0, 10.0, 15.0, 20.0]
+capacitance_ratio_median_min = 1.25
+capacitance_ratio_all_min = 1.10
+current_density_ratio_majority_min = 1.15
+current_density_required_majority_fraction = 0.75
+fixed_current_a = [1.0e-4, 5.0e-4, 1.0e-3]
+required_width_ratio_majority_min = 1.25
+required_width_ratio_majority_fraction = 0.67
+forced_gm_over_gds_order = false
+forced_noise_order = false
+forced_leakage_order = false
+forced_total_gate_charge_order = false
+
+[sealed_circuit_holdout]
+definition_state = "SEALED_BEFORE_FINAL_CANDIDATE_GENERATION"
+fixture_classes = ["mos_diode", "current_mirror_1to1", "source_follower", "resistive_load_common_source", "pmos_pass_device"]
+temperatures_c = [-40, 85, 125]
+intermediate_length_ratios = [1.375, 2.75]
+load_currents_a = [1.0e-4, 5.0e-4, 1.0e-3]
+pass_scenarios = ["io18_vin1v8_vout1v0", "io25_underdrive_vin1v8_vout1v0", "io25_nominal_vin2v5_vout1v2"]
+explicit_parallel_unit_width_m = 1.0e-5
+maximum_units = 128
+
+[selection]
+method = "observable_space_medoid"
+metric_names = ["vth", "dibl", "id_per_width_vs_gmid", "gds_over_id", "gm_over_gds", "cgg_per_width_or_area", "cgd_over_cgg", "body_effect", "temperature"]
+normalization = "median_absolute_deviation_with_unit_floor"
+tie_break = "lowest_seed"
+circuit_results_available_before_selection = true
+
+[failure_states]
+io25 = "IO25_CONTRACT_INCONSISTENT"
+io18 = "IO18_CONTRACT_INCONSISTENT"
+distinctness = "IO18_DISTINCTNESS_NOT_ESTABLISHED"
+identifiability = "PARAMETER_IDENTIFIABILITY_FAILURE"
+ensemble = "EPISTEMIC_UNCERTAINTY_TOO_WIDE"
+dc_charge = "DC_CHARGE_CONFLICT"
+circuit = "CIRCUIT_HOLDOUT_FAILURE"

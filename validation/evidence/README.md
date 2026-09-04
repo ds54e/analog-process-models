@@ -39,6 +39,12 @@ preserved in `v4_qualification_epoch1_failure.json`. That compact record binds
 the clean unseal receipt and full failure report, forbids reuse or repair, and
 does not promote its passing subdomains. A later attempt must use a new recorded
 generation epoch, new seeds, and a newly sealed holdout definition.
+Epoch 2 is likewise preserved in `v4_qualification_epoch2_failure.json`: every
+device/circuit/structural domain and every reachable required-distinctness
+comparison passed, but its additional all-candidate-pairs reachability rule
+failed at 20 1/V. Epoch 3 therefore uses new seeds and holdout definitions and
+seals an explicit per-view/polarity/target 50% coverage floor consistent with
+the release contract's "where reachable" language.
 
 ## Status vocabulary
 

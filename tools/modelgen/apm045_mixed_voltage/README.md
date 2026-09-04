@@ -54,8 +54,8 @@ candidates without evaluating any holdout:
 
 ```bash
 .venv/bin/python -m tools.modelgen.apm045_mixed_voltage.synthesize_families \
-  --config tools/modelgen/apm045_mixed_voltage/generation_epoch_2.toml \
-  --output .apm/results/v4-generation-epoch2-calibration \
+  --config tools/modelgen/apm045_mixed_voltage/generation_epoch_3.toml \
+  --output .apm/results/v4-generation-epoch3-calibration \
   --calibration-only
 ```
 
@@ -63,9 +63,9 @@ Then run the repeatable, non-holdout seal audit:
 
 ```bash
 .venv/bin/python -m tools.modelgen.apm045_mixed_voltage.qualify_families \
-  --config tools/modelgen/apm045_mixed_voltage/qualification_epoch_2.toml \
-  --calibration-report .apm/results/v4-generation-epoch2-calibration/report.json \
-  --output .apm/results/v4-qualification-epoch2-preflight \
+  --config tools/modelgen/apm045_mixed_voltage/qualification_epoch_3.toml \
+  --calibration-report .apm/results/v4-generation-epoch3-calibration/report.json \
+  --output .apm/results/v4-qualification-epoch3-preflight \
   --preflight
 ```
 
@@ -76,11 +76,14 @@ qualification, and medoid selection occurs only after circuit results.
 
 Epoch 1 is retained as failed-closed history. Its strict method rejected io25
 when 17.5 1/V was explicitly not reachable in subsets of the high-temperature
-qualified-current region. Epoch 2 uses disjoint seeds and new holdout
-definitions; it implements the release contract's explicit
-`target_not_reachable`/near-off states while still requiring two qualified
-intermediate inversion targets on every curve. Neither old coordinates nor old
-candidates are reused for repair.
+qualified-current region. Epoch 2 used disjoint seeds and new holdouts and
+fixed that classification, but its extra all-candidate-pairs requirement then
+rejected otherwise passing distinctness at 20 1/V. Epoch 3 again uses new seeds
+and new holdout/structural/distinctness definitions. It requires two qualified
+intermediate targets per device curve and at least half of candidate-pair
+comparisons per distinctness view, polarity, and target, while persisting every
+explicit `target_not_reachable` state. No failed holdout is used as a repair
+target and no failed candidate is reused.
 
 ## Claim boundary
 

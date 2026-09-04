@@ -1,0 +1,106 @@
+{
+  "schema": "apm.v4-mixed-voltage-qualification-failure.v1",
+  "status": "failed_closed",
+  "created_utc": "2026-09-04T13:53:37.198079+00:00",
+  "qualification_epoch": 2,
+  "generation_epoch": 2,
+  "implementation_commit": "fbbeaf4208a55e3522ba4489aad4247616db9cf4",
+  "release_gate_promotion": false,
+  "failure_classification": {
+    "report_failure_state": "IO18_DISTINCTNESS_NOT_ESTABLISHED",
+    "root_cause_state": "DISTINCTNESS_COMPARISON_COVERAGE_METHOD_INCONSISTENT",
+    "root_cause": "All three required io18/io25 distinctness claims passed on every reachable pair, but the epoch-2 method additionally required all 1600 candidate-pair equal-inversion comparisons to be reachable. The 20 1/V view had 60%-75% valid pair coverage depending on polarity; all lower targets had 100% coverage.",
+    "method_finding": "The v4 comparison contract requires equal-inversion views where reachable and the result contract requires explicit target_not_reachable states. Epoch 2 nevertheless sealed an all-pairs reachability check, so its failure is retained and not reinterpreted.",
+    "candidate_parameter_failure_inferred": false
+  },
+  "full_report": {
+    "generated_path": ".apm/results/v4-qualification-epoch2-unsealed-exact-fbbeaf4/report.json",
+    "sha256": "a839f22203653922987f388e994ccc80f2c6e5a4310c3d67a9cf86c374d37608",
+    "status": "fail",
+    "simulator_evaluation_count": 502,
+    "retention": "ignored local full result; compact failure evidence is tracked"
+  },
+  "unseal_receipt": {
+    "generated_path": ".apm/results/v4-qualification-epoch2-unsealed-exact-fbbeaf4/unseal_receipt.json",
+    "sha256": "7c39255118fe4d6346fc745d9cf21306e1f04248ab0461af8bc0524541374c0c",
+    "clean_commit": true,
+    "definitions_unsealed": [
+      "sealed_device_holdout",
+      "sealed_charge_holdout",
+      "terminal_y.holdout",
+      "sealed_circuit_holdout"
+    ]
+  },
+  "bound_inputs": {
+    "qualification_input": {
+      "path": "tools/modelgen/apm045_mixed_voltage/qualification_epoch_2.toml",
+      "sha256": "ea5050855627690e81765a95383449da83fd33f0569f683aa38b2dc9eb2a8368"
+    },
+    "generation_contract": {
+      "path": "tools/modelgen/apm045_mixed_voltage/generation_epoch_2.toml",
+      "sha256": "ed48de6915f063af066d08c71628bcee674f6fb65b0dc208ef978f45b19c2d62"
+    },
+    "calibration_report": {
+      "generated_path": ".apm/results/v4-generation-epoch2-calibration-exact-fbbeaf4/report.json",
+      "sha256": "82c6a2749f34ad34fca215d8586f23923b09fe81a2568baa993a64164f872a88",
+      "canonical_content_sha256": "7f654d77299be639f0a2dc34cc0d69d654440c0b038e113b758a807c8a17e021"
+    },
+    "qualification_implementation_sha256": "a361c8656c896f79e94b1f289d2cc7d7b90d02287bfcdd707e5d2effe3b14052",
+    "terminal_observables_implementation_sha256": "68f8070f170f0cc66c006c30976b6b8bee63a61e10d9ea0460c3632304e56477",
+    "circuit_fixtures_implementation_sha256": "a17a36d1d0c9458f14757fe5dc85e9bbd1fdc8355708c5504bbf9ee70b2d9677"
+  },
+  "sealed_definition_sha256": {
+    "sealed_device_holdout": "5973fa97c2654904020d070bae06a873436119925a8ab8124d8b5dba4ec6e78e",
+    "sealed_charge_holdout": "8deaa3831b2fcbc2c1d97da32dab0f3979be2e3b6acf9a673328ecd1a719f92c",
+    "sealed_circuit_holdout": "79ca2361d588e9dd084b43c4ddb921ae1b7e486ae48daca6cf4276fc8395b805"
+  },
+  "observed_outcome": {
+    "candidate_seeds": [
+      53001,
+      53002,
+      53003,
+      53004,
+      53005
+    ],
+    "io18_individually_qualified_seed_pairs": 5,
+    "io25_individually_qualified_seed_pairs": 5,
+    "all_20_candidate_polarity_device_charge_y_body_domains_passed": true,
+    "all_10_circuit_candidate_pairs_passed": true,
+    "structural_capacitance_order": {
+      "status": "pass",
+      "claim_class": "ROBUST_ACROSS_ENSEMBLE",
+      "comparison_count": 150
+    },
+    "required_distinctness_claims": {
+      "IO18_IO25_CAPACITANCE_DISTINCTION": true,
+      "IO18_IO25_CURRENT_DENSITY_DISTINCTION": true,
+      "IO18_IO25_DESIGN_REALIZATION_DISTINCTION": true
+    },
+    "distinctness_metrics": {
+      "capacitance_ratio_io18_over_io25_min": 1.3354832447874334,
+      "capacitance_ratio_io18_over_io25_median": 1.6809965393028512,
+      "current_density_ratio_io18_over_io25_min": 1.298749219928474,
+      "current_density_ratio_io18_over_io25_median": 3.3255867290234913,
+      "current_density_success_fraction": 1.0,
+      "design_width_ratio_success_fraction": 1.0
+    },
+    "distinctness_pair_comparisons": 1600,
+    "distinctness_reachable_pair_comparisons": 1470,
+    "distinctness_unreachable_pair_comparisons": 130,
+    "minimum_reachable_fraction_by_view_polarity_target": 0.60,
+    "targets_5_10_15_reachable_fraction": 1.0,
+    "target_20_reachable_fraction_range": [
+      0.60,
+      0.75
+    ]
+  },
+  "failure_policy": {
+    "candidate_parameters_modified_after_unseal": false,
+    "prior_holdout_reuse_for_repair": false,
+    "passing_subdomains_promoted_as_release_gates": false,
+    "next_attempt_requires_new_generation_epoch": true,
+    "next_attempt_requires_new_candidate_seeds": true,
+    "next_attempt_requires_new_sealed_holdout_definition": true,
+    "next_attempt_requires_new_distinctness_coordinates": true
+  }
+}
