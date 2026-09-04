@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
@@ -728,15 +729,28 @@ def audit_v4_claims(root: Path, contract: dict[str, Any]) -> dict[str, Any]:
 
 
 def _run_logged_command(
-    root: Path, output: Path, command_id: str, command: list[str]
+    root: Path,
+    output: Path,
+    command_id: str,
+    command: list[str],
+    *,
+    environment: dict[str, str] | None = None,
+    environment_summary: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     started = time.monotonic()
-    result = subprocess.run(command, cwd=root, text=True, capture_output=True, check=False)
+    result = subprocess.run(
+        command,
+        cwd=root,
+        text=True,
+        capture_output=True,
+        check=False,
+        env=environment,
+    )
     stdout_path = output / f"{command_id}.stdout.txt"
     stderr_path = output / f"{command_id}.stderr.txt"
     stdout_path.write_text(result.stdout, encoding="utf-8")
     stderr_path.write_text(result.stderr, encoding="utf-8")
-    return {
+    record = {
         "id": command_id,
         "command": command,
         "returncode": result.returncode,
@@ -747,6 +761,9 @@ def _run_logged_command(
         "stderr_sha256": sha256_file(stderr_path),
         "status": "pass" if result.returncode == 0 else "fail",
     }
+    if environment_summary:
+        record["environment"] = environment_summary
+    return record
 
 
 def _failed_validation_report(
@@ -782,11 +799,47 @@ def run_v3_regression(root: Path, output: Path) -> dict[str, Any]:
             ["git", "checkout", "--detach", V3_TAG_COMMIT],
         )
         commands.append(checkout)
+    v3_site = output / "v3-site"
+    if all(item["status"] == "pass" for item in commands):
+        commands.append(
+            _run_logged_command(
+                source,
+                output,
+                "install-v3",
+                [
+                    sys.executable,
+                    "-m",
+                    "pip",
+                    "install",
+                    "--no-deps",
+                    "--no-compile",
+                    "--target",
+                    str(v3_site),
+                    ".",
+                ],
+            )
+        )
+    v3_environment = os.environ.copy()
+    python_path_entries = [str(v3_site)]
+    if v3_environment.get("PYTHONPATH"):
+        python_path_entries.append(v3_environment["PYTHONPATH"])
+    v3_environment["PYTHONPATH"] = os.pathsep.join(python_path_entries)
     if all(item["status"] == "pass" for item in commands):
         commands.extend(
             [
                 _run_logged_command(
-                    source, output, "pytest-v3", [sys.executable, "-m", "pytest", "-q"]
+                    source,
+                    output,
+                    "pytest-v3",
+                    [sys.executable, "-m", "pytest", "-q"],
+                    environment=v3_environment,
+                    environment_summary={
+                        "PYTHONPATH_prefix": str(v3_site),
+                        "purpose": (
+                            "execute tagged v3 source with its installed 3.0.0 "
+                            "distribution metadata while using the v4 tool environment"
+                        ),
+                    },
                 ),
                 _run_logged_command(
                     source,
@@ -805,8 +858,16 @@ def run_v3_regression(root: Path, output: Path) -> dict[str, Any]:
     observed_head = (
         _git(source, "rev-parse", "HEAD") if (source / ".git").exists() else "missing"
     )
+    metadata_paths = sorted(v3_site.glob("analog_process_models-3.0.0.dist-info/METADATA"))
+    distribution_metadata = metadata_paths[0] if len(metadata_paths) == 1 else None
     checks = {
         "isolated_v3_checkout": observed_head == V3_TAG_COMMIT,
+        "v3_distribution_install": next(
+            (item["status"] == "pass" for item in commands if item["id"] == "install-v3"),
+            False,
+        ),
+        "v3_distribution_metadata": distribution_metadata is not None
+        and "Version: 3.0.0" in distribution_metadata.read_text(encoding="utf-8"),
         "v3_pytest": next(
             (item["status"] == "pass" for item in commands if item["id"] == "pytest-v3"),
             False,
@@ -827,6 +888,13 @@ def run_v3_regression(root: Path, output: Path) -> dict[str, Any]:
         "source_repository": str(root),
         "v3_tagged_commit_expected": V3_TAG_COMMIT,
         "v3_tagged_commit_observed": observed_head,
+        "v3_distribution": {
+            "site_path": str(v3_site),
+            "metadata_path": str(distribution_metadata) if distribution_metadata else None,
+            "metadata_sha256": sha256_file(distribution_metadata)
+            if distribution_metadata
+            else None,
+        },
         "commands": commands,
         "checks": checks,
     }
