@@ -8,7 +8,7 @@ supports validation and release claims.
 ```text
 Released baseline: v3.0.0
 Target release: v4.0.0
-State: RELEASE-CANDIDATE HARDENING
+State: RELEASE-CANDIDATE PORTABILITY FIX
 
 V4 development/integration gates proven before release qualification:
   12/16
@@ -32,7 +32,7 @@ Third-party redistribution/provenance:
   PASS
 
 Current normal repository validation:
-  PASS (pre-candidate clean snapshot 7e336a6)
+  PASS (pre-portability-fix clean snapshot a2f5b4c)
 
 v3.0.0 tag / GitHub Release:
   IMMUTABLE / unchanged
@@ -59,7 +59,7 @@ Current real-tool baseline:
   apm doctor PASS (ngspice 47; 2026-09-04)
 
 V4 release qualification:
-  CANDIDATE AND EXACT-TAG FRESH-CLONE RUNS PENDING
+  PORTABILITY FIX IMPLEMENTED; NEW CANDIDATE AND EXACT-TAG RUNS PENDING
 
 V4 stop state:
   none
@@ -139,10 +139,12 @@ pre-release integration total to 11/16. Compact evidence is
 
 The live stationary-noise planner derives 424 logical memberships from all 30
 devices and deduplicates them to 330 physical requests (94 memberships
-deduplicated). This is planning evidence, not the `noise.v4_catalog` gate. A
-fresh 330-request execution, strict 330/330 reuse, tamper qualification, v3
-compatibility regression, clean-clone candidate run, claim review, and exact-tag
-requalification remain release work.
+deduplicated). This planning result alone is not the `noise.v4_catalog` gate.
+The first candidate attempt later completed a fresh 330-request execution,
+strict 330/330 reuse, tamper qualification, and v3 compatibility regression,
+but that attempt did not qualify the candidate because an earlier modelgen
+replay component failed. Those noise checks must therefore run again inside
+the next complete successful candidate.
 
 The separate phase-aware validator implements all 16 declared v4 gates.
 Candidate success requires 15/15 pre-tag gates and leaves only the exact-tag
@@ -161,6 +163,29 @@ Together with the complete hash-bound public review, this proves
 `release.claim_audit_v4` at the development/static level and brings the
 pre-release milestone total to 12/16. The candidate still must independently
 rerun every component from its attested fresh clone.
+
+Fresh candidate attempt `a2f5b4c7a2b7218ebcc4263ba56b89b9501e832e`
+correctly failed closed before replaying any device or circuit holdout. Its
+fresh calibration report was scientifically byte-equivalent to the original
+after excluding only build-local metadata, but the original canonical hash
+also covered the source-built ngspice path, binary hash, and creation-time
+banner. Those values necessarily changed in a new clone. Reconstruction,
+calibration, all 15 characterizations, v3 regressions, mixed-voltage
+comparison, Benchmark Global/Local/All, the fresh/resumed noise catalog, and
+all four tamper/staleness tests passed; the blocked replay cascaded into the
+four model/holdout gates and the aggregate clean-clone gate, leaving 10/15
+candidate-required gates passed. No `v4.0.0` tag was created.
+
+The release-replay fix preserves the immutable epoch-3 calibration and
+first-unseal hashes. A separate committed portability binding proves that the
+original and fresh calibration reports have the same scientific content when
+only `created_utc` and the three rebuild-local ngspice identity fields are
+excluded. It separately requires the fresh path, executable SHA-256, complete
+version banner, and major version to match the executable actually used.
+Candidate parameters, holdout definitions, qualification criteria, and
+electrical results remain exact and are all rerun. Because the failed attempt
+stopped before opening a holdout, this repairs no candidate against a failed
+holdout result and creates no new generation epoch.
 
 ## Immutable releases
 

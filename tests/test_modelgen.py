@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import copy
+import json
 import math
 from pathlib import Path
 
@@ -28,11 +30,18 @@ from tools.modelgen.apm045_mixed_voltage.kernel import (
     sha256_bytes,
     sha256_file,
 )
+from tools.modelgen.apm045_mixed_voltage.qualify_families import (
+    _canonical_report_sha256,
+)
 from tools.modelgen.apm045_mixed_voltage.qualify_reconstruction import (
     COMPLETION_STATE,
     REQUIRED_RECORD_IDS,
     SUBSET_COMPLETION_STATE,
     _coverage,
+)
+from tools.modelgen.apm045_mixed_voltage.replay_families import (
+    EXCLUDED_FIELDS,
+    portable_calibration_sha256,
 )
 from tools.modelgen.apm045_mixed_voltage.synthesize_families import (
     _candidate_parameters,
@@ -66,7 +75,74 @@ GENERATION_CONFIGURATION_3 = (
 QUALIFICATION_CONFIGURATION_3 = (
     ROOT / "tools/modelgen/apm045_mixed_voltage/qualification_epoch_3.toml"
 )
+CALIBRATION_REPLAY_CONFIGURATION = (
+    ROOT / "tools/modelgen/apm045_mixed_voltage/calibration_replay_v4.toml"
+)
 NGSPICE = ROOT / ".apm/toolchain/ngspice-47/bin/ngspice"
+
+
+def test_calibration_replay_hash_excludes_only_rebuild_local_tool_fields() -> None:
+    original = {
+        "schema": "fixture",
+        "created_utc": "first",
+        "reference_tool": {
+            "major": "47",
+            "path": "/first/ngspice",
+            "sha256": "first-binary",
+            "version_output": "ngspice-47 first build",
+        },
+        "scientific_result": {"cards": ["a", "b"], "metric": 1.25},
+    }
+    rebuilt = copy.deepcopy(original)
+    rebuilt["created_utc"] = "second"
+    rebuilt["reference_tool"].update(
+        {
+            "path": "/second/ngspice",
+            "sha256": "second-binary",
+            "version_output": "ngspice-47 second build",
+        }
+    )
+
+    assert _canonical_report_sha256(original) != _canonical_report_sha256(rebuilt)
+    assert portable_calibration_sha256(
+        original
+    ) == portable_calibration_sha256(rebuilt)
+    rebuilt["reference_tool"]["major"] = "48"
+    assert portable_calibration_sha256(
+        original
+    ) != portable_calibration_sha256(rebuilt)
+    assert EXCLUDED_FIELDS == (
+        "created_utc",
+        "reference_tool.path",
+        "reference_tool.sha256",
+        "reference_tool.version_output",
+    )
+
+
+def test_calibration_replay_binding_preserves_first_unseal_identity() -> None:
+    with CALIBRATION_REPLAY_CONFIGURATION.open("rb") as handle:
+        replay = tomllib.load(handle)
+    with QUALIFICATION_CONFIGURATION_3.open("rb") as handle:
+        qualification = tomllib.load(handle)
+    evidence_path = ROOT / replay["original_calibration_evidence"]
+    evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+
+    assert replay["qualification_input_sha256"] == sha256_file(
+        QUALIFICATION_CONFIGURATION_3
+    )
+    assert replay["original_calibration_evidence_sha256"] == sha256_file(
+        evidence_path
+    )
+    assert replay["sealed_calibration_canonical_content_sha256"] == qualification[
+        "calibration_canonical_content_sha256"
+    ]
+    assert replay["original_calibration_report_sha256"] == evidence["full_report"][
+        "sha256"
+    ]
+    assert replay["excluded_fields"] == list(EXCLUDED_FIELDS)
+    assert replay["candidate_parameter_change_permitted"] is False
+    assert replay["holdout_definition_change_permitted"] is False
+    assert replay["electrical_criterion_change_permitted"] is False
 
 
 def _configuration() -> dict:

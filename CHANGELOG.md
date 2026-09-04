@@ -59,7 +59,10 @@ families to APM045.
   acquisition identities, Sparse/no-KLU execution, strict resume, and tamper
   rejection;
 - added exact public-generation lineage and license/provenance checks for all
-  new APM-authored assets; and
+  new APM-authored assets;
+- added a fail-closed clean-clone calibration replay binding that preserves the
+  immutable first-unseal identity while separating rebuild-local ngspice
+  metadata from the portable scientific-content hash;
 - changed the Rust bootstrap from a mutable distribution URL to the
   checksum-verified rustup 1.29.1 archive so clean-clone setup remains
   reproducible after upstream stable-channel changes; and

@@ -1,0 +1,47 @@
+# SPDX-FileCopyrightText: APM contributors
+# SPDX-License-Identifier: Apache-2.0
+
+schema = "apm.modelgen.calibration-replay-binding.v1"
+state = "PORTABLE_REPLAY_BINDING_AFTER_FIRST_UNSEAL"
+declared_date = "2026-09-05"
+generation_epoch = 3
+qualification_epoch = 3
+
+qualification_input = "tools/modelgen/apm045_mixed_voltage/qualification_epoch_3.toml"
+qualification_input_sha256 = "1f6977a0697a8797464030f7345b8c1c8bbbc35996ffdf8df063c409163a3cfa"
+frozen_qualification_implementation = "tools/modelgen/apm045_mixed_voltage/qualify_families.py"
+frozen_qualification_implementation_sha256 = "374f86f4479fd56347bf968c7d410b9870dabbc80bc04daa431833b8763c1ce0"
+original_calibration_evidence = "validation/evidence/v4_generation_epoch3_calibration.json"
+original_calibration_evidence_sha256 = "889be51c0d7b61040cae56b20cd6030a2b2c4d8f71ea59e3d31c00a1a92bc12b"
+original_calibration_report_sha256 = "a0353eb13b4fb384497335f5409a48ec3b22c8e73f43fd6eacae52ee56193a36"
+sealed_calibration_canonical_content_sha256 = "7476a64c16c8a8aa84a13db4d1c9f106514530c145b80178277b3e86cfcb0622"
+portable_calibration_content_sha256 = "5ef914f31be4588d0d2ede922e38ee03e816819843c2e212ba9baceba3a50813"
+
+excluded_fields = [
+  "created_utc",
+  "reference_tool.path",
+  "reference_tool.sha256",
+  "reference_tool.version_output",
+]
+reference_simulator_major = 47
+fresh_report_required = true
+candidate_parameter_change_permitted = false
+holdout_definition_change_permitted = false
+electrical_criterion_change_permitted = false
+
+rationale = "Source-built ngspice embeds clone-local path and build-time metadata; release replay excludes only those fields from the portable science hash while separately requiring the fresh report's complete tool identity to match the executable used."
+
+[sealed_reference_tool]
+major = "47"
+path = "/home/admin/src/analog-process-models/.apm/toolchain/ngspice-47/bin/ngspice"
+sha256 = "34d24e813da266ee2a5deef72596de1351b63d489f96372ec4364648676cdc21"
+version_output = """******
+** ngspice-47 : Circuit level simulation program
+** Compiled with KLU Direct Linear Solver
+** The U. C. Berkeley CAD Group
+** Copyright 1985-1994, Regents of the University of California.
+** Copyright 2001-2026, The ngspice team.
+** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html
+** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html
+** Creation Date: Sat Aug 29 14:53:22 UTC 2026
+******"""

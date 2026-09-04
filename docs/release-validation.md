@@ -52,6 +52,13 @@ v3 comparison and native-variation regressions, the versioned mixed-voltage comp
 Benchmark Global/Local/All, and a fresh 330-request live noise catalog followed
 by strict 330/330 resume and four-way tamper/staleness qualification.
 
+The replay preserves the immutable first-unseal calibration hash and checks
+the committed `calibration_replay_v4.toml` portability binding. Its portable
+hash excludes only the calibration timestamp and source-build-local ngspice
+path, binary hash, and version banner; those tool fields are separately
+required to match the fresh executable exactly. No candidate, holdout,
+criterion, or electrical result field is normalized away.
+
 Success has status `candidate_pass`, passes 15/15 candidate-required gates,
 reports 15 of the 16 total gates passed, and leaves only
 `release.exact_tag_requalification` explicitly `pending`. This is not a hidden

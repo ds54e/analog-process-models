@@ -74,6 +74,16 @@ directory. It writes the unseal receipt before the first holdout job and does
 not accept `--replace-output`. Candidate parameters are immutable throughout
 qualification, and medoid selection occurs only after circuit results.
 
+Release requalification uses `--replay` with
+`calibration_replay_v4.toml`. The first-unseal calibration hash remains
+unchanged. The replay binding additionally fixes a portable science hash that
+excludes only calibration time and the clone-local ngspice path, binary hash,
+and build banner. A replay still requires those omitted tool fields to match
+the fresh executable exactly, requires ngspice major 47, regenerates the same
+candidate cards byte-for-byte, and reruns every device and circuit holdout.
+This portability projection changes no candidate parameter, holdout
+definition, electrical criterion, or first-unseal evidence.
+
 Epoch 1 is retained as failed-closed history. Its strict method rejected io25
 when 17.5 1/V was explicitly not reachable in subsets of the high-temperature
 qualified-current region. Epoch 2 used disjoint seeds and new holdouts and

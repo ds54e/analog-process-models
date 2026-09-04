@@ -97,6 +97,8 @@ REQUIRED_REVIEWED_FILES_V4 = frozenset(
         "docs/spectre.md",
         "models/apm045/README.md",
         "models/apm045/mixed_voltage_evidence.toml",
+        "tools/modelgen/apm045_mixed_voltage/README.md",
+        "tools/modelgen/apm045_mixed_voltage/calibration_replay_v4.toml",
         "validation/evidence/README.md",
         "validation/release_gates_v4.toml",
     }
@@ -147,6 +149,14 @@ MODELGEN_SOURCE_BINDINGS = {
     "qualification": (
         "tools/modelgen/apm045_mixed_voltage/qualify_families.py",
         "374f86f4479fd56347bf968c7d410b9870dabbc80bc04daa431833b8763c1ce0",
+    ),
+    "qualification_replay": (
+        "tools/modelgen/apm045_mixed_voltage/replay_families.py",
+        "c0e2671c48b620b46748033315bdebd1834e7a3a47cc64019735d1a86cd753fb",
+    ),
+    "calibration_replay_contract": (
+        "tools/modelgen/apm045_mixed_voltage/calibration_replay_v4.toml",
+        "8eacecf1658c3f0c852210d2705e77eb30434931f209d63d25404af193f5c91c",
     ),
     "terminal_observables": (
         "tools/modelgen/apm045_mixed_voltage/terminal_observables.py",
@@ -1215,25 +1225,29 @@ def _run_modelgen_qualification_replay(
 
     calibration_path = Path(str(calibration["report_path"]))
     config = root / "tools/modelgen/apm045_mixed_voltage/qualification_epoch_3.toml"
+    replay_contract = (
+        root / "tools/modelgen/apm045_mixed_voltage/calibration_replay_v4.toml"
+    )
     report = _run_modelgen_command(
         root,
         output,
         command_id="modelgen-qualification-replay-epoch3",
-        module="tools.modelgen.apm045_mixed_voltage.qualify_families",
+        module="tools.modelgen.apm045_mixed_voltage.replay_families",
         arguments=[
             "--config",
             str(config),
             "--calibration-report",
             str(calibration_path),
+            "--replay-contract",
+            str(replay_contract),
             "--output",
             str(output),
-            "--unseal",
         ],
     )
     candidate_results = report.get("candidate_results", [])
     circuit_results = report.get("sealed_circuit_holdout", [])
     eligibility = report.get("eligibility", {})
-    receipt = report.get("unseal_receipt", {})
+    receipt = report.get("replay_receipt", {})
     artifacts = report.get("canonical_artifacts", {})
     canonical_hashes = {
         f"{family}/{polarity}": artifacts.get(family, {})
@@ -1256,8 +1270,19 @@ def _run_modelgen_qualification_replay(
         "fresh_exact_commit_receipt": receipt.get("git", {}).get("commit")
         == _git(root, "rev-parse", "HEAD")
         and receipt.get("git", {}).get("worktree_clean") is True
+        and receipt.get("schema")
+        == "apm.mixed-voltage-holdout-replay-receipt.v1"
+        and receipt.get("operation") == "release_replay"
         and receipt.get("candidate_parameter_modification_after_unseal_permitted") is False
         and receipt.get("failed_holdout_reuse_for_repair_permitted") is False,
+        "portable_calibration_replay_binding": receipt.get(
+            "calibration_binding", {}
+        ).get("status")
+        == "pass"
+        and receipt.get("calibration_binding", {}).get("mode")
+        == "portable_release_replay"
+        and bool(receipt.get("calibration_binding", {}).get("checks"))
+        and all(receipt["calibration_binding"]["checks"].values()),
         "all_twenty_candidate_domains": len(candidate_results) == 20
         and all(item.get("status") == "pass" for item in candidate_results),
         "all_ten_circuit_holdouts": len(circuit_results) == 10

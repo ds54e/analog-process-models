@@ -53,6 +53,16 @@ predeclared observable-space medoid select io18 seed 54003 and io25 seed 54002.
 Fresh release validation regenerates all epoch-3 candidates and requires the
 four selected cards to be byte-identical to the shipped cards.
 
+The original epoch-3 calibration and first-unseal hashes remain immutable.
+Clean-clone release replay uses the separately hash-bound
+`calibration_replay_v4.toml` portability projection because a source-built
+ngspice executable records clone-local path and build-time metadata. Only the
+calibration timestamp and those three rebuild-local tool fields are excluded
+from the portable science hash; the fresh report must still bind its complete
+path, executable SHA-256, version banner, and major version to the actual
+ngspice used. Candidate parameters, holdouts, criteria, and electrical result
+content are not excluded or changed.
+
 The retained epistemic ensemble measures model-construction uncertainty under
 the public behavior contract. It is not process variation, device mismatch,
 yield prediction, a probability distribution over silicon, or a replacement
