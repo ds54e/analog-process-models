@@ -11,10 +11,10 @@ Target release: v4.0.0
 State: ACTIVE DEVELOPMENT
 
 V4 required gates:
-  2/16 proven
+  7/16 proven
 
 Current milestone:
-  GENERATION/QUALIFICATION EPOCH 3 SEALED / EXACT CALIBRATION PENDING
+  MIXED-VOLTAGE QUALIFICATION COMPLETE / RUNTIME INTEGRATION ACTIVE
 
 Public-readiness cleanup:
   COMPLETE
@@ -97,13 +97,26 @@ coverage. The report therefore failed, no candidate was promoted or repaired,
 and compact evidence is
 `validation/evidence/v4_qualification_epoch2_failure.json`.
 
-Generation and qualification epoch 3 are sealed with another disjoint seed
-set, new device/charge/Y/circuit holdouts, and new structural/distinctness
-coordinates. The distinctness method now follows the release contract's
-"where reachable" rule with explicit `target_not_reachable` states and a
-predeclared 50% candidate-pair coverage floor for every view, polarity, and
-target. Exact clean-commit calibration and the first epoch-3 unseal remain
-pending; no new family is promoted yet.
+Generation and qualification epoch 3 passed from clean commit
+`65d00b1489ef67f43d38926eba15f1824b2ef81b`. Exact calibration retained all
+five independently seeded N/P candidate pairs for each family across 344
+ngspice 47 batches. The first one-shot unseal then passed all 20 candidate
+device-domain records, all 10 circuit candidate pairs, all 150 structural
+comparisons, and all three required io18/io25 distinctness claims across 502
+additional batches. Minimum io18/io25 capacitance- and current-density ratios
+were 1.322 and 1.306; minimum per-view/polarity/target reachability coverage
+was 60%, above the predeclared 50% floor. Observable-space medoid selection
+chose io18 seed 54003 and io25 seed 54002 only after circuit results were
+available. Compact evidence is
+`validation/evidence/v4_generation_epoch3_calibration.json` and
+`validation/evidence/v4_mixed_voltage_qualification.json`.
+
+This proves `modelgen.deterministic_regeneration`, `models.io25`,
+`models.io18`, `mixed_voltage.distinctness`, and
+`mixed_voltage.circuit_holdout`, bringing the v4 total to 7/16. Runtime catalog
+integration of the four byte-frozen canonical cards is active; comparison,
+variation, noise, Spectre structure, compatibility, provenance, and release
+qualification remain pending.
 The released v3.0.0 tag, tagged commit, cards, evidence, and GitHub Release
 remain unchanged.
 

@@ -1,0 +1,241 @@
+{
+  "schema": "apm.v4-mixed-voltage-qualification-evidence.v1",
+  "milestone": "V4-M2-MIXED-VOLTAGE-QUALIFICATION",
+  "status": "validated",
+  "created_utc": "2026-09-04T14:09:52Z",
+  "implementation_commit": "65d00b1489ef67f43d38926eba15f1824b2ef81b",
+  "implementation_commit_exact_report": true,
+  "qualification_epoch": 3,
+  "generation_epoch": 3,
+  "completion_state": "MIXED_VOLTAGE_ENSEMBLE_QUALIFIED",
+  "successful_states": [
+    "IO25_DEVICE_QUALIFIED",
+    "IO25_APPLICATION_QUALIFIED",
+    "IO18_DEVICE_QUALIFIED",
+    "IO18_APPLICATION_QUALIFIED",
+    "IO18_IO25_DISTINCTNESS_ESTABLISHED"
+  ],
+  "gates_validated": [
+    "modelgen.deterministic_regeneration",
+    "models.io25",
+    "models.io18",
+    "mixed_voltage.distinctness",
+    "mixed_voltage.circuit_holdout"
+  ],
+  "claim_boundary": "The selected cards are independent APM-authored generic BSIM4 models qualified for the declared APM behavior and research-use contracts. They are not foundry-correlated, silicon-calibrated, reliability-qualified, manufacturable design rules, process-noise calibration, layout-dependent models, or real-Spectre-qualified artifacts.",
+  "full_report": {
+    "generated_path": ".apm/results/v4-qualification-epoch3-unsealed-exact-65d00b1/report.json",
+    "sha256": "b7f1fa01989a432e31bc8c1364bba66d060f2faabd5dd508aeadf0ee68fd535e",
+    "schema": "apm.mixed-voltage-qualification.v1",
+    "status": "pass",
+    "failure_state": null,
+    "retention": "ignored reproducible full result"
+  },
+  "exact_preflight": {
+    "generated_path": ".apm/results/v4-qualification-epoch3-preflight-exact-65d00b1/preflight.json",
+    "sha256": "a1b1eaa09eb40f994079fdeb26732e740786229c917b73121bf8f58824f8e9be",
+    "status": "pass",
+    "holdouts_evaluated": false,
+    "safe_to_unseal": true
+  },
+  "first_unseal_receipt": {
+    "generated_path": ".apm/results/v4-qualification-epoch3-unsealed-exact-65d00b1/unseal_receipt.json",
+    "sha256": "9f4d77ace08cae39ab654c9cfc4338c8b3987f54a55e862a95759d2e917de7ac",
+    "clean_commit": true,
+    "commit": "65d00b1489ef67f43d38926eba15f1824b2ef81b",
+    "candidate_parameter_modification_after_unseal_permitted": false,
+    "failed_holdout_reuse_for_repair_permitted": false,
+    "definitions_unsealed": [
+      "sealed_device_holdout",
+      "sealed_charge_holdout",
+      "terminal_y.holdout",
+      "sealed_circuit_holdout"
+    ]
+  },
+  "bound_inputs": {
+    "generation_contract": {
+      "path": "tools/modelgen/apm045_mixed_voltage/generation_epoch_3.toml",
+      "sha256": "615a93963d2fa0a1c80e8b7ae1b51cf4a74282e5d26c68fe1e6b11eb1b2f34e9"
+    },
+    "qualification_input": {
+      "path": "tools/modelgen/apm045_mixed_voltage/qualification_epoch_3.toml",
+      "sha256": "1f6977a0697a8797464030f7345b8c1c8bbbc35996ffdf8df063c409163a3cfa"
+    },
+    "calibration_report": {
+      "generated_path": ".apm/results/v4-generation-epoch3-calibration-exact-65d00b1/report.json",
+      "sha256": "a0353eb13b4fb384497335f5409a48ec3b22c8e73f43fd6eacae52ee56193a36",
+      "canonical_content_sha256": "7476a64c16c8a8aa84a13db4d1c9f106514530c145b80178277b3e86cfcb0622"
+    },
+    "qualification_implementation_sha256": "374f86f4479fd56347bf968c7d410b9870dabbc80bc04daa431833b8763c1ce0",
+    "synthesis_implementation_sha256": "575f642a829de8da022a1e2f4262aa7f428dc4895881c9f7c50de62f7c10acaf",
+    "terminal_observables_implementation_sha256": "68f8070f170f0cc66c006c30976b6b8bee63a61e10d9ea0460c3632304e56477",
+    "circuit_fixtures_implementation_sha256": "a17a36d1d0c9458f14757fe5dc85e9bbd1fdc8355708c5504bbf9ee70b2d9677",
+    "release_contract_sha256": "7005ddd99bb4537a2bc9cf95985afa8a7fd25be141c6d866794b63b0be8ffccb"
+  },
+  "environment": {
+    "platform": "WSL2",
+    "distribution_class": "RHEL-compatible EL9",
+    "architecture": "x86_64",
+    "python": "3.9.25",
+    "ngspice": {
+      "version": "47",
+      "sha256": "34d24e813da266ee2a5deef72596de1351b63d489f96372ec4364648676cdc21",
+      "real_tool_execution": true
+    }
+  },
+  "execution": {
+    "simulator_batches": {
+      "sweep": 110,
+      "terminal": 302,
+      "circuit": 90,
+      "total": 502
+    },
+    "all_global_checks_pass": true,
+    "global_checks": {
+      "all_candidate_domains": true,
+      "all_circuit_holdouts": true,
+      "hard_structural_contract": true,
+      "io18_io25_distinctness": true,
+      "minimum_retained_ensemble": true
+    }
+  },
+  "ensemble": {
+    "candidate_seeds": [54001, 54002, 54003, 54004, 54005],
+    "minimum_required_pairs_per_family": 3,
+    "io18_individually_qualified_pairs": 5,
+    "io25_individually_qualified_pairs": 5,
+    "all_20_candidate_polarity_records_pass": true,
+    "epistemic_not_process_variation": true
+  },
+  "device_domains": {
+    "all_status": "pass",
+    "required_domains": [
+      "sealed_device_holdout",
+      "sealed_charge_holdout",
+      "terminal_y",
+      "body_effect"
+    ],
+    "io18": {
+      "candidate_polarity_records": 10,
+      "threshold_over_vdd_range": [0.20637022580802664, 0.3041859862100231],
+      "dibl_v_per_v_range": [0.009200262452593762, 0.06862396000655466],
+      "finite_difference_p95_relative_max": 0.0005131609546053671,
+      "native_oracle_p95_relative_max": 0.000171111540443954,
+      "length_current_order_fraction_min": 1.0,
+      "gmid_solution_states": {"validated": 960, "target_not_reachable": 108, "excluded_near_off_control_region": 12},
+      "cgg_density_f_per_m2_range": [0.004033693617502192, 0.014764464600375834],
+      "terminal_y_kcl_normalized_max": 2.864995663037737e-10,
+      "body_threshold_shift_over_vdd_max": 0.020488056737693144
+    },
+    "io25": {
+      "candidate_polarity_records": 10,
+      "threshold_over_vdd_range": [0.21026470320413226, 0.2886381080268185],
+      "dibl_v_per_v_range": [0.006395516968621913, 0.035735654154336625],
+      "finite_difference_p95_relative_max": 0.0005602236697323209,
+      "native_oracle_p95_relative_max": 0.00018679363396651916,
+      "length_current_order_fraction_min": 1.0,
+      "gmid_solution_states": {"validated": 840, "target_not_reachable": 240, "excluded_near_off_control_region": 0},
+      "cgg_density_f_per_m2_range": [0.0022710367030142086, 0.008427212398257333],
+      "terminal_y_kcl_normalized_max": 1.4960298583455414e-9,
+      "body_threshold_shift_over_vdd_max": 0.02028797382469687
+    }
+  },
+  "structural_contract": {
+    "status": "pass",
+    "claim_class": "ROBUST_ACROSS_ENSEMBLE",
+    "comparison_count": 150,
+    "required_order": ["apm045/vtg", "apm045/io18", "apm045/io25"],
+    "all_candidate_pairs_strictly_ordered": true,
+    "both_polarities": true,
+    "every_declared_physical_length": true,
+    "model_supported_geometry_hierarchy_review": true
+  },
+  "distinctness": {
+    "status": "pass",
+    "common_vdd_v": 1.8,
+    "targets_per_v": [5.0, 10.0, 15.0, 20.0],
+    "checks": {
+      "IO18_IO25_CAPACITANCE_DISTINCTION": true,
+      "IO18_IO25_CURRENT_DENSITY_DISTINCTION": true,
+      "IO18_IO25_DESIGN_REALIZATION_DISTINCTION": true,
+      "qualified_comparison_coverage": true,
+      "solver_states_explicit": true,
+      "no_forced_unrelated_order": true
+    },
+    "metrics": {
+      "capacitance_ratio_io18_over_io25_min": 1.3217130004837352,
+      "capacitance_ratio_io18_over_io25_median": 1.6288147708269904,
+      "current_density_ratio_io18_over_io25_min": 1.3056493325939778,
+      "current_density_ratio_io18_over_io25_median": 3.261013643065664,
+      "current_density_success_fraction": 1.0,
+      "design_width_ratio_success_fraction": 1.0,
+      "validated_pair_fraction": 0.9,
+      "minimum_validated_pair_fraction_by_view_polarity_target": 0.6,
+      "solver_state_counts": {"validated": 608, "target_not_reachable": 32}
+    },
+    "forced_ordering": {
+      "gm_over_gds": false,
+      "noise": false,
+      "leakage": false,
+      "total_gate_charge": false
+    }
+  },
+  "circuit_holdout": {
+    "status": "pass",
+    "candidate_pair_count": 10,
+    "all_candidate_pairs_pass": true,
+    "fixture_classes": [
+      "mos_diode",
+      "current_mirror_1to1",
+      "source_follower",
+      "resistive_load_common_source",
+      "pmos_pass_device"
+    ],
+    "basic_fixture_result_count": 60,
+    "pass_sizing_case_count": 270,
+    "pass_confirmation_count": 270,
+    "maximum_observed_parallel_units": 4,
+    "maximum_pass_current_relative_error": 0.0013646229999999537,
+    "all_parallel_devices_explicit": true,
+    "claim_boundary": "Numerical and device-usefulness qualification only; no layout area, shared-diffusion capacitance, extracted gate resistance, or production pass-FET gate-charge claim."
+  },
+  "canonical_selection": {
+    "method": "observable_space_medoid",
+    "circuit_results_available_before_selection": true,
+    "io18": {
+      "selected_seed": 54003,
+      "summed_pairwise_distance": 70.42304463930647,
+      "n_card_sha256": "e639452467891fde0ea51f1fb3e965a01f46acf2bec85b90a437f296d2f1cebe",
+      "p_card_sha256": "065dd165f2e1bc3bab41f5205292205adab8ea1d4b39c9bdb813d690eaebd40a"
+    },
+    "io25": {
+      "selected_seed": 54002,
+      "summed_pairwise_distance": 62.34150623847739,
+      "n_card_sha256": "2c2478406b4417e7a5058c46b321ff70dee1041025bda04986bb18758df104a0",
+      "p_card_sha256": "8eab45ce29fbd0caf4b089c4e1f7f7e52e14c7cc1572ee9c4245b57fc8ff1cc2"
+    },
+    "all_canonical_cards_byte_identical_to_frozen_candidates": true
+  },
+  "commands": [
+    {
+      "command": ".venv/bin/python -m tools.modelgen.apm045_mixed_voltage.synthesize_families --config tools/modelgen/apm045_mixed_voltage/generation_epoch_3.toml --output .apm/results/v4-generation-epoch3-calibration-exact-65d00b1 --calibration-only --replace-output",
+      "status": "pass"
+    },
+    {
+      "command": ".venv/bin/python -m tools.modelgen.apm045_mixed_voltage.qualify_families --config tools/modelgen/apm045_mixed_voltage/qualification_epoch_3.toml --calibration-report .apm/results/v4-generation-epoch3-calibration-exact-65d00b1/report.json --output .apm/results/v4-qualification-epoch3-preflight-exact-65d00b1 --preflight --replace-output",
+      "status": "pass"
+    },
+    {
+      "command": ".venv/bin/python -m tools.modelgen.apm045_mixed_voltage.qualify_families --config tools/modelgen/apm045_mixed_voltage/qualification_epoch_3.toml --calibration-report .apm/results/v4-generation-epoch3-calibration-exact-65d00b1/report.json --output .apm/results/v4-qualification-epoch3-unsealed-exact-65d00b1 --unseal",
+      "status": "pass",
+      "one_shot_first_evaluation": true
+    }
+  ],
+  "limitations": [
+    "The selected geometry floors are APM-supported model floors, not foundry design-rule minima.",
+    "The epistemic candidate ensemble is not process variation, Monte Carlo, mismatch, or a foundry distribution.",
+    "Gate leakage, GIDL, distributed gate/body resistance, NQS, and layout-dependent effects remain disabled or outside the v4 claim.",
+    "Successful ngspice behavior qualification does not establish voltage reliability or silicon correlation.",
+    "Spectre remains model-only experimental/unverified and was not executed."
+  ]
+}

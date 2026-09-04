@@ -46,6 +46,13 @@ failed at 20 1/V. Epoch 3 therefore uses new seeds and holdout definitions and
 seals an explicit per-view/polarity/target 50% coverage floor consistent with
 the release contract's "where reachable" language.
 
+The exact clean-commit epoch-3 calibration is summarized in
+`v4_generation_epoch3_calibration.json`. Its first one-shot qualification
+passed and is summarized in `v4_mixed_voltage_qualification.json`; that record
+binds the unseal receipt, complete ignored report, qualified ensemble,
+structural and distinctness results, circuit fixtures, medoid selections, and
+four canonical card hashes.
+
 ## Status vocabulary
 
 - `validated`: the required real environment/tool/test ran and directly

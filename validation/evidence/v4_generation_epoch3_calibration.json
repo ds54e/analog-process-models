@@ -1,0 +1,93 @@
+{
+  "schema": "apm.v4-generation-calibration-evidence.v1",
+  "milestone": "V4-M1-EPOCH3-CALIBRATION",
+  "status": "validated",
+  "created_utc": "2026-09-04T14:09:52Z",
+  "implementation_commit": "65d00b1489ef67f43d38926eba15f1824b2ef81b",
+  "implementation_commit_exact_report": true,
+  "completion_state": "MIXED_VOLTAGE_CALIBRATION_CANDIDATES_FROZEN",
+  "claim_boundary": "This clean-commit calibration froze the independently seeded io18/io25 N/P candidate cards before the first epoch-3 holdout evaluation. The subsequent one-shot qualification, not calibration alone, establishes the device, circuit, distinctness, and canonical-selection claims.",
+  "full_report": {
+    "generated_path": ".apm/results/v4-generation-epoch3-calibration-exact-65d00b1/report.json",
+    "sha256": "a0353eb13b4fb384497335f5409a48ec3b22c8e73f43fd6eacae52ee56193a36",
+    "canonical_content_sha256_excluding_created_utc": "7476a64c16c8a8aa84a13db4d1c9f106514530c145b80178277b3e86cfcb0622",
+    "status": "pass",
+    "simulator_evaluation_count": 344,
+    "retention": "ignored reproducible full result"
+  },
+  "repeat_execution": {
+    "development_report_sha256": "dd411a86ed75ff9e1f5db74e55299a9ce94eb4a33319a915dbfd16a5f97b0020",
+    "exact_commit_report_sha256": "a0353eb13b4fb384497335f5409a48ec3b22c8e73f43fd6eacae52ee56193a36",
+    "canonical_content_identical_excluding_created_utc": true,
+    "canonical_content_sha256": "7476a64c16c8a8aa84a13db4d1c9f106514530c145b80178277b3e86cfcb0622"
+  },
+  "bound_inputs": {
+    "generation_contract": {
+      "path": "tools/modelgen/apm045_mixed_voltage/generation_epoch_3.toml",
+      "sha256": "615a93963d2fa0a1c80e8b7ae1b51cf4a74282e5d26c68fe1e6b11eb1b2f34e9",
+      "epoch": 3,
+      "state": "SEALED_BEFORE_FINAL_CANDIDATE_GENERATION"
+    },
+    "kernel": {
+      "path": "tools/modelgen/apm045_mixed_voltage/kernel.py",
+      "identity": "apm.modelgen.observable-kernel@1.2.0",
+      "sha256": "005e6b9f8ebcf704e21b7f1d2fb736e9a1c3fa3e20be49303172891041c5ff5c"
+    },
+    "synthesis": {
+      "path": "tools/modelgen/apm045_mixed_voltage/synthesize_families.py",
+      "sha256": "575f642a829de8da022a1e2f4262aa7f428dc4895881c9f7c50de62f7c10acaf"
+    },
+    "public_evidence_matrix_sha256": "8c4e717b8b1b6b5c139d4469f6de83355910bb50b986c47ec9b028d8fff8786d",
+    "private_or_proprietary_parameter_input": false,
+    "source_card_parameter_input": false
+  },
+  "sealed_definitions": {
+    "device_holdout_sha256": "14af758c2bfa0873e9930dd9e97fd43569a4ca314a018054465520d5f1a36692",
+    "charge_holdout_sha256": "87614e2343257a4dc431dd3988d67e363d702439e05b99eb6f07d1418f73e3b8",
+    "circuit_holdout_sha256": "6a01f2b96fec790489f3ec7c95e6f197f0ab406bde508fbc7ce9c1c4733bc199",
+    "terminal_y_holdout_bound_by_generation_contract": true,
+    "evaluated_during_calibration": false
+  },
+  "geometry": {
+    "study_status": "pass",
+    "io18_selected_l_floor_um": 0.08,
+    "io25_selected_l_floor_um": 0.18,
+    "selection_state": "PROVISIONAL_PENDING_SEALED_HOLDOUT",
+    "selected_w_floor_um": 0.25,
+    "challenged_widths_um": [0.25, 0.5, 1.0, 2.0, 5.0, 10.0, 16.0],
+    "width_outcome": "WIDTH_INVARIANT_IN_SCOPE",
+    "foundry_design_rule_claim": false
+  },
+  "ensemble": {
+    "candidate_seeds": [54001, 54002, 54003, 54004, 54005],
+    "io18_retained_pair_count": 5,
+    "io25_retained_pair_count": 5,
+    "minimum_required_pair_count": 3,
+    "all_20_polarity_records_pass": true,
+    "all_cards_byte_identically_regenerated": true,
+    "meaning": "epistemic model-construction alternatives, not process variation or Monte Carlo"
+  },
+  "candidate_card_hashes": {
+    "io18": {
+      "54001": {"n": "c2009862857118f67a09f04a1143c878cbfc4b13db8ab2547b08987cb7658002", "p": "151b328ae83af591b27f5dc40f17801639311aaeb7f8d68f104a5de3bfd183e0"},
+      "54002": {"n": "68c2148bc9a8a66267d5fdb876490b17004cf1b28e25d8a802c4f391bd9bc814", "p": "7900c7ba116cfaa7f72e3a616790ab5f799939833a81320ab4866e2fcacee47d"},
+      "54003": {"n": "e639452467891fde0ea51f1fb3e965a01f46acf2bec85b90a437f296d2f1cebe", "p": "065dd165f2e1bc3bab41f5205292205adab8ea1d4b39c9bdb813d690eaebd40a"},
+      "54004": {"n": "e773383af2befbbf5abef07add4ff71845ba1f816e483295c29721e4e05e1e1d", "p": "afc37dd0c9b57039cdcf9b1742928cf2340bd52de9efd5367b73a4baee011069"},
+      "54005": {"n": "8236e74efb60382005a160ccc27644fddbf4c4ba10bddf17e209db2e0db93d3e", "p": "f04e5a132263ba9c79ef3155d99067426f8a6a3f2b09c9f1660203c15d5186b9"}
+    },
+    "io25": {
+      "54001": {"n": "80c6f70a302034248a70d399fe27f8404d7b5371051b047164e14c77a26ae492", "p": "3c17eff433995a4a2ae63d0ab5a60b54699978cfe80ba6fec2776bca9980968d"},
+      "54002": {"n": "2c2478406b4417e7a5058c46b321ff70dee1041025bda04986bb18758df104a0", "p": "8eab45ce29fbd0caf4b089c4e1f7f7e52e14c7cc1572ee9c4245b57fc8ff1cc2"},
+      "54003": {"n": "ffd05266da5492cf9997f520e63a3530e3e79b4f8e80c46c6c7ab00b4aeffad6", "p": "fa065b7a7569375cd9a2d72754de38e2e38afcdc3abb9fcd3262f3a893b7a700"},
+      "54004": {"n": "d7a66097765af60fa2c9ddc3060397a8b1a55fb1dba2fc2ecc9f82ec1c8106e5", "p": "a883e208131863910fbcc1416da1e37be41cbbc02a0fdc9eee9d5dec0d14ae5b"},
+      "54005": {"n": "a5cc7a625a31ee208425ae9069a726303e3841e91dbf0200f6bce8ec3534586d", "p": "d2b08d2ec44b3b5c5da8a300edd6f023009096c5765ccec73f442eda81f25581"}
+    }
+  },
+  "subsequent_qualification": {
+    "epoch": 3,
+    "status": "pass",
+    "evidence": "validation/evidence/v4_mixed_voltage_qualification.json",
+    "candidate_parameters_modified_after_unseal": false,
+    "failed_holdout_reused_for_repair": false
+  }
+}
