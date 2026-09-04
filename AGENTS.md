@@ -48,20 +48,23 @@ without explicit authorization for that exact action.
 
 ## Current mission and instruction hierarchy
 
-Implement the current `GOAL.md` faithfully. For post-v4 work, preserve the
-released electrical/noise behavior and claim boundaries unless a later goal
-explicitly and deliberately changes them.
+Implement the post-v4 maintenance goal in `GOAL.md` faithfully. Use
+`APM045_POSITIONING.md` for the current APM045 portfolio and claim boundary.
+Preserve released electrical/noise behavior, model bytes, evidence meaning,
+and public schemas unless a later explicit versioned goal deliberately changes
+them.
 
 Read before substantive work:
 
 1. `AGENTS.md`;
 2. `GOAL.md`;
-3. `README.md`;
-4. `STATUS.md`;
-5. the technical contract(s) relevant to the change;
-6. `THIRD_PARTY.md` and `CONTRIBUTING.md` when models, provenance, or shipped
+3. `APM045_POSITIONING.md` when APM045 scope or claims are involved;
+4. `README.md`;
+5. `STATUS.md`;
+6. the current technical contract(s) relevant to the change;
+7. `THIRD_PARTY.md` and `CONTRIBUTING.md` when models, provenance, or shipped
    assets are involved;
-7. `ENVIRONMENT.md` and the applicable validation documentation when real-tool
+8. `ENVIRONMENT.md` and the applicable validation documentation when real-tool
    execution is involved.
 
 Authority on conflict:
@@ -69,16 +72,27 @@ Authority on conflict:
 1. applicable safety/security requirements and explicit user instructions;
 2. `AGENTS.md`;
 3. the current `GOAL.md`;
-4. current preserved technical contracts, including
+4. `APM045_POSITIONING.md` for current APM045 positioning;
+5. current preserved technical contracts, including
    `DEVICE_FAMILY_MODEL.md`, `RESULT_CONTRACT.md`, and
    `NOISE_CHARACTERIZATION.md`;
-5. current user and validation documentation.
+6. current user and validation documentation.
 
 `RELEASE_V3.md`, `UNATTENDED_EXECUTION.md`, `PROJECT_CONTEXT.md`,
 `RESEARCH_BASELINE.md`, `NOISE_N1.md`, and `NOISE_N2.md` are retained
 historical/frozen milestone records. They provide design rationale and
 reproducibility, but they are not current goals and do not prohibit or undo an
 already-completed release.
+
+Completed v4 artifacts are also frozen historical/release records. This
+includes `V4_MIXED_VOLTAGE.md`, `RELEASE_V4.md`,
+`validation/release_gates_v4.toml`,
+`validation/release_review_v4.toml`, `validation/evidence/v4_*.json`, and the
+completed v4 model-generation contracts/evidence. Their release-phase wording
+records what was required and observed at the time; it is not current technical
+instruction. Do not rewrite these records merely to remove candidate,
+pre-release, future-tense, or completion language. Use the current goal,
+positioning document, and live user documentation for post-v4 work.
 
 Do not resolve a material conflict by silently dropping the harder
 requirement. Record material departures and evidence in `STATUS.md`.
@@ -197,9 +211,10 @@ skipped, static-only, stale, or unavailable real-tool evidence is not a pass.
 
 Write compact auditable summaries under `validation/evidence/`; keep raw
 simulator data ignored and reproducible. `apm validate` is the normal
-current-tree validation path. The frozen `apm validate --release` contract is a
-maintainer/release-engineering workflow and must not be reinterpreted as an
-ordinary post-release user requirement.
+current-tree maintenance path. The frozen `apm validate --release` and
+`apm validate --release-v4` contracts are historical release-engineering
+workflows and must not be reinterpreted or updated as ordinary post-release
+requirements.
 
 High autonomy is authorized for in-scope research, implementation, local
 toolchain repair, tests, documentation, coherent commits, and normal pushes.

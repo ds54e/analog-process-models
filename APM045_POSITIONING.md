@@ -1,3 +1,6 @@
+<!-- SPDX-FileCopyrightText: APM contributors -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
 # APM045 positioning after v4.0.0
 
 ## Current interpretation

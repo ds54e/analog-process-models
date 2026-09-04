@@ -3,10 +3,10 @@
 ## Supported release
 
 Security and provenance maintenance targets the latest released line and
-current `main`. During v4 candidate hardening, APM v3.0.0 remains the latest
-completed release and `main` carries the v4.0.0 candidate work. Older immutable
-release tags are retained for reproducibility; fixes are normally made on
-`main` rather than by moving a released tag.
+current `main`. APM v4.0.0 is the latest completed release, and `main` is its
+post-release public-maintenance line. All released tags are immutable and
+retained for reproducibility; fixes are normally made on `main` rather than by
+moving a released tag or rewriting published history.
 
 ## Reporting privately
 

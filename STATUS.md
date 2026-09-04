@@ -8,13 +8,13 @@ supports validation and release claims.
 ```text
 Released baseline: v4.0.0
 Completed release: v4.0.0
-State: RELEASED / POST-RELEASE EVIDENCE COMPLETE
+State: RELEASED / POST-V4 PUBLIC MAINTENANCE
 
 V4 exact-tag required gates:
   16/16 PASS
 
 Current milestone:
-  APM V4.0.0 MIXED-VOLTAGE RELEASE COMPLETE
+  POST-V4 MAINTENANCE AUTHORITY CLEANUP VALIDATED
 
 Public-readiness cleanup:
   COMPLETE
@@ -32,7 +32,7 @@ Third-party redistribution/provenance:
   PASS
 
 Current normal repository validation:
-  PASS (released commit d224f27 and current post-release evidence tree)
+  PASS (post-v4 maintenance working tree; 2026-09-05)
 
 v3.0.0 tag / GitHub Release:
   IMMUTABLE / unchanged
@@ -56,22 +56,69 @@ Secret scanning / push protection:
   ENABLED / ENABLED
 
 Current real-tool baseline:
-  apm doctor PASS (ngspice 47; 2026-09-04)
+  apm doctor PASS (ngspice 47; 2026-09-05)
 
 V4 release qualification:
   CANDIDATE 15/15 PASS / EXACT TAG 16/16 PASS
 
-V4 stop state:
+Post-v4 maintenance stop state:
   none
 ```
 
-The APM v4.0.0 mixed-voltage goal defined by `GOAL.md`,
-`V4_MIXED_VOLTAGE.md`, and `validation/release_gates_v4.toml` is complete.
+`GOAL.md` now defines post-v4 maintenance. The completed APM v4.0.0
+mixed-voltage goal remains recorded by the frozen `V4_MIXED_VOLTAGE.md`,
+`RELEASE_V4.md`, release-gate/review files, and v4 evidence; those records are
+not current implementation instructions and were not rewritten by this
+cleanup.
+
 The immutable annotated tag `v4.0.0` peels to the qualified candidate commit
 `d224f279921c7e1ae637fd867e00d450067766c6`; a separate fresh exact-tag clone
 passed 16/16 required gates before the GitHub Release was published. Current
 `main` is the post-v4 evidence and public-maintenance line, not the release tag
 target.
+
+## Post-v4 maintenance authority cleanup
+
+The current-tree cleanup was validated before this status entry was updated on
+2026-09-05. It:
+
+- replaced the completed v4 `GOAL.md` with a post-release maintenance goal;
+- added `APM045_POSITIONING.md` with inline SPDX copyright/license metadata and
+  the current released-portfolio, geometry, evidence, and claim boundaries;
+- made `AGENTS.md` explicit that completed v4 contracts, release procedures,
+  review files, evidence, and model-generation records are frozen historical
+  records rather than current technical instructions;
+- refreshed live APM045, environment, security, and top-level guidance without
+  changing the released electrical/noise meaning;
+- separated unflagged current-tree validation from the frozen v3/v4 release
+  workflows. `apm validate --release` and `apm validate --release-v4` retain
+  their original historical behavior and were neither weakened nor rerun as
+  maintenance gates;
+- added a fail-closed current audit for live guidance plus exact hashes for 19
+  frozen v4 release/evidence/model artifacts and the annotated tag identity.
+
+Observed integrated-tree maintenance validation results:
+
+- `.venv/bin/apm doctor`: PASS with real ngspice 47; native BSIM3, native
+  BSIM4, PSP103 OSDI, and BSIM-CMG OSDI smokes all passed;
+- `.venv/bin/pytest -q`: 118 passed;
+- `.venv/bin/ruff check .`: PASS;
+- `.venv/bin/reuse lint`: PASS, 303/303 files with copyright and license
+  information;
+- `.venv/bin/apm provenance-check`: PASS, all eight checks true;
+- `.venv/bin/apm validate`: PASS under schema
+  `apm.repository-validation.maintenance.v1`; current commands, repository
+  audits, isolated v3 regression, and Spectre structural checks all passed;
+- frozen-v4 audit: PASS with 19/19 hashes exact, zero mismatches, annotated tag
+  object `797cdf9462db9dd634bff558802bcadaaeb70015`, and peeled commit
+  `d224f279921c7e1ae637fd867e00d450067766c6`;
+- maintenance validation report SHA-256:
+  `ee2ab4f0e294d2fc3b8e7349713111e72281eacdc4ae711986e73564b67fc0bd`.
+
+No released tag, tagged commit, GitHub Release, canonical model card/wrapper,
+release contract, release review, or v4 evidence record changed. No history
+rewrite or released model/evidence semantic change was required, and no stop
+condition was reached.
 
 The `evidence.public_matrix` and `modelgen.reconstruction` gates are proven.
 Kernel 1.2.0 removes a stray continuation token that ngspice ignored with a

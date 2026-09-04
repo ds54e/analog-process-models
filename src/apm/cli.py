@@ -25,6 +25,7 @@ from .compare import (
     validate_all_characterizations,
 )
 from .doctor import run_doctor
+from .maintenance_validate import validate_maintenance_repository
 from .model_build import build_models
 from .native_variation import NativeVariationError, validate_apm130_native
 from .noise import NoiseCharacterizationError, characterize_noise_selector
@@ -34,7 +35,7 @@ from .noise_validate import NoiseValidationError, validate_noise_spike
 from .paths import repository_root
 from .provenance_validate import ProvenanceValidationError, validate_provenance
 from .release_validate import ReleaseValidationError, validate_release
-from .release_validate_v4 import validate_release_v4, validate_repository_v4
+from .release_validate_v4 import validate_release_v4
 from .spectre_validate import SpectreStructureError, validate_spectre
 from .toolchain import ToolchainError
 
@@ -96,8 +97,8 @@ def build_parser() -> argparse.ArgumentParser:
         choices=("candidate", "exact-tag"),
         metavar="PHASE",
         help=(
-            "Evaluate the v4.0 release contract in pre-tag candidate or post-tag exact-tag "
-            "phase from an attested fresh clone"
+            "Reproduce the frozen historical v4.0 candidate or exact-tag release contract "
+            "from an attested fresh clone"
         ),
     )
     p_validate.add_argument(
@@ -251,7 +252,7 @@ def main() -> int:
             elif args.release_v4:
                 result = validate_release_v4(args.output, phase=args.release_v4)
             else:
-                result = validate_repository_v4(args.output)
+                result = validate_maintenance_repository(args.output)
             print(
                 json.dumps(
                     {

@@ -10,8 +10,10 @@ numeric source material for the APM-authored families.
 
 This positioning is generation-level only. APM045 is not a TSMC40/45 model,
 a TSMC55 proxy, or a foundry-correlated PDK. The released `v4.0.0` tag and
-qualification evidence remain unchanged. See [`APM045_POSITIONING.md`](../../APM045_POSITIONING.md)
-for the post-release rationale and transfer boundary.
+qualification evidence remain unchanged. See
+[`APM045_POSITIONING.md`](../../APM045_POSITIONING.md) for the post-release
+rationale and transfer boundary. Completed v4 contracts and release evidence
+remain frozen historical records.
 
 Public TSMC 40/45 nm information is used only as a taxonomy sanity check: TSMC
 45 nm publicly described multiple-Vt core devices, a low-power triple-gate-
@@ -53,8 +55,9 @@ minima.
 
 THKOX's 2.0 V profile is an APM-selected behavior profile, not an upstream
 reliability rating. VTG/THKOX common-overlap comparison is separately simulated
-at 1.0 V. The new families add `common_overlap_1v0` profiles, and `io25` also
-adds `common_overlap_1v8`, for explicitly labeled common-bias comparisons.
+at 1.0 V. The io18/io25 families expose `common_overlap_1v0` profiles, and
+`io25` also exposes `common_overlap_1v8`, for explicitly labeled common-bias
+comparisons.
 Operating-profile voltage is a characterization choice, not a safe-operating,
 breakdown, lifetime, or reliability rating.
 
@@ -89,18 +92,19 @@ views for VTG/io18/io25 as applicable. It preserves exact source identities,
 raw signed currents, complete Y matrices, explicit target-solver states, and
 intrinsic public-wrapper gate-charge trajectories.
 
-The new cards are deterministic outputs of the offline model-generation flow
-under `tools/modelgen/apm045_mixed_voltage/`. Public source facts and their
-allowed/forbidden uses are recorded in `mixed_voltage_evidence.toml`; exact
-generation lineage is recorded in `provenance.toml`. The retained candidate
-ensemble represents model-construction uncertainty and is not process,
-mismatch, yield, or foundry variation.
+The released io18/io25 cards are deterministic outputs of the completed
+offline model-generation flow under `tools/modelgen/apm045_mixed_voltage/`.
+Public source facts and their allowed/forbidden uses are recorded in
+`mixed_voltage_evidence.toml`; exact generation lineage is recorded in
+`provenance.toml`. The retained candidate ensemble represents
+model-construction uncertainty and is not process, mismatch, yield, or foundry
+variation.
 
 The `io18` and `io25` families are generic research models. They are not
 correlated to TSMC, UMC, or other foundry silicon; do not establish calibrated
 leakage or process-noise accuracy; include no layout-dependent parasitics; and
 provide no manufacturability or reliability qualification. A standalone 3.3 V
-family is outside APM v4.
+family is outside the released portfolio and current maintenance scope.
 
 For later LDO or mixed-voltage research, transfer normalized mechanisms and
 tradeoffs rather than absolute foundry quantities. gm/Id, gds/Id, normalized

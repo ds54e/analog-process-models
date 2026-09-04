@@ -3,26 +3,27 @@
 APM v4.0.0 uses the same required real-tool platform as the released v3
 baseline: WSL2, RHEL-compatible EL9 Linux, x86_64, and a Linux-filesystem
 checkout. This file records reusable environment guidance and immutable
-historical release context. The active phase-specific v4 commands are in
-`docs/release-validation.md`.
+historical release context. The completed phase-specific v4 commands are in
+`docs/release-validation.md`, where they are retained as a frozen release
+record rather than current maintenance instructions.
 
 The annotated `v3.0.0` tag peels to
 `995e0ce7cdd0c37ef9f3397008637f9d239c746e`, and exact-tag qualification passed
 18/18 on the documented WSL2/AlmaLinux reference environment.
 
-## V4 release qualification boundary
+## Historical v4 release qualification boundary
 
-Development may reuse the project-local toolchain, but neither a development
-run nor a reused checkout satisfies a v4 release gate. The v4 candidate and
-exact-tag phases each start in a separate fresh authoritative HTTPS clone,
-checked out detached, and run `tools/attest_clean_clone_v4.py` before any
-project-local generated state exists. Each phase then bootstraps, installs,
-builds, runs doctor, and executes its complete validator. The candidate phase
-requires 15/15 pre-tag gates; the exact-tag phase independently requires all
+Development could reuse the project-local toolchain, but neither a development
+run nor a reused checkout satisfied a v4 release gate. The completed v4
+candidate and exact-tag phases each started in a separate authoritative HTTPS
+clone, checked out detached, and ran `tools/attest_clean_clone_v4.py` before
+any project-local generated state existed. Each phase then bootstrapped,
+installed, built, ran doctor, and executed its complete validator. The
+candidate passed 15/15 pre-tag gates; the exact tag independently passed all
 16/16 gates before GitHub Release creation.
 
-Both runs require ngspice 47 and the pinned OpenVAF-Re-Loaded `v24.0.2mob`
-toolchain. The bootstrap uses the immutable rustup 1.29.1 archive, verified as
+Both runs used ngspice 47 and the pinned OpenVAF-Re-Loaded `v24.0.2mob`
+toolchain. The bootstrap used the immutable rustup 1.29.1 archive, verified as
 SHA-256 `dda7234360b7f578ca8b0ddcb80145646fa61a67c1720a5abc7051b35c9fcb71`,
 to install the pinned Rust 1.98.0 toolchain. Spectre remains model-only and
 **experimental/unverified**; a real Spectre or Virtuoso environment is neither
@@ -76,6 +77,19 @@ Development may reuse:
 When code/model bindings change, rebuild only affected generated artifacts as required.
 
 If an existing artifact's source/binding/revision changes, do not assume its v1 binary remains valid; rebuild and record the new dependency chain.
+
+## Current maintenance validation
+
+Use the reusable project-local environment for ordinary current-tree work:
+
+```console
+.venv/bin/apm doctor
+.venv/bin/apm validate
+```
+
+Unflagged `apm validate` checks the live post-v4 maintenance tree. The
+`--release` and `--release-v4` modes preserve their completed release-era
+meaning and are not ordinary maintenance gates.
 
 ## Historical v3 release qualification boundary
 

@@ -16,6 +16,11 @@ pre-tag gates and a separate fresh clone of the exact tag passed 16/16 before
 the [GitHub Release](https://github.com/ds54e/analog-process-models/releases/tag/v4.0.0)
 was published. Earlier released tags remain unchanged.
 
+The current APM045 portfolio and post-release claim boundary are summarized in
+[`APM045_POSITIONING.md`](APM045_POSITIONING.md). Completed v4 contracts,
+release procedures, review records, and evidence remain frozen historical
+records rather than current implementation instructions.
+
 ## Scope
 
 APM supplies family-qualified MOS model wrappers, manifest-driven discovery,
@@ -32,7 +37,7 @@ noise accuracy. The retained io18/io25 feasible ensemble describes
 model-construction uncertainty, not process variation, mismatch, yield, or
 silicon statistics. Noise Monte Carlo, RTS/RTN, transient noise, PSS/PNoise,
 oscillator phase noise, and full terminal noise-correlation matrices remain
-outside v4.0.0.
+outside the current maintenance scope.
 
 ## Device-family domain model
 
@@ -119,6 +124,8 @@ breakdown, lifetime, or safe-operating-area claims.
 The qualified io18 model-supported range is L = 0.08–2 µm and W = 0.25–16 µm;
 the io25 range is L = 0.18–2 µm and W = 0.25–16 µm. These are tested compact-
 model behavior ranges, not foundry design-rule minima or layout rules.
+The current APM045 interpretation is collected in
+[`APM045_POSITIONING.md`](APM045_POSITIONING.md).
 
 ## Characterization
 
@@ -276,7 +283,8 @@ terminal-behavior contracts. They are not calibrated to proprietary silicon.
 Upstream-derived APM130 and APM045 expose only the audited model subset and do
 not turn this repository into the upstream PDK. Characterization establishes
 behavior only over recorded geometry, bias, and temperature points; it is not
-a reliability or manufacturing guarantee. V4 claims no standalone io33
+a reliability or manufacturing guarantee. The released portfolio and current
+maintenance line claim no standalone io33
 family, foundry design-rule minimum, calibrated gate-leakage/GIDL or
 process-noise accuracy, layout-dependent accuracy, or physical interpretation
 of the epistemic model ensemble as process variation.
@@ -295,19 +303,23 @@ For normal installation and current-tree confidence, users should run:
 .venv/bin/apm validate
 ```
 
+The unflagged command validates live maintenance guidance and the preserved
+released baseline. It does not reinterpret or update a completed release
+review.
+
 The frozen fail-closed v4 release contract is
 [`validation/release_gates_v4.toml`](validation/release_gates_v4.toml).
 For the completed release, maintainers attested a fresh detached HTTPS clone
 before bootstrap, then ran
-`apm validate --release-v4 candidate`; a successful candidate report passes
-15/15 candidate-required gates and explicitly leaves the sixteenth exact-tag
-gate pending. After the annotated tag is pushed, a second fresh clone runs
-`apm validate --release-v4 exact-tag`, which must pass 16/16 before release
-publication. Those two runs passed and are recorded in
+`apm validate --release-v4 candidate`; its report passed 15/15
+candidate-required gates and explicitly left the sixteenth exact-tag gate
+pending. After the annotated tag was pushed, a second fresh clone ran
+`apm validate --release-v4 exact-tag` and passed 16/16 before release
+publication. Those two runs are recorded in
 [`v4_release_candidate.json`](validation/evidence/v4_release_candidate.json)
 and
 [`v4_post_release_requalification.json`](validation/evidence/v4_post_release_requalification.json).
-Both v4 phases regenerate calibration and use a hash-bound
+Both v4 phases regenerated calibration and used a hash-bound
 portable replay adapter that excludes only clone-local ngspice build metadata
 from its science hash while still matching the unmodified fresh report to the
 fresh executable exactly. The frozen
@@ -317,8 +329,9 @@ historical v3 meaning. See
 [`docs/release-validation.md`](docs/release-validation.md) for the exact
 commands and evidence semantics.
 
-Repository policy, implementation scope, and result semantics are defined by
-[`AGENTS.md`](AGENTS.md), [`GOAL.md`](GOAL.md), and
+Repository policy, implementation scope, APM045 positioning, and result
+semantics are defined by [`AGENTS.md`](AGENTS.md), [`GOAL.md`](GOAL.md),
+[`APM045_POSITIONING.md`](APM045_POSITIONING.md), and
 [`RESULT_CONTRACT.md`](RESULT_CONTRACT.md).
 
 Security or provenance concerns should follow [`SECURITY.md`](SECURITY.md).

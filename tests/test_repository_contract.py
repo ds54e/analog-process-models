@@ -23,6 +23,7 @@ from apm.characterize import (
 )
 from apm.cli import build_parser
 from apm.doctor import _extract_observables
+from apm.maintenance_validate import audit_current_guidance, audit_frozen_v4_artifacts
 from apm.model_build import MODEL_SOURCES
 from apm.noise import ACQUISITION_POLICY_ID, ACQUISITION_POLICY_VERSION
 from apm.noise_fit import FIT_METHOD_IDENTITY
@@ -45,7 +46,7 @@ EXPECTED_FAMILIES = {
 }
 
 
-def test_v4_release_and_historical_document_status_are_explicit() -> None:
+def test_post_v4_goal_and_historical_document_status_are_explicit() -> None:
     agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
     goal = (ROOT / "GOAL.md").read_text(encoding="utf-8")
     normalized_goal = " ".join(goal.split())
@@ -58,20 +59,27 @@ def test_v4_release_and_historical_document_status_are_explicit() -> None:
     assert "d224f279921c7e1ae637fd867e00d450067766c6" in agents
     assert "v4.0.0 exact-tag requalification: 16/16 required gates passed" in agents
     assert "The repository is public" in agents
+    assert goal.startswith("# Post-v4 release maintenance")
     assert (
-        "# APM v4.0.0 — APM045 Mixed-Voltage Electrical Families (complete)"
-        in goal
-    )
-    assert (
-        "Current `main` is the post-v4 development and public-maintenance line."
+        "Current `main` is the post-v4 public-maintenance line."
         in normalized_goal
     )
-    assert "APM v4.0.0 is released and immutable" in normalized_goal
-    assert "repository visibility: PUBLIC" in goal
-    assert "Status: **COMPLETE — RELEASED**" in goal
-    assert "Released target: **APM v4.0.0**" in goal
+    assert "APM v1.0.0 through v4.0.0 are released and immutable" in normalized_goal
+    assert "Complete and release **APM v4.0.0**" not in goal
+    assert "must not update a historical release review" in normalized_goal
+    assert "changing released model/evidence semantics" in normalized_goal
     assert "validation/evidence/v4_release_candidate.json" in goal
     assert "validation/evidence/v4_post_release_requalification.json" in goal
+
+    for frozen in (
+        "V4_MIXED_VOLTAGE.md",
+        "RELEASE_V4.md",
+        "validation/release_gates_v4.toml",
+        "validation/release_review_v4.toml",
+        "validation/evidence/v4_*.json",
+    ):
+        assert frozen in agents
+    assert "it is not current technical instruction" in " ".join(agents.split())
 
     historical_markers = {
         "RELEASE_V3.md": "Historical record — frozen V3-N3 candidate contract",
@@ -90,6 +98,48 @@ def test_v4_release_and_historical_document_status_are_explicit() -> None:
     normalized_security = " ".join(security.split())
     assert "Report a vulnerability" in normalized_security
     assert "Private Vulnerability Reporting is enabled" in normalized_security
+    assert "APM v4.0.0 is the latest completed release" in normalized_security
+
+    positioning = (ROOT / "APM045_POSITIONING.md").read_text(encoding="utf-8")
+    assert positioning.startswith(
+        "<!-- SPDX-FileCopyrightText: APM contributors -->\n"
+        "<!-- SPDX-License-Identifier: Apache-2.0 -->\n"
+    )
+    assert "GENERIC 40/45 NM-CLASS" in positioning
+    assert "Model/release changes required: **NONE**" in positioning
+
+
+def test_current_guidance_and_frozen_v4_artifact_audits_pass() -> None:
+    guidance = audit_current_guidance(ROOT)
+    frozen = audit_frozen_v4_artifacts(ROOT)
+    assert guidance["status"] == "pass", guidance
+    assert frozen["status"] == "pass", frozen
+    assert frozen["artifact_count"] >= 19
+    assert frozen["mismatches"] == []
+
+
+def test_current_guidance_audit_fails_closed_on_completed_goal(tmp_path: Path) -> None:
+    for relative in (
+        "AGENTS.md",
+        "APM045_POSITIONING.md",
+        "ENVIRONMENT.md",
+        "GOAL.md",
+        "README.md",
+        "SECURITY.md",
+        "models/apm045/README.md",
+    ):
+        source = ROOT / relative
+        destination = tmp_path / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes(source.read_bytes())
+    (tmp_path / "GOAL.md").write_text(
+        "# APM v4.0.0 — APM045 Mixed-Voltage Electrical Families (complete)\n\n"
+        "Complete and release **APM v4.0.0**.\n",
+        encoding="utf-8",
+    )
+    result = audit_current_guidance(tmp_path)
+    assert result["status"] == "fail"
+    assert "goal_is_post_v4_maintenance" in result["failed_checks"]
 
 
 def test_psp_product_documentation_acknowledgement_is_preserved() -> None:
