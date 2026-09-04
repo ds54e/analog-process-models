@@ -31,14 +31,29 @@ from tools.modelgen.apm045_mixed_voltage.qualify_reconstruction import (
     SUBSET_COMPLETION_STATE,
     _coverage,
 )
+from tools.modelgen.apm045_mixed_voltage.synthesize_families import (
+    _candidate_parameters,
+    _draws,
+    _geometry,
+    _validate_configuration,
+    _width_challenge_audit,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIGURATION = ROOT / "tools/modelgen/apm045_mixed_voltage/reconstruction.toml"
+GENERATION_CONFIGURATION = (
+    ROOT / "tools/modelgen/apm045_mixed_voltage/generation_epoch_1.toml"
+)
 NGSPICE = ROOT / ".apm/toolchain/ngspice-47/bin/ngspice"
 
 
 def _configuration() -> dict:
     with CONFIGURATION.open("rb") as handle:
+        return tomllib.load(handle)
+
+
+def _generation_configuration() -> dict:
+    with GENERATION_CONFIGURATION.open("rb") as handle:
         return tomllib.load(handle)
 
 
@@ -143,7 +158,99 @@ def test_renderer_is_canonical_and_disables_unqualified_features() -> None:
     assert ".model apm_modelgen_unit_n nmos level=54 version=4.8.2" in first
     assert "igcmod=0 igbmod=0 gidlmod=0" in first
     assert "rbodymod=0 rgatemod=0 acnqsmod=0 trnqsmod=0" in first
+    assert "k3=0 k3b=0 w0=0" in first
     assert "SPDX-License-Identifier: Apache-2.0" in first
+
+
+def test_generation_epoch_is_sealed_and_matches_frozen_geometry_search() -> None:
+    configuration = _generation_configuration()
+    audit = _validate_configuration(configuration, ROOT)
+
+    assert configuration["generation_epoch"] == 1
+    assert configuration["epoch_state"] == "SEALED_BEFORE_FINAL_CANDIDATE_GENERATION"
+    assert configuration["kernel"] == "apm.modelgen.observable-kernel@1.1.0"
+    assert configuration["seeds"] == [52001, 52002, 52003, 52004, 52005]
+    assert audit["stage_parameter_counts"] == {
+        "electrostatics": 8,
+        "transport": 4,
+        "output": 5,
+        "charge": 4,
+        "temperature": 3,
+    }
+    assert audit["width_challenge_um"] == [0.25, 0.5, 1.0, 2.0, 5.0, 10.0, 16.0]
+    assert audit["declared_width_outcome"] == "WIDTH_INVARIANT_IN_SCOPE"
+    assert all(audit["calibration_holdout_separation"].values())
+    assert math.isclose(_geometry(configuration, "io18").lmin_m, 0.08e-6)
+    assert math.isclose(_geometry(configuration, "io25").lmin_m, 0.18e-6)
+
+
+def test_generation_draws_are_deterministic_independent_and_center_bounded() -> None:
+    configuration = _generation_configuration()
+    parameter_sets: list[dict[str, float]] = []
+    draw_sets: list[dict[str, float]] = []
+    for family in ("io18", "io25"):
+        for polarity in ("n", "p"):
+            for seed in configuration["seeds"]:
+                first = _draws(configuration, family, polarity, int(seed))
+                second = _draws(configuration, family, polarity, int(seed))
+                assert first == second
+                assert all(-1.0 <= value <= 1.0 for value in first.values())
+                draw_sets.append(first)
+                parameter_sets.append(
+                    _candidate_parameters(
+                        configuration, family, polarity, first, scale=1.0
+                    )
+                )
+                assert _candidate_parameters(
+                    configuration, family, polarity, first, scale=0.0
+                ) != parameter_sets[-1]
+    assert len({tuple(sorted(item.items())) for item in draw_sets}) == 20
+    assert len({tuple(sorted(item.items())) for item in parameter_sets}) == 20
+
+
+def test_width_challenge_audit_passes_only_invariant_full_grid() -> None:
+    configuration = _generation_configuration()
+    geometry = _geometry(configuration, "io18")
+    widths_um = configuration["width_challenge"]["widths_um"]
+
+    def curves(narrow_scale: float) -> dict[str, Curve]:
+        result: dict[str, Curve] = {}
+        for width_um in widths_um:
+            request = SweepRequest(
+                request_id=f"width-{width_um:g}",
+                kind="idvg",
+                temperature_c=27,
+                l_m=geometry.lmin_m,
+                w_m=float(width_um) * 1e-6,
+                fixed_bias_v=geometry.native_vdd_v,
+                sweep_stop_v=geometry.native_vdd_v,
+                points=5,
+            )
+            scale = narrow_scale if math.isclose(float(width_um), 0.25) else 1.0
+            result[request.request_id] = Curve(
+                request=request,
+                sweep_v=np.linspace(0.0, geometry.native_vdd_v, 5),
+                idmag_a=(
+                    request.w_m
+                    * scale
+                    * np.asarray([1.0, 2.0, 4.0, 7.0, 11.0])
+                ),
+                terminal_cgg_f=None,
+            )
+        return result
+
+    passing = _width_challenge_audit(
+        curves(1.0), configuration=configuration, geometry=geometry
+    )
+    failing = _width_challenge_audit(
+        curves(0.5), configuration=configuration, geometry=geometry
+    )
+    assert passing["status"] == "pass"
+    assert passing["outcome"] == "WIDTH_INVARIANT_IN_SCOPE"
+    assert all(passing["checks"].values())
+    assert failing["status"] == "fail"
+    assert failing["outcome"] is None
+    assert failing["checks"]["current_density_invariant"] is False
 
 
 def test_parameter_bounds_fail_closed() -> None:

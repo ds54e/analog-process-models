@@ -416,6 +416,8 @@ def qualify(
     configuration = _load_toml(configuration_path)
     if configuration.get("schema") != "apm.modelgen.reconstruction-input.v1":
         raise ModelgenError("unexpected reconstruction input schema")
+    if configuration.get("kernel") != f"{KERNEL_ID}@{KERNEL_VERSION}":
+        raise ModelgenError("reconstruction input does not name the executing kernel version")
     settings = _fit_settings(configuration)
     criteria = configuration["criteria"]
     ngspice = root / ".apm/toolchain/ngspice-47/bin/ngspice"

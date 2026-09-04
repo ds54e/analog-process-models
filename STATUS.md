@@ -11,10 +11,10 @@ Target release: v4.0.0
 State: ACTIVE DEVELOPMENT
 
 V4 required gates:
-  2/16 proven
+  1/16 proven
 
 Current milestone:
-  MODELGEN KERNEL / PUBLIC EVIDENCE QUALIFIED
+  GENERATION EPOCH 1 CALIBRATION SEALED; KERNEL 1.1 EXACT RUN PENDING
 
 Public-readiness cleanup:
   COMPLETE
@@ -68,15 +68,22 @@ commit `0e216fe` was fast-forwarded into this development checkout on
 2026-09-04. The required local ngspice 47, OpenVAF-Re-Loaded, PSP103, and
 BSIM-CMG toolchain passed `apm doctor` before v4 implementation began.
 
-The `evidence.public_matrix` and `modelgen.reconstruction` v4 gates are proven.
-The unfiltered exact-clean-commit run at
-`173b3321f8c097177fc4912e492bc44cf4e70703` passed all four APM022/SVT and
-APM045/VTG N/P reconstruction records with real ngspice 47, external-terminal
-finite differences, terminal-Y-derived Cgg, deterministic card rendering,
-hard candidate rejection, and sealed holdouts. A prior repeat run produced
-identical canonical content after excluding only the report timestamp. Compact
-evidence is `validation/evidence/v4_modelgen_foundation.json` (SHA-256
-`064a4ff445fe131198699f52963af1bd2733fb447fdc9045b44a48bf4308410d`).
+The `evidence.public_matrix` gate is proven. The prior exact-clean-commit
+`modelgen.reconstruction` evidence remains a valid historical qualification of
+kernel 1.0.0, but kernel 1.1.0 now explicitly neutralizes an otherwise
+uncontrolled BSIM4 narrow-width term. Its unfiltered development run passed all
+four APM022/SVT and APM045/VTG N/P reconstruction records; exact-clean-commit
+requalification is pending before the gate is reclaimed for the current
+implementation.
+
+Mixed-voltage generation epoch 1 is sealed. A calibration-only development run
+retained five independently seeded io18 and io25 N/P candidate pairs after
+literal electrostatics/transport/output/charge/temperature staged release and
+final cross-domain rechecks. The prescribed geometry study selected provisional
+APM-supported floors of 0.08 um for io18 and 0.18 um for io25, and every retained
+candidate passed the 0.25--16 um width challenge with
+`WIDTH_INVARIANT_IN_SCOPE`. Sealed device, charge, Y-matrix, and circuit
+holdouts have not been unsealed; no new family is promoted yet.
 The released v3.0.0 tag, tagged commit, cards, evidence, and GitHub Release
 remain unchanged.
 
