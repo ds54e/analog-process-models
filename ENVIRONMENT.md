@@ -1,13 +1,29 @@
-# APM v3 Reference Environment and Release Record
+# APM v4 Reference Environment and Release Record
 
-APM v3.0.0 is released. This file records the reference environment used for
-development, exact-candidate qualification, and exact-tag post-release
-requalification. It is current environment guidance plus historical release
-context; it is not an active candidate checklist.
+APM v4.0.0 uses the same required real-tool platform as the released v3
+baseline: WSL2, RHEL-compatible EL9 Linux, x86_64, and a Linux-filesystem
+checkout. This file records reusable environment guidance and immutable
+historical release context. The active phase-specific v4 commands are in
+`docs/release-validation.md`.
 
 The annotated `v3.0.0` tag peels to
 `995e0ce7cdd0c37ef9f3397008637f9d239c746e`, and exact-tag qualification passed
 18/18 on the documented WSL2/AlmaLinux reference environment.
+
+## V4 release qualification boundary
+
+Development may reuse the project-local toolchain, but neither a development
+run nor a reused checkout satisfies a v4 release gate. The v4 candidate and
+exact-tag phases each start in a separate fresh authoritative HTTPS clone,
+checked out detached, and run `tools/attest_clean_clone_v4.py` before any
+project-local generated state exists. Each phase then bootstraps, installs,
+builds, runs doctor, and executes its complete validator. The candidate phase
+requires 15/15 pre-tag gates; the exact-tag phase independently requires all
+16/16 gates before GitHub Release creation.
+
+Both runs require ngspice 47 and the pinned OpenVAF-Re-Loaded `v24.0.2mob`
+toolchain. Spectre remains model-only and **experimental/unverified**; a real
+Spectre or Virtuoso environment is neither assumed nor claimed.
 
 ## Validated v1 baseline
 
@@ -27,10 +43,10 @@ The v1 release evidence established a working direct environment with:
 
 See the v1 tag and historical evidence for exact commands/hashes.
 
-## Post-release development continuation
+## Development continuation and reuse
 
-Post-release development may continue in the same repository and environment
-when the project-local toolchain remains valid.
+Development may continue in the same repository and environment when the
+project-local toolchain remains valid.
 
 Before installing/building anything:
 

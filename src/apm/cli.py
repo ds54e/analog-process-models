@@ -33,7 +33,8 @@ from .noise_method_validate import NoiseMethodValidationError, validate_noise_me
 from .noise_validate import NoiseValidationError, validate_noise_spike
 from .paths import repository_root
 from .provenance_validate import ProvenanceValidationError, validate_provenance
-from .release_validate import ReleaseValidationError, validate_release, validate_repository
+from .release_validate import ReleaseValidationError, validate_release
+from .release_validate_v4 import validate_release_v4, validate_repository_v4
 from .spectre_validate import SpectreStructureError, validate_spectre
 from .toolchain import ToolchainError
 
@@ -55,7 +56,7 @@ def build_parser() -> argparse.ArgumentParser:
         prog="apm",
         description="Analog Process Models characterization framework",
     )
-    parser.add_argument("--version", action="version", version="APM 3.0.0")
+    parser.add_argument("--version", action="version", version="APM 4.0.0")
     sub = parser.add_subparsers(dest="command", required=True)
 
     sub.add_parser("doctor", help="Run reference-runtime and compact-model smoke tests")
@@ -81,12 +82,22 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     p_validate = sub.add_parser("validate", help="Run repository validation/regression checks")
-    p_validate.add_argument(
+    release_mode = p_validate.add_mutually_exclusive_group()
+    release_mode.add_argument(
         "--release",
         action="store_true",
         help=(
-            "Evaluate the v3.0 release-gate contract; required unimplemented, skipped, "
-            "or failed automatically-checkable gates must cause a non-zero exit status"
+            "Evaluate the frozen historical v3.0 candidate contract; retained only for "
+            "immutable-release reproducibility"
+        ),
+    )
+    release_mode.add_argument(
+        "--release-v4",
+        choices=("candidate", "exact-tag"),
+        metavar="PHASE",
+        help=(
+            "Evaluate the v4.0 release contract in pre-tag candidate or post-tag exact-tag "
+            "phase from an attested fresh clone"
         ),
     )
     p_validate.add_argument(
@@ -235,9 +246,12 @@ def main() -> int:
             print(json.dumps(result, indent=2, sort_keys=True))
             return 0
         if args.command == "validate":
-            result = (
-                validate_release(args.output) if args.release else validate_repository(args.output)
-            )
+            if args.release:
+                result = validate_release(args.output)
+            elif args.release_v4:
+                result = validate_release_v4(args.output, phase=args.release_v4)
+            else:
+                result = validate_repository_v4(args.output)
             print(
                 json.dumps(
                     {

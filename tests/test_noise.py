@@ -317,7 +317,7 @@ def test_analytic_correlation_fixture_is_decisive_and_single_source() -> None:
     assert "common_noise" in source and "copied_noise" in source
 
 
-def test_noise_cli_contracts_preserve_schema_identity_at_v3_release() -> None:
+def test_noise_cli_contracts_preserve_v3_schema_identity_in_v4_package() -> None:
     parser = build_parser()
     noise = parser.parse_args(
         ["noise", "apm130/lv/nmos", "--output", "/tmp/apm-noise-test"]
@@ -330,5 +330,7 @@ def test_noise_cli_contracts_preserve_schema_identity_at_v3_release() -> None:
         ["noise-method-check", "--output", "/tmp/apm-noise-method-check-test"]
     )
     assert method.command == "noise-method-check"
-    assert (ROOT / "src/apm/__init__.py").read_text(encoding="utf-8").count('"3.0.0"') == 1
+    assert (ROOT / "src/apm/__init__.py").read_text(encoding="utf-8").count('"4.0.0"') == 1
     assert NOISE_SCHEMA == "apm.noise-characterization.v1"
+    assert FIT_METHOD_IDENTITY == "apm.noise-fit.contiguous-regions@1.0.0"
+    assert ACQUISITION_POLICY_ID == "apm.noise-acquisition.bounded-white-search"

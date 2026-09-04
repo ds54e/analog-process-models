@@ -1,7 +1,7 @@
 # APM v2 Result Contract
 
 This file defines the stable semantic minimum for the
-`apm.characterization.v2` results preserved by APM v3.0.0.
+`apm.characterization.v2` results preserved by APM v3.0.0 and v4.0.0.
 
 If this file conflicts with current `AGENTS.md`, an explicit later goal, or
 `DEVICE_FAMILY_MODEL.md`, those files win.
@@ -222,6 +222,13 @@ Supported v2 comparison kinds include:
 - `threshold_equal_inversion`
 - `gate_stack_native_profile`
 - `gate_stack_common_overlap`
+
+APM v4 leaves those meanings unchanged and adds the separate
+`apm.mixed-voltage-comparison.v1` output for APM045 VTG/io18/io25 native,
+common-bias, equal-geometry, and equal-inversion views. That supplemental
+schema binds exact source identities, preserves raw signed terminal values and
+complete Y matrices, labels each metric basis, and records
+`target_not_reachable` without silently clipping to a sweep endpoint.
 
 Comparison tables may denormalize:
 

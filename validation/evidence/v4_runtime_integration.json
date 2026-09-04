@@ -1,0 +1,128 @@
+{
+  "schema": "apm.v4-runtime-integration-evidence.v1",
+  "milestone": "V4-M3-RUNTIME-INTEGRATION",
+  "status": "validated",
+  "created_utc": "2026-09-04T15:24:00Z",
+  "implementation_commit": "42502c522401b92dde16dcad57d849ffab94f33b",
+  "implementation_commit_exact_reports": true,
+  "release_claim": false,
+  "gates_validated": [
+    "mixed_voltage.comparison",
+    "variation.v4",
+    "spectre.model_only",
+    "licensing.provenance"
+  ],
+  "completion_states": [
+    "MIXED_VOLTAGE_COMPARISON_QUALIFIED",
+    "MIXED_VOLTAGE_VARIATION_INTEGRATED"
+  ],
+  "claim_boundary": "This integration milestone proves the live catalog, characterization, mixed-voltage comparison, benchmark variation, model-only Spectre structure, and public-generation provenance on the exact clean integration source. It is not a v4 release, clean-clone release qualification, exact-tag qualification, fresh catalog-wide noise result, foundry/silicon correlation, reliability rating, or process-variation interpretation of the epistemic ensemble.",
+  "catalog": {
+    "technology_count": 5,
+    "family_count": 15,
+    "public_device_count": 30,
+    "new_families": [
+      "apm045/io18",
+      "apm045/io25"
+    ]
+  },
+  "reference_tool": {
+    "backend": "ngspice",
+    "major": "47",
+    "binary_sha256": "34d24e813da266ee2a5deef72596de1351b63d489f96372ec4364648676cdc21"
+  },
+  "reports": {
+    "all_family_characterization": {
+      "generated_path": ".apm/results/v4-all-characterization-42502c5/report.json",
+      "sha256": "006da17ab97b6f12763239569c902c294dde5c939de55f2f1bf47d58d58da7ca",
+      "schema": "apm.comparison.v2",
+      "status": "validated",
+      "observed": {
+        "five_technologies": true,
+        "fifteen_families": true,
+        "all_characterization_audits": true
+      }
+    },
+    "mixed_voltage_comparison": {
+      "generated_path": ".apm/results/v4-mixed-voltage-comparison-42502c5/report.json",
+      "sha256": "a27820352f0f73a12ef70f0e6b54ad345cdef70b41d7f0a84f4158e08e3d8132",
+      "schema": "apm.mixed-voltage-comparison.v1",
+      "status": "pass",
+      "observed": {
+        "observation_count": 130,
+        "validated_observation_count": 126,
+        "target_state_counts": {
+          "validated": 100,
+          "target_not_reachable": 4,
+          "simulation_failed": 0
+        },
+        "maximum_gm_convergence_relative": 0.00490446235936631,
+        "maximum_gds_convergence_relative": 0.006889169517774812,
+        "maximum_native_gm_relative_error": 0.009506243634974647,
+        "maximum_native_gds_relative_error": 0.0023187037350662987,
+        "maximum_y_kcl_normalized_residual": 5.6159533952876295e-09
+      }
+    },
+    "benchmark_variation": {
+      "generated_path": ".apm/results/v4-benchmark-42502c5/report.json",
+      "sha256": "e8e6ee2fb8c1d7bd90b95acb79348d6748e99b9e914d358fa6b110c379324aaa",
+      "schema": "apm.benchmark-validation.v2",
+      "status": "validated",
+      "observed": {
+        "family_count": 15,
+        "device_count": 30,
+        "global_local_all_execute": true,
+        "overall_pass": true
+      }
+    },
+    "spectre_structure": {
+      "generated_path": ".apm/results/v4-spectre-integration-clean-42502c5/spectre_structural_report.json",
+      "sha256": "32f7426a2672ca064904c192cfbac69bf353dc7eb090aafccba708b32dace1b1",
+      "schema": "apm.spectre-structural-report.v2",
+      "status": "structurally_checked",
+      "backend_status": "experimental_unverified",
+      "real_tool_validation_performed": false,
+      "all_checks_pass": true
+    },
+    "provenance": {
+      "generated_path": ".apm/results/v4-provenance-integration-clean/provenance_validation_report.json",
+      "sha256": "435a18563390251dd0dfd33981dfb382baa343c27a22ef5c54c9ae8d26ac8c12",
+      "schema": "apm.provenance-validation.v2",
+      "status": "pass",
+      "observed": {
+        "all_eight_checks_pass": true,
+        "apm045_mixed_voltage_public_generation_boundary": true,
+        "reuse_spdx_compliance": true
+      }
+    }
+  },
+  "live_noise_plan": {
+    "status": "planned_not_release_executed",
+    "technology_count": 5,
+    "family_count": 15,
+    "public_device_count": 30,
+    "logical_request_counts": {
+      "canonical_temperature_matrix": 120,
+      "cross_process_anchor": 10,
+      "inversion_sweep": 150,
+      "length_scaling": 90,
+      "nfin_scaling": 18,
+      "threshold_equal_bias": 18,
+      "threshold_equal_inversion": 18
+    },
+    "planned_logical_request_count": 424,
+    "unique_request_count": 330,
+    "deduplicated_logical_request_count": 94,
+    "limitation": "Counts were deterministically derived from the exact live catalog. Fresh execution, strict resume, and tamper qualification remain required release work."
+  },
+  "bound_inputs": {
+    "v4_release_contract_sha256": "7005ddd99bb4537a2bc9cf95985afa8a7fd25be141c6d866794b63b0be8ffccb",
+    "apm045_provenance_sha256": "c224054f3973c7dafba6c33bf2295ed9aa6b3765c7c1458a22c1162333491a0e",
+    "io18_family_manifest_sha256": "ff967ffb32d02f24a33352db08e2a0e77b38506bddca7d068142f480a078d625",
+    "io25_family_manifest_sha256": "1b0a6919f23a0ef50b193650f706eed43683841c57c0cd9d0fa7c45155a0a810",
+    "benchmark_adapters_sha256": "a595225d3509ca10034c79c4ddcbb7abd2e19d81e6f6a0a2499101e3e84c81c9",
+    "mixed_voltage_comparison_implementation_sha256": "bcbfe0b0c9ffd5929785ac1afe3d351c93c1cdb33b885a08b4d4ed2b86b6a0d0",
+    "noise_catalog_implementation_sha256": "158e8f1a0f8d435878742278c71585c76496f792e5eaa89a76ff184c009bc333",
+    "spectre_validator_sha256": "e3fc84d8318025fda9a85ff017bcc8107959274ef9e8d919f126393592a4f01c"
+  }
+}

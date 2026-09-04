@@ -6,6 +6,9 @@
 > frozen V3-N1/V3-N2 milestones. It remains a technical contract for the
 > released foundation, but it is not the current implementation goal. See
 > `README.md`, `STATUS.md`, and `AGENTS.md` for current state.
+> APM v4 preserves these schemas and frozen method identities unchanged; its
+> 30-device live-catalog extension and claim boundary are documented in
+> `RELEASE_V4.md`. Historical references below to 26 devices describe v3 only.
 
 This document defined the APM v3 noise-characterization foundation unless a
 higher-authority repository policy overrode it.

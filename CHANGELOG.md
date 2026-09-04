@@ -2,6 +2,73 @@
 
 All notable changes to Analog Process Models (APM) are documented here.
 
+## [4.0.0] - 2026-09-05
+
+APM 4.0.0 preserves the immutable v3 electrical and stationary-noise
+contracts and adds two APM-authored, planar-bulk BSIM4 mixed-voltage research
+families to APM045.
+
+### APM045 mixed-voltage families
+
+- added family-qualified `apm045/io18` and `apm045/io25` N/P devices, expanding
+  the manifest-driven catalog to five technologies, 15 electrical families,
+  and 30 public MOS devices;
+- added nominal 1.8 V and 2.5 V Operating Profiles plus explicit common-1.0 V
+  and common-1.8 V comparison profiles; these are characterization choices,
+  not safe-voltage, breakdown, lifetime, or reliability ratings;
+- qualified model-supported L/W ranges, width scaling, body effect, bias
+  reachability, temperature behavior, intrinsic gate charge, complete terminal
+  Y matrices, and finite-difference convergence with ngspice 47; and
+- supplied ngspice cards/wrappers and model-only Spectre artifacts for both
+  families while preserving every released upstream APM045 family/card byte.
+
+### Public model-generation and sealed qualification
+
+- added a deterministic offline model-generation kernel, public source-fact
+  matrix, staged bounded search, parameter-sensitivity checks, hard-constraint
+  rejection, and byte-identical regeneration of the four canonical cards;
+- qualified the generator against held-out APM022/SVT and APM045/VTG terminal
+  behavior without requiring original-parameter recovery;
+- preserved failed epochs 1 and 2 as fail-closed evidence, then qualified epoch
+  3 on its first unseal using separately sealed device and circuit holdouts;
+- retained five feasible N/P candidate pairs per family and selected the
+  canonical pair by a predeclared observable-space medoid only after circuit
+  results were available; and
+- reports that retained ensemble as model-construction uncertainty, never as
+  process variation, mismatch, yield, or foundry statistics.
+
+### Circuit and comparison coverage
+
+- added sealed MOS-diode, 1:1 mirror, source-follower, resistive-load
+  common-source, and bounded parallel-unit PMOS pass-device fixtures;
+- established io18/io25 capacitance-density, current-density, and
+  design-realization distinction at common 1.8 V without forcing unrelated
+  leakage, noise, gm/gds, or total-charge ordering; and
+- added `apm.mixed-voltage-comparison.v1` with native-relative-geometry,
+  common-bias, equal-physical-length, equal-relative-length, and
+  equal-inversion views, exact source identities, explicit metric bases, and
+  honest `target_not_reachable` states.
+
+### Variation, noise, provenance, and release validation
+
+- integrated all 15 families and 30 devices into Benchmark Global/Local/All,
+  exact adapter calibration, full characterization, and Spectre structural
+  generation;
+- extended live stationary-noise planning to io18/io25 while preserving
+  `apm.noise-characterization.v1`, `apm.noise-comparison.v1`, the frozen fit and
+  acquisition identities, Sparse/no-KLU execution, strict resume, and tamper
+  rejection;
+- added exact public-generation lineage and license/provenance checks for all
+  new APM-authored assets; and
+- added a separate 16-gate v4 release validator with phase-aware clean-clone
+  attestation: 15 pre-tag gates authorize tag creation, while all 16 gates must
+  pass from a second fresh exact-tag clone before the GitHub Release.
+
+APM 4.0.0 is not a manufacturable PDK. It adds no foundry or silicon
+correlation, standalone io33 family, foundry design rules, reliability rating,
+layout-dependent accuracy, calibrated gate-leakage/GIDL or process-noise
+accuracy, noise Monte Carlo, or real Spectre validation.
+
 ## [3.0.0] - 2026-08-30
 
 APM 3.0.0 preserves the v2 electrical-family/catalog and terminal-

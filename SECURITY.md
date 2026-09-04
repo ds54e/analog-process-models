@@ -2,10 +2,11 @@
 
 ## Supported release
 
-Security and provenance maintenance targets the latest released line,
-currently APM v3.0.0 and post-release `main`. Older immutable release tags are
-retained for reproducibility; fixes are normally made on `main` rather than by
-moving a released tag.
+Security and provenance maintenance targets the latest released line and
+current `main`. During v4 candidate hardening, APM v3.0.0 remains the latest
+completed release and `main` carries the v4.0.0 candidate work. Older immutable
+release tags are retained for reproducibility; fixes are normally made on
+`main` rather than by moving a released tag.
 
 ## Reporting privately
 

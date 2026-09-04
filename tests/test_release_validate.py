@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from apm import clean_clone
+from apm import clean_clone, clean_clone_v4
 from apm.cli import build_parser
 from apm.release_validate import (
     IMPLEMENTED_GATE_IDS,
@@ -20,6 +20,16 @@ from apm.release_validate import (
     audit_release_metadata,
     evaluate_required_gates,
     load_gate_contract,
+)
+from apm.release_validate_v4 import (
+    V4_GATE_IDS,
+    audit_mixed_voltage_evidence,
+    audit_public_evidence,
+    audit_v3_immutability,
+    audit_v4_catalog,
+    audit_v4_release_metadata,
+    evaluate_v4_gates,
+    load_v4_gate_contract,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -59,6 +69,57 @@ def test_release_contract_and_implementation_are_exact() -> None:
     } <= required
 
 
+def test_v4_release_contract_and_implementation_are_exact() -> None:
+    contract = load_v4_gate_contract(ROOT)
+    required = {gate["id"] for gate in contract["gate"] if gate["required"] is True}
+    assert contract["schema"] == "apm.release-gates.v4"
+    assert contract["target"] == "v4.0.0"
+    assert len(required) == 16
+    assert required == V4_GATE_IDS
+
+
+def test_v4_candidate_gate_evaluation_keeps_exact_tag_pending(tmp_path: Path) -> None:
+    contract = load_v4_gate_contract(ROOT)
+    evidence = tmp_path / "evidence.json"
+    evidence.write_text("{}\n", encoding="utf-8")
+    results = _pass_results(contract, evidence)
+    results["release.exact_tag_requalification"]["status"] = "pending"
+    ordered, candidate_eligible, exact_complete = evaluate_v4_gates(
+        contract, results, phase="candidate"
+    )
+    exact_tag = next(
+        gate for gate in ordered if gate["id"] == "release.exact_tag_requalification"
+    )
+    assert candidate_eligible is True
+    assert exact_complete is False
+    assert exact_tag["candidate_required"] is False
+    assert exact_tag["passed"] is False
+
+
+def test_v4_exact_tag_evaluation_requires_all_sixteen_gates(tmp_path: Path) -> None:
+    contract = load_v4_gate_contract(ROOT)
+    evidence = tmp_path / "evidence.json"
+    evidence.write_text("{}\n", encoding="utf-8")
+    results = _pass_results(contract, evidence)
+    ordered, candidate_eligible, exact_complete = evaluate_v4_gates(
+        contract, results, phase="exact-tag"
+    )
+    assert candidate_eligible is True
+    assert exact_complete is True
+    assert sum(gate["passed"] for gate in ordered) == 16
+
+
+def test_v4_catalog_public_evidence_and_holdout_evidence_are_bound() -> None:
+    contract = load_v4_gate_contract(ROOT)
+    assert audit_v4_catalog(ROOT, contract)["status"] == "pass"
+    assert audit_public_evidence(ROOT, contract)["status"] == "pass"
+    assert audit_v3_immutability(ROOT, contract)["status"] == "pass"
+    evidence = audit_mixed_voltage_evidence(ROOT)
+    assert evidence["status"] == "pass"
+    assert evidence["checks"]["canonical_card_hashes_exact"] is True
+    assert evidence["checks"]["circuit_holdout_pass"] is True
+
+
 @pytest.mark.parametrize(
     ("mutation", "expected_status"),
     (("missing", "missing"), ("skipped", "skipped"), ("empty_evidence", "pass")),
@@ -93,11 +154,11 @@ def test_gate_evaluation_rejects_stale_or_nonexistent_evidence(tmp_path: Path) -
     assert all(gate["evidence_valid"] is False for gate in ordered)
 
 
-def test_release_repository_audits_and_frozen_v3_claim_review_are_fail_closed() -> None:
+def test_v4_repository_audits_and_frozen_v3_validator_are_fail_closed() -> None:
     contract = load_gate_contract(ROOT)
-    assert audit_release_metadata(ROOT, contract)["status"] == "pass"
-    # The frozen v3 validator must reject the expanded v4 live catalog rather
-    # than silently reinterpreting its historical 5/13/26 contract.
+    # The frozen v3 validator must reject v4 metadata and the expanded live
+    # catalog rather than silently reinterpreting its historical contract.
+    assert audit_release_metadata(ROOT, contract)["status"] == "fail"
     assert audit_catalog(ROOT, contract)["status"] == "fail"
     assert audit_migration(ROOT)["status"] == "pass"
     distribution = audit_distribution(ROOT)
@@ -114,6 +175,9 @@ def test_release_repository_audits_and_frozen_v3_claim_review_are_fail_closed() 
     # The v3 review remains immutable historical evidence and must not be silently
     # accepted after GOAL.md moves to the separately reviewed v4 development contract.
     assert "GOAL.md" in {item["path"] for item in claims["review_hash_mismatches"]}
+
+    v4_contract = load_v4_gate_contract(ROOT)
+    assert audit_v4_release_metadata(ROOT, v4_contract)["status"] == "pass"
 
 
 def test_metadata_audit_rejects_development_versions(tmp_path: Path) -> None:
@@ -183,6 +247,70 @@ def test_clean_clone_attestation_is_tied_to_exact_commit(
         clean_clone.verify_clean_clone_attestation(root)
 
 
+def test_v4_candidate_attestation_is_detached_and_exact(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = tmp_path / "clone-v4"
+    root.mkdir()
+    (root / "validation").mkdir()
+    (root / "validation/release_gates_v4.toml").write_text(
+        'schema = "apm.release-gates.v4"\n', encoding="utf-8"
+    )
+    (root / ".gitignore").write_text(".apm/\n", encoding="utf-8")
+    _git(root, "init")
+    _git(root, "config", "user.name", "APM test")
+    _git(root, "config", "user.email", "apm-test@example.invalid")
+    _git(root, "remote", "add", "origin", clean_clone_v4.EXPECTED_REMOTE)
+    _git(root, "add", ".")
+    _git(root, "commit", "-m", "fixture")
+    head = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=root,
+        text=True,
+        capture_output=True,
+        check=True,
+    ).stdout.strip()
+    _git(root, "update-ref", "refs/remotes/origin/main", head)
+    _git(root, "checkout", "--detach", head)
+    observation = {
+        "kernel_release": "fixture-microsoft-standard-WSL2",
+        "kernel_version": "fixture WSL2",
+        "architecture": "x86_64",
+        "os_release": {"ID": "almalinux", "VERSION_ID": "9"},
+        "filesystem": {"type": "ext4", "source": "fixture", "target": "/"},
+        "checks": {
+            "wsl2": True,
+            "rhel_compatible_el9": True,
+            "x86_64": True,
+            "linux_filesystem_path": True,
+        },
+    }
+    v3 = {
+        "present": True,
+        "object": clean_clone_v4.V3_TAG_OBJECT,
+        "object_type": "tag",
+        "commit": clean_clone_v4.V3_TAG_COMMIT,
+    }
+    absent = {"present": False, "object": None, "object_type": None, "commit": None}
+    monkeypatch.setattr(clean_clone_v4, "_platform_observation", lambda _: observation)
+    monkeypatch.setattr(
+        clean_clone_v4,
+        "_tag_identity",
+        lambda _root, tag: v3 if tag == "v3.0.0" else absent,
+    )
+    monkeypatch.setattr(
+        clean_clone_v4,
+        "_remote_tag_identity",
+        lambda _root, _tag: {"present": False, "object": None, "commit": None, "refs": {}},
+    )
+
+    created = clean_clone_v4.create_clean_clone_v4_attestation(root, phase="candidate")
+    assert created["schema"] == "apm.clean-clone-attestation.v4"
+    assert created["repository_head"] == head
+    verified = clean_clone_v4.verify_clean_clone_v4_attestation(root, phase="candidate")
+    assert verified["status"] == "verified"
+
+
 def test_clean_clone_inventory_detects_ignored_generated_state(tmp_path: Path) -> None:
     (tmp_path / ".venv").mkdir()
     (tmp_path / "models/fixture").mkdir(parents=True)
@@ -213,6 +341,11 @@ def test_attestation_launcher_disables_bytecode_before_project_import() -> None:
     project_import = source.index("from apm.clean_clone import")
     assert disable < project_import
 
+    v4_source = (ROOT / "tools/attest_clean_clone_v4.py").read_text(encoding="utf-8")
+    v4_disable = v4_source.index("sys.dont_write_bytecode = True")
+    v4_project_import = v4_source.index("from apm.clean_clone_v4 import")
+    assert v4_disable < v4_project_import
+
 
 def test_validate_cli_exposes_release_output() -> None:
     args = build_parser().parse_args(
@@ -221,6 +354,19 @@ def test_validate_cli_exposes_release_output() -> None:
     assert args.command == "validate"
     assert args.release is True
     assert args.output == Path("/tmp/apm-release-test")
+
+    v4_args = build_parser().parse_args(
+        [
+            "validate",
+            "--release-v4",
+            "candidate",
+            "--output",
+            "/tmp/apm-v4-release-test",
+        ]
+    )
+    assert v4_args.release is False
+    assert v4_args.release_v4 == "candidate"
+    assert v4_args.output == Path("/tmp/apm-v4-release-test")
 
 
 def test_contract_mismatch_is_an_error(tmp_path: Path) -> None:

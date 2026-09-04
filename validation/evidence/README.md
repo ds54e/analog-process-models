@@ -53,6 +53,13 @@ binds the unseal receipt, complete ignored report, qualified ensemble,
 structural and distinctness results, circuit fixtures, medoid selections, and
 four canonical card hashes.
 
+Runtime catalog integration is summarized in `v4_runtime_integration.json`.
+It binds clean commit `42502c522401b92dde16dcad57d849ffab94f33b` to the
+15-family characterization, versioned mixed-voltage comparison, 30-device
+Benchmark Global/Local/All run, exact provenance audit, and model-only Spectre
+structural report. Its live noise-plan counts are planning evidence only; they
+do not substitute for the fresh catalog plus strict-resume release run.
+
 ## Status vocabulary
 
 - `validated`: the required real environment/tool/test ran and directly
@@ -142,3 +149,10 @@ a second fresh HTTPS clone with the complete catalog executed from empty output
 before strict all-reuse resume qualification. See
 `docs/release-validation.md` for the current reproducibility path and the
 historical tag-absence compatibility detail.
+
+V4 uses a separate phase-aware attestation and validator. A successful
+pre-tag report must pass 15/15 candidate-required gates while leaving the
+exact-tag gate explicitly pending. After annotated-tag creation, a different
+fresh HTTPS clone must pass all 16/16 gates. Compact v4 candidate and exact-tag
+summaries are added only after those runs exist; a planned filename or a status
+document is never accepted as release evidence.

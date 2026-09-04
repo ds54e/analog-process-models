@@ -5,16 +5,15 @@ models and a terminal-characterization framework for cross-process and
 within-process analog device studies. This repository is the APM project;
 within it, APM always means Analog Process Models.
 
-Version **3.0.0** preserves the released v2 manifest-driven electrical-family
-and terminal-characterization baseline and adds stationary small-signal MOS
-noise as a separate, provenance-aware characterization domain. The catalog
-contains 13 electrical families and 26 public MOS devices across five
-technologies.
+Version **4.0.0** preserves the released v3 electrical and stationary-noise
+contracts and adds independently APM-authored `apm045/io18` and
+`apm045/io25` mixed-voltage research families. The live catalog contains 15
+electrical families and 30 public MOS devices across five technologies.
 
-The immutable annotated `v3.0.0` tag has passed exact-tag post-release
-qualification (18/18 gates), and the GitHub Release exists. Post-release
-`main` contains release evidence and public maintenance. The repository is
-public, and APM v3.0.0 is the current released baseline.
+The immutable annotated `v3.0.0` release remains unchanged. A v4 release is
+complete only after the exact candidate passes 15 pre-tag gates, the annotated
+`v4.0.0` tag is created at that candidate, and a second fresh clone of the
+exact tag passes all 16 gates before the GitHub Release is created.
 
 ## Scope
 
@@ -25,11 +24,14 @@ technology-neutral benchmark R/C devices, and exact model provenance.
 APM is **not a manufacturable PDK**. It does not provide layout, PCells, DRC,
 LVS, PEX, standard cells, signoff, reliability qualification, foundry
 correlation, yield prediction, RF devices, silicon-calibrated process-noise
-models, AMS integration, or Virtuoso automation. The v3 noise datasets
-characterize predictions already present in the compact models and preserve
-their parameter provenance; they do not establish silicon or foundry noise
-accuracy. Noise Monte Carlo, RTS/RTN, transient noise, PSS/PNoise, oscillator
-phase noise, and full terminal noise-correlation matrices are outside v3.0.0.
+models, AMS integration, or Virtuoso automation. The noise datasets
+characterize compact-model predictions already present in the cards and
+preserve their parameter provenance; they do not establish silicon or foundry
+noise accuracy. The retained io18/io25 feasible ensemble describes
+model-construction uncertainty, not process variation, mismatch, yield, or
+silicon statistics. Noise Monte Carlo, RTS/RTN, transient noise, PSS/PNoise,
+oscillator phase noise, and full terminal noise-correlation matrices remain
+outside v4.0.0.
 
 ## Device-family domain model
 
@@ -46,7 +48,7 @@ manifest-driven catalog currently contains:
 | --- | --- | --- |
 | APM350 | `general` | BSIM3 |
 | APM130 | `lv`, `hv` | PSP103 |
-| APM045 | `vtl`, `vtg`, `vth`, `thkox` | BSIM4 |
+| APM045 | `vtl`, `vtg`, `vth`, `thkox`, `io18`, `io25` | BSIM4 |
 | APM022 | `lvt`, `svt`, `hvt` | BSIM4 |
 | APM016F | `lvt`, `svt`, `hvt` | BSIM-CMG 112.1.0 |
 
@@ -91,6 +93,7 @@ the five cross-process anchors:
 .venv/bin/apm characterize apm045/vtg --output .apm/results/apm045-vtg
 .venv/bin/apm compare-set apm045 threshold --output .apm/results/apm045-threshold
 .venv/bin/apm compare-set apm045 gate_stack --output .apm/results/apm045-gate-stack
+.venv/bin/apm compare-set apm045 mixed_voltage --output .apm/results/apm045-mixed-voltage
 .venv/bin/apm compare-anchors --output .apm/results/anchors
 ```
 
@@ -108,7 +111,13 @@ unlimited.
 The APM045 THKOX native profile is an APM-selected 2.0 V behavior profile; its
 gate-stack comparison with VTG uses an explicitly validated 1.0 V common
 overlap. APM130 HV uses a 3.3 V native profile and a 1.2 V LV/HV common overlap.
-These voltages do not imply breakdown, lifetime, or safe-operating-area claims.
+APM045 io18 uses nominal 1.8 V plus a common 1.0 V profile. APM045 io25 uses
+nominal 2.5 V plus common 1.8 V and 1.0 V profiles. These voltages do not imply
+breakdown, lifetime, or safe-operating-area claims.
+
+The qualified io18 model-supported range is L = 0.08–2 µm and W = 0.25–16 µm;
+the io25 range is L = 0.18–2 µm and W = 0.25–16 µm. These are tested compact-
+model behavior ranges, not foundry design-rule minima or layout rules.
 
 ## Characterization
 
@@ -171,8 +180,8 @@ without modifying the production card. See
 historical [`NOISE_N1.md`](NOISE_N1.md) contract for method details and claim
 boundaries.
 
-The catalog-wide dataset discovers all 26 public MOS devices from the
-five-technology/13-family
+The catalog-wide dataset discovers all 30 public MOS devices from the
+five-technology/15-family
 manifest catalog and plans the complete temperature, inversion, length, NFIN,
 threshold-sibling, and cross-process-anchor matrix before simulation. Its
 stable request hash binds the exact selector/profile/bias/geometry, frozen
@@ -218,6 +227,13 @@ Profile and a separately simulated common-overlap profile. The required sets
 cover APM045 VTL/VTG/VTH and VTG/THKOX, APM022 LVT/SVT/HVT, APM016F
 LVT/SVT/HVT, and APM130 LV/HV.
 
+APM045's versioned mixed-voltage result,
+`apm.mixed-voltage-comparison.v1`, keeps native-relative-geometry,
+common-1.0 V, common-1.8 V, equal-physical-length, equal-relative-length, and
+equal-inversion views separate. It preserves raw source identities and labels
+whether a metric is a native-family result or a common-bias terminal result;
+scientifically valid `target_not_reachable` states are not clipped into data.
+
 ## Benchmark versus upstream variation
 
 APM benchmark variation is synthetic and observable: `vth_shift` changes
@@ -237,10 +253,14 @@ All mode. See [`docs/benchmark-variation.md`](docs/benchmark-variation.md) and
 
 ## Model provenance
 
-APM130 and APM045 retain exact-file provenance to pinned, redistributable IHP
-SG13G2 and FreePDK45 sources. The PSP103 and BSIM-CMG compiler sources retain
-their upstream licenses and notices. APM350, APM022, and the APM016F parameter
-deck are independently authored APM assets.
+APM130 and the four upstream APM045 families retain exact-file provenance to
+pinned, redistributable IHP SG13G2 and FreePDK45 sources. APM045 io18/io25 are
+deterministic outputs of an offline APM model-generation flow whose public
+source-fact matrix is `models/apm045/mixed_voltage_evidence.toml`; neither
+private PDK inputs nor the FreePDK45 cards supply their numeric parameters.
+The PSP103 and BSIM-CMG compiler sources retain their upstream licenses and
+notices. APM350, APM022, and the APM016F parameter deck are independently
+authored APM assets.
 
 Official PTM/PTM-MG model cards are neither shipped nor used as numeric source
 material for APM022 or APM016F. Every shipped model input is hash-declared in a
@@ -255,7 +275,10 @@ terminal-behavior contracts. They are not calibrated to proprietary silicon.
 Upstream-derived APM130 and APM045 expose only the audited model subset and do
 not turn this repository into the upstream PDK. Characterization establishes
 behavior only over recorded geometry, bias, and temperature points; it is not
-a reliability or manufacturing guarantee.
+a reliability or manufacturing guarantee. V4 claims no standalone io33
+family, foundry design-rule minimum, calibrated gate-leakage/GIDL or
+process-noise accuracy, layout-dependent accuracy, or physical interpretation
+of the epistemic model ensemble as process variation.
 
 Spectre files are model-only and **experimental/unverified**. They have not
 been parsed or simulated by a real Spectre installation, and static checks do
@@ -271,15 +294,18 @@ For normal installation and current-tree confidence, users should run:
 .venv/bin/apm validate
 ```
 
-The frozen v3 contract is
-[`validation/release_gates.toml`](validation/release_gates.toml).
-`apm validate --release` is a maintainer/release-engineering workflow whose
-18-gate exact-candidate and exact-tag runs are already complete; it is not an
-ordinary usage requirement. It includes clean-clone attestation, the complete
-v2 electrical baseline, fresh catalog-wide noise execution, and strict resume
-qualification. See
-[`docs/release-validation.md`](docs/release-validation.md) for current
-reproducibility, the historical candidate procedure, and exact-tag evidence.
+The current fail-closed v4 contract is
+[`validation/release_gates_v4.toml`](validation/release_gates_v4.toml).
+Maintainers attest a fresh detached HTTPS clone before bootstrap, then run
+`apm validate --release-v4 candidate`; a successful candidate report passes
+15/15 candidate-required gates and explicitly leaves the sixteenth exact-tag
+gate pending. After the annotated tag is pushed, a second fresh clone runs
+`apm validate --release-v4 exact-tag`, which must pass 16/16 before release
+publication. The frozen `apm validate --release` command and
+[`validation/release_gates.toml`](validation/release_gates.toml) retain their
+historical v3 meaning. See
+[`docs/release-validation.md`](docs/release-validation.md) for the exact
+commands and evidence semantics.
 
 Repository policy, implementation scope, and result semantics are defined by
 [`AGENTS.md`](AGENTS.md), [`GOAL.md`](GOAL.md), and

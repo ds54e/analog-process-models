@@ -8,13 +8,13 @@ supports validation and release claims.
 ```text
 Released baseline: v3.0.0
 Target release: v4.0.0
-State: ACTIVE DEVELOPMENT
+State: RELEASE-CANDIDATE HARDENING
 
-V4 required gates:
-  7/16 proven
+V4 integration gates proven before release qualification:
+  11/16
 
 Current milestone:
-  MIXED-VOLTAGE QUALIFICATION COMPLETE / RUNTIME INTEGRATION ACTIVE
+  MIXED-VOLTAGE RUNTIME INTEGRATION COMPLETE / RELEASE VALIDATOR ACTIVE
 
 Public-readiness cleanup:
   COMPLETE
@@ -32,13 +32,13 @@ Third-party redistribution/provenance:
   PASS
 
 Current normal repository validation:
-  PASS
+  REQUIRED ON THE COHERENT CANDIDATE
 
-v3.0.0 tag:
+v3.0.0 tag / GitHub Release:
   IMMUTABLE / unchanged
 
-GitHub Release:
-  CREATED / unchanged
+v4.0.0 tag / GitHub Release:
+  NOT YET CREATED / NOT YET CREATED
 
 Repository visibility:
   PUBLIC
@@ -57,6 +57,9 @@ Secret scanning / push protection:
 
 Current real-tool baseline:
   apm doctor PASS (ngspice 47; 2026-09-04)
+
+V4 release qualification:
+  CANDIDATE AND EXACT-TAG FRESH-CLONE RUNS PENDING
 
 V4 stop state:
   none
@@ -113,12 +116,39 @@ available. Compact evidence is
 
 This proves `modelgen.deterministic_regeneration`, `models.io25`,
 `models.io18`, `mixed_voltage.distinctness`, and
-`mixed_voltage.circuit_holdout`, bringing the v4 total to 7/16. Runtime catalog
-integration of the four byte-frozen canonical cards is active; comparison,
-variation, noise, Spectre structure, compatibility, provenance, and release
-qualification remain pending.
-The released v3.0.0 tag, tagged commit, cards, evidence, and GitHub Release
-remain unchanged.
+`mixed_voltage.circuit_holdout`, bringing the qualification milestone total to
+7/16.
+
+Exact clean integration commit
+`42502c522401b92dde16dcad57d849ffab94f33b` then promoted the four byte-frozen
+cards through the manifest catalog. Real-ngspice characterization passed all
+15 families; Benchmark Global/Local/All passed all 15 families and 30 devices;
+and the versioned mixed-voltage comparison passed all required views with 130
+observations, 126 validated observations, four explicit
+`target_not_reachable` observations, and zero simulation failures. Its maximum
+gm/gds finite-difference errors were 0.004904/0.006889, maximum native-oracle
+gm/gds differences were 0.009506/0.002319, and maximum normalized Y-matrix KCL
+residual was 5.616e-9.
+
+The same integration source passed exact provenance/REUSE checks and all-family
+Spectre structure; Spectre remains model-only **experimental/unverified** with
+no real backend execution. These results prove `mixed_voltage.comparison`,
+`variation.v4`, `spectre.model_only`, and `licensing.provenance`, bringing the
+pre-release integration total to 11/16. Compact evidence is
+`validation/evidence/v4_runtime_integration.json`.
+
+The live stationary-noise planner derives 424 logical memberships from all 30
+devices and deduplicates them to 330 physical requests (94 memberships
+deduplicated). This is planning evidence, not the `noise.v4_catalog` gate. A
+fresh 330-request execution, strict 330/330 reuse, tamper qualification, v3
+compatibility regression, clean-clone candidate run, claim review, and exact-tag
+requalification remain release work.
+
+The separate phase-aware validator implements all 16 declared v4 gates.
+Candidate success requires 15/15 pre-tag gates and leaves only the exact-tag
+gate pending; a second fresh clone at the annotated tag must pass 16/16 before
+the GitHub Release is authorized. The released v3.0.0 tag, tagged commit,
+cards, evidence, validator contract, and GitHub Release remain unchanged.
 
 ## Immutable releases
 
@@ -294,8 +324,8 @@ numeric source material for APM022/APM016F.
 
 ## Next action
 
-Freeze the new-family generation epoch, then synthesize and retain at least
-three feasible io25 candidates per the observable-space, sealed-holdout, and
-epistemic-ensemble contract. Do not promote io25 into the runtime catalog until
-its device and application qualification states pass without reusing a failed
-unsealed holdout.
+Freeze the hash-bound v4 claim review on the coherent candidate, push it to
+`origin/main`, and run the complete 15-gate pre-tag qualification from a fresh
+detached HTTPS clone. Create no `v4.0.0` tag unless that report explicitly
+authorizes it; create no GitHub Release unless a second fresh exact-tag clone
+passes all 16 gates.

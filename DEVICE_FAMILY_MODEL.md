@@ -1,8 +1,9 @@
 # Device Family Domain Model
 
-This file defined the APM v2 domain model and remains the preserved electrical
-taxonomy in released v3.0.0 unless current `AGENTS.md` or a later explicit goal
-introduces a versioned change.
+This file defined the APM v2 domain model, remained the preserved electrical
+taxonomy in released v3.0.0, and is extended in v4.0.0 only by adding two
+APM045 Electrical Families and one versioned comparison-set kind. The core
+hierarchy and orthogonality rules are unchanged.
 
 Its purpose is to prevent device taxonomy, operating conditions, simulator bindings, and variation semantics from becoming entangled as APM expands beyond one representative MOS pair per technology.
 
@@ -45,7 +46,7 @@ An Electrical Family is a distinct nominal electrical model or parameterization 
 
 A Family is **not** primarily a usage category.
 
-Examples of v2 Families:
+Examples of Electrical Families:
 
 - `apm130/lv`
 - `apm130/hv`
@@ -53,6 +54,8 @@ Examples of v2 Families:
 - `apm045/vtg`
 - `apm045/vth`
 - `apm045/thkox`
+- `apm045/io18` (added in v4)
+- `apm045/io25` (added in v4)
 - `apm022/lvt`
 - `apm022/svt`
 - `apm022/hvt`
@@ -76,19 +79,20 @@ A Family should carry explicit searchable metadata where evidence supports it, f
 
 Do not invent metadata merely to fill a field. Unknown/undisclosed is preferable to false precision.
 
-## 4. Required v2 family matrix
+## 4. Current family matrix
 
-The v2 release target is:
+The v4 catalog is:
 
 | Technology | Required electrical families | Basis |
 | --- | --- | --- |
 | APM350 | `general` | existing APM-authored generic BSIM3 |
 | APM130 | `lv`, `hv` | IHP SG13G2 thin-oxide and thick-oxide PSP families |
-| APM045 | `vtl`, `vtg`, `vth`, `thkox` | FreePDK45 native model flavors |
+| APM045 | `vtl`, `vtg`, `vth`, `thkox`, `io18`, `io25` | four FreePDK45 flavors plus two independently APM-authored generic mixed-voltage families |
 | APM022 | `lvt`, `svt`, `hvt` | APM generic threshold-class families |
 | APM016F | `lvt`, `svt`, `hvt` | APM generic workfunction-dominant FinFET families |
 
-This is 13 required Electrical Families.
+This is 15 required Electrical Families. The immutable v2/v3 releases retain
+their historical 13-family catalogs; v4 does not reinterpret them.
 
 The schema itself must remain sparse and must not encode assumptions that every technology has these same family types.
 
@@ -128,6 +132,8 @@ Use family-qualified APM-owned names. Required families should converge on names
 - `apm045_vtg_nmos`, `apm045_vtg_pmos`
 - `apm045_vth_nmos`, `apm045_vth_pmos`
 - `apm045_thkox_nmos`, `apm045_thkox_pmos`
+- `apm045_io18_nmos`, `apm045_io18_pmos`
+- `apm045_io25_nmos`, `apm045_io25_pmos`
 - `apm022_lvt_nmos`, `apm022_lvt_pmos`
 - `apm022_svt_nmos`, `apm022_svt_pmos`
 - `apm022_hvt_nmos`, `apm022_hvt_pmos`
@@ -236,6 +242,11 @@ Technology manifests may define named sets, for example:
 
 - `threshold`: members `vtl`, `vtg`, `vth`, anchor `vtg`
 - `gate_stack`: members `vtg`, `thkox`
+- `mixed_voltage`: members `vtg`, `io18`, `io25`, anchor `vtg`
+
+The v4 `mixed_voltage` set dispatches to the separately versioned
+`apm.mixed-voltage-comparison.v1` contract. It does not alter the released
+meaning of the `threshold` or `gate_stack` sets.
 
 ### APM130
 
@@ -390,11 +401,12 @@ If future evidence shows a mode materially changes terminal behavior and users n
 
 ## 15. Manifest-driven release requirement
 
-By v2 release, normal family discovery and characterization must be data-driven.
+Normal family discovery and characterization must remain data-driven.
 
 A release test must prove at least:
 
-- all five technologies and 13 required families are discoverable from manifests;
+- all five technologies and the current 15 required families are discoverable
+  from manifests (the frozen v2/v3 catalog remains 13);
 - Devices and geometry contracts are discovered from manifests;
 - the generic characterization path can run all required families;
 - adding a normal fixture family to a test catalog does not require a new technology-specific production loader;
