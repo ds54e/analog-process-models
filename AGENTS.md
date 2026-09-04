@@ -15,7 +15,7 @@ repository; do not create or substitute another project authority.
 
 ## Released baseline and current line
 
-APM v1.0.0, v2.0.0, and v3.0.0 are released and immutable.
+APM v1.0.0, v2.0.0, v3.0.0, and v4.0.0 are released and immutable.
 
 - v2.0.0 commit: `3cc6cfea4932cc40f2d693784d0a569926cdf399`;
 - v3.0.0 annotated-tag object:
@@ -26,10 +26,19 @@ APM v1.0.0, v2.0.0, and v3.0.0 are released and immutable.
 - GitHub Release: `Analog Process Models v3.0.0`;
 - post-tag evidence:
   `validation/evidence/v3_post_release_requalification.json`.
+- v4.0.0 annotated-tag object:
+  `797cdf9462db9dd634bff558802bcadaaeb70015`;
+- v4.0.0 tagged commit:
+  `d224f279921c7e1ae637fd867e00d450067766c6`;
+- v4.0.0 exact-tag requalification: 16/16 required gates passed;
+- GitHub Release: `Analog Process Models v4.0.0`;
+- v4 candidate and post-tag evidence:
+  `validation/evidence/v4_release_candidate.json` and
+  `validation/evidence/v4_post_release_requalification.json`.
 
 Do not modify, move, recreate, or delete a released tag. Do not amend the
 tagged commits, rewrite published history, or force-push. Current `main` is the
-post-v3 development and public-maintenance line; it is not the v3.0.0 tag
+post-v4 development and public-maintenance line; it is not a released tag
 target.
 
 The repository is public. Publication followed a passing pre-publication audit
@@ -39,7 +48,7 @@ without explicit authorization for that exact action.
 
 ## Current mission and instruction hierarchy
 
-Implement the current `GOAL.md` faithfully. For post-v3 work, preserve the
+Implement the current `GOAL.md` faithfully. For post-v4 work, preserve the
 released electrical/noise behavior and claim boundaries unless a later goal
 explicitly and deliberately changes them.
 
@@ -106,7 +115,7 @@ terminal quantities separately from positive-magnitude comparison quantities.
 
 ## Noise and model-fidelity policy
 
-Released v3 stationary-noise results characterize existing compact-model
+Released v3/v4 stationary-noise results characterize existing compact-model
 predictions. They are not silicon/foundry calibration, reliability
 qualification, or a manufacturable-PDK claim.
 

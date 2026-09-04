@@ -1,6 +1,6 @@
 # APM v4.0.0 release validation and reproducibility
 
-APM v4 uses a phase-aware, fail-closed 16-gate contract. It preserves the
+APM v4 used a phase-aware, fail-closed 16-gate contract. It preserves the
 released v3 validator and evidence as immutable history while making ordinary
 `apm validate` follow the live v4 repository.
 
@@ -24,10 +24,12 @@ Generated build and result state remains below ignored project-local paths.
 The validator rechecks commit, origin/main snapshot, remote tag state,
 worktree, and platform before and after the complete run.
 
-## V4 pre-tag candidate qualification
+## Historical V4 pre-tag candidate qualification
 
-Push the coherent candidate to `origin/main`, then use a new directory while
-the `v4.0.0` tag is absent both locally and remotely:
+The completed release used a new directory after the coherent candidate was
+pushed to `origin/main` and while the `v4.0.0` tag was absent both locally and
+remotely. This pre-tag state cannot be recreated now that the immutable tag
+exists; its full report is hash-bound by the compact evidence record.
 
 ```console
 git clone https://github.com/ds54e/analog-process-models.git
@@ -97,6 +99,31 @@ generated state. Success must report `pass`, 16/16 gates, and
 `Analog Process Models v4.0.0` may be created only after that result. Compact
 candidate and exact-tag summaries record full generated report hashes on
 post-tag `main`; the large raw runs stay untracked.
+
+## Frozen v4.0.0 release record
+
+The pre-tag candidate completed at
+`d224f279921c7e1ae637fd867e00d450067766c6` with status `candidate_pass`, all
+15/15 candidate-required gates passing, and release-report SHA-256
+`315f65d039fdf4301c5d99656db5a6198bfb1c0ae0a8b9b4eb4c3722a1b5db5f`.
+Only the necessarily post-tag gate remained pending. Compact candidate evidence
+is `validation/evidence/v4_release_candidate.json` (SHA-256
+`54ffd0442c9a0578b4f73f7e19f3ff5b93fb70a8018306637be509866ae2d88b`).
+
+The resulting immutable annotated tag has object
+`797cdf9462db9dd634bff558802bcadaaeb70015`, peels to that exact candidate, and
+has message `Analog Process Models v4.0.0`. A different fresh HTTPS clone then
+passed all 16/16 gates with release-report SHA-256
+`2cb8215511889bb8e426f90e223f2f5d266fd37ce44b4e84707a78b0cc446668`.
+Compact exact-tag evidence is
+`validation/evidence/v4_post_release_requalification.json` (SHA-256
+`2ae5392fdd1f4d741b1c77e92a8b0e05f89358987272b8df25d4d1ba746c2685`).
+
+The [GitHub Release](https://github.com/ds54e/analog-process-models/releases/tag/v4.0.0)
+was published at 2026-09-04T17:41:47Z, after exact-tag validation completed at
+2026-09-04T17:40:59.879114Z. It is neither a draft nor a prerelease, and its
+notes match `RELEASE_V4.md`. Post-release commits on `main` may document the
+result but must never move or recreate the tag.
 
 ## Fail-closed evidence semantics
 

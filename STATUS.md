@@ -6,15 +6,15 @@ supports validation and release claims.
 ## Current state
 
 ```text
-Released baseline: v3.0.0
-Target release: v4.0.0
-State: RELEASE-CANDIDATE PORTABILITY FIX
+Released baseline: v4.0.0
+Completed release: v4.0.0
+State: RELEASED / POST-RELEASE EVIDENCE COMPLETE
 
-V4 development/integration gates proven before release qualification:
-  12/16
+V4 exact-tag required gates:
+  16/16 PASS
 
 Current milestone:
-  MIXED-VOLTAGE RUNTIME INTEGRATION COMPLETE / RELEASE VALIDATOR ACTIVE
+  APM V4.0.0 MIXED-VOLTAGE RELEASE COMPLETE
 
 Public-readiness cleanup:
   COMPLETE
@@ -32,13 +32,13 @@ Third-party redistribution/provenance:
   PASS
 
 Current normal repository validation:
-  PASS (pre-portability-fix clean snapshot a2f5b4c)
+  PASS (released commit d224f27 and current post-release evidence tree)
 
 v3.0.0 tag / GitHub Release:
   IMMUTABLE / unchanged
 
 v4.0.0 tag / GitHub Release:
-  NOT YET CREATED / NOT YET CREATED
+  IMMUTABLE / PUBLISHED
 
 Repository visibility:
   PUBLIC
@@ -59,17 +59,19 @@ Current real-tool baseline:
   apm doctor PASS (ngspice 47; 2026-09-04)
 
 V4 release qualification:
-  PORTABILITY FIX IMPLEMENTED; NEW CANDIDATE AND EXACT-TAG RUNS PENDING
+  CANDIDATE 15/15 PASS / EXACT TAG 16/16 PASS
 
 V4 stop state:
   none
 ```
 
-The current goal is the APM v4.0.0 mixed-voltage release defined by `GOAL.md`,
-`V4_MIXED_VOLTAGE.md`, and `validation/release_gates_v4.toml`. Upstream goal
-commit `0e216fe` was fast-forwarded into this development checkout on
-2026-09-04. The required local ngspice 47, OpenVAF-Re-Loaded, PSP103, and
-BSIM-CMG toolchain passed `apm doctor` before v4 implementation began.
+The APM v4.0.0 mixed-voltage goal defined by `GOAL.md`,
+`V4_MIXED_VOLTAGE.md`, and `validation/release_gates_v4.toml` is complete.
+The immutable annotated tag `v4.0.0` peels to the qualified candidate commit
+`d224f279921c7e1ae637fd867e00d450067766c6`; a separate fresh exact-tag clone
+passed 16/16 required gates before the GitHub Release was published. Current
+`main` is the post-v4 evidence and public-maintenance line, not the release tag
+target.
 
 The `evidence.public_matrix` and `modelgen.reconstruction` gates are proven.
 Kernel 1.2.0 removes a stray continuation token that ngspice ignored with a
@@ -143,14 +145,16 @@ deduplicated). This planning result alone is not the `noise.v4_catalog` gate.
 The first candidate attempt later completed a fresh 330-request execution,
 strict 330/330 reuse, tamper qualification, and v3 compatibility regression,
 but that attempt did not qualify the candidate because an earlier modelgen
-replay component failed. Those noise checks must therefore run again inside
-the next complete successful candidate.
+replay component failed. Those noise checks therefore had to run again inside
+the eventual successful candidate and again at the exact tag; both later runs
+passed.
 
-The separate phase-aware validator implements all 16 declared v4 gates.
-Candidate success requires 15/15 pre-tag gates and leaves only the exact-tag
-gate pending; a second fresh clone at the annotated tag must pass 16/16 before
-the GitHub Release is authorized. The released v3.0.0 tag, tagged commit,
-cards, evidence, validator contract, and GitHub Release remain unchanged.
+The separate phase-aware validator implements all 16 declared v4 gates. The
+successful candidate passed 15/15 pre-tag gates and left only the exact-tag
+gate pending; a second fresh clone at the annotated tag then passed 16/16
+before the GitHub Release was authorized. The released v3.0.0 tag, tagged
+commit, cards, evidence, validator contract, and GitHub Release remain
+unchanged.
 
 Clean validator-hardening commit
 `7e336a6899df22f73610412404f7cbedf1ef1071` passed ordinary v4 repository
@@ -161,8 +165,8 @@ all 20 candidate-domain records, all 10 circuit pairs, structural/distinctness
 checks, both five-seed ensembles, and all four canonical card hashes passed.
 Together with the complete hash-bound public review, this proves
 `release.claim_audit_v4` at the development/static level and brings the
-pre-release milestone total to 12/16. The candidate still must independently
-rerun every component from its attested fresh clone.
+pre-release milestone total to 12/16. At that point, the candidate still had
+to rerun every component independently from its attested fresh clone.
 
 Fresh candidate attempt `a2f5b4c7a2b7218ebcc4263ba56b89b9501e832e`
 correctly failed closed before replaying any device or circuit holdout. Its
@@ -200,6 +204,28 @@ current identity, then adapts only the immutable qualifier's legacy hash
 callback. The final report records the actual fresh hash separately from the
 preserved first-unseal binding; electrical evaluation code remains unchanged.
 
+The coherent candidate commit
+`d224f279921c7e1ae637fd867e00d450067766c6` was then pushed and checked out
+detached in a new HTTPS clone with no generated state. Its source-built
+ngspice 47 and complete release workload passed all 15/15 candidate-required
+gates. The generated report has SHA-256
+`315f65d039fdf4301c5d99656db5a6198bfb1c0ae0a8b9b4eb4c3722a1b5db5f`;
+all 15 component hashes and all 48 evidence paths were independently rechecked.
+Compact evidence is `validation/evidence/v4_release_candidate.json` (SHA-256
+`54ffd0442c9a0578b4f73f7e19f3ff5b93fb70a8018306637be509866ae2d88b`).
+
+Only after that authorization, annotated tag `v4.0.0` was created at the exact
+candidate. An unrelated new HTTPS clone checked out the tag detached, built a
+different fresh ngspice 47 binary, and repeated the complete workload from
+empty generated state. All 16/16 gates passed; the generated exact-tag report
+has SHA-256
+`2cb8215511889bb8e426f90e223f2f5d266fd37ce44b4e84707a78b0cc446668`,
+with all 15 component hashes and all 62 evidence paths rechecked. The GitHub
+Release was published only after this result authorized it. Compact evidence
+is `validation/evidence/v4_post_release_requalification.json` (SHA-256
+`2ae5392fdd1f4d741b1c77e92a8b0e05f89358987272b8df25d4d1ba746c2685`).
+No stop condition remains open.
+
 ## Immutable releases
 
 | Release | Tagged commit | State |
@@ -207,6 +233,37 @@ preserved first-unseal binding; electrical evaluation code remains unchanged.
 | v1.0.0 | `e7bba6aaba1487a1116459a6b7b2c3c5add93318` | immutable |
 | v2.0.0 | `3cc6cfea4932cc40f2d693784d0a569926cdf399` | immutable; exact-tag 20/20 PASS |
 | v3.0.0 | `995e0ce7cdd0c37ef9f3397008637f9d239c746e` | immutable; exact-tag 18/18 PASS |
+| v4.0.0 | `d224f279921c7e1ae637fd867e00d450067766c6` | immutable; exact-tag 16/16 PASS |
+
+v4.0.0 release identity:
+
+```text
+annotated tag object  797cdf9462db9dd634bff558802bcadaaeb70015
+peeled commit         d224f279921c7e1ae637fd867e00d450067766c6
+tag message           Analog Process Models v4.0.0
+signature             unsigned annotated tag
+GitHub Release ID     382911346
+GitHub Release        Analog Process Models v4.0.0
+release URL           https://github.com/ds54e/analog-process-models/releases/tag/v4.0.0
+published UTC         2026-09-04T17:41:47Z
+```
+
+The exact candidate passed 15/15 candidate-required gates in a genuine fresh
+HTTPS clone. A different fresh clone of the exact annotated tag then passed
+all 16/16 gates. The GitHub Release was created only after the exact-tag report
+set `github_release_creation_authorized = true`. The tag remains at the
+validated candidate; these later evidence changes belong only to `main`.
+
+Candidate and post-tag evidence:
+
+- `validation/evidence/v4_release_candidate.json` —
+  `54ffd0442c9a0578b4f73f7e19f3ff5b93fb70a8018306637be509866ae2d88b`;
+- `validation/evidence/v4_post_release_requalification.json` —
+  `2ae5392fdd1f4d741b1c77e92a8b0e05f89358987272b8df25d4d1ba746c2685`.
+
+Exact-tag release-report SHA-256:
+
+`2cb8215511889bb8e426f90e223f2f5d266fd37ce44b4e84707a78b0cc446668`
 
 v3.0.0 release identity:
 
@@ -243,9 +300,17 @@ tag object, detached candidate, and remote history were never modified.
 
 ## Released technical baseline
 
-APM v3.0.0 provides:
+APM v4.0.0 preserves the full v3 baseline and provides:
 
-- five technologies, 13 electrical families, and 26 public MOS devices;
+- five technologies, 15 electrical families, and 30 public MOS devices;
+- independently APM-authored APM045/io18 and APM045/io25 mixed-voltage
+  research families with explicit Operating Profiles and tested model-supported
+  geometry ranges;
+- deterministic behavior-constrained generation, retained five-pair epistemic
+  ensembles, sealed device/circuit holdouts, and byte-exact canonical-card
+  regeneration;
+- `apm.mixed-voltage-comparison.v1` native, common-bias, equal-geometry, and
+  equal-inversion views with explicit unreachable states and metric bases;
 - manifest-driven `Technology -> Electrical Family -> Device` discovery;
 - preserved `apm.characterization.v2` DC, finite-difference gm/gds, Y-matrix,
   capacitance, temperature, comparison, and variation behavior;
@@ -262,9 +327,9 @@ APM v3.0.0 provides:
 - parameter-level effective noise provenance and raw backend source names;
 - normal Sparse/no-KLU required `.noise` execution.
 
-The release catalog contained 376 logical memberships deduplicated to 290
-physical requests: 261 validated, 29 explicitly `target_not_reachable`, and
-zero `simulation_failed`. Strict resume reused 290/290, and exact reuse plus
+The v4 release catalog contained 424 logical memberships deduplicated to 330
+physical requests: 290 validated, 40 explicitly `target_not_reachable`, and
+zero `simulation_failed`. Strict resume reused 330/330, and exact reuse plus
 mismatch/tamper/incomplete rejection passed 4/4.
 
 Milestone evidence retained as frozen engineering history:
@@ -275,6 +340,11 @@ Milestone evidence retained as frozen engineering history:
 | V3-N1 method | `0aab87b98697bd8806d13d244595a989cd81a0e3` | `validation/evidence/v3_n1_noise_method.json` |
 | V3-N2 catalog | `ca977af3ba08b9dfdee8556e5781f647f99cabdd` | `validation/evidence/v3_n2_noise_catalog.json` |
 | V3-N3 candidate | `995e0ce7cdd0c37ef9f3397008637f9d239c746e` | `validation/evidence/v3_release_candidate.json` |
+| V4 modelgen foundation | `6773e0c6d8382723e9041a8d19034173e5242875` | `validation/evidence/v4_modelgen_foundation.json` |
+| V4 epoch-3 qualification | `65d00b1489ef67f43d38926eba15f1824b2ef81b` | `validation/evidence/v4_mixed_voltage_qualification.json` |
+| V4 runtime integration | `42502c522401b92dde16dcad57d849ffab94f33b` | `validation/evidence/v4_runtime_integration.json` |
+| V4 candidate | `d224f279921c7e1ae637fd867e00d450067766c6` | `validation/evidence/v4_release_candidate.json` |
+| V4 exact tag | `d224f279921c7e1ae637fd867e00d450067766c6` | `validation/evidence/v4_post_release_requalification.json` |
 
 ## Reference environment
 
@@ -374,8 +444,8 @@ numeric source material for APM022/APM016F.
 
 ## Next action
 
-Freeze the hash-bound v4 claim review on the coherent candidate, push it to
-`origin/main`, and run the complete 15-gate pre-tag qualification from a fresh
-detached HTTPS clone. Create no `v4.0.0` tag unless that report explicitly
-authorizes it; create no GitHub Release unless a second fresh exact-tag clone
-passes all 16 gates.
+Continue ordinary post-v4 maintenance on `main` using `apm doctor` and
+`apm validate`. Preserve the immutable `v4.0.0` tag, its tagged commit, release
+evidence, electrical/noise behavior, and claim boundaries unless a later
+explicit goal deliberately changes the versioned development line. Do not
+rerun the historical pre-tag workflow or move/recreate any released tag.

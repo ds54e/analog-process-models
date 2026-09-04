@@ -10,10 +10,11 @@ contracts and adds independently APM-authored `apm045/io18` and
 `apm045/io25` mixed-voltage research families. The live catalog contains 15
 electrical families and 30 public MOS devices across five technologies.
 
-The immutable annotated `v3.0.0` release remains unchanged. A v4 release is
-complete only after the exact candidate passes 15 pre-tag gates, the annotated
-`v4.0.0` tag is created at that candidate, and a second fresh clone of the
-exact tag passes all 16 gates before the GitHub Release is created.
+The immutable annotated `v4.0.0` release is tagged at
+`d224f279921c7e1ae637fd867e00d450067766c6`. Its exact candidate passed 15/15
+pre-tag gates and a separate fresh clone of the exact tag passed 16/16 before
+the [GitHub Release](https://github.com/ds54e/analog-process-models/releases/tag/v4.0.0)
+was published. Earlier released tags remain unchanged.
 
 ## Scope
 
@@ -294,14 +295,19 @@ For normal installation and current-tree confidence, users should run:
 .venv/bin/apm validate
 ```
 
-The current fail-closed v4 contract is
+The frozen fail-closed v4 release contract is
 [`validation/release_gates_v4.toml`](validation/release_gates_v4.toml).
-Maintainers attest a fresh detached HTTPS clone before bootstrap, then run
+For the completed release, maintainers attested a fresh detached HTTPS clone
+before bootstrap, then ran
 `apm validate --release-v4 candidate`; a successful candidate report passes
 15/15 candidate-required gates and explicitly leaves the sixteenth exact-tag
 gate pending. After the annotated tag is pushed, a second fresh clone runs
 `apm validate --release-v4 exact-tag`, which must pass 16/16 before release
-publication. Both v4 phases regenerate calibration and use a hash-bound
+publication. Those two runs passed and are recorded in
+[`v4_release_candidate.json`](validation/evidence/v4_release_candidate.json)
+and
+[`v4_post_release_requalification.json`](validation/evidence/v4_post_release_requalification.json).
+Both v4 phases regenerate calibration and use a hash-bound
 portable replay adapter that excludes only clone-local ngspice build metadata
 from its science hash while still matching the unmodified fresh report to the
 fresh executable exactly. The frozen

@@ -1,18 +1,26 @@
-# APM v4.0.0 — APM045 Mixed-Voltage Electrical Families
+# APM v4.0.0 — APM045 Mixed-Voltage Electrical Families (complete)
 
 ## Current state
 
-APM v3.0.0 is released and immutable.
+APM v4.0.0 is released and immutable. The release completed the goal below
+without changing its technical or claim boundary.
 
-- annotated tag: `v3.0.0`;
-- tagged commit: `995e0ce7cdd0c37ef9f3397008637f9d239c746e`;
-- exact-tag post-release qualification: 18/18 PASS;
-- GitHub Release: `Analog Process Models v3.0.0`;
+- annotated tag: `v4.0.0`;
+- annotated-tag object: `797cdf9462db9dd634bff558802bcadaaeb70015`;
+- tagged commit: `d224f279921c7e1ae637fd867e00d450067766c6`;
+- pre-tag candidate qualification: 15/15 candidate-required gates PASS;
+- exact-tag post-release qualification: 16/16 required gates PASS;
+- GitHub Release: `Analog Process Models v4.0.0`;
+- release URL:
+  `https://github.com/ds54e/analog-process-models/releases/tag/v4.0.0`;
+- compact evidence: `validation/evidence/v4_release_candidate.json` and
+  `validation/evidence/v4_post_release_requalification.json`;
 - repository visibility: PUBLIC.
 
-Current `main` is the post-v3 development line. Do not modify, recreate, move,
-or delete released tags, tagged commits, historical release evidence, or the
-existing GitHub Release.
+APM v1.0.0 through v3.0.0 remain released and immutable. Current `main` is the
+post-v4 development and public-maintenance line. Do not modify, recreate, move,
+or delete released tags, tagged commits, historical release evidence, or
+existing GitHub Releases.
 
 ## Goal
 
@@ -227,6 +235,9 @@ boundary.
 
 ## Completion state
 
-Status: **ACTIVE DEVELOPMENT**
+Status: **COMPLETE — RELEASED**
 
-Target: **APM v4.0.0**
+Released target: **APM v4.0.0**
+
+Completion evidence: candidate 15/15 PASS; exact tag 16/16 PASS; GitHub Release
+published only after exact-tag qualification.

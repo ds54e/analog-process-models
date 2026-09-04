@@ -60,6 +60,15 @@ Benchmark Global/Local/All run, exact provenance audit, and model-only Spectre
 structural report. Its live noise-plan counts are planning evidence only; they
 do not substitute for the fresh catalog plus strict-resume release run.
 
+The successful exact pre-tag run is recorded in
+`v4_release_candidate.json`. It hash-binds the 15/15 candidate result and its
+complete generated component reports at commit
+`d224f279921c7e1ae637fd867e00d450067766c6`. The independent 16/16 exact-tag
+run, immutable annotated-tag identity, and subsequently published GitHub
+Release are recorded in `v4_post_release_requalification.json`. The raw runs
+remain ignored and reproducible; the compact files contain portable paths and
+cryptographic identities rather than temporary clone locations.
+
 ## Status vocabulary
 
 - `validated`: the required real environment/tool/test ran and directly
@@ -153,6 +162,7 @@ historical tag-absence compatibility detail.
 V4 uses a separate phase-aware attestation and validator. A successful
 pre-tag report must pass 15/15 candidate-required gates while leaving the
 exact-tag gate explicitly pending. After annotated-tag creation, a different
-fresh HTTPS clone must pass all 16/16 gates. Compact v4 candidate and exact-tag
-summaries are added only after those runs exist; a planned filename or a status
-document is never accepted as release evidence.
+fresh HTTPS clone must pass all 16/16 gates. Both runs passed for v4.0.0; their
+compact records are `v4_release_candidate.json` and
+`v4_post_release_requalification.json`. A planned filename or a status document
+alone is never accepted as release evidence.

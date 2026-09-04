@@ -45,18 +45,33 @@ EXPECTED_FAMILIES = {
 }
 
 
-def test_v4_goal_and_historical_document_status_are_explicit() -> None:
+def test_v4_release_and_historical_document_status_are_explicit() -> None:
     agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
     goal = (ROOT / "GOAL.md").read_text(encoding="utf-8")
-    assert "APM v1.0.0, v2.0.0, and v3.0.0 are released and immutable" in agents
+    normalized_goal = " ".join(goal.split())
+    assert (
+        "APM v1.0.0, v2.0.0, v3.0.0, and v4.0.0 are released and immutable"
+        in agents
+    )
     assert "afecec29ea6ed0703ef441d4839fd40a238bef0b" in agents
+    assert "797cdf9462db9dd634bff558802bcadaaeb70015" in agents
+    assert "d224f279921c7e1ae637fd867e00d450067766c6" in agents
+    assert "v4.0.0 exact-tag requalification: 16/16 required gates passed" in agents
     assert "The repository is public" in agents
-    assert "# APM v4.0.0 — APM045 Mixed-Voltage Electrical Families" in goal
-    assert "Current `main` is the post-v3 development line" in goal
-    assert "APM v3.0.0 is released and immutable" in goal
+    assert (
+        "# APM v4.0.0 — APM045 Mixed-Voltage Electrical Families (complete)"
+        in goal
+    )
+    assert (
+        "Current `main` is the post-v4 development and public-maintenance line."
+        in normalized_goal
+    )
+    assert "APM v4.0.0 is released and immutable" in normalized_goal
     assert "repository visibility: PUBLIC" in goal
-    assert "Status: **ACTIVE DEVELOPMENT**" in goal
-    assert "Target: **APM v4.0.0**" in goal
+    assert "Status: **COMPLETE — RELEASED**" in goal
+    assert "Released target: **APM v4.0.0**" in goal
+    assert "validation/evidence/v4_release_candidate.json" in goal
+    assert "validation/evidence/v4_post_release_requalification.json" in goal
 
     historical_markers = {
         "RELEASE_V3.md": "Historical record — frozen V3-N3 candidate contract",
