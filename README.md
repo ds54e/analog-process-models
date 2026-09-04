@@ -302,8 +302,9 @@ Maintainers attest a fresh detached HTTPS clone before bootstrap, then run
 gate pending. After the annotated tag is pushed, a second fresh clone runs
 `apm validate --release-v4 exact-tag`, which must pass 16/16 before release
 publication. Both v4 phases regenerate calibration and use a hash-bound
-portable replay projection that excludes only clone-local ngspice build
-metadata while still matching the fresh executable exactly. The frozen
+portable replay adapter that excludes only clone-local ngspice build metadata
+from its science hash while still matching the unmodified fresh report to the
+fresh executable exactly. The frozen
 `apm validate --release` command and
 [`validation/release_gates.toml`](validation/release_gates.toml) retain their
 historical v3 meaning. See

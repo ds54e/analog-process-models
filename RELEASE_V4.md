@@ -55,13 +55,15 @@ four selected cards to be byte-identical to the shipped cards.
 
 The original epoch-3 calibration and first-unseal hashes remain immutable.
 Clean-clone release replay uses the separately hash-bound
-`calibration_replay_v4.toml` portability projection because a source-built
+`calibration_replay_v4.toml` portability adapter because a source-built
 ngspice executable records clone-local path and build-time metadata. Only the
 calibration timestamp and those three rebuild-local tool fields are excluded
-from the portable science hash; the fresh report must still bind its complete
-path, executable SHA-256, version banner, and major version to the actual
-ngspice used. Candidate parameters, holdouts, criteria, and electrical result
-content are not excluded or changed.
+from the portable science hash. The adapter passes the unmodified fresh report
+to the frozen qualifier, separately binds its complete path, executable
+SHA-256, version banner, and major version to the actual ngspice used, and
+adapts only the frozen qualifier's legacy canonical-hash comparison to the
+sealed first-unseal hash. Candidate parameters, holdouts, criteria, electrical
+result content, and electrical evaluation code are not excluded or changed.
 
 The retained epistemic ensemble measures model-construction uncertainty under
 the public behavior contract. It is not process variation, device mismatch,

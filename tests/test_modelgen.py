@@ -140,6 +140,9 @@ def test_calibration_replay_binding_preserves_first_unseal_identity() -> None:
         "sha256"
     ]
     assert replay["excluded_fields"] == list(EXCLUDED_FIELDS)
+    assert replay["frozen_hash_adapter_target"] == (
+        "qualify_families._canonical_report_sha256"
+    )
     assert replay["candidate_parameter_change_permitted"] is False
     assert replay["holdout_definition_change_permitted"] is False
     assert replay["electrical_criterion_change_permitted"] is False

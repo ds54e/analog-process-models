@@ -6,9 +6,9 @@
 The first-unseal implementation and its exact calibration hash are immutable.
 Source-built ngspice embeds rebuild-local path/time information, so a fresh
 clone cannot reproduce that exact metadata.  This adapter verifies a narrow
-portable-content binding, reconstructs the exact metadata projection expected
-by the frozen implementation, delegates every electrical check to that
-unchanged implementation, and records the fresh tool/report identity.
+portable-content binding, adapts only the frozen canonical-hash callback,
+delegates every electrical check to that unchanged implementation, and records
+the fresh tool/report identity.
 """
 
 from __future__ import annotations
@@ -112,6 +112,8 @@ def _binding_audit(
         == str(frozen_path.relative_to(root))
         and binding.get("frozen_qualification_implementation_sha256")
         == sha256_file(frozen_path),
+        "frozen_hash_adapter_target": binding.get("frozen_hash_adapter_target")
+        == "qualify_families._canonical_report_sha256",
         "excluded_fields_exact": binding.get("excluded_fields")
         == list(EXCLUDED_FIELDS),
         "sealed_hash_preserved": binding.get(
@@ -195,24 +197,40 @@ def replay(
         calibration=calibration,
     )
 
-    projection = json.loads(canonical_json(calibration))
-    projection["reference_tool"] = dict(binding["sealed_reference_tool"])
-    projection_path = calibration_path.parent / "report.release-replay-projection.json"
-    _write_json(projection_path, projection)
-    projected_hash = frozen._canonical_report_sha256(projection)
     sealed_hash = str(binding["sealed_calibration_canonical_content_sha256"])
-    if projected_hash != sealed_hash:
-        raise frozen.QualificationError(
-            "calibration replay projection does not reproduce the first-unseal hash"
-        )
+    observed_hash = str(audit["observed_calibration_canonical_content_sha256"])
+    portable_hash = str(audit["portable_calibration_content_sha256"])
+    frozen_hasher = frozen._canonical_report_sha256
 
-    report = frozen.qualify(
-        root=root,
-        output=output,
-        qualification_path=qualification_path,
-        calibration_report_path=projection_path,
-    )
+    def _replay_hash_adapter(report: Mapping[str, Any]) -> str:
+        if frozen_hasher(report) != observed_hash:
+            raise frozen.QualificationError(
+                "frozen validator hashed content other than the bound fresh calibration"
+            )
+        if portable_calibration_sha256(report) != portable_hash:
+            raise frozen.QualificationError(
+                "fresh calibration changed during frozen-validator replay"
+            )
+        return sealed_hash
+
+    frozen._canonical_report_sha256 = _replay_hash_adapter
+    try:
+        report = frozen.qualify(
+            root=root,
+            output=output,
+            qualification_path=qualification_path,
+            calibration_report_path=calibration_path,
+        )
+    finally:
+        frozen._canonical_report_sha256 = frozen_hasher
     engine_receipt = report.pop("unseal_receipt")
+    fresh_calibration_identity = {
+        "path": str(calibration_path),
+        "sha256": sha256_file(calibration_path),
+        "canonical_content_sha256": frozen_hasher(calibration),
+        "portable_content_sha256": portable_calibration_sha256(calibration),
+    }
+    frozen_preflight_binding = dict(report["preflight"]["calibration"])
     receipt = {
         "schema": RECEIPT_SCHEMA,
         "created_utc": _utc_now(),
@@ -226,19 +244,14 @@ def replay(
         "generation_contract_sha256": engine_receipt[
             "generation_contract_sha256"
         ],
-        "fresh_calibration_report": {
-            "path": str(calibration_path),
-            "sha256": sha256_file(calibration_path),
-            "canonical_content_sha256": frozen._canonical_report_sha256(
-                calibration
-            ),
-            "portable_content_sha256": portable_calibration_sha256(calibration),
-        },
-        "frozen_engine_projection": {
-            "path": str(projection_path),
-            "sha256": sha256_file(projection_path),
-            "canonical_content_sha256": projected_hash,
-            "purpose": "metadata-only adapter for immutable first-unseal validator",
+        "fresh_calibration_report": fresh_calibration_identity,
+        "frozen_engine_hash_adapter": {
+            "target": "qualify_families._canonical_report_sha256",
+            "observed_fresh_content_sha256": observed_hash,
+            "verified_portable_content_sha256": portable_hash,
+            "sealed_first_unseal_content_sha256": sealed_hash,
+            "electrical_evaluation_code_changed": False,
+            "frozen_preflight_binding": frozen_preflight_binding,
         },
         "calibration_binding": audit,
         "definitions_replayed": engine_receipt["definitions_unsealed"],
@@ -249,13 +262,19 @@ def replay(
     report["qualification_receipt"] = receipt
     report["replay_receipt"] = receipt
     report["frozen_engine_receipt"] = engine_receipt
+    report["preflight"]["frozen_engine_calibration_binding"] = (
+        frozen_preflight_binding
+    )
+    report["preflight"]["calibration"] = {
+        **fresh_calibration_identity,
+        "frozen_engine_binding_sha256": sealed_hash,
+    }
     report["preflight"]["release_replay_binding"] = audit
     identity = report.setdefault("artifact_identity", {})
-    identity["calibration_projection"] = identity.pop(
-        "calibration_report",
-        receipt["frozen_engine_projection"],
-    )
-    identity["calibration_report"] = receipt["fresh_calibration_report"]
+    identity["calibration_report"] = {
+        **fresh_calibration_identity,
+        "frozen_engine_binding_sha256": sealed_hash,
+    }
     identity["qualification_replay_implementation"] = {
         "path": str(Path(__file__).resolve().relative_to(root)),
         "sha256": sha256_file(Path(__file__)),

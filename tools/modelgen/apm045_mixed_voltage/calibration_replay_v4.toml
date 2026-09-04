@@ -28,20 +28,6 @@ fresh_report_required = true
 candidate_parameter_change_permitted = false
 holdout_definition_change_permitted = false
 electrical_criterion_change_permitted = false
+frozen_hash_adapter_target = "qualify_families._canonical_report_sha256"
 
 rationale = "Source-built ngspice embeds clone-local path and build-time metadata; release replay excludes only those fields from the portable science hash while separately requiring the fresh report's complete tool identity to match the executable used."
-
-[sealed_reference_tool]
-major = "47"
-path = "/home/admin/src/analog-process-models/.apm/toolchain/ngspice-47/bin/ngspice"
-sha256 = "34d24e813da266ee2a5deef72596de1351b63d489f96372ec4364648676cdc21"
-version_output = """******
-** ngspice-47 : Circuit level simulation program
-** Compiled with KLU Direct Linear Solver
-** The U. C. Berkeley CAD Group
-** Copyright 1985-1994, Regents of the University of California.
-** Copyright 2001-2026, The ngspice team.
-** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html
-** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html
-** Creation Date: Sat Aug 29 14:53:22 UTC 2026
-******"""

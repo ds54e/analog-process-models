@@ -152,11 +152,11 @@ MODELGEN_SOURCE_BINDINGS = {
     ),
     "qualification_replay": (
         "tools/modelgen/apm045_mixed_voltage/replay_families.py",
-        "c0e2671c48b620b46748033315bdebd1834e7a3a47cc64019735d1a86cd753fb",
+        "e1aa51cd673956e4c625246c18b0a82919dfc8892fbead28959abfcac372522c",
     ),
     "calibration_replay_contract": (
         "tools/modelgen/apm045_mixed_voltage/calibration_replay_v4.toml",
-        "8eacecf1658c3f0c852210d2705e77eb30434931f209d63d25404af193f5c91c",
+        "c5d410086ac4742893849555d591a4a3370b11a0022e07ff0cc660b092ef856c",
     ),
     "terminal_observables": (
         "tools/modelgen/apm045_mixed_voltage/terminal_observables.py",
@@ -1248,6 +1248,9 @@ def _run_modelgen_qualification_replay(
     circuit_results = report.get("sealed_circuit_holdout", [])
     eligibility = report.get("eligibility", {})
     receipt = report.get("replay_receipt", {})
+    fresh_calibration = receipt.get("fresh_calibration_report", {})
+    hash_adapter = receipt.get("frozen_engine_hash_adapter", {})
+    calibration_binding = receipt.get("calibration_binding", {})
     artifacts = report.get("canonical_artifacts", {})
     canonical_hashes = {
         f"{family}/{polarity}": artifacts.get(family, {})
@@ -1283,6 +1286,25 @@ def _run_modelgen_qualification_replay(
         == "portable_release_replay"
         and bool(receipt.get("calibration_binding", {}).get("checks"))
         and all(receipt["calibration_binding"]["checks"].values()),
+        "transparent_frozen_hash_adapter": hash_adapter.get("target")
+        == "qualify_families._canonical_report_sha256"
+        and hash_adapter.get("observed_fresh_content_sha256")
+        == fresh_calibration.get("canonical_content_sha256")
+        == calibration_binding.get("observed_calibration_canonical_content_sha256")
+        and hash_adapter.get("verified_portable_content_sha256")
+        == fresh_calibration.get("portable_content_sha256")
+        == calibration_binding.get("portable_calibration_content_sha256")
+        and hash_adapter.get("sealed_first_unseal_content_sha256")
+        == calibration_binding.get("sealed_calibration_canonical_content_sha256")
+        and hash_adapter.get("electrical_evaluation_code_changed") is False
+        and report.get("artifact_identity", {}).get("calibration_report", {}).get(
+            "canonical_content_sha256"
+        )
+        == fresh_calibration.get("canonical_content_sha256")
+        and report.get("preflight", {}).get("calibration", {}).get(
+            "canonical_content_sha256"
+        )
+        == fresh_calibration.get("canonical_content_sha256"),
         "all_twenty_candidate_domains": len(candidate_results) == 20
         and all(item.get("status") == "pass" for item in candidate_results),
         "all_ten_circuit_holdouts": len(circuit_results) == 10

@@ -56,8 +56,11 @@ The replay preserves the immutable first-unseal calibration hash and checks
 the committed `calibration_replay_v4.toml` portability binding. Its portable
 hash excludes only the calibration timestamp and source-build-local ngspice
 path, binary hash, and version banner; those tool fields are separately
-required to match the fresh executable exactly. No candidate, holdout,
-criterion, or electrical result field is normalized away.
+required to match the fresh executable exactly. The unmodified fresh report is
+passed to the frozen qualifier, and the adapter changes only the qualifier's
+legacy canonical-hash callback after both identities have been verified. No
+candidate, holdout, criterion, electrical result field, or electrical
+evaluation code is normalized away or changed.
 
 Success has status `candidate_pass`, passes 15/15 candidate-required gates,
 reports 15 of the 16 total gates passed, and leaves only

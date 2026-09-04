@@ -79,10 +79,13 @@ Release requalification uses `--replay` with
 unchanged. The replay binding additionally fixes a portable science hash that
 excludes only calibration time and the clone-local ngspice path, binary hash,
 and build banner. A replay still requires those omitted tool fields to match
-the fresh executable exactly, requires ngspice major 47, regenerates the same
-candidate cards byte-for-byte, and reruns every device and circuit holdout.
-This portability projection changes no candidate parameter, holdout
-definition, electrical criterion, or first-unseal evidence.
+the fresh executable exactly, requires ngspice major 47, passes the unmodified
+fresh report to the frozen qualifier, regenerates the same candidate cards
+byte-for-byte, and reruns every device and circuit holdout. After verifying the
+raw and portable identities, its narrow adapter changes only the frozen
+qualifier's legacy canonical-hash callback to return the preserved first-unseal
+hash. It changes no candidate parameter, holdout definition, electrical
+criterion, electrical evaluation code, or first-unseal evidence.
 
 Epoch 1 is retained as failed-closed history. Its strict method rejected io25
 when 17.5 1/V was explicitly not reachable in subsets of the high-temperature

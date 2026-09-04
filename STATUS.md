@@ -187,6 +187,19 @@ electrical results remain exact and are all rerun. Because the failed attempt
 stopped before opening a holdout, this repairs no candidate against a failed
 holdout result and creates no new generation epoch.
 
+A second fresh-clone attempt at
+`7743da68a6e22d5d77f2b04e0f530e10d8e1674b` exposed a separate public-hygiene
+defect before the release command ran: the first portability implementation
+stored the original workstation's absolute ngspice path in its tracked replay
+contract. Ordinary validation rejected that path, including its explicit
+distribution-audit regression test, so the attempt was abandoned and no tag
+was created. The revised adapter contains no historical absolute path and does
+not synthesize or rewrite a calibration report. It verifies the raw fresh
+report, the narrowly defined portable science hash, and the executable's full
+current identity, then adapts only the immutable qualifier's legacy hash
+callback. The final report records the actual fresh hash separately from the
+preserved first-unseal binding; electrical evaluation code remains unchanged.
+
 ## Immutable releases
 
 | Release | Tagged commit | State |
