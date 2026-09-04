@@ -1,0 +1,250 @@
+{
+  "schema": "apm.v4-modelgen-foundation-evidence.v1",
+  "milestone": "V4-M0",
+  "status": "validated",
+  "created_utc": "2026-09-04T11:43:23.910481+00:00",
+  "implementation_commit": "173b3321f8c097177fc4912e492bc44cf4e70703",
+  "implementation_commit_exact_report": true,
+  "release_claim": false,
+  "gates_validated": [
+    "evidence.public_matrix",
+    "modelgen.reconstruction"
+  ],
+  "completion_state": "MODELGEN_KERNEL_QUALIFIED",
+  "claim_boundary": "This milestone qualifies the offline fitting machinery and its public evidence boundary. It does not qualify io18/io25 cards, new-family deterministic regeneration, device behavior, electrical distinctness, circuits, comparisons, variation, noise, Spectre execution, or a v4 release.",
+  "full_report": {
+    "generated_path": ".apm/results/v4-modelgen-reconstruction-exact-173b332/report.json",
+    "sha256": "31680b28ef694aac12ba268afbe60f9818dce6e770989ae74c8f0cf03811be28",
+    "status": "pass",
+    "retention": "ignored reproducible full result"
+  },
+  "bound_inputs": {
+    "kernel": {
+      "path": "tools/modelgen/apm045_mixed_voltage/kernel.py",
+      "sha256": "fc75e1cce84a60bd035006a3521da29f52ff210a8d90fa4d955cbdffa0298f66",
+      "identity": "apm.modelgen.observable-kernel@1.0.0"
+    },
+    "qualification": {
+      "path": "tools/modelgen/apm045_mixed_voltage/qualify_reconstruction.py",
+      "sha256": "70643c22c26390f0bd0f4bea2f70a5ba90b9c0f27703b6b5c446b3a575cef3f4"
+    },
+    "reconstruction_contract": {
+      "path": "tools/modelgen/apm045_mixed_voltage/reconstruction.toml",
+      "sha256": "924ad6088e114bf3359ca2768356128624a589669e8a8d9e2eca0fac207dc299",
+      "deterministic_seeds": [41001, 41002, 41003]
+    },
+    "public_evidence_matrix": {
+      "path": "models/apm045/mixed_voltage_evidence.toml",
+      "sha256": "8c4e717b8b1b6b5c139d4469f6de83355910bb50b986c47ec9b028d8fff8786d"
+    },
+    "v4_release_contract": {
+      "path": "validation/release_gates_v4.toml",
+      "sha256": "7005ddd99bb4537a2bc9cf95985afa8a7fd25be141c6d866794b63b0be8ffccb"
+    }
+  },
+  "environment": {
+    "platform": "WSL2",
+    "distribution_class": "RHEL-compatible EL9",
+    "architecture": "x86_64",
+    "kernel": "6.18.33.2-microsoft-standard-WSL2",
+    "python": "3.9.25",
+    "ngspice": {
+      "version": "47",
+      "sha256": "34d24e813da266ee2a5deef72596de1351b63d489f96372ec4364648676cdc21",
+      "real_tool_execution": true
+    },
+    "doctor_report_sha256": "6c2a1f6f8681872de52fe000e3ef8f8f9f060b4e07a8ede86bdad9ffba3ce8c2"
+  },
+  "terminal_observation_method": {
+    "current": "external drain voltage-source branch current",
+    "gm_and_gds": "finite difference of external terminal current",
+    "cgg": "imag(Ygg)/(2*pi*f) from an independent 1 V gate-terminal AC excitation",
+    "terminal_ac_frequency_hz": 1000000.0,
+    "simulator_internal_gm_gds_cgg_used_as_fit_inputs": false,
+    "reference_card_text_or_parameters_parsed": false,
+    "original_parameter_recovery_required": false
+  },
+  "coverage": {
+    "full_required_coverage": true,
+    "required_record_ids": [
+      "apm022_svt-n",
+      "apm022_svt-p",
+      "apm045_vtg-n",
+      "apm045_vtg-p"
+    ],
+    "observed_record_ids": [
+      "apm022_svt-n",
+      "apm022_svt-p",
+      "apm045_vtg-n",
+      "apm045_vtg-p"
+    ]
+  },
+  "repeat_execution": {
+    "development_report_sha256": "2950e52e572c601a6fd6458ca761ca0adf5de97b3ce50f16194d31556b48caf8",
+    "exact_commit_report_sha256": "31680b28ef694aac12ba268afbe60f9818dce6e770989ae74c8f0cf03811be28",
+    "canonical_content_identical_excluding_created_utc": true,
+    "identical_fields": [
+      "coverage",
+      "input and implementation hashes",
+      "evaluation counts",
+      "fitted parameters",
+      "generated card hashes",
+      "calibration and holdout terminal-data hashes",
+      "holdout metrics and checks"
+    ]
+  },
+  "records": [
+    {
+      "id": "apm022_svt-n",
+      "status": "pass",
+      "objective_rms": 0.26210847809637516,
+      "simulator_evaluation_count": 10457,
+      "reference_include_sha256": "c7616b942d4bc0e5f9d6fad78b6a4a48945b8dc04bb8125264617d6bbb860c90",
+      "calibration_terminal_data_sha256": "c4728e6b5591fbe5128239ddc85234e2c2c5b83a3f7af3e59e14f2406cea5364",
+      "holdout_definition_sha256": "f5fe8bbc65ce2e42426a2f5eb0c570c53fd6e76ee12c6bf81a0ca6ba2ec93ef0",
+      "holdout_terminal_data_sha256": "5b48671cf6676be6617d5d8989b0869d7008c5e0933f1f03c503f35bb96cad7b",
+      "candidate_terminal_data_sha256": "33adf63a05d3976abae5ed6d34345ec32743b2a216c7d204f9be555e4f6f55cb",
+      "generated_card_sha256": "7cf6f4a0955a1cfd27e6f63abd70ae3b4a7ce9e6e73777677043b949851a24c2",
+      "holdout_metrics": {
+        "current_log_median_dec": 0.03750388464491564,
+        "current_log_p95_dec": 0.06432644384918093,
+        "threshold_error_p95_v": 0.005157364498981808,
+        "gmid_log_p95": 0.02206620497024464,
+        "gdsid_log_p95": 0.12101410333303958,
+        "cgg_log_p95": 0.015949314957721235,
+        "terminal_derivative_step_p95": 0.04128549103666242
+      }
+    },
+    {
+      "id": "apm022_svt-p",
+      "status": "pass",
+      "objective_rms": 0.2754730075304593,
+      "simulator_evaluation_count": 10869,
+      "reference_include_sha256": "c7616b942d4bc0e5f9d6fad78b6a4a48945b8dc04bb8125264617d6bbb860c90",
+      "calibration_terminal_data_sha256": "7a7b020b4a4ac6e433fdbd0479c7da645b76126f3ed6519bb28f27a4d6ec3333",
+      "holdout_definition_sha256": "f5fe8bbc65ce2e42426a2f5eb0c570c53fd6e76ee12c6bf81a0ca6ba2ec93ef0",
+      "holdout_terminal_data_sha256": "5f48b7eace05f870ea5df8763aaa07b7932c2fa79d3c66922ab7a0e3d204e851",
+      "candidate_terminal_data_sha256": "a6de6028591a4df5cc220228ced2a21aad91c00ac2847af28f9f90e72f36c2f3",
+      "generated_card_sha256": "9dc5f0d6b7b3c4b95874d119263721cfa9fb30400ed04b0bfde257126f693bb0",
+      "holdout_metrics": {
+        "current_log_median_dec": 0.015396126793440771,
+        "current_log_p95_dec": 0.046206869631498365,
+        "threshold_error_p95_v": 0.0038116836887617076,
+        "gmid_log_p95": 0.05953774837166151,
+        "gdsid_log_p95": 0.20613700914902336,
+        "cgg_log_p95": 0.04750780514470372,
+        "terminal_derivative_step_p95": 0.037627106270997406
+      }
+    },
+    {
+      "id": "apm045_vtg-n",
+      "status": "pass",
+      "objective_rms": 1.8887476115064834,
+      "simulator_evaluation_count": 8510,
+      "reference_include_sha256": "3cb730470427d99b6d22ab4d029493fa949daa1040d2ed51179118263682a14c",
+      "calibration_terminal_data_sha256": "2eb124561da1dfda530fb14725d538d389760e1e7042937723089c00d442934c",
+      "holdout_definition_sha256": "f5fe8bbc65ce2e42426a2f5eb0c570c53fd6e76ee12c6bf81a0ca6ba2ec93ef0",
+      "holdout_terminal_data_sha256": "d2016c9c8e600c64558b11967bb79e39c9a3213aa15ce065c8970cb938ad4cc2",
+      "candidate_terminal_data_sha256": "b1fc7199805a575571107dcf5f35c11bf8981d04f368e527c1bdf6c260e57ec1",
+      "generated_card_sha256": "17ab6374e0528bad21d28bd863c1fee29a64d20b3ae25274833e0222e79cd064",
+      "holdout_metrics": {
+        "current_log_median_dec": 0.1958342158123793,
+        "current_log_p95_dec": 0.2781543876608605,
+        "threshold_error_p95_v": 0.02346220201963653,
+        "gmid_log_p95": 0.08259181070085564,
+        "gdsid_log_p95": 0.4169927328772557,
+        "cgg_log_p95": 0.30692444720910295,
+        "terminal_derivative_step_p95": 0.038720271436879214
+      }
+    },
+    {
+      "id": "apm045_vtg-p",
+      "status": "pass",
+      "objective_rms": 0.7112010742419318,
+      "simulator_evaluation_count": 11716,
+      "reference_include_sha256": "a7d95a2631897134d2f52a9fa8469aef4e7c6dd2a2b5a499fc08645da3465d4a",
+      "calibration_terminal_data_sha256": "1346b575d7e4a452004bccf362f42839aedb1e2d9b2efab29d94b8b0d9f9cadd",
+      "holdout_definition_sha256": "f5fe8bbc65ce2e42426a2f5eb0c570c53fd6e76ee12c6bf81a0ca6ba2ec93ef0",
+      "holdout_terminal_data_sha256": "4a839729c689d7c648de72d0c7d3062b85a77fcb3d3ff0c12eda07192ee56751",
+      "candidate_terminal_data_sha256": "6ce7830016112e5f88a469d98295844457a6949fe4cf2bca50c103881ae401cf",
+      "generated_card_sha256": "eb50bb1c07296b0084d26a0a80c286f24ca1d955761c894a7718a0b1c482e388",
+      "holdout_metrics": {
+        "current_log_median_dec": 0.0610410719745874,
+        "current_log_p95_dec": 0.12930232221501364,
+        "threshold_error_p95_v": 0.007453568843920479,
+        "gmid_log_p95": 0.10851663975726411,
+        "gdsid_log_p95": 0.4057900490564874,
+        "cgg_log_p95": 0.09482040593586563,
+        "terminal_derivative_step_p95": 0.03427383397665314
+      }
+    }
+  ],
+  "all_record_checks": {
+    "byte_identical_card_regeneration": true,
+    "calibration_objective": true,
+    "local_sensitivity_recorded": true,
+    "real_ngspice_47": true,
+    "sealed_holdout": true,
+    "staged_parameter_release": true,
+    "numerical_hard_contract": true,
+    "all_thresholds_bracketed": true,
+    "current_log_median": true,
+    "current_log_p95": true,
+    "threshold_error_p95": true,
+    "gmid_log_p95": true,
+    "gdsid_log_p95": true,
+    "cgg_log_p95": true,
+    "terminal_derivative_step_p95": true,
+    "trend_agreement": true
+  },
+  "public_evidence_audit": {
+    "status": "pass",
+    "schema": "apm.public-evidence-matrix.v1",
+    "entry_count": 5,
+    "evidence_ids": [
+      "umc-55-65-90-io-offerings",
+      "berkeley-bsim4-release",
+      "ibm-65nm-dual-gate-oxide",
+      "chen-oxide-electrical-physical-distinction",
+      "freepdk45-vtg-open-anchor"
+    ],
+    "all_required_fields_present": true,
+    "all_entries_have_allowed_and_forbidden_use": true,
+    "source_fact_engineering_prior_contract_separated": true,
+    "private_or_proprietary_inputs_used": false,
+    "physical_oxide_to_bsim_toxe_direct_copy_forbidden": true,
+    "foundry_identity_or_correlation_claimed": false
+  },
+  "commands": [
+    {
+      "command": ".venv/bin/python -m tools.modelgen.apm045_mixed_voltage.qualify_reconstruction --output .apm/results/v4-modelgen-reconstruction-exact-173b332 --replace-output",
+      "status": "pass",
+      "result": "4/4 required records pass; MODELGEN_KERNEL_QUALIFIED"
+    },
+    {
+      "command": ".venv/bin/pytest -q",
+      "status": "pass",
+      "result": "101 passed"
+    },
+    {
+      "command": ".venv/bin/ruff check .",
+      "status": "pass"
+    },
+    {
+      "command": ".venv/bin/reuse lint",
+      "status": "pass",
+      "result": "259/259 files licensed in the post-report evidence worktree"
+    },
+    {
+      "command": "audit_distribution(Path.cwd())",
+      "status": "pass",
+      "result": "no secret hits, private-path hits, generated artifacts, or unresolved model includes"
+    }
+  ],
+  "limitations": [
+    "The generated reconstruction cards are ignored test artifacts and are not shipped device families.",
+    "Reconstruction validates held-out terminal behavior, not original compact-model parameter recovery.",
+    "The public evidence supports qualitative priors and claim boundaries, not foundry card values, voltage reliability, design rules, silicon correlation, or manufacturability.",
+    "Spectre remains model-only experimental/unverified and was not executed."
+  ]
+}

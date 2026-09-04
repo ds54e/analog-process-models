@@ -205,7 +205,7 @@ def test_real_ngspice_terminal_cgg_is_external_and_bias_dependent(tmp_path: Path
         ),
         polarity="n",
         requests=(request,),
-        token="real-terminal-cgg",
+        token="cgg",
         measure_terminal_cgg=True,
     )[request.request_id]
     assert evaluator.evaluation_count == 2
@@ -217,7 +217,7 @@ def test_real_ngspice_terminal_cgg_is_external_and_bias_dependent(tmp_path: Path
         float(curve.terminal_cgg_f[-1]),
         rel_tol=1.0e-3,
     )
-    terminal_netlist = (tmp_path / "real-terminal-cgg/terminal-cgg.cir").read_text(
+    terminal_netlist = (tmp_path / "cgg/terminal-cgg.cir").read_text(
         encoding="utf-8"
     )
     assert "i(Vcg" in terminal_netlist

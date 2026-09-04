@@ -11,10 +11,10 @@ Target release: v4.0.0
 State: ACTIVE DEVELOPMENT
 
 V4 required gates:
-  0/16 proven
+  2/16 proven
 
 Current milestone:
-  MODELGEN KERNEL IMPLEMENTED / EXACT-COMMIT REQUALIFICATION PENDING
+  MODELGEN KERNEL / PUBLIC EVIDENCE QUALIFIED
 
 Public-readiness cleanup:
   COMPLETE
@@ -68,15 +68,17 @@ commit `0e216fe` was fast-forwarded into this development checkout on
 2026-09-04. The required local ngspice 47, OpenVAF-Re-Loaded, PSP103, and
 BSIM-CMG toolchain passed `apm doctor` before v4 implementation began.
 
-No v4 gate is claimed complete yet. The offline model-generation kernel and
-machine-readable public-evidence matrix are implemented. An unfiltered
-development-tree run passed all four APM022/SVT and APM045/VTG N/P
-reconstruction records with real ngspice 47, external-terminal finite
-differences, terminal-Y-derived Cgg, deterministic card rendering, hard
-candidate rejection, and sealed holdouts. The implementation must now be
-committed and rerun from that exact clean commit before compact milestone
-evidence claims `modelgen.reconstruction`. The released v3.0.0 tag, tagged
-commit, cards, evidence, and GitHub Release remain unchanged.
+The `evidence.public_matrix` and `modelgen.reconstruction` v4 gates are proven.
+The unfiltered exact-clean-commit run at
+`173b3321f8c097177fc4912e492bc44cf4e70703` passed all four APM022/SVT and
+APM045/VTG N/P reconstruction records with real ngspice 47, external-terminal
+finite differences, terminal-Y-derived Cgg, deterministic card rendering,
+hard candidate rejection, and sealed holdouts. A prior repeat run produced
+identical canonical content after excluding only the report timestamp. Compact
+evidence is `validation/evidence/v4_modelgen_foundation.json` (SHA-256
+`064a4ff445fe131198699f52963af1bd2733fb447fdc9045b44a48bf4308410d`).
+The released v3.0.0 tag, tagged commit, cards, evidence, and GitHub Release
+remain unchanged.
 
 ## Immutable releases
 
@@ -252,8 +254,8 @@ numeric source material for APM022/APM016F.
 
 ## Next action
 
-Commit the model-generation/public-evidence foundation, rerun the unfiltered
-four-record reconstruction from that exact clean implementation commit, and
-record compact hash-bound evidence. Do not promote io18/io25 into the runtime
-catalog until this prerequisite has exact-commit real-ngspice reconstruction
-evidence.
+Freeze the new-family generation epoch, then synthesize and retain at least
+three feasible io25 candidates per the observable-space, sealed-holdout, and
+epistemic-ensemble contract. Do not promote io25 into the runtime catalog until
+its device and application qualification states pass without reusing a failed
+unsealed holdout.

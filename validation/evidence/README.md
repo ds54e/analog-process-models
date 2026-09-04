@@ -26,6 +26,12 @@ PRIVATE observations remain the historical pre-publication audit. The later
 controlled publication, `main` protection, and GitHub security-feature state
 are recorded in `publication_v3.json` without rewriting the earlier evidence.
 
+V4 development evidence uses a `v4_` prefix. The V4-M0 public-evidence and
+model-generation reconstruction prerequisite is recorded in
+`v4_modelgen_foundation.json`. It binds a clean implementation commit to the
+complete real-ngspice four-record reconstruction report while explicitly
+making no io18/io25 device or release claim.
+
 ## Status vocabulary
 
 - `validated`: the required real environment/tool/test ran and directly
