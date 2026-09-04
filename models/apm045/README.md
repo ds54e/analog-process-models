@@ -15,13 +15,16 @@ qualification evidence remain unchanged. See
 rationale and transfer boundary. Completed v4 contracts and release evidence
 remain frozen historical records.
 
-Public TSMC 40/45 nm information is used only as a taxonomy sanity check: TSMC
-45 nm publicly described multiple-Vt core devices, a low-power triple-gate-
-oxide option, and 1.8 V/2.5 V/3.3 V I/O options; TSMC 40 nm was described as a
-direct linear shrink from 45 nm and retained multiple-Vt core, mixed-signal/RF,
-triple-gate-oxide, and 1.8 V/2.5 V I/O options. No TSMC numerical model
-parameter, geometry rule, reliability value, or electrical curve is used by
-APM045.
+The `apm045` identifier remains the technical 45 nm FreePDK45-based technology
+namespace. For post-release positioning, public TSMC 40/45 nm information is
+used only as a generation-level taxonomy sanity check: TSMC 45 nm publicly
+described multiple-Vt core devices, a low-power triple-gate-oxide option, and
+1.8 V/2.5 V/3.3 V I/O options; TSMC 40 nm was described as a direct linear
+shrink from 45 nm and retained multiple-Vt core, mixed-signal/RF,
+triple-gate-oxide, and 1.8 V/2.5 V I/O options. It was not a numerical input,
+fitting target, or calibration reference for the released `io18`/`io25`
+model-generation flow. No TSMC numerical model parameter, geometry rule,
+reliability value, or electrical curve is used by APM045.
 
 ## Electrical families
 

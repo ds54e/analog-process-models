@@ -6,6 +6,7 @@ import sys
 from dataclasses import asdict, is_dataclass
 from pathlib import Path
 
+from . import __version__
 from .benchmark import (
     BENCHMARK_CORNERS,
     BENCHMARK_MODES,
@@ -57,7 +58,7 @@ def build_parser() -> argparse.ArgumentParser:
         prog="apm",
         description="Analog Process Models characterization framework",
     )
-    parser.add_argument("--version", action="version", version="APM 4.0.0")
+    parser.add_argument("--version", action="version", version=f"APM {__version__}")
     sub = parser.add_subparsers(dest="command", required=True)
 
     sub.add_parser("doctor", help="Run reference-runtime and compact-model smoke tests")

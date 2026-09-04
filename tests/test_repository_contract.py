@@ -14,6 +14,7 @@ try:
 except ModuleNotFoundError:  # pragma: no cover - Python 3.9/3.10
     import tomli as tomllib
 
+from apm import maintenance_validate
 from apm.catalog import load_catalog
 from apm.characterize import (
     CharacterizationError,
@@ -23,7 +24,12 @@ from apm.characterize import (
 )
 from apm.cli import build_parser
 from apm.doctor import _extract_observables
-from apm.maintenance_validate import audit_current_guidance, audit_frozen_v4_artifacts
+from apm.maintenance_validate import (
+    V4_FROZEN_AUTHORITY_COMMIT,
+    audit_current_guidance,
+    audit_frozen_v4_artifacts,
+    audit_maintenance_package_identity,
+)
 from apm.model_build import MODEL_SOURCES
 from apm.noise import ACQUISITION_POLICY_ID, ACQUISITION_POLICY_VERSION
 from apm.noise_fit import FIT_METHOD_IDENTITY
@@ -112,10 +118,24 @@ def test_post_v4_goal_and_historical_document_status_are_explicit() -> None:
 def test_current_guidance_and_frozen_v4_artifact_audits_pass() -> None:
     guidance = audit_current_guidance(ROOT)
     frozen = audit_frozen_v4_artifacts(ROOT)
+    package = audit_maintenance_package_identity(ROOT)
     assert guidance["status"] == "pass", guidance
     assert frozen["status"] == "pass", frozen
-    assert frozen["artifact_count"] >= 19
+    assert package["status"] == "pass", package
+    assert frozen["authority_commit"] == V4_FROZEN_AUTHORITY_COMMIT
+    assert frozen["artifact_count"] == 52
+    assert {
+        "tools/modelgen/apm045_mixed_voltage/calibration_replay_v4.toml",
+        "tools/modelgen/apm045_mixed_voltage/generation_epoch_1.toml",
+        "tools/modelgen/apm045_mixed_voltage/generation_epoch_2.toml",
+        "tools/modelgen/apm045_mixed_voltage/generation_epoch_3.toml",
+        "tools/modelgen/apm045_mixed_voltage/qualification_epoch_1.toml",
+        "tools/modelgen/apm045_mixed_voltage/qualification_epoch_2.toml",
+        "tools/modelgen/apm045_mixed_voltage/qualification_epoch_3.toml",
+        "tools/modelgen/apm045_mixed_voltage/reconstruction.toml",
+    } <= set(frozen["artifact_paths"])
     assert frozen["mismatches"] == []
+    assert frozen["mode_mismatches"] == []
 
 
 def test_current_guidance_audit_fails_closed_on_completed_goal(tmp_path: Path) -> None:
@@ -140,6 +160,25 @@ def test_current_guidance_audit_fails_closed_on_completed_goal(tmp_path: Path) -
     result = audit_current_guidance(tmp_path)
     assert result["status"] == "fail"
     assert "goal_is_post_v4_maintenance" in result["failed_checks"]
+
+
+def test_frozen_v4_audit_fails_closed_on_byte_drift(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    target = ROOT / "tools/modelgen/apm045_mixed_voltage/generation_epoch_1.toml"
+    read_worktree = maintenance_validate._worktree_bytes
+
+    def altered_bytes(path: Path) -> bytes | None:
+        payload = read_worktree(path)
+        return payload + b"\n" if path == target and payload is not None else payload
+
+    monkeypatch.setattr(maintenance_validate, "_worktree_bytes", altered_bytes)
+    result = audit_frozen_v4_artifacts(ROOT)
+    assert result["status"] == "fail"
+    assert "frozen_artifact_bytes_exact" in result["failed_checks"]
+    assert {item["path"] for item in result["mismatches"]} == {
+        "tools/modelgen/apm045_mixed_voltage/generation_epoch_1.toml"
+    }
 
 
 def test_psp_product_documentation_acknowledgement_is_preserved() -> None:

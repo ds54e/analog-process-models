@@ -22,8 +22,14 @@ bulk BSIM4 reference with VTL/VTG/VTH and legacy THKOX model flavors. APM v4
 preserves those upstream-derived families and adds independently APM-authored
 `io18` and `io25` mixed-voltage families.
 
-Public TSMC technology information provides a useful generation-level sanity
-check without supplying any APM model parameter:
+The `apm045` identifier remains the technical 45 nm FreePDK45-based technology
+namespace. The broader 40/45 nm-class description is a research-positioning
+layer, not a change to that namespace or its provenance.
+
+For post-release positioning, public TSMC technology information provides a
+useful generation-level taxonomy sanity check. It was not a numerical input,
+fitting target, or calibration reference for the released `io18`/`io25`
+model-generation flow and supplies no APM model parameter:
 
 - TSMC's 45 nm logic family publicly described multiple-Vt core devices, a
   low-power triple-gate-oxide option, and 1.8 V, 2.5 V, and 3.3 V I/O options.

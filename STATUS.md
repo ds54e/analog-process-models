@@ -14,7 +14,13 @@ V4 exact-tag required gates:
   16/16 PASS
 
 Current milestone:
-  POST-V4 MAINTENANCE AUTHORITY CLEANUP VALIDATED
+  POST-V4 FINAL SELF-REVIEW VALIDATED
+
+Post-release package identity:
+  4.0.0+main (non-release local identity)
+
+Frozen v4 maintenance audit:
+  52/52 authority-derived artifacts exact
 
 Public-readiness cleanup:
   COMPLETE
@@ -32,7 +38,7 @@ Third-party redistribution/provenance:
   PASS
 
 Current normal repository validation:
-  PASS (post-v4 maintenance working tree; 2026-09-05)
+  PASS (final self-review integrated working tree; 2026-09-05)
 
 v3.0.0 tag / GitHub Release:
   IMMUTABLE / unchanged
@@ -76,6 +82,101 @@ The immutable annotated tag `v4.0.0` peels to the qualified candidate commit
 passed 16/16 required gates before the GitHub Release was published. Current
 `main` is the post-v4 evidence and public-maintenance line, not the release tag
 target.
+
+## Final post-v4 self-review after `ef2a4bc`
+
+The final review identified and corrected one substantive validation gap. The
+previous maintenance audit directly hash-bound 19 selected files, while
+`AGENTS.md` and `GOAL.md` declared a broader set of completed v4 generation,
+reconstruction, release, evidence, and model records frozen. Existing
+provenance/evidence links protected the epoch-3 contracts, selected generator
+sources, and canonical ngspice cards, but did not directly protect every
+epoch-1/2 definition, reconstruction contract, family manifest, Spectre
+counterpart, or historical release-validator/procedure file.
+
+The maintenance validator now derives expected paths, bytes, and Git modes
+from the single post-tag evidence authority commit
+`02959d4a095062873fa2a3a53936af3cb4598ee3`. Its 52-file scope covers:
+
+- the completed v4 release documents and procedure;
+- gate, review, and mixed-voltage comparison contracts;
+- all nine `validation/evidence/v4_*.json` records;
+- the entire `tools/modelgen/apm045_mixed_voltage/` tree, including all three
+  generation epochs, all three qualification epochs, calibration replay, and
+  reconstruction;
+- the v4 clean-clone and release-validator implementations;
+- both released io18/io25 family trees, including ngspice cards/wrappers,
+  family/binding manifests, and model-only Spectre files; and
+- the APM045 technology, provenance, and mixed-voltage evidence manifests.
+
+The audit fails on a missing or unexpected selected path, index conflict, Git
+mode change, byte change, missing authority, wrong ancestry, or changed v4 tag
+identity. A regression test injects byte drift into an epoch-1 generation
+contract and confirms failure. The authority is a descendant of the tagged
+release containing the final candidate/exact-tag evidence; it is not another
+release target and does not change the tagged source's meaning.
+
+The package/version review concluded that plain `4.0.0` on post-release
+`main` was ambiguous because this source-oriented repository installs directly
+from `main`, whose maintenance validator is absent from the release tag.
+Current `main` therefore uses the valid PEP 440 local identity `4.0.0+main` in
+package/runtime/CLI metadata. This creates no v4.0.1, v4.1.0, v5, tag, or
+GitHub Release. The immutable tag still contains and reports `4.0.0`; exact
+maintenance result identity remains the recorded Git commit plus bound input
+hashes. The frozen v4 release-metadata validator now correctly rejects current
+`main` while retaining its unchanged historical behavior at the tag.
+Maintenance reports now bind dirty pre-commit runs as well as clean commits by
+recording HEAD, a hash of the path/mode/content manifest for every tracked
+worktree file, nonignored untracked-file hashes, and a combined source-snapshot
+hash.
+
+Live `README.md`, `APM045_POSITIONING.md`, and `models/apm045/README.md` now
+state explicitly that public TSMC40/45 material is a post-release,
+generation-level taxonomy sanity check and was not numerical input, a fitting
+target, or a calibration reference for the released io18/io25 generation
+flow. They also retain APM045's technical identity as the 45 nm
+FreePDK45-based namespace. No frozen historical `45/55 nm-class` wording was
+rewritten.
+
+Validation completed on the implementation/documentation working tree, before
+this status entry was refreshed, on 2026-09-05:
+
+- editable Hatch build/install: PASS as `analog-process-models==4.0.0+main`;
+- `.venv/bin/apm --version`: `APM 4.0.0+main`;
+- `.venv/bin/apm doctor`: PASS with real ngspice 47; native BSIM3/BSIM4 and
+  PSP103/BSIM-CMG OSDI smokes passed; report SHA-256
+  `a9e49e27fede714c3f2605d597fe0368ba4dcb694c0c62ea7f533e5b2c52e4e6`;
+- `.venv/bin/pytest -q`: 119 passed;
+- `.venv/bin/ruff check .`: PASS;
+- `.venv/bin/reuse lint`: PASS, 303/303 files with copyright and license
+  information;
+- `.venv/bin/apm provenance-check --output
+  .apm/results/provenance-final-review-v2`: PASS, all eight checks true; report
+  SHA-256
+  `b52ec009d384d4f7c22b0f8c77c1a486226321b0c4eb28e9f772a36202722649`;
+- unflagged `.venv/bin/apm validate --output
+  .apm/results/validation-self-review-final-20260905`: PASS under
+  `apm.repository-validation.maintenance.v1`; all current command,
+  repository-audit, isolated-v3-regression, and Spectre-structure checks
+  passed; report SHA-256
+  `b2f68a9623c7bb101f1943c9bd72d6d61fca4bc1bd63b293b250044707bc90ea`.
+
+That maintenance report records repository HEAD
+`ef2a4bc6a0ae16cdfd549af4027276cb552ba01e`, tracked-worktree manifest
+SHA-256 `e27034af0969ba009216a7ef050d66b2ad02ccb1e0623a310c83292614103e8d`,
+and combined source-snapshot SHA-256
+`e738f3e0c70fec9cc5afe7e31fff09de8131896c297061b5f396bcd12006b6d8`.
+It found zero nonignored untracked files; the worktree was intentionally dirty
+with the coherent review changes pending commit.
+
+The annotated `v4.0.0` tag object remains
+`797cdf9462db9dd634bff558802bcadaaeb70015`, is still an annotated tag, and
+peels to `d224f279921c7e1ae637fd867e00d450067766c6`. Direct diffs and the
+authority audit found zero released io18/io25 model, wrapper, manifest,
+contract, procedure, model-generation, or evidence changes. No released
+semantics, tag, tagged commit, or GitHub Release changed; no history rewrite or
+force operation was performed. Historical release workflows were not rerun.
+There is no unresolved review issue or maintenance stop condition.
 
 ## Post-v4 maintenance authority cleanup
 

@@ -39,7 +39,11 @@ APM v1.0.0, v2.0.0, v3.0.0, and v4.0.0 are released and immutable.
 Do not modify, move, recreate, or delete a released tag. Do not amend the
 tagged commits, rewrite published history, or force-push. Current `main` is the
 post-v4 development and public-maintenance line; it is not a released tag
-target.
+target. Packages built from this line use the PEP 440 local identity
+`4.0.0+main`; this distinguishes mutable post-release source from the exact
+`4.0.0` release without declaring another release. A maintenance report's
+exact source identity is its recorded Git commit, working-tree snapshot, and
+input hashes, not the `+main` label alone.
 
 The repository is public. Publication followed a passing pre-publication audit
 and is recorded in `validation/evidence/publication_v3.json`. Do not change the
@@ -93,6 +97,19 @@ records what was required and observed at the time; it is not current technical
 instruction. Do not rewrite these records merely to remove candidate,
 pre-release, future-tense, or completion language. Use the current goal,
 positioning document, and live user documentation for post-v4 work.
+
+The single byte authority for the completed v4 frozen scope is post-tag
+evidence commit `02959d4a095062873fa2a3a53936af3cb4598ee3`, which descends
+from the tagged release and contains the final candidate and exact-tag evidence
+records. The scope compared to that authority comprises the completed release
+documents, procedure, gate/review/comparison contracts, every
+`validation/evidence/v4_*.json` record, the full
+`tools/modelgen/apm045_mixed_voltage/` generation/reconstruction history, the
+v4 clean-clone and release-validator implementations, the released
+`models/apm045/families/io18/` and `models/apm045/families/io25/` trees, and
+their technology, provenance, and public-evidence manifests. This comparison
+does not make the evidence commit a release tag or alter the meaning of the
+tagged source.
 
 Do not resolve a material conflict by silently dropping the harder
 requirement. Record material departures and evidence in `STATUS.md`.

@@ -17,6 +17,12 @@ v4.0.0:
 Current `main` is the post-v4 public-maintenance line. It is not a continuation
 of v4 release execution and is not a replacement release target.
 
+Its package identity is `4.0.0+main`, a PEP 440 local identifier for source
+built from the post-release line. This is not a new release version. The exact
+identity of a validated maintenance result is the report's Git commit,
+working-tree snapshot, and input hashes; the immutable `v4.0.0` tag continues
+to contain and report plain `4.0.0`.
+
 ## Goal
 
 Keep the released APM portfolio usable, reproducible, accurately documented,
@@ -54,6 +60,18 @@ The canonical released io18/io25 model cards and wrappers are also frozen.
 Do not tune, regenerate, or replace them during maintenance. Do not modify,
 move, recreate, or delete a released tag or GitHub Release; amend a tagged
 commit; rewrite published history; or force-push.
+
+Post-tag evidence commit `02959d4a095062873fa2a3a53936af3cb4598ee3` is the
+single byte authority for this completed frozen scope. The maintenance audit
+compares it with the release documents and procedure; v4 gate, review, and
+mixed-voltage comparison contracts; every `validation/evidence/v4_*.json`;
+the complete `tools/modelgen/apm045_mixed_voltage/` generation,
+qualification, calibration-replay, and reconstruction history; the v4
+clean-clone/release-validator implementations; the released
+`models/apm045/families/io18/` and `models/apm045/families/io25/` trees; and
+their APM045 technology, provenance, and evidence manifests. That commit
+descends from the tagged release and adds final release evidence; it is not a
+different release target and does not supersede the immutable tag.
 
 The frozen `apm validate --release` and `apm validate --release-v4` workflows
 retain only their original v3/v4 qualification meaning. Ordinary maintenance

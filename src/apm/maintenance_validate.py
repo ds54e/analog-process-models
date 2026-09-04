@@ -5,14 +5,26 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
+import os
 import re
+import subprocess
 import sys
+import time
 from datetime import datetime, timezone
+from importlib import metadata as importlib_metadata
 from pathlib import Path
 from typing import Any
 
+try:
+    import tomllib
+except ModuleNotFoundError:  # pragma: no cover - Python 3.9/3.10
+    import tomli as tomllib
+
+from . import __version__
 from .model_build import sha256_file
-from .paths import repository_root
+from .paths import repository_root, state_directory
 from .provenance_validate import ProvenanceValidationError, validate_provenance
 from .release_validate import (
     ReleaseValidationError,
@@ -20,87 +32,160 @@ from .release_validate import (
     audit_migration,
 )
 from .release_validate_v4 import (
-    _check_map,
-    _default_output,
-    _failed_validation_report,
-    _git,
-    _run_logged_command,
-    _write_report,
     audit_mixed_voltage_evidence,
     audit_public_evidence,
     audit_v3_immutability,
     audit_v4_catalog,
-    audit_v4_release_metadata,
     load_v4_gate_contract,
     run_v3_regression,
 )
 from .spectre_validate import SpectreStructureError, validate_spectre
 
+V4_TAG = "v4.0.0"
 V4_TAG_OBJECT = "797cdf9462db9dd634bff558802bcadaaeb70015"
 V4_TAGGED_COMMIT = "d224f279921c7e1ae637fd867e00d450067766c6"
+V4_FROZEN_AUTHORITY_COMMIT = "02959d4a095062873fa2a3a53936af3cb4598ee3"
 
-# These current-tree bytes are completed release records or released model
-# artifacts. Live maintenance documentation is deliberately not hash-bound to
-# the v4 release review.
-FROZEN_V4_ARTIFACT_SHA256 = {
-    "V4_MIXED_VOLTAGE.md": (
-        "8490d51889ed49a2c5b578caee7808c8622930baa463d840edf46952840d6569"
-    ),
-    "RELEASE_V4.md": (
-        "b0831dc54375476eb15bcb5394821859c9bf8a9a9b900cb5497a1ee3ca5ad98b"
-    ),
-    "validation/release_gates_v4.toml": (
-        "7005ddd99bb4537a2bc9cf95985afa8a7fd25be141c6d866794b63b0be8ffccb"
-    ),
-    "validation/release_review_v4.toml": (
-        "196dc63493a53114f13c64c5a79375f7ab06ef48d81fa8d9ce662ddc7121d63d"
-    ),
-    "validation/evidence/v4_generation_epoch1_calibration.json": (
-        "8fc0803716c60167c7d86a4b050d263ebe17d790f8542ec0c6011d670a28fd7d"
-    ),
-    "validation/evidence/v4_generation_epoch3_calibration.json": (
-        "889be51c0d7b61040cae56b20cd6030a2b2c4d8f71ea59e3d31c00a1a92bc12b"
-    ),
-    "validation/evidence/v4_mixed_voltage_qualification.json": (
-        "e0f867e3539434dc61dedf0e10a56b76cff092c9f43aaa3608bc153481ff9b9b"
-    ),
-    "validation/evidence/v4_modelgen_foundation.json": (
-        "94d7ad484d8e335e73c8724d89308e98e16216196c573776e0aa2cc66b4003d2"
-    ),
-    "validation/evidence/v4_post_release_requalification.json": (
-        "2ae5392fdd1f4d741b1c77e92a8b0e05f89358987272b8df25d4d1ba746c2685"
-    ),
-    "validation/evidence/v4_qualification_epoch1_failure.json": (
-        "eba0602b191390d4a6c16a2ee89d6dbb8e3d8b194757fc3da7ddd856732a62b5"
-    ),
-    "validation/evidence/v4_qualification_epoch2_failure.json": (
-        "70138b9388b4b0a6d50f32fcf8149c46fd85060be45b17224076b71544396e70"
-    ),
-    "validation/evidence/v4_release_candidate.json": (
-        "54ffd0442c9a0578b4f73f7e19f3ff5b93fb70a8018306637be509866ae2d88b"
-    ),
-    "validation/evidence/v4_runtime_integration.json": (
-        "87f0bdf1c5cd7ad8ba88bdbc19315493d0bcea7a17122775158bd18824d1537d"
-    ),
-    "models/apm045/families/io18/ngspice/apm045_io18_n.inc": (
-        "e639452467891fde0ea51f1fb3e965a01f46acf2bec85b90a437f296d2f1cebe"
-    ),
-    "models/apm045/families/io18/ngspice/apm045_io18_p.inc": (
-        "065dd165f2e1bc3bab41f5205292205adab8ea1d4b39c9bdb813d690eaebd40a"
-    ),
-    "models/apm045/families/io18/ngspice/wrapper.inc": (
-        "cd008255aea5fd5e5363900253cc355be0167f203578066c35d6a2f1ae992ad5"
-    ),
-    "models/apm045/families/io25/ngspice/apm045_io25_n.inc": (
-        "2c2478406b4417e7a5058c46b321ff70dee1041025bda04986bb18758df104a0"
-    ),
-    "models/apm045/families/io25/ngspice/apm045_io25_p.inc": (
-        "8eab45ce29fbd0caf4b089c4e1f7f7e52e14c7cc1572ee9c4245b57fc8ff1cc2"
-    ),
-    "models/apm045/families/io25/ngspice/wrapper.inc": (
-        "c754235bbb5a8df2b88e07ca6d691a687404be08c105a1157be5469f77b64efc"
-    ),
-}
+# The authority commit is the first post-tag commit containing both the exact
+# tagged source and the final candidate/exact-tag evidence records. Selecting
+# complete directories here makes additions, removals, modes, and bytes part
+# of the comparison without copying dozens of hashes into mutable code.
+FROZEN_V4_PATHSPECS = (
+    "V4_MIXED_VOLTAGE.md",
+    "RELEASE_V4.md",
+    "docs/release-validation.md",
+    "models/apm045/families/io18",
+    "models/apm045/families/io25",
+    "models/apm045/mixed_voltage_evidence.toml",
+    "models/apm045/provenance.toml",
+    "models/apm045/technology.toml",
+    "src/apm/clean_clone_v4.py",
+    "src/apm/release_validate_v4.py",
+    "tools/attest_clean_clone_v4.py",
+    "tools/modelgen/apm045_mixed_voltage",
+    "validation/mixed_voltage_comparison_v1.toml",
+    "validation/release_gates_v4.toml",
+    "validation/release_review_v4.toml",
+    "validation/evidence",
+)
+REQUIRED_MODELGEN_RECORDS = frozenset(
+    {
+        "tools/modelgen/apm045_mixed_voltage/calibration_replay_v4.toml",
+        "tools/modelgen/apm045_mixed_voltage/generation_epoch_1.toml",
+        "tools/modelgen/apm045_mixed_voltage/generation_epoch_2.toml",
+        "tools/modelgen/apm045_mixed_voltage/generation_epoch_3.toml",
+        "tools/modelgen/apm045_mixed_voltage/qualification_epoch_1.toml",
+        "tools/modelgen/apm045_mixed_voltage/qualification_epoch_2.toml",
+        "tools/modelgen/apm045_mixed_voltage/qualification_epoch_3.toml",
+        "tools/modelgen/apm045_mixed_voltage/reconstruction.toml",
+    }
+)
+
+
+def _is_frozen_selected_path(relative: str) -> bool:
+    if relative.startswith("validation/evidence/"):
+        return bool(re.fullmatch(r"validation/evidence/v4_.*\.json", relative))
+    return True
+
+
+def _git(root: Path, *arguments: str) -> str:
+    result = subprocess.run(
+        ["git", *arguments], cwd=root, text=True, capture_output=True, check=False
+    )
+    if result.returncode != 0:
+        detail = result.stderr.strip() or result.stdout.strip()
+        raise ReleaseValidationError(f"git {' '.join(arguments)} failed: {detail}")
+    return result.stdout.strip()
+
+
+def _git_bytes(root: Path, *arguments: str) -> bytes:
+    result = subprocess.run(
+        ["git", *arguments], cwd=root, capture_output=True, check=False
+    )
+    if result.returncode != 0:
+        detail = result.stderr.decode("utf-8", errors="replace").strip()
+        raise ReleaseValidationError(f"git {' '.join(arguments)} failed: {detail}")
+    return result.stdout
+
+
+def _git_object_bytes(root: Path, revision: str, relative: str) -> bytes:
+    return _git_bytes(root, "show", f"{revision}:{relative}")
+
+
+def _is_ancestor(root: Path, ancestor: str, descendant: str) -> bool:
+    result = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", ancestor, descendant],
+        cwd=root,
+        capture_output=True,
+        check=False,
+    )
+    if result.returncode not in (0, 1):
+        detail = result.stderr.decode("utf-8", errors="replace").strip()
+        raise ReleaseValidationError(
+            f"git merge-base --is-ancestor {ancestor} {descendant} failed: {detail}"
+        )
+    return result.returncode == 0
+
+
+def _check_map(checks: dict[str, bool], *, context: str) -> dict[str, Any]:
+    failed = sorted(name for name, passed in checks.items() if passed is not True)
+    return {
+        "status": "pass" if not failed else "fail",
+        "checks": checks,
+        "failed_checks": failed,
+        "context": context,
+    }
+
+
+def _write_report(path: Path, report: dict[str, Any]) -> dict[str, Any]:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    report["report_path"] = str(path)
+    report["output_directory"] = str(path.parent)
+    return report
+
+
+def _run_logged_command(
+    root: Path, output: Path, command_id: str, command: list[str]
+) -> dict[str, Any]:
+    started = time.monotonic()
+    result = subprocess.run(command, cwd=root, text=True, capture_output=True, check=False)
+    stdout_path = output / f"{command_id}.stdout.txt"
+    stderr_path = output / f"{command_id}.stderr.txt"
+    stdout_path.write_text(result.stdout, encoding="utf-8")
+    stderr_path.write_text(result.stderr, encoding="utf-8")
+    return {
+        "id": command_id,
+        "command": command,
+        "returncode": result.returncode,
+        "duration_seconds": round(time.monotonic() - started, 3),
+        "stdout_path": str(stdout_path),
+        "stdout_sha256": sha256_file(stdout_path),
+        "stderr_path": str(stderr_path),
+        "stderr_sha256": sha256_file(stderr_path),
+        "status": "pass" if result.returncode == 0 else "fail",
+    }
+
+
+def _failed_validation_report(
+    report_path: Path, error: Exception, *, fallback_schema: str
+) -> dict[str, Any]:
+    if report_path.is_file():
+        try:
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            report = {"schema": fallback_schema, "status": "fail", "checks": {}}
+    else:
+        report = {"schema": fallback_schema, "status": "fail", "checks": {}}
+    report["error"] = str(error)
+    report["report_path"] = str(report_path)
+    report["output_directory"] = str(report_path.parent)
+    return report
+
+
+def _default_output(root: Path, mode: str) -> Path:
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")
+    return state_directory(root) / "results" / "validation" / f"{mode}-{stamp}"
 
 
 def _read(root: Path, relative: str) -> str:
@@ -110,6 +195,19 @@ def _read(root: Path, relative: str) -> str:
 
 def _normalized(text: str) -> str:
     return " ".join(text.split())
+
+
+def _matches(text: str, *patterns: str) -> bool:
+    return all(re.search(pattern, text, re.IGNORECASE) for pattern in patterns)
+
+
+def _documents_tsmc_taxonomy_only(text: str) -> bool:
+    return _matches(
+        text,
+        r"post-release",
+        r"taxonomy (?:sanity )?check(?:ing)?",
+        r"not (?:a )?numerical input\b.*released\b.*model-generation flow",
+    )
 
 
 def audit_current_guidance(root: Path) -> dict[str, Any]:
@@ -150,61 +248,82 @@ def audit_current_guidance(root: Path) -> dict[str, Any]:
         )
         if re.search(pattern, public_text)
     ]
-    frozen_names = (
-        "V4_MIXED_VOLTAGE.md",
-        "RELEASE_V4.md",
-        "validation/release_gates_v4.toml",
-        "validation/release_review_v4.toml",
-        "validation/evidence/v4_*.json",
-    )
     checks = {
         "required_current_documents_present": all(
             (root / relative).is_file() for relative in required_paths
         ),
-        "goal_is_post_v4_maintenance": goal.startswith("# Post-v4 release maintenance")
-        and "Current `main` is the post-v4 public-maintenance line" in normalized_goal
-        and "Complete and release **APM v4.0.0**" not in normalized_goal,
-        "goal_preserves_released_semantics": "model bytes" in normalized_goal
-        and "changing released model/evidence semantics" in normalized_goal
-        and "must not update a historical release review" in normalized_goal,
-        "agents_identify_frozen_v4_records": all(name in agents for name in frozen_names)
-        and "it is not current technical" in normalized_agents
-        and "Do not rewrite these records" in normalized_agents,
+        "goal_is_post_v4_maintenance": _matches(
+            normalized_goal,
+            r"^# post-v4 release maintenance\b",
+            r"current `main` is the post-v4 .*maintenance line",
+        )
+        and not re.search(r"complete and release \*\*APM v4\.0\.0\*\*", normalized_goal),
+        "goal_preserves_released_semantics": _matches(
+            normalized_goal,
+            r"preserv\w* .*model bytes",
+            r"changing released model/evidence semantics",
+            r"must not update a historical release review",
+        ),
+        "policy_identifies_frozen_v4_authority": all(
+            _matches(
+                document,
+                re.escape(V4_FROZEN_AUTHORITY_COMMIT),
+                r"tools/modelgen/apm045_mixed_voltage/",
+                r"models/apm045/families/io18/.*models/apm045/families/io25/",
+            )
+            for document in (normalized_agents, normalized_goal)
+        )
+        and _matches(normalized_agents, r"historical/release records"),
         "positioning_has_inline_spdx": positioning.startswith(
             "<!-- SPDX-FileCopyrightText: APM contributors -->\n"
             "<!-- SPDX-License-Identifier: Apache-2.0 -->\n"
         ),
-        "positioning_preserves_family_boundary": (
-            "generic 40/45 nm-class planar bulk CMOS" in normalized_positioning
-            and "VTL/VTG/VTH and legacy THKOX" in normalized_positioning
-            and "`io18` and `io25` mixed-voltage families" in normalized_positioning
+        "positioning_preserves_technology_and_family_boundary": _matches(
+            normalized_positioning,
+            r"generic 40/45 nm-class planar bulk CMOS",
+            r"45 nm FreePDK45-based technology namespace",
+            r"VTL/VTG/VTH and legacy THKOX",
+            r"`io18` and `io25` mixed-voltage families",
         ),
-        "positioning_preserves_claim_boundary": (
-            "not as a TSMC40/45 model" in normalized_positioning
-            and "foundry design-rule minima" in normalized_positioning
-            and "reliability or safe-voltage ratings" in normalized_positioning
-            and "epistemic ensemble as process variation" in normalized_positioning
-            and "Model/release changes required: **NONE**" in normalized_positioning
+        "positioning_preserves_claim_boundary": _matches(
+            normalized_positioning,
+            r"not as a TSMC40/45 model",
+            r"foundry design-rule minima",
+            r"reliability or safe-voltage ratings",
+            r"epistemic ensemble as process variation",
+            r"Model/release changes required: \*\*NONE\*\*",
         ),
-        "apm045_readme_is_current_device_guidance": (
-            "APM045_POSITIONING.md" in normalized_apm045
-            and "released io18/io25 cards" in normalized_apm045
-            and "current maintenance scope" in normalized_apm045
+        "positioning_tsmc_information_is_taxonomy_only": (
+            _documents_tsmc_taxonomy_only(normalized_positioning)
         ),
-        "security_names_latest_release": "APM v4.0.0 is the latest completed release"
-        in normalized_security
-        and "post-release public-maintenance line" in normalized_security,
-        "environment_separates_current_and_historical_flows": (
-            "## Historical v4 release qualification boundary" in normalized_environment
-            and "## Current maintenance validation" in normalized_environment
-            and "Unflagged `apm validate` checks the live post-v4 maintenance tree"
-            in normalized_environment
+        "apm045_readme_tsmc_information_is_taxonomy_only": (
+            _documents_tsmc_taxonomy_only(normalized_apm045)
         ),
-        "readme_separates_current_and_historical_flows": (
-            "frozen historical records rather than current implementation instructions"
-            in normalized_readme
-            and "does not reinterpret or update a completed release review"
-            in normalized_readme
+        "root_readme_tsmc_information_is_taxonomy_only": (
+            _documents_tsmc_taxonomy_only(normalized_readme)
+        ),
+        "apm045_readme_is_current_device_guidance": _matches(
+            normalized_apm045,
+            r"APM045_POSITIONING\.md",
+            r"released `?io18`?/`?io25`? cards|released io18/io25 cards",
+            r"current maintenance scope",
+        ),
+        "security_names_latest_release": _matches(
+            normalized_security,
+            r"APM v4\.0\.0 is the latest completed release",
+            r"post-release public-maintenance line",
+        ),
+        "environment_separates_current_and_historical_flows": _matches(
+            normalized_environment,
+            r"historical v4 release qualification boundary",
+            r"current maintenance validation",
+            r"unflagged `apm validate` checks the live post-v4 maintenance tree",
+        ),
+        "readme_separates_current_and_historical_flows": _matches(
+            normalized_readme,
+            r"frozen historical records rather than current implementation instructions",
+            r"does not reinterpret or update a completed release review",
+            r"4\.0\.0\+main",
         ),
         "no_prohibited_public_claims": not prohibited_patterns,
     }
@@ -218,44 +337,347 @@ def audit_current_guidance(root: Path) -> dict[str, Any]:
     return result
 
 
-def audit_frozen_v4_artifacts(root: Path) -> dict[str, Any]:
-    """Verify that maintenance did not rewrite completed v4 records or models."""
+def _tree_entries(root: Path, revision: str) -> dict[str, dict[str, str]]:
+    raw = _git_bytes(
+        root,
+        "ls-tree",
+        "-r",
+        "--full-tree",
+        "-z",
+        revision,
+        "--",
+        *FROZEN_V4_PATHSPECS,
+    )
+    entries: dict[str, dict[str, str]] = {}
+    for record in raw.split(b"\0"):
+        if not record:
+            continue
+        metadata, raw_path = record.split(b"\t", 1)
+        mode, object_type, object_id = metadata.decode("ascii").split()
+        relative = raw_path.decode("utf-8", errors="surrogateescape")
+        if _is_frozen_selected_path(relative):
+            entries[relative] = {
+                "mode": mode,
+                "object_type": object_type,
+                "object_id": object_id,
+            }
+    return entries
 
-    observed = {
-        relative: sha256_file(root / relative) if (root / relative).is_file() else "missing"
-        for relative in FROZEN_V4_ARTIFACT_SHA256
+
+def _index_entries(root: Path) -> tuple[dict[str, str], list[dict[str, str]]]:
+    raw = _git_bytes(root, "ls-files", "--stage", "-z", "--", *FROZEN_V4_PATHSPECS)
+    entries: dict[str, str] = {}
+    conflicts: list[dict[str, str]] = []
+    for record in raw.split(b"\0"):
+        if not record:
+            continue
+        metadata, raw_path = record.split(b"\t", 1)
+        mode, _object_id, stage = metadata.decode("ascii").split()
+        relative = raw_path.decode("utf-8", errors="surrogateescape")
+        if not _is_frozen_selected_path(relative):
+            continue
+        if stage == "0":
+            entries[relative] = mode
+        else:
+            conflicts.append({"path": relative, "stage": stage, "mode": mode})
+    return entries, conflicts
+
+
+def _selected_worktree_paths(root: Path) -> set[str]:
+    raw = _git_bytes(
+        root,
+        "ls-files",
+        "--cached",
+        "--others",
+        "--exclude-standard",
+        "-z",
+        "--",
+        *FROZEN_V4_PATHSPECS,
+    )
+    return {
+        item.decode("utf-8", errors="surrogateescape")
+        for item in raw.split(b"\0")
+        if item
+        and _is_frozen_selected_path(
+            item.decode("utf-8", errors="surrogateescape")
+        )
     }
-    mismatches = [
-        {
-            "path": relative,
-            "expected": expected,
-            "actual": observed[relative],
-        }
-        for relative, expected in FROZEN_V4_ARTIFACT_SHA256.items()
-        if observed[relative] != expected
-    ]
+
+
+def _worktree_bytes(path: Path) -> bytes | None:
+    if path.is_symlink():
+        return os.fsencode(os.readlink(path))
+    if path.is_file():
+        return path.read_bytes()
+    return None
+
+
+def _repository_state_identity(root: Path) -> dict[str, Any]:
+    """Identify the exact tracked and nonignored source state used by a run."""
+
+    head = _git(root, "rev-parse", "HEAD")
+    raw_tracked = _git_bytes(root, "ls-files", "--stage", "-z")
+    tracked_records: list[dict[str, str]] = []
+    for record in raw_tracked.split(b"\0"):
+        if not record:
+            continue
+        metadata, raw_relative = record.split(b"\t", 1)
+        mode, _object_id, stage = metadata.decode("ascii").split()
+        relative = raw_relative.decode("utf-8", errors="surrogateescape")
+        payload = _worktree_bytes(root / relative)
+        tracked_records.append(
+            {
+                "path": relative,
+                "index_mode": mode,
+                "index_stage": stage,
+                "worktree_sha256": (
+                    hashlib.sha256(payload).hexdigest()
+                    if payload is not None
+                    else "missing"
+                ),
+            }
+        )
+    tracked_manifest = json.dumps(
+        tracked_records, sort_keys=True, separators=(",", ":")
+    ).encode()
+    raw_untracked = _git_bytes(root, "ls-files", "--others", "--exclude-standard", "-z")
+    untracked_hashes: dict[str, str] = {}
+    for raw_relative in raw_untracked.split(b"\0"):
+        if not raw_relative:
+            continue
+        relative = raw_relative.decode("utf-8", errors="surrogateescape")
+        payload = _worktree_bytes(root / relative)
+        untracked_hashes[relative] = (
+            hashlib.sha256(payload).hexdigest() if payload is not None else "missing"
+        )
+    identity = {
+        "repository_head": head,
+        "tracked_path_count": len({item["path"] for item in tracked_records}),
+        "tracked_worktree_manifest_sha256": hashlib.sha256(
+            tracked_manifest
+        ).hexdigest(),
+        "untracked_nonignored_sha256": untracked_hashes,
+    }
+    snapshot = json.dumps(identity, sort_keys=True, separators=(",", ":")).encode()
+    identity["source_snapshot_sha256"] = hashlib.sha256(snapshot).hexdigest()
+    identity["worktree_clean"] = not _git_bytes(
+        root, "status", "--porcelain=v1", "-z", "--untracked-files=all"
+    )
+    return identity
+
+
+def _project_version(data: bytes) -> str:
     try:
-        tag_object = _git(root, "rev-parse", "refs/tags/v4.0.0")
-        tag_commit = _git(root, "rev-parse", "v4.0.0^{commit}")
-        tag_type = _git(root, "cat-file", "-t", "refs/tags/v4.0.0")
-    except ReleaseValidationError:
-        tag_object = "missing"
-        tag_commit = "missing"
-        tag_type = "missing"
+        project = tomllib.loads(data.decode("utf-8")).get("project", {})
+    except (UnicodeDecodeError, tomllib.TOMLDecodeError):
+        return "invalid"
+    return str(project.get("version", "missing"))
+
+
+def _runtime_version(data: bytes) -> str:
+    try:
+        text = data.decode("utf-8")
+    except UnicodeDecodeError:
+        return "invalid"
+    match = re.search(r'^__version__\s*=\s*["\']([^"\']+)["\']', text, re.MULTILINE)
+    return match.group(1) if match else "missing"
+
+
+def _source_cli_version(data: bytes) -> str:
+    try:
+        text = data.decode("utf-8")
+    except UnicodeDecodeError:
+        return "invalid"
+    match = re.search(r'version=["\']APM ([^"\']+)["\']', text)
+    return match.group(1) if match else "missing"
+
+
+def _executed_cli_version(root: Path) -> tuple[str, int, str]:
+    result = subprocess.run(
+        [sys.executable, "-m", "apm.cli", "--version"],
+        cwd=root,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    output = result.stdout.strip()
+    version = output.removeprefix("APM ") if output.startswith("APM ") else "missing"
+    return version, result.returncode, result.stderr.strip()
+
+
+def audit_maintenance_package_identity(root: Path) -> dict[str, Any]:
+    """Distinguish mutable main builds from the immutable released package."""
+
+    current_project = _project_version((root / "pyproject.toml").read_bytes())
+    try:
+        installed = importlib_metadata.version("analog-process-models")
+    except importlib_metadata.PackageNotFoundError:
+        installed = "missing"
+    cli_version, cli_returncode, cli_stderr = _executed_cli_version(root)
+    try:
+        tagged_project = _project_version(
+            _git_object_bytes(root, V4_TAGGED_COMMIT, "pyproject.toml")
+        )
+        tagged_runtime = _runtime_version(
+            _git_object_bytes(root, V4_TAGGED_COMMIT, "src/apm/__init__.py")
+        )
+        tagged_cli = _source_cli_version(
+            _git_object_bytes(root, V4_TAGGED_COMMIT, "src/apm/cli.py")
+        )
+        source_error = None
+    except ReleaseValidationError as error:
+        tagged_project = tagged_runtime = tagged_cli = "missing"
+        source_error = str(error)
+    expected_release = V4_TAG.removeprefix("v")
+    expected_main = f"{expected_release}+main"
+    checks = {
+        "tagged_source_retains_release_identity": tagged_project
+        == tagged_runtime
+        == tagged_cli
+        == expected_release,
+        "main_has_explicit_nonrelease_identity": current_project == expected_main,
+        "runtime_version_matches_main_identity": __version__ == expected_main,
+        "installed_distribution_matches_main_identity": installed == expected_main,
+        "executed_cli_matches_main_identity": cli_returncode == 0
+        and cli_version == expected_main,
+        "all_current_version_surfaces_agree": current_project
+        == __version__
+        == installed
+        == cli_version,
+        "validator_source_is_selected_repository": Path(__file__).resolve()
+        == (root / "src/apm/maintenance_validate.py").resolve(),
+    }
+    result = _check_map(checks, context="post-release main package/version identity")
+    result.update(
+        {
+            "policy": (
+                "PEP 440 local +main distinguishes post-release source from the "
+                "immutable public release; the reported source snapshot supplies exact identity"
+            ),
+            "release_version": expected_release,
+            "main_version": expected_main,
+            "runtime_version": __version__,
+            "installed_distribution_version": installed,
+            "cli_version": cli_version,
+            "cli_stderr": cli_stderr,
+            "validator_source": str(Path(__file__).resolve()),
+            "tagged_source_versions": {
+                "pyproject": tagged_project,
+                "runtime": tagged_runtime,
+                "cli": tagged_cli,
+            },
+            "source_error": source_error,
+        }
+    )
+    return result
+
+
+def audit_frozen_v4_artifacts(root: Path) -> dict[str, Any]:
+    """Compare the complete declared v4 frozen scope to one immutable commit."""
+
+    authority_entries: dict[str, dict[str, str]] = {}
+    index_entries: dict[str, str] = {}
+    current_paths: set[str] = set()
+    conflicts: list[dict[str, str]] = []
+    expected_hashes: dict[str, str] = {}
+    observed_hashes: dict[str, str] = {}
+    byte_mismatches: list[dict[str, str]] = []
+    mode_mismatches: list[dict[str, str]] = []
+    authority_commit = authority_type = "missing"
+    authority_descends_tag = head_descends_authority = False
+    tag_object = tag_commit = tag_type = "missing"
+    audit_error: str | None = None
+    try:
+        tag_object = _git(root, "rev-parse", f"refs/tags/{V4_TAG}")
+        tag_commit = _git(root, "rev-parse", f"{V4_TAG}^{{commit}}")
+        tag_type = _git(root, "cat-file", "-t", f"refs/tags/{V4_TAG}")
+        authority_commit = _git(
+            root, "rev-parse", f"{V4_FROZEN_AUTHORITY_COMMIT}^{{commit}}"
+        )
+        authority_type = _git(root, "cat-file", "-t", V4_FROZEN_AUTHORITY_COMMIT)
+        authority_descends_tag = _is_ancestor(root, V4_TAGGED_COMMIT, authority_commit)
+        head_descends_authority = _is_ancestor(root, authority_commit, "HEAD")
+        authority_entries = _tree_entries(root, authority_commit)
+        index_entries, conflicts = _index_entries(root)
+        current_paths = _selected_worktree_paths(root)
+        for relative, entry in sorted(authority_entries.items()):
+            expected_bytes = _git_object_bytes(root, authority_commit, relative)
+            current_bytes = _worktree_bytes(root / relative)
+            expected_hash = hashlib.sha256(expected_bytes).hexdigest()
+            observed_hash = (
+                hashlib.sha256(current_bytes).hexdigest()
+                if current_bytes is not None
+                else "missing"
+            )
+            expected_hashes[relative] = expected_hash
+            observed_hashes[relative] = observed_hash
+            if observed_hash != expected_hash:
+                byte_mismatches.append(
+                    {
+                        "path": relative,
+                        "expected": expected_hash,
+                        "actual": observed_hash,
+                    }
+                )
+            actual_mode = index_entries.get(relative, "missing")
+            if actual_mode != entry["mode"]:
+                mode_mismatches.append(
+                    {
+                        "path": relative,
+                        "expected": entry["mode"],
+                        "actual": actual_mode,
+                    }
+                )
+    except (OSError, ReleaseValidationError, ValueError) as error:
+        audit_error = str(error)
+
+    expected_paths = set(authority_entries)
+    missing_paths = sorted(expected_paths - current_paths)
+    unexpected_paths = sorted(current_paths - expected_paths)
+    missing_index_paths = sorted(expected_paths - set(index_entries))
+    unexpected_index_paths = sorted(set(index_entries) - expected_paths)
     checks = {
         "v4_tag_object_exact": tag_object == V4_TAG_OBJECT,
         "v4_tag_commit_exact": tag_commit == V4_TAGGED_COMMIT,
         "v4_tag_remains_annotated": tag_type == "tag",
-        "completed_v4_artifact_hashes_exact": not mismatches,
+        "frozen_authority_commit_exact": authority_commit
+        == V4_FROZEN_AUTHORITY_COMMIT,
+        "frozen_authority_is_commit": authority_type == "commit",
+        "frozen_authority_descends_tagged_release": authority_descends_tag,
+        "current_history_contains_frozen_authority": head_descends_authority,
+        "frozen_authority_entries_are_blobs": bool(authority_entries)
+        and all(entry["object_type"] == "blob" for entry in authority_entries.values()),
+        "completed_modelgen_records_in_scope": REQUIRED_MODELGEN_RECORDS
+        <= expected_paths,
+        "frozen_artifact_inventory_exact": bool(expected_paths)
+        and not missing_paths
+        and not unexpected_paths
+        and not missing_index_paths
+        and not unexpected_index_paths
+        and not conflicts,
+        "frozen_artifact_modes_exact": not mode_mismatches,
+        "frozen_artifact_bytes_exact": bool(expected_hashes) and not byte_mismatches,
+        "frozen_audit_completed_without_error": audit_error is None,
     }
     result = _check_map(checks, context="frozen v4 release records and model artifacts")
     result.update(
         {
             "v4_tag_object": tag_object,
             "v4_tagged_commit": tag_commit,
-            "artifact_count": len(FROZEN_V4_ARTIFACT_SHA256),
-            "artifact_sha256": observed,
-            "mismatches": mismatches,
+            "authority_commit": authority_commit,
+            "authority_pathspecs": list(FROZEN_V4_PATHSPECS),
+            "artifact_count": len(expected_paths),
+            "artifact_paths": sorted(expected_paths),
+            "expected_sha256": expected_hashes,
+            "artifact_sha256": observed_hashes,
+            "missing_paths": missing_paths,
+            "unexpected_paths": unexpected_paths,
+            "missing_index_paths": missing_index_paths,
+            "unexpected_index_paths": unexpected_index_paths,
+            "index_conflicts": conflicts,
+            "mode_mismatches": mode_mismatches,
+            "mismatches": byte_mismatches,
+            "audit_error": audit_error,
         }
     )
     return result
@@ -264,7 +686,9 @@ def audit_frozen_v4_artifacts(root: Path) -> dict[str, Any]:
 def run_maintenance_static_audits(root: Path, output: Path) -> dict[str, Any]:
     """Run the ordinary static/regression suite against current maintenance guidance."""
 
-    baseline_contract = load_v4_gate_contract(root)
+    # This contract is used only as a preserved compatibility baseline. The
+    # current maintenance authority is GOAL.md plus the unflagged validator.
+    released_contract = load_v4_gate_contract(root)
     output.mkdir(parents=True, exist_ok=False)
     commands = [
         _run_logged_command(root, output, "pytest", [sys.executable, "-m", "pytest", "-q"]),
@@ -301,16 +725,19 @@ def run_maintenance_static_audits(root: Path, output: Path) -> dict[str, Any]:
             error,
             fallback_schema="apm.v3-regression-from-v4.v1",
         )
+    frozen_v4 = audit_frozen_v4_artifacts(root)
     audits = {
-        "release_baseline_metadata": audit_v4_release_metadata(root, baseline_contract),
-        "catalog": audit_v4_catalog(root, baseline_contract),
+        "package_identity": audit_maintenance_package_identity(root),
+        "released_v4_catalog_compatibility": audit_v4_catalog(root, released_contract),
         "migration": audit_migration(root),
         "distribution": audit_distribution(root),
         "current_guidance": audit_current_guidance(root),
-        "frozen_v4_artifacts": audit_frozen_v4_artifacts(root),
-        "public_evidence": audit_public_evidence(root, baseline_contract),
-        "v3_immutability": audit_v3_immutability(root, baseline_contract),
-        "mixed_voltage_evidence": audit_mixed_voltage_evidence(root),
+        "frozen_v4_artifacts": frozen_v4,
+        "released_public_evidence_integrity": audit_public_evidence(
+            root, released_contract
+        ),
+        "released_v3_compatibility": audit_v3_immutability(root, released_contract),
+        "released_mixed_voltage_evidence_integrity": audit_mixed_voltage_evidence(root),
         "provenance": provenance,
     }
     checks = {
@@ -320,16 +747,19 @@ def run_maintenance_static_audits(root: Path, output: Path) -> dict[str, Any]:
         "spectre_structural": spectre.get("status") == "structurally_checked"
         and all(spectre.get("checks", {}).values()),
     }
+    repository_state = _repository_state_identity(root)
     report = {
         "schema": "apm.maintenance-static-audits.v1",
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "status": "pass" if all(checks.values()) else "fail",
         "repository": str(root),
-        "repository_head": _git(root, "rev-parse", "HEAD"),
+        "repository_head": repository_state["repository_head"],
+        "repository_state": repository_state,
         "released_baseline_contract_path": "validation/release_gates_v4.toml",
         "released_baseline_contract_sha256": sha256_file(
             root / "validation/release_gates_v4.toml"
         ),
+        "frozen_v4_authority_commit": V4_FROZEN_AUTHORITY_COMMIT,
         "commands": commands,
         "audits": audits,
         "v3_regression": {
@@ -351,7 +781,7 @@ def run_maintenance_static_audits(root: Path, output: Path) -> dict[str, Any]:
     result = _write_report(output / "static_audits.json", report)
     result.update(
         {
-            "baseline_contract": baseline_contract,
+            "released_compatibility_contract": released_contract,
             "provenance": provenance,
             "spectre_full": spectre,
             "v3_regression_full": v3_regression,
@@ -375,7 +805,8 @@ def validate_maintenance_repository(
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "status": result["status"],
         "repository": str(selected),
-        "repository_head": _git(selected, "rev-parse", "HEAD"),
+        "repository_head": result["repository_state"]["repository_head"],
+        "repository_state": result["repository_state"],
         "static_report_path": result["report_path"],
         "static_report_sha256": sha256_file(Path(result["report_path"])),
         "checks": result["checks"],

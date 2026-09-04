@@ -176,8 +176,14 @@ def test_v4_repository_audits_and_frozen_v3_validator_are_fail_closed() -> None:
     # accepted after GOAL.md moves to the separately reviewed v4 development contract.
     assert "GOAL.md" in {item["path"] for item in claims["review_hash_mismatches"]}
 
+    # Current main has an explicit local-version identity and must also be
+    # rejected by the frozen v4 release-metadata audit. The immutable tag still
+    # contains the exact 4.0.0 metadata that this historical audit requires.
     v4_contract = load_v4_gate_contract(ROOT)
-    assert audit_v4_release_metadata(ROOT, v4_contract)["status"] == "pass"
+    v4_metadata = audit_v4_release_metadata(ROOT, v4_contract)
+    assert v4_metadata["status"] == "fail"
+    assert "pyproject_version_matches_target" in v4_metadata["failed_checks"]
+    assert "runtime_version_matches_target" in v4_metadata["failed_checks"]
 
 
 def test_metadata_audit_rejects_development_versions(tmp_path: Path) -> None:

@@ -5,10 +5,17 @@ models and a terminal-characterization framework for cross-process and
 within-process analog device studies. This repository is the APM project;
 within it, APM always means Analog Process Models.
 
-Version **4.0.0** preserves the released v3 electrical and stationary-noise
+Release **4.0.0** preserves the released v3 electrical and stationary-noise
 contracts and adds independently APM-authored `apm045/io18` and
 `apm045/io25` mixed-voltage research families. The live catalog contains 15
 electrical families and 30 public MOS devices across five technologies.
+
+Current post-release `main` packages identify themselves as **4.0.0+main**.
+That PEP 440 local suffix distinguishes a build from mutable maintenance source
+from the immutable 4.0.0 release; it does not declare a new release. Generated
+maintenance validation reports record the Git commit and an exact working-tree
+snapshot hash, and model/result records retain their input hashes for exact
+reproducibility.
 
 The immutable annotated `v4.0.0` release is tagged at
 `d224f279921c7e1ae637fd867e00d450067766c6`. Its exact candidate passed 15/15
@@ -266,6 +273,9 @@ pinned, redistributable IHP SG13G2 and FreePDK45 sources. APM045 io18/io25 are
 deterministic outputs of an offline APM model-generation flow whose public
 source-fact matrix is `models/apm045/mixed_voltage_evidence.toml`; neither
 private PDK inputs nor the FreePDK45 cards supply their numeric parameters.
+Public TSMC40/45 information was added only for post-release, generation-level
+taxonomy sanity checking; it was not a numerical input, fitting target, or
+calibration reference for the released io18/io25 model-generation flow.
 The PSP103 and BSIM-CMG compiler sources retain their upstream licenses and
 notices. APM350, APM022, and the APM016F parameter deck are independently
 authored APM assets.
