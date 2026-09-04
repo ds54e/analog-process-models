@@ -1,11 +1,25 @@
 # APM045
 
-APM045 is APM's 45 nm planar predictive/open reference. It exposes four
-FreePDK45-derived BSIM4 electrical families plus two independently APM-authored
-generic mixed-voltage families. The upstream cards disclose customized PTM
-ancestry and representative published bulk-Si tuning; they are not a
-silicon-correlated PDK and are not numeric source material for the APM-authored
-families.
+APM045 is APM's 45 nm planar predictive/open reference and is best interpreted
+for subsequent research as a **generic 40/45 nm-class planar bulk CMOS
+research environment**. It exposes four FreePDK45-derived BSIM4 electrical
+families plus two independently APM-authored generic mixed-voltage families.
+The upstream cards disclose customized PTM ancestry and representative
+published bulk-Si tuning; they are not a silicon-correlated PDK and are not
+numeric source material for the APM-authored families.
+
+This positioning is generation-level only. APM045 is not a TSMC40/45 model,
+a TSMC55 proxy, or a foundry-correlated PDK. The released `v4.0.0` tag and
+qualification evidence remain unchanged. See [`APM045_POSITIONING.md`](../../APM045_POSITIONING.md)
+for the post-release rationale and transfer boundary.
+
+Public TSMC 40/45 nm information is used only as a taxonomy sanity check: TSMC
+45 nm publicly described multiple-Vt core devices, a low-power triple-gate-
+oxide option, and 1.8 V/2.5 V/3.3 V I/O options; TSMC 40 nm was described as a
+direct linear shrink from 45 nm and retained multiple-Vt core, mixed-signal/RF,
+triple-gate-oxide, and 1.8 V/2.5 V I/O options. No TSMC numerical model
+parameter, geometry rule, reliability value, or electrical curve is used by
+APM045.
 
 ## Electrical families
 
@@ -17,6 +31,18 @@ families.
 | `thkox` | `apm045_thkox_nmos`, `apm045_thkox_pmos` | general-VT, thick | 2.0 V APM-selected |
 | `io18` | `apm045_io18_nmos`, `apm045_io18_pmos` | APM-authored generic 1.8 V class | 1.8 V |
 | `io25` | `apm045_io25_nmos`, `apm045_io25_pmos` | APM-authored generic 2.5 V class | 2.5 V |
+
+The recommended 40/45 nm-generation interpretation is:
+
+```text
+VTL / VTG / VTH   multiple-Vt ~1 V-class core study
+io18              generic 1.8 V-class mixed-voltage MOS
+io25              generic 2.5 V-class mixed-voltage MOS
+THKOX             legacy FreePDK45 thick/high-Vt anchor
+```
+
+This is a comparison/research palette, not a claim that these APM families map
+to specific primitives or coexist exactly in any one foundry process option.
 
 Each planar device uses `d g s b` and only `w,l`. The upstream-documented
 drawn range for the four FreePDK45 families is L = 0.05–1 µm and W =
@@ -75,6 +101,14 @@ correlated to TSMC, UMC, or other foundry silicon; do not establish calibrated
 leakage or process-noise accuracy; include no layout-dependent parasitics; and
 provide no manufacturability or reliability qualification. A standalone 3.3 V
 family is outside APM v4.
+
+For later LDO or mixed-voltage research, transfer normalized mechanisms and
+tradeoffs rather than absolute foundry quantities. gm/Id, gds/Id, normalized
+headroom, length elasticity, relative current-density/width tradeoffs,
+intrinsic capacitance/charge, pass-device versus gate-drive burden, loop
+behavior, and transient charge balance are appropriate research outputs.
+Absolute W, Id/W, mismatch, leakage, layout parasitics, and reliability must be
+re-established in the actual target PDK.
 
 Each family has `families/<id>/spectre/model.scs`, model-only
 **experimental/unverified** and not parsed or simulated by Spectre.
