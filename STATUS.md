@@ -10,8 +10,8 @@ Released baseline: v3.0.0
 Target release: v4.0.0
 State: RELEASE-CANDIDATE HARDENING
 
-V4 integration gates proven before release qualification:
-  11/16
+V4 development/integration gates proven before release qualification:
+  12/16
 
 Current milestone:
   MIXED-VOLTAGE RUNTIME INTEGRATION COMPLETE / RELEASE VALIDATOR ACTIVE
@@ -32,7 +32,7 @@ Third-party redistribution/provenance:
   PASS
 
 Current normal repository validation:
-  REQUIRED ON THE COHERENT CANDIDATE
+  PASS (pre-candidate clean snapshot 7e336a6)
 
 v3.0.0 tag / GitHub Release:
   IMMUTABLE / unchanged
@@ -149,6 +149,18 @@ Candidate success requires 15/15 pre-tag gates and leaves only the exact-tag
 gate pending; a second fresh clone at the annotated tag must pass 16/16 before
 the GitHub Release is authorized. The released v3.0.0 tag, tagged commit,
 cards, evidence, validator contract, and GitHub Release remain unchanged.
+
+Clean validator-hardening commit
+`7e336a6899df22f73610412404f7cbedf1ef1071` passed ordinary v4 repository
+validation, including 114 current tests, Ruff, REUSE, all static audits, and an
+isolated install/test of the exact v3 tagged source. A direct release-component
+exercise then replayed the frozen epoch-3 qualification in 502 ngspice batches:
+all 20 candidate-domain records, all 10 circuit pairs, structural/distinctness
+checks, both five-seed ensembles, and all four canonical card hashes passed.
+Together with the complete hash-bound public review, this proves
+`release.claim_audit_v4` at the development/static level and brings the
+pre-release milestone total to 12/16. The candidate still must independently
+rerun every component from its attested fresh clone.
 
 ## Immutable releases
 

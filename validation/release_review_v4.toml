@@ -1,7 +1,7 @@
 schema = "apm.release-review.v4"
 status = "complete"
 release_target = "v4.0.0"
-reviewed_utc = "2026-09-04T15:33:07Z"
+reviewed_utc = "2026-09-04T15:37:38Z"
 reviewer = "Codex release implementation agent"
 
 v3_history_immutable = true
@@ -30,7 +30,7 @@ unresolved_claim_findings = []
 "RESEARCH_BASELINE.md" = "5051a8740e661d71323222d34c97e9e169bc2ce6579f909a83c1393c53686868"
 "PROJECT_CONTEXT.md" = "335bfbdb8d5488c1a345fb4ab7ba27cfa5e3d3af27e39484ae727253bbdb5d80"
 "SECURITY.md" = "80ad8807fa9f58ae21023fc7f9452e60bed0a726a408c5f03befd253fd3985e5"
-"STATUS.md" = "bb1fadc9fdc2a53ea5c937dd445c906d149913b67d83f035ae336ebdcfc513d4"
+"STATUS.md" = "8b7521513194ad8edfcebd01cc42418cf5f874750916c45501c3aacc70943033"
 "THIRD_PARTY.md" = "b972236cbdbc88eb1637c5169a47e6deda7d0df83a4d3cf525bcd0e20c5eb073"
 "UNATTENDED_EXECUTION.md" = "a5b6cc5ac4067408f868a864b4836df298a5231a75ada46c7b8edcfa29cce9ff"
 "V4_MIXED_VOLTAGE.md" = "8490d51889ed49a2c5b578caee7808c8622930baa463d840edf46952840d6569"
