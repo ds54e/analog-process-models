@@ -5,7 +5,7 @@ schema = "apm.technology.v2"
 id = "apm045"
 display_name = "APM045"
 technology_class = "45nm"
-description = "FreePDK45 native BSIM4 electrical families."
+description = "FreePDK45 native and independently APM-authored generic mixed-voltage BSIM4 electrical families."
 cross_process_anchor = "vtg"
 
 [[comparison_set]]
@@ -20,3 +20,9 @@ kind = "gate_stack"
 members = ["vtg", "thkox"]
 anchor = "vtg"
 common_overlap_profile = "common_overlap_1v0"
+
+[[comparison_set]]
+id = "mixed_voltage"
+kind = "mixed_voltage"
+members = ["vtg", "io18", "io25"]
+anchor = "vtg"

@@ -96,7 +96,9 @@ def test_gate_evaluation_rejects_stale_or_nonexistent_evidence(tmp_path: Path) -
 def test_release_repository_audits_and_frozen_v3_claim_review_are_fail_closed() -> None:
     contract = load_gate_contract(ROOT)
     assert audit_release_metadata(ROOT, contract)["status"] == "pass"
-    assert audit_catalog(ROOT, contract)["status"] == "pass"
+    # The frozen v3 validator must reject the expanded v4 live catalog rather
+    # than silently reinterpreting its historical 5/13/26 contract.
+    assert audit_catalog(ROOT, contract)["status"] == "fail"
     assert audit_migration(ROOT)["status"] == "pass"
     distribution = audit_distribution(ROOT)
     assert distribution["status"] == "pass"

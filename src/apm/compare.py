@@ -881,6 +881,10 @@ def compare_set(
     catalog = load_catalog(selected.root)
     technology = catalog.technology(technology_id)
     comparison_set: ComparisonSet = technology.comparison_set(set_id)
+    if comparison_set.kind == "mixed_voltage":
+        from .mixed_voltage_compare import compare_mixed_voltage
+
+        return compare_mixed_voltage(output_directory, selected)
     selectors = tuple(f"{technology_id}/{family}" for family in comparison_set.members)
     output = output_directory.expanduser().resolve()
     _prepare_output(output)
@@ -1122,7 +1126,7 @@ def validate_all_characterizations(
     audited = _run_results(catalog, selectors, output, selected)
     requirements = {
         "five_technologies": len(catalog.technologies) == 5,
-        "thirteen_families": len(selectors) == 13,
+        "fifteen_families": len(selectors) == 15,
         "all_characterization_audits": all(item.audit["overall_pass"] for item in audited),
     }
     checks = {"requirements": requirements, "overall_pass": all(requirements.values())}

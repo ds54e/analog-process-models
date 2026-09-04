@@ -1,12 +1,12 @@
 # SPDX-FileCopyrightText: APM contributors
 # SPDX-License-Identifier: Apache-2.0
 
-"""Manifest-driven V3-N2 stationary-noise catalog orchestration.
+"""Manifest-driven stationary-noise catalog orchestration.
 
-The module deliberately wraps the frozen per-device V3-N1 engine.  It owns
-catalog planning, semantic request identity, strict resume validation, and
-comparison/index generation; it does not introduce another simulator backend
-or reinterpret compact-model-specific source names.
+The module deliberately wraps the frozen per-device V3-N1 engine. It owns
+live-catalog planning, semantic request identity, strict resume validation,
+and comparison/index generation; it does not introduce another simulator
+backend or reinterpret compact-model-specific source names.
 """
 
 from __future__ import annotations
@@ -50,7 +50,7 @@ CATALOG_RESULT_SCHEMA = "apm.noise-catalog-result.v1"
 CATALOG_REPORT_SCHEMA = "apm.noise-catalog-validation.v1"
 COMPARISON_SCHEMA = "apm.noise-comparison.v1"
 CATALOG_METHOD_ID = "apm.noise-catalog.manifest-deduplicated-resumable"
-CATALOG_METHOD_VERSION = "1.0.0"
+CATALOG_METHOD_VERSION = "1.1.0"
 REQUEST_HASH_ALGORITHM = "sha256-canonical-json"
 RESULT_HASH_ALGORITHM = "sha256-canonical-artifact-inventory"
 
@@ -58,9 +58,6 @@ TEMPERATURES_C = (-40, 27, 85, 125)
 INVERSION_TARGETS_PER_V = (5.0, 10.0, 15.0, 20.0, 25.0)
 REFERENCE_FREQUENCIES_HZ = (1.0, 1.0e3, 1.0e6, 1.0e7)
 INTEGRATION_BAND_HZ = (1.0, 1.0e7)
-EXPECTED_TECHNOLOGY_COUNT = 5
-EXPECTED_FAMILY_COUNT = 13
-EXPECTED_DEVICE_COUNT = 26
 TERMINAL_STATUSES = ("validated", "target_not_reachable", "simulation_failed")
 REUSABLE_STATUSES = ("validated", "target_not_reachable")
 
@@ -74,7 +71,7 @@ COMPARISON_CROSS_PROCESS = "cross_process_anchor"
 
 
 class NoiseCatalogError(RuntimeError):
-    """The V3-N2 catalog plan or execution failed closed."""
+    """The stationary-noise catalog plan or execution failed closed."""
 
 
 def _utc_now() -> str:
@@ -406,15 +403,8 @@ def build_noise_catalog_plan(
         for family in families
         for device in sorted(family.devices, key=lambda item: item.device_id)
     ]
-    if (len(technologies), len(families), len(devices)) != (
-        EXPECTED_TECHNOLOGY_COUNT,
-        EXPECTED_FAMILY_COUNT,
-        EXPECTED_DEVICE_COUNT,
-    ):
-        raise NoiseCatalogError(
-            "catalog coverage mismatch: expected 5/13/26 technologies/families/devices, "
-            f"found {len(technologies)}/{len(families)}/{len(devices)}"
-        )
+    if not technologies or not families or not devices:
+        raise NoiseCatalogError("live catalog contains no noise-plannable devices")
 
     def context(device: DeviceSpec) -> tuple[FamilySpec, dict[str, Any], float, str]:
         family = catalog.family(device.technology_id, device.family_id)
@@ -612,6 +602,30 @@ def build_noise_catalog_plan(
         COMPARISON_THRESHOLD_EQUAL_BIAS,
         COMPARISON_CROSS_PROCESS,
     )
+    threshold_member_device_count = sum(
+        len(technology.family(family_id).devices)
+        for technology in technologies
+        for comparison_set in technology.comparison_sets
+        if comparison_set.kind == "threshold_family"
+        for family_id in comparison_set.members
+    )
+    anchor_device_count = sum(
+        len(technology.family(technology.cross_process_anchor).devices)
+        for technology in technologies
+    )
+    derived_logical_counts = {
+        DATASET_TEMPERATURE: len(devices) * len(TEMPERATURES_C),
+        DATASET_INVERSION: len(devices) * len(INVERSION_TARGETS_PER_V),
+        DATASET_LENGTH: sum(len(device.characterization_lengths_m) for device in devices),
+        DATASET_NFIN: sum(
+            len(device.characterization_nfin)
+            for device in devices
+            if device.technology_id == "apm016f"
+        ),
+        COMPARISON_THRESHOLD_EQUAL_INVERSION: threshold_member_device_count,
+        COMPARISON_THRESHOLD_EQUAL_BIAS: threshold_member_device_count,
+        COMPARISON_CROSS_PROCESS: anchor_device_count,
+    }
     plan_core = {
         "schema": CATALOG_PLAN_SCHEMA,
         "method_id": CATALOG_METHOD_ID,
@@ -633,6 +647,9 @@ def build_noise_catalog_plan(
         "reference_tools": tools,
         "family_bindings": [bindings[key] for key in sorted(bindings)],
         "logical_request_counts": dict(sorted(logical_counts.items())),
+        "live_catalog_derived_logical_request_counts": dict(
+            sorted(derived_logical_counts.items())
+        ),
         "dataset_logical_request_count": sum(logical_counts[name] for name in dataset_names),
         "comparison_logical_request_count": sum(
             logical_counts[name] for name in comparison_names
@@ -2006,14 +2023,23 @@ def validate_noise_catalog(
     source_summaries = list(summaries["source_summaries"].values())
     validated_sources = [row for row in source_summaries if row["status"] == "validated"]
     logical_counts = plan["logical_request_counts"]
+    derived_logical_counts = plan["live_catalog_derived_logical_request_counts"]
+    expected_threshold_group_count = sum(
+        2 * len(item.get("views", []))
+        for item in plan["comparison_definitions"]
+        if "views" in item
+    )
     checks = [
         {
-            "id": "catalog.manifest_5_13_26",
+            "id": "catalog.manifest_live_coverage",
             "status": (
                 "pass"
-                if plan["catalog"]["technology_count"] == 5
-                and plan["catalog"]["family_count"] == 13
-                and plan["catalog"]["public_device_count"] == 26
+                if plan["catalog"]["technology_count"] > 0
+                and plan["catalog"]["family_count"] > 0
+                and plan["catalog"]["public_device_count"] > 0
+                and len(plan["catalog"]["selectors"])
+                == plan["catalog"]["public_device_count"]
+                and len(plan["family_bindings"]) == plan["catalog"]["family_count"]
                 else "fail"
             ),
         },
@@ -2030,8 +2056,10 @@ def validate_noise_catalog(
             "id": "dataset.temperature_complete_status",
             "status": (
                 "pass"
-                if logical_counts.get(DATASET_TEMPERATURE) == 104
-                and sum(coverage["logical_status_counts"][DATASET_TEMPERATURE].values()) == 104
+                if logical_counts.get(DATASET_TEMPERATURE)
+                == derived_logical_counts[DATASET_TEMPERATURE]
+                and sum(coverage["logical_status_counts"][DATASET_TEMPERATURE].values())
+                == derived_logical_counts[DATASET_TEMPERATURE]
                 else "fail"
             ),
         },
@@ -2039,8 +2067,10 @@ def validate_noise_catalog(
             "id": "dataset.inversion_complete_status",
             "status": (
                 "pass"
-                if logical_counts.get(DATASET_INVERSION) == 130
-                and sum(coverage["logical_status_counts"][DATASET_INVERSION].values()) == 130
+                if logical_counts.get(DATASET_INVERSION)
+                == derived_logical_counts[DATASET_INVERSION]
+                and sum(coverage["logical_status_counts"][DATASET_INVERSION].values())
+                == derived_logical_counts[DATASET_INVERSION]
                 else "fail"
             ),
         },
@@ -2048,8 +2078,11 @@ def validate_noise_catalog(
             "id": "dataset.length_manifest_coverage",
             "status": (
                 "pass"
-                if coverage["length_selector_count"] == 26
-                and coverage["length_request_count"] == logical_counts.get(DATASET_LENGTH)
+                if coverage["length_selector_count"]
+                == plan["catalog"]["public_device_count"]
+                and coverage["length_request_count"]
+                == logical_counts.get(DATASET_LENGTH)
+                == derived_logical_counts[DATASET_LENGTH]
                 else "fail"
             ),
         },
@@ -2059,7 +2092,9 @@ def validate_noise_catalog(
                 "pass"
                 if coverage["nfin_selector_count"] == 6
                 and coverage["nfin_values"] == [1, 2, 4]
-                and coverage["nfin_request_count"] == logical_counts.get(DATASET_NFIN)
+                and coverage["nfin_request_count"]
+                == logical_counts.get(DATASET_NFIN)
+                == derived_logical_counts[DATASET_NFIN]
                 else "fail"
             ),
         },
@@ -2100,7 +2135,7 @@ def validate_noise_catalog(
             "id": "comparison.threshold_views",
             "status": (
                 "pass"
-                if len(threshold_groups) == 12
+                if len(threshold_groups) == expected_threshold_group_count
                 and all(group["member_count"] == 3 for group in threshold_groups)
                 else "fail"
             ),
@@ -2110,7 +2145,10 @@ def validate_noise_catalog(
             "status": (
                 "pass"
                 if len(anchor_groups) == 2
-                and all(group["member_count"] == 5 for group in anchor_groups)
+                and all(
+                    group["member_count"] == plan["catalog"]["technology_count"]
+                    for group in anchor_groups
+                )
                 and all(group["cross_basis_ratios"] is None for group in anchor_groups)
                 else "fail"
             ),

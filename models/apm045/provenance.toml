@@ -2,11 +2,12 @@ id = "apm045"
 technology_class = "45nm"
 architecture = "planar_bulk"
 compact_model = "bsim4"
-model_origin = "predictive_open"
+model_origin = "mixed_upstream_and_apm_authored"
 foundry_correlated = false
 
 [source]
-status = "vendored-pinned-subset"
+status = "mixed-pinned-upstream-and-apm-authored"
+scope = "The FreePDK45 fields below apply only to vendor/freepdk45 and the vtl/vtg/vth/thkox bindings; io18/io25 are independently APM-authored under the separate apm_generation contract."
 project = "FreePDK45 1.4, Subversion revision 173, open-source-clean Git mirror"
 repository = "Chips4Makers/freepdk45"
 url = "https://gitlab.com/Chips4Makers/freepdk45"
@@ -30,8 +31,22 @@ license_basis = "The exact upstream root README states that all files are Apache
 "vendor/freepdk45/UPSTREAM-README.txt" = "269392f454dcf92521d4d4174d4b80d1702a752571d5f924a403960703c8e972"
 
 [source.apm_authored_files]
-"technology.toml" = "5592f1c75fc7b6dfcb4219714e768140927dbd75b3874a00cd87bb7409661ccc"
+"technology.toml" = "e82f1d8d59041b950c43205f9f492b9c664bd2fa395bc89bc8508ff2c496a4d2"
 "mixed_voltage_evidence.toml" = "8c4e717b8b1b6b5c139d4469f6de83355910bb50b986c47ec9b028d8fff8786d"
+"families/io18/family.toml" = "ff967ffb32d02f24a33352db08e2a0e77b38506bddca7d068142f480a078d625"
+"families/io18/ngspice/apm045_io18_n.inc" = "e639452467891fde0ea51f1fb3e965a01f46acf2bec85b90a437f296d2f1cebe"
+"families/io18/ngspice/apm045_io18_p.inc" = "065dd165f2e1bc3bab41f5205292205adab8ea1d4b39c9bdb813d690eaebd40a"
+"families/io18/ngspice/binding.toml" = "db18b0254a5f26d2b09edfe82755ad52238e03feb326a407ef9c1e4827b75440"
+"families/io18/ngspice/wrapper.inc" = "cd008255aea5fd5e5363900253cc355be0167f203578066c35d6a2f1ae992ad5"
+"families/io18/spectre/binding.toml" = "e9c27fe0c1b249c211b881a988f61f570d683a3cafe29c577c5acdd4af5180ff"
+"families/io18/spectre/model.scs" = "8c5b42f7c9f6bd78807f594fafab5fba5723dbf47315dcbf8f04d589d0bb63c0"
+"families/io25/family.toml" = "1b0a6919f23a0ef50b193650f706eed43683841c57c0cd9d0fa7c45155a0a810"
+"families/io25/ngspice/apm045_io25_n.inc" = "2c2478406b4417e7a5058c46b321ff70dee1041025bda04986bb18758df104a0"
+"families/io25/ngspice/apm045_io25_p.inc" = "8eab45ce29fbd0caf4b089c4e1f7f7e52e14c7cc1572ee9c4245b57fc8ff1cc2"
+"families/io25/ngspice/binding.toml" = "fb5aae6526451dafde2554792c2a933793829d2e0f15f13b1f7b85cdeb155848"
+"families/io25/ngspice/wrapper.inc" = "c754235bbb5a8df2b88e07ca6d691a687404be08c105a1157be5469f77b64efc"
+"families/io25/spectre/binding.toml" = "6aef601179216a4598c375b49558cfd2882efd9b1567669d36f35ec20c9a3fe6"
+"families/io25/spectre/model.scs" = "37e0053d350e202fbd6dc511083b4131cbaa6f73dbb824df56e61e888e0430a2"
 "families/vtl/family.toml" = "9875155c21a9e951b9887196ab47381cc6c8a2e9860acc70ed8db859bb661278"
 "families/vtl/ngspice/binding.toml" = "11aad1c1346390fc562ea07e95987d00308da1c49ee44a28f552dd6c826b141e"
 "families/vtl/ngspice/wrapper.inc" = "14dc7db5637f845dbf89b563854103483ffdc1808406c7cd09226defad588771"
@@ -55,14 +70,34 @@ license_basis = "The exact upstream root README states that all files are Apache
 
 [redistribution]
 ship_in_repo = true
-selection = "Exact VTL, VTG, VTH, and THKOX N/P BSIM4 cards plus licensing and model-basis documentation"
-modifications = "none; exact upstream bytes copied into a shortened vendor path"
+selection = "Exact upstream VTL/VTG/VTH/THKOX N/P cards plus independently APM-authored io18/io25 N/P cards and their public generation evidence"
+modifications = "Upstream card bytes are unchanged; io18/io25 are new APM-authored files and are not modifications of FreePDK45 cards"
 upstream_notices_preserved = true
 excluded = ["SVRF and other files removed by the upstream open-source-clean mirror", "layout and physical-design assets", "native FF and SS statistical model cards"]
 
 [device_scope]
-include = ["VTL N/P", "VTG N/P", "VTH N/P", "THKOX N/P"]
+include = ["VTL N/P", "VTG N/P", "VTH N/P", "THKOX N/P", "io18 N/P", "io25 N/P"]
 exclude_v2 = ["native FF/SS statistical modes", "layout/physical-design assets"]
+
+[apm_generation]
+scope = "io18/io25 only"
+origin = "independently_apm_authored"
+license = "Apache-2.0"
+public_inputs_only = true
+private_or_proprietary_pdk_input_used = false
+foundry_parameter_copy_used = false
+generator_contract = "tools/modelgen/apm045_mixed_voltage/generation_epoch_3.toml"
+generator_contract_sha256 = "615a93963d2fa0a1c80e8b7ae1b51cf4a74282e5d26c68fe1e6b11eb1b2f34e9"
+qualification_contract = "tools/modelgen/apm045_mixed_voltage/qualification_epoch_3.toml"
+qualification_contract_sha256 = "1f6977a0697a8797464030f7345b8c1c8bbbc35996ffdf8df063c409163a3cfa"
+generation_evidence = "validation/evidence/v4_generation_epoch3_calibration.json"
+generation_evidence_sha256 = "889be51c0d7b61040cae56b20cd6030a2b2c4d8f71ea59e3d31c00a1a92bc12b"
+qualification_evidence = "validation/evidence/v4_mixed_voltage_qualification.json"
+qualification_evidence_sha256 = "e0f867e3539434dc61dedf0e10a56b76cff092c9f43aaa3608bc153481ff9b9b"
+kernel = "apm.modelgen.observable-kernel@1.2.0"
+canonical_selection = "observable_space_medoid_after_circuit_qualification"
+epistemic_ensemble_is_process_variation = false
+canonical_cards_byte_identically_regenerable = true
 
 [model_basis]
 nominal_vdd_v = 1.0
@@ -79,7 +114,7 @@ native_corners_included = false
 native_corners_optional = true
 
 [validation]
-ngspice = "v2 VTL/VTG/VTH/THKOX characterization, threshold/gate-stack comparison, and eight benchmark adapters passed"
+ngspice = "VTL/VTG/VTH/THKOX released characterization remains preserved; io18/io25 passed epoch-3 device, ensemble, distinctness, and sealed-circuit qualification in ngspice 47"
 spectre = "experimental_unverified"
 
 [spectre]
@@ -88,7 +123,9 @@ artifacts = [
   "families/vtl/spectre/model.scs",
   "families/vtg/spectre/model.scs",
   "families/vth/spectre/model.scs",
-  "families/thkox/spectre/model.scs"
+  "families/thkox/spectre/model.scs",
+  "families/io18/spectre/model.scs",
+  "families/io25/spectre/model.scs"
 ]
 model_route = "native Spectre BSIM4 through SPICE level-54 mapping"
 real_tool_validation = false

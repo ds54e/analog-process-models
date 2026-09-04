@@ -118,7 +118,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_characterization = sub.add_parser(
         "characterization-check",
-        help="Run and audit terminal characterization across all 13 electrical families",
+        help="Run and audit terminal characterization across all 15 electrical families",
     )
     p_characterization.add_argument("--output", type=Path, required=True)
 
@@ -185,7 +185,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_noise_catalog_check = sub.add_parser(
         "noise-catalog-check",
-        help="Run or strictly resume the complete V3-N2 catalog-wide noise qualification",
+        help="Run or strictly resume the live-catalog stationary-noise qualification",
     )
     p_noise_catalog_check.add_argument("--output", type=Path, required=True)
     p_noise_catalog_check.add_argument(

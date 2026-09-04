@@ -772,10 +772,10 @@ def validate_benchmark(
         "distribution": distribution,
     }
     requirements = {
-        "all_13_families_and_26_devices": checks["catalog_family_count"]
+        "all_15_families_and_30_devices": checks["catalog_family_count"]
         == checks["adapter_family_count"]
-        == 13
-        and checks["catalog_device_count"] == checks["adapter_device_count"] == 26,
+        == 15
+        and checks["catalog_device_count"] == checks["adapter_device_count"] == 30,
         "seed_reproducibility": checks["same_seed_identical_sample"],
         "different_seed_behavior": checks["different_seed_differs"],
         "mode_composition_draw_identity": checks["same_seed_mode_draw_order_identical"],

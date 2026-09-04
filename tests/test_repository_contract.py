@@ -39,7 +39,7 @@ EXPECTED_MODELS = {
 EXPECTED_FAMILIES = {
     "apm350": ("general",),
     "apm130": ("lv", "hv"),
-    "apm045": ("vtl", "vtg", "vth", "thkox"),
+    "apm045": ("vtl", "vtg", "vth", "thkox", "io18", "io25"),
     "apm022": ("lvt", "svt", "hvt"),
     "apm016f": ("lvt", "svt", "hvt"),
 }
@@ -99,20 +99,30 @@ def load_toml(relative: str) -> dict:
         return tomllib.load(handle)
 
 
-def test_release_contract_and_catalog_use_same_five_technologies_and_13_families() -> None:
-    gates = load_toml("validation/release_gates.toml")
+def test_v3_contract_is_frozen_and_v4_contract_matches_the_live_catalog() -> None:
+    v3 = load_toml("validation/release_gates.toml")
+    v4 = load_toml("validation/release_gates_v4.toml")
     catalog = load_catalog(ROOT)
-    assert tuple(gates["technology_catalog"]["required_technologies"]) == EXPECTED_TECHNOLOGIES
-    assert gates["technology_catalog"]["required_family_count"] == 13
+    assert tuple(v3["technology_catalog"]["required_technologies"]) == EXPECTED_TECHNOLOGIES
+    assert v3["technology_catalog"]["required_family_count"] == 13
+    assert v3["technology_catalog"]["required_families"]["apm045"] == [
+        "vtl",
+        "vtg",
+        "vth",
+        "thkox",
+    ]
+    assert tuple(v4["technology_catalog"]["required_technologies"]) == EXPECTED_TECHNOLOGIES
+    assert v4["technology_catalog"]["required_family_count"] == 15
+    assert v4["technology_catalog"]["required_public_device_count"] == 30
     assert tuple(item.technology_id for item in catalog.technologies) == tuple(
         sorted(EXPECTED_TECHNOLOGIES)
     )
-    assert sum(len(item.families) for item in catalog.technologies) == 13
+    assert sum(len(item.families) for item in catalog.technologies) == 15
     for technology_id, expected in EXPECTED_FAMILIES.items():
         assert {item.family_id for item in catalog.technology(technology_id).families} == set(
             expected
         )
-        assert gates["technology_catalog"]["required_families"][technology_id] == list(expected)
+        assert v4["technology_catalog"]["required_families"][technology_id] == list(expected)
 
 
 def test_reference_runtime_contract_is_el9_ngspice47_osdi() -> None:
@@ -161,7 +171,7 @@ def test_public_geometry_and_identity_contract_is_manifest_enforced() -> None:
                 assert device.public_name.startswith(f"{technology.technology_id}_{family.family_id}_")
                 assert device.public_name not in names
                 names.add(device.public_name)
-    assert len(names) == 26
+    assert len(names) == 30
 
 
 def test_all_provenance_files_match_identity_model_and_spectre_boundary() -> None:
@@ -255,11 +265,15 @@ def test_apm045_threshold_and_gate_stack_domains_are_explicit() -> None:
     technology = load_catalog(ROOT).technology("apm045")
     threshold = technology.comparison_set("threshold")
     gate_stack = technology.comparison_set("gate_stack")
+    mixed_voltage = technology.comparison_set("mixed_voltage")
     assert threshold.kind == "threshold_family"
     assert threshold.members == ("vtl", "vtg", "vth")
     assert gate_stack.kind == "gate_stack"
     assert gate_stack.members == ("vtg", "thkox")
     assert gate_stack.common_overlap_profile == "common_overlap_1v0"
+    assert mixed_voltage.kind == "mixed_voltage"
+    assert mixed_voltage.members == ("vtg", "io18", "io25")
+    assert mixed_voltage.anchor == "vtg"
     thkox = technology.family("thkox")
     assert thkox.operating_profile().reference_vdd_v == 2.0
     overlap = thkox.operating_profile("common_overlap_1v0")

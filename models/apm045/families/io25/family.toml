@@ -1,0 +1,81 @@
+# SPDX-FileCopyrightText: APM contributors
+# SPDX-License-Identifier: Apache-2.0
+
+schema = "apm.family.v2"
+technology_id = "apm045"
+id = "io25"
+architecture = "planar_bulk"
+compact_model = "bsim4"
+gate_stack_id = "io25_oxide"
+gate_stack_class = "thick"
+threshold_class = "general"
+origin = "apm_authored"
+typical_uses = ["mixed_voltage_analog", "io"]
+default_operating_profile = "nominal_2v5"
+provenance = "models/apm045/provenance.toml"
+backend_bindings = ["models/apm045/families/io25/ngspice/binding.toml", "models/apm045/families/io25/spectre/binding.toml"]
+
+[[operating_profile]]
+id = "nominal_2v5"
+reference_vdd_v = 2.5
+origin = "apm_selected"
+purpose = "release characterization for the generic 2.5 V-class family"
+evidence = "APM epoch-3 terminal and circuit qualification at the declared profile; this is a behavior profile, not a reliability or safe-voltage rating."
+temperatures_c = [-40, 27, 85, 125]
+
+[[operating_profile]]
+id = "common_overlap_1v8"
+reference_vdd_v = 1.8
+origin = "apm_selected"
+purpose = "common-bias io18/io25 comparison"
+evidence = "APM-selected common 1.8 V terminal comparison scope; no reliability or foundry-correlation claim."
+temperatures_c = [-40, 27, 85, 125]
+
+[[operating_profile]]
+id = "common_overlap_1v0"
+reference_vdd_v = 1.0
+origin = "apm_selected"
+purpose = "common-bias mixed-voltage comparison"
+evidence = "APM-selected common 1.0 V terminal comparison scope; no reliability or foundry-correlation claim."
+temperatures_c = [-40, 27, 85, 125]
+
+[[device]]
+id = "nmos"
+polarity = "n"
+public_name = "apm045_io25_nmos"
+terminals = ["d", "g", "s", "b"]
+geometry_kind = "planar"
+parameters = ["w", "l"]
+lmin_m = 1.8e-7
+lmax_m = 2.0e-6
+wmin_m = 2.5e-7
+wmax_m = 1.6e-5
+default_w_m = 1.0e-6
+characterization_lengths_m = [1.8e-7, 3.6e-7, 7.2e-7]
+
+[[device]]
+id = "pmos"
+polarity = "p"
+public_name = "apm045_io25_pmos"
+terminals = ["d", "g", "s", "b"]
+geometry_kind = "planar"
+parameters = ["w", "l"]
+lmin_m = 1.8e-7
+lmax_m = 2.0e-6
+wmin_m = 2.5e-7
+wmax_m = 1.6e-5
+default_w_m = 1.0e-6
+characterization_lengths_m = [1.8e-7, 3.6e-7, 7.2e-7]
+
+[threshold]
+method = "constant_current"
+coefficient_a = 1.0e-7
+normalization = "coefficient * W/L"
+vout_low_v = 0.05
+vout_high_fraction_vdd = 0.8
+
+[characterization]
+idvg_points = 201
+idvd_points = 101
+y_frequencies_hz = [1.0e5, 1.0e6]
+dibl_validation_max_v_per_v = 0.40

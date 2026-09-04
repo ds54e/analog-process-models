@@ -75,8 +75,8 @@ def _family_records() -> list[tuple[Path, dict[str, Any], Path, dict[str, Any]]]
             )
         binding_path = spectre_paths[0]
         records.append((manifest_path, manifest, binding_path, _load(binding_path)))
-    if len(records) != 13:
-        raise RuntimeError(f"expected 13 Spectre family bindings, found {len(records)}")
+    if len(records) != 15:
+        raise RuntimeError(f"expected 15 Spectre family bindings, found {len(records)}")
     return records
 
 

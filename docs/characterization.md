@@ -144,8 +144,18 @@ matching normalization bases; a planar/FinFET relation is explicitly
 `not_reported_across_per_width_and_per_fin_bases`.
 
 `apm characterization-check --output DIR` is the release-oriented all-family
-flow. It characterizes all 13 families and produces an audited cross-family
+flow. It characterizes all 15 families and produces an audited cross-family
 summary through the same v2 comparison implementation.
+
+APM045's `mixed_voltage` comparison set uses the separately versioned
+`apm.mixed-voltage-comparison.v1` contract. It runs native-profile,
+common-bias, equal-physical-length, equal-relative-length, and equal-inversion
+views across VTG, io18, and io25 where applicable. Each target retains a
+bracketed `validated`, `target_not_reachable`, or `simulation_failed` state;
+there is no endpoint substitution. The report also hash-binds source cards,
+raw DC/Y data, terminal-order KCL checks, and public-wrapper intrinsic
+gate-charge trajectories. These terminal comparisons do not imply foundry,
+silicon, reliability, or layout-dependent accuracy.
 
 ## Spectre boundary
 

@@ -66,25 +66,28 @@ def _plan() -> dict:
     )
 
 
-def test_manifest_plan_has_exact_n2_logical_and_deduplicated_coverage() -> None:
+def test_manifest_plan_derives_v4_logical_and_deduplicated_coverage() -> None:
     plan = _plan()
     assert plan["catalog"]["technology_count"] == 5
-    assert plan["catalog"]["family_count"] == 13
-    assert plan["catalog"]["public_device_count"] == 26
-    assert len(plan["catalog"]["selectors"]) == 26
+    assert plan["catalog"]["family_count"] == 15
+    assert plan["catalog"]["public_device_count"] == 30
+    assert len(plan["catalog"]["selectors"]) == 30
     assert plan["logical_request_counts"] == {
-        DATASET_TEMPERATURE: 104,
-        DATASET_INVERSION: 130,
-        DATASET_LENGTH: 78,
+        DATASET_TEMPERATURE: 120,
+        DATASET_INVERSION: 150,
+        DATASET_LENGTH: 90,
         DATASET_NFIN: 18,
         COMPARISON_THRESHOLD_EQUAL_INVERSION: 18,
         COMPARISON_THRESHOLD_EQUAL_BIAS: 18,
         COMPARISON_CROSS_PROCESS: 10,
     }
-    assert plan["planned_logical_request_count"] == 376
-    assert plan["unique_request_count"] == 290
-    assert plan["deduplicated_logical_request_count"] == 86
-    assert len({job["request_id"] for job in plan["requests"]}) == 290
+    assert plan["logical_request_counts"] == plan[
+        "live_catalog_derived_logical_request_counts"
+    ]
+    assert plan["planned_logical_request_count"] == 424
+    assert plan["unique_request_count"] == 330
+    assert plan["deduplicated_logical_request_count"] == 94
+    assert len({job["request_id"] for job in plan["requests"]}) == 330
 
 
 def test_catalog_plan_is_deterministic_and_deduplicates_identical_physical_requests() -> None:

@@ -38,15 +38,15 @@ def test_benchmark_v2_values_are_frozen_and_release_placeholder_free() -> None:
     adapters = configuration["adapters"]
     assert variation["status"] == "frozen-real-tool-validated-2026-08-30"
     assert passives["status"] == "frozen-real-tool-validated-2026-08-30"
-    assert adapters["status"] == "real-tool-calibrated-all-26-devices-2026-08-30"
+    assert adapters["status"] == "real-tool-calibrated-all-30-devices-2026-09-04"
     assert variation["mos"]["global"]["vth_shift_sigma"] == 0.012
     assert variation["mos"]["global"]["drive_shift_sigma"] == 0.03
     assert variation["mos"]["local"]["vth_shift_sigma_ref"] == 0.008
     assert variation["mos"]["local"]["drive_shift_sigma_ref"] == 0.025
     assert passives["resistor"]["global_sigma"] == 0.02
     assert passives["capacitor"]["local_sigma_ref"] == 0.01
-    assert len(adapters["family"]) == 13
-    assert sum(len(item["device"]) for item in adapters["family"].values()) == 26
+    assert len(adapters["family"]) == 15
+    assert sum(len(item["device"]) for item in adapters["family"].values()) == 30
     for path in (
         ROOT / "variation/benchmark_v2.toml",
         ROOT / "variation/adapters_v2.toml",

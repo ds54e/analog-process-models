@@ -224,16 +224,16 @@ def _check_family_bindings(root: Path) -> dict[str, Any]:
                 "compact_model_native_name": binding.compact_model_native_name,
                 "devices": device_details,
             }
-    _require(len(family_details) == 13, "Spectre family coverage is not 13")
+    _require(len(family_details) == 15, "Spectre family coverage is not 15")
     _require(
-        sum(len(item["devices"]) for item in family_details.values()) == 26,
-        "Spectre device coverage is not 26",
+        sum(len(item["devices"]) for item in family_details.values()) == 30,
+        "Spectre device coverage is not 30",
     )
     _require(
         float(benchmark["mos"]["global"]["drive_shift_sigma"]) == 0.03,
         "Spectre generation is not bound to frozen v2 benchmark configuration",
     )
-    return {"family_count": 13, "device_count": 26, "families": family_details}
+    return {"family_count": 15, "device_count": 30, "families": family_details}
 
 
 def _check_variation(root: Path) -> dict[str, Any]:
@@ -411,7 +411,7 @@ def _check_model_only_scope(root: Path) -> dict[str, Any]:
                 not source_pattern.search(stripped),
                 f"source/testbench found in {path.relative_to(root)}",
             )
-    _require(len(artifacts) == 31, f"expected 31 Spectre-scope files, found {len(artifacts)}")
+    _require(len(artifacts) == 35, f"expected 35 Spectre-scope files, found {len(artifacts)}")
     return {
         "artifact_count": len(artifacts),
         "artifacts": [str(path.relative_to(root)) for path in sorted(artifacts)],
@@ -434,7 +434,7 @@ def _check_documentation(root: Path) -> dict[str, Any]:
         "variations=process",
         "variations=mismatch",
         "variations=all",
-        "all 13",
+        "all 15",
         "not been parsed",
         "Virtuoso",
         "user-managed",

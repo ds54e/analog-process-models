@@ -32,7 +32,7 @@ def test_all_spectre_artifacts_pass_static_gate(tmp_path: Path) -> None:
     assert all(report["checks"].values())
     persisted = json.loads(Path(report["report_path"]).read_text(encoding="utf-8"))
     assert persisted["release_gate"] == "spectre.model_only"
-    assert persisted["details"]["model_only_scope"]["artifact_count"] == 31
+    assert persisted["details"]["model_only_scope"]["artifact_count"] == 35
 
 
 def test_spectre_public_names_match_all_family_ngspice_names() -> None:
@@ -47,7 +47,7 @@ def test_spectre_public_names_match_all_family_ngspice_names() -> None:
             for public_name in ngspice_names:
                 assert f"subckt {public_name} (d g s b)" in spectre
             count += 1
-    assert count == 13
+    assert count == 15
 
 
 def test_spectre_generation_is_byte_reproducible() -> None:

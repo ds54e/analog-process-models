@@ -2,7 +2,7 @@
 
 ## Status: EXPERIMENTAL / UNVERIFIED
 
-APM v2 supplies model files for all 13 Electrical Families and 26 public MOS
+APM v4 supplies model files for all 15 Electrical Families and 30 public MOS
 devices. Cadence Spectre is not available in the reference environment, so the
 files have **not been parsed or simulated by Spectre**. APM does not claim
 parse validity, numerical agreement with ngspice, or compatibility with any
@@ -107,7 +107,7 @@ model blocks, changes only the OpenVAF module name `psp103va` to Spectre's
 native `psp103`, and fixes wrapper-only nominal inputs. It preserves upstream
 parameter values and the Apache-2.0 notice.
 
-`tools/generate_spectre_v2.py` deterministically emits all 13 family wrappers,
+`tools/generate_spectre_v2.py` deterministically emits all 15 family wrappers,
 the BSIM-CMG transcription, benchmark variation sections, and benchmark
 passives from the family manifests and frozen v2 TOML specifications. Audit
 both generated layers with:

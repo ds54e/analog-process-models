@@ -2,13 +2,13 @@
 # SPDX-License-Identifier: Apache-2.0
 
 schema = "apm.benchmark-adapters.v2"
-status = "real-tool-calibrated-all-26-devices-2026-08-30"
+status = "real-tool-calibrated-all-30-devices-2026-09-04"
 
 [method]
 simulator = "ngspice 47"
 temperature_c = 27.0
-required_family_count = 13
-required_device_count = 26
+required_family_count = 15
+required_device_count = 30
 reference_length = "2*device-specific Lmin"
 reference_vout = "0.5*family-native VDD"
 reference_vctrl = "nominal characterization grid point nearest gm/Id=15 1/V"
@@ -304,6 +304,100 @@ drive_fit_linear = 0.627843906141977
 drive_fit_quadratic = -0.250836320458491
 drive_fit_max_residual_fraction = 2.15510864100571e-4
 ngspice_device_path_template = "@m.{instance}.mapm022_svt_core"
+
+[family."apm045/io18"]
+technology_id = "apm045"
+family_id = "io18"
+family_manifest_sha256 = "ff967ffb32d02f24a33352db08e2a0e77b38506bddca7d068142f480a078d625"
+architecture = "planar_bulk"
+compact_model = "bsim4"
+vdd_v = 1.8
+vout_reference_v = 0.9
+threshold_coefficient_a = 1.0e-7
+vth_raw_parameter = "delvto"
+drive_raw_parameter = "mulu0"
+drive_raw_nominal = 1.0
+
+[family."apm045/io18".device.nmos]
+polarity = "n"
+public_device = "apm045_io18_nmos"
+reference_l_m = 1.6e-7
+reference_w_m = 1.0e-6
+vctrl_reference_v = 0.612
+nominal_gm_over_id_per_v = 14.856018527015378
+nominal_reference_id_a = 1.1289575166689e-5
+nominal_threshold_magnitude_v = 0.4506056337619602
+vth_fit_linear = 1.0346163766628573
+vth_fit_quadratic = -0.008022147457998206
+vth_fit_max_residual_v = 1.8136439270767524e-5
+drive_fit_linear = 0.9032879675609736
+drive_fit_quadratic = -0.1002432424317137
+drive_fit_max_residual_fraction = 1.4935118023362559e-5
+ngspice_device_path_template = "@m.{instance}.mapm045_io18_core"
+
+[family."apm045/io18".device.pmos]
+polarity = "p"
+public_device = "apm045_io18_pmos"
+reference_l_m = 1.6e-7
+reference_w_m = 1.0e-6
+vctrl_reference_v = 0.621
+nominal_gm_over_id_per_v = 15.187630404158394
+nominal_reference_id_a = 3.96813510784177e-6
+nominal_threshold_magnitude_v = 0.4948877542249253
+vth_fit_linear = -1.0377600440050798
+vth_fit_quadratic = -0.03167575731580512
+vth_fit_max_residual_v = 1.4430901359552273e-5
+drive_fit_linear = 0.9592189979766945
+drive_fit_quadratic = -0.05323893746395895
+drive_fit_max_residual_fraction = 5.454712751401525e-6
+ngspice_device_path_template = "@m.{instance}.mapm045_io18_core"
+
+[family."apm045/io25"]
+technology_id = "apm045"
+family_id = "io25"
+family_manifest_sha256 = "1b0a6919f23a0ef50b193650f706eed43683841c57c0cd9d0fa7c45155a0a810"
+architecture = "planar_bulk"
+compact_model = "bsim4"
+vdd_v = 2.5
+vout_reference_v = 1.25
+threshold_coefficient_a = 1.0e-7
+vth_raw_parameter = "delvto"
+drive_raw_parameter = "mulu0"
+drive_raw_nominal = 1.0
+
+[family."apm045/io25".device.nmos]
+polarity = "n"
+public_device = "apm045_io25_nmos"
+reference_l_m = 3.6e-7
+reference_w_m = 1.0e-6
+vctrl_reference_v = 0.7125
+nominal_gm_over_id_per_v = 15.225110574742988
+nominal_reference_id_a = 1.90577652980674e-6
+nominal_threshold_magnitude_v = 0.5906196526514693
+vth_fit_linear = 1.0265736281528215
+vth_fit_quadratic = -0.0018656358971746961
+vth_fit_max_residual_v = 1.0927334111905662e-5
+drive_fit_linear = 0.9754088599880691
+drive_fit_quadratic = -0.03205262474684015
+drive_fit_max_residual_fraction = 4.298223061943718e-6
+ngspice_device_path_template = "@m.{instance}.mapm045_io25_core"
+
+[family."apm045/io25".device.pmos]
+polarity = "p"
+public_device = "apm045_io25_pmos"
+reference_l_m = 3.6e-7
+reference_w_m = 1.0e-6
+vctrl_reference_v = 0.75
+nominal_gm_over_id_per_v = 15.074549617572519
+nominal_reference_id_a = 9.482588548350786e-7
+nominal_threshold_magnitude_v = 0.6592677621639869
+vth_fit_linear = -1.030102393097642
+vth_fit_quadratic = -0.00198566542485649
+vth_fit_max_residual_v = 1.1425889303372933e-5
+drive_fit_linear = 0.992558269817733
+drive_fit_quadratic = -0.015955581273746872
+drive_fit_max_residual_fraction = 6.815309267965697e-6
+ngspice_device_path_template = "@m.{instance}.mapm045_io25_core"
 
 [family."apm045/thkox"]
 technology_id = "apm045"

@@ -8,8 +8,8 @@ The frozen v2 contracts are:
 
 - `variation/benchmark_v2.toml` — distributions, correlations, corners, and
   observable-intent semantics;
-- `variation/adapters_v2.toml` — real-ngspice-calibrated mappings for all 13
-  families and 26 devices; and
+- `variation/adapters_v2.toml` — real-ngspice-calibrated mappings for all 15
+  families and 30 devices; and
 - `passives/benchmark_v2.toml` — technology-neutral Rbench/Cbench behavior.
 
 Persisted benchmark rows use `variation_origin = "benchmark"`.

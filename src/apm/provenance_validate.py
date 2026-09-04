@@ -311,6 +311,111 @@ def _audit_redistribution(root: Path) -> dict[str, Any]:
     return details
 
 
+def _audit_apm045_mixed_voltage_generation(root: Path) -> dict[str, Any]:
+    """Bind the independently authored io18/io25 cards to public generation evidence."""
+
+    provenance_path = root / "models/apm045/provenance.toml"
+    provenance = _load_toml(provenance_path)
+    generation = provenance.get("apm_generation", {})
+    _require(generation.get("scope") == "io18/io25 only", "apm045: bad generation scope")
+    _require(
+        generation.get("origin") == "independently_apm_authored",
+        "apm045: io18/io25 authorship boundary is missing",
+    )
+    _require(generation.get("license") == "Apache-2.0", "apm045: bad authored license")
+    for field, expected in (
+        ("public_inputs_only", True),
+        ("private_or_proprietary_pdk_input_used", False),
+        ("foundry_parameter_copy_used", False),
+        ("epistemic_ensemble_is_process_variation", False),
+        ("canonical_cards_byte_identically_regenerable", True),
+    ):
+        _require(generation.get(field) is expected, f"apm045: generation field {field} drifted")
+
+    bound_files: dict[str, dict[str, str]] = {}
+    for path_field, hash_field in (
+        ("generator_contract", "generator_contract_sha256"),
+        ("qualification_contract", "qualification_contract_sha256"),
+        ("generation_evidence", "generation_evidence_sha256"),
+        ("qualification_evidence", "qualification_evidence_sha256"),
+    ):
+        relative = generation.get(path_field)
+        expected_hash = generation.get(hash_field)
+        _require(isinstance(relative, str) and bool(relative), f"apm045: missing {path_field}")
+        _require(
+            isinstance(expected_hash, str) and SHA256_PATTERN.fullmatch(expected_hash) is not None,
+            f"apm045: invalid {hash_field}",
+        )
+        path = (root / relative).resolve()
+        try:
+            path.relative_to(root.resolve())
+        except ValueError as error:
+            raise ProvenanceValidationError(f"apm045: {path_field} escapes repository") from error
+        _require(path.is_file(), f"apm045: missing bound generation file {relative}")
+        _require(_sha256(path) == expected_hash, f"apm045: hash mismatch for {relative}")
+        bound_files[path_field] = {"path": relative, "sha256": expected_hash}
+
+    qualification = _load_toml(root / generation["qualification_contract"])
+    _require(
+        qualification.get("generation_contract_sha256")
+        == generation["generator_contract_sha256"],
+        "apm045: qualification contract does not bind the generation contract",
+    )
+    generation_evidence = json.loads(
+        (root / generation["generation_evidence"]).read_text(encoding="utf-8")
+    )
+    qualification_evidence = json.loads(
+        (root / generation["qualification_evidence"]).read_text(encoding="utf-8")
+    )
+    _require(
+        generation_evidence.get("status") == "validated"
+        and qualification_evidence.get("status") == "validated",
+        "apm045: generation or qualification evidence is not passing",
+    )
+    _require(
+        generation_evidence.get("bound_inputs", {})
+        .get("public_evidence_matrix_sha256")
+        == _sha256(root / "models/apm045/mixed_voltage_evidence.toml"),
+        "apm045: public evidence matrix binding mismatch",
+    )
+    selected = qualification_evidence.get("canonical_selection", {})
+    catalog = load_catalog(root)
+    card_hashes: dict[str, dict[str, str]] = {}
+    for family_id in ("io18", "io25"):
+        family = catalog.family("apm045", family_id)
+        _require(family.origin == "apm_authored", f"{family.selector}: origin drifted")
+        family_selection = selected.get(family_id, {})
+        per_polarity: dict[str, str] = {}
+        for polarity in ("n", "p"):
+            path = (
+                root
+                / "models/apm045/families"
+                / family_id
+                / "ngspice"
+                / f"apm045_{family_id}_{polarity}.inc"
+            )
+            digest = _sha256(path)
+            _require(
+                family_selection.get(f"{polarity}_card_sha256") == digest,
+                f"{family.selector}: canonical {polarity.upper()} card binding mismatch",
+            )
+            per_polarity[polarity] = digest
+        card_hashes[family_id] = per_polarity
+    _require(
+        selected.get("all_canonical_cards_byte_identical_to_frozen_candidates") is True,
+        "apm045: canonical card regeneration evidence is not affirmative",
+    )
+    return {
+        "origin": "independently_apm_authored",
+        "public_inputs_only": True,
+        "bound_files": bound_files,
+        "canonical_card_sha256": card_hashes,
+        "kernel": generation.get("kernel"),
+        "canonical_selection": generation.get("canonical_selection"),
+        "epistemic_ensemble_is_process_variation": False,
+    }
+
+
 def _audit_independent_models(root: Path) -> dict[str, Any]:
     catalog = load_catalog(root)
     expectations = {
@@ -397,15 +502,20 @@ def _audit_catalog_distribution(root: Path) -> dict[str, Any]:
                             f"{family.selector}/{binding.backend_id}: source escapes repository"
                         ) from error
                     _require(path.is_file(), f"missing bound model source: {path}")
-    _require(backend_counts == {"ngspice": 13, "spectre": 13}, "backend coverage drifted")
-    contract = _load_toml(root / "validation/release_gates.toml")
+    _require(backend_counts == {"ngspice": 15, "spectre": 15}, "backend coverage drifted")
+    v3_contract = _load_toml(root / "validation/release_gates.toml")
+    v4_contract = _load_toml(root / "validation/release_gates_v4.toml")
     _require(
-        contract.get("distribution", {}).get("separate_transistor_model_download_required")
+        v3_contract.get("distribution", {}).get("separate_transistor_model_download_required")
         is False,
-        "release contract does not require a self-contained transistor distribution",
+        "frozen v3 contract does not require a self-contained transistor distribution",
+    )
+    _require(
+        v4_contract.get("distribution", {}).get("generated_binaries_committed") is False,
+        "v4 distribution contract permits committed generated binaries",
     )
     return {
-        "family_count": 13,
+        "family_count": 15,
         "backend_bindings": backend_counts,
         "bound_source_count": len(source_paths),
         "all_bound_sources_inside_repository": True,
@@ -525,6 +635,7 @@ def validate_provenance(output: Path, *, root: Path = ROOT) -> dict[str, Any]:
     functions: tuple[tuple[str, Callable[[Path], dict[str, Any]]], ...] = (
         ("complete_exact_file_hash_inventories", _audit_file_inventories),
         ("third_party_redistribution_and_license_boundaries", _audit_redistribution),
+        ("apm045_mixed_voltage_public_generation_boundary", _audit_apm045_mixed_voltage_generation),
         ("apm022_apm016f_independent_authorship", _audit_independent_models),
         ("catalog_model_sources_self_contained", _audit_catalog_distribution),
         ("release_assets_tracked_and_generated_outputs_excluded", _audit_tracked_distribution),

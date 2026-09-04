@@ -16,6 +16,7 @@ from apm.compare import (
     _relations,
     compare_families,
 )
+from apm.mixed_voltage_compare import _load_configuration, _source_identities
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -124,6 +125,36 @@ def test_comparison_cli_and_catalog_sets_are_concrete_contracts(tmp_path: Path) 
         "vtg",
         "thkox",
     )
+    assert catalog.technology("apm045").comparison_set("mixed_voltage").members == (
+        "vtg",
+        "io18",
+        "io25",
+    )
+
+
+def test_mixed_voltage_comparison_input_is_frozen_and_source_bound() -> None:
+    configuration = _load_configuration(ROOT)
+    assert configuration["state"] == "FROZEN_AFTER_GRID_REFINEMENT"
+    assert configuration["sweep_points"] == 501
+    assert configuration["development_refinement"]["acceptance_threshold_changed"] is False
+    assert {item["id"] for item in configuration["view"]} == {
+        "native_relative_geometry",
+        "common_1v0_equal_physical_l",
+        "common_1v0_equal_relative_l",
+        "common_1v8_io18_vs_io25_equal_physical_l",
+        "common_1v8_io18_vs_io25_equal_relative_l",
+    }
+    catalog = load_catalog(ROOT)
+    technology = catalog.technology("apm045")
+    identities = _source_identities(
+        ROOT,
+        [technology.family(item) for item in ("vtg", "io18", "io25")],
+        configuration,
+    )
+    assert set(identities) == {"apm045/vtg", "apm045/io18", "apm045/io25"}
+    assert all(len(item["source_identity_id"]) == 64 for item in identities.values())
+    assert identities["apm045/io18"]["sealed_canonical_selection"]["selected_seed"] == 54003
+    assert identities["apm045/io25"]["sealed_canonical_selection"]["selected_seed"] == 54002
 
 
 def test_cross_process_relations_do_not_mix_planar_and_finfet_bases() -> None:

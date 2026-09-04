@@ -1,0 +1,88 @@
+# SPDX-FileCopyrightText: APM contributors
+# SPDX-License-Identifier: Apache-2.0
+
+schema = "apm.mixed-voltage-comparison-input.v1"
+state = "FROZEN_AFTER_GRID_REFINEMENT"
+declared_date = "2026-09-04"
+technology_id = "apm045"
+comparison_set_id = "mixed_voltage"
+temperature_c = 27
+width_m = 1.0e-6
+sweep_points = 501
+charge_trajectory_points = 41
+terminal_y_frequency_hz = 1.5e6
+fixed_vctrl_fraction_vdd = 0.5
+fixed_vout_fraction_vdd = 0.5
+gmid_targets_per_v = [5.0, 10.0, 15.0, 20.0]
+gmid_target_relative_tolerance_max = 0.03
+qualified_vctrl_fraction_min = 0.15
+qualified_vctrl_fraction_max = 0.92
+threshold_relative_current_floor = 0.003
+absolute_current_floor_a = 1.0e-15
+finite_difference_relative_max = 0.02
+native_oracle_relative_max = 0.02
+y_kcl_normalized_residual_max = 1.0e-6
+minimum_reachable_targets_per_family_polarity_view = 2
+qualification_evidence = "validation/evidence/v4_mixed_voltage_qualification.json"
+qualification_evidence_sha256 = "e0f867e3539434dc61dedf0e10a56b76cff092c9f43aaa3608bc153481ff9b9b"
+
+[development_refinement]
+initial_sweep_points = 201
+initial_maximum_gm_convergence_relative = 0.02838348393552707
+fixed_acceptance_maximum = 0.02
+selected_sweep_points = 501
+acceptance_threshold_changed = false
+rationale = "The 201-point development execution missed only io25 native-profile gm/Id=20 finite-difference convergence; the comparison grid was refined before release evidence generation."
+
+[claim_boundary]
+device_level_only = true
+foundry_correlated = false
+silicon_calibrated = false
+reliability_qualified = false
+layout_dependent_charge = false
+process_noise_calibrated = false
+real_spectre_qualified = false
+forced_gm_over_gds_order = false
+forced_noise_order = false
+forced_leakage_order = false
+forced_total_gate_charge_order = false
+
+[[view]]
+id = "native_relative_geometry"
+families = ["vtg", "io18", "io25"]
+profiles = { vtg = "nominal", io18 = "nominal_1v8", io25 = "nominal_2v5" }
+geometry = "equal_relative_l"
+l_over_lmin = 2.0
+metric_basis = "native-profile terminal metrics at family-relative geometry"
+
+[[view]]
+id = "common_1v0_equal_physical_l"
+families = ["vtg", "io18", "io25"]
+profiles = { vtg = "common_overlap_1v0", io18 = "common_overlap_1v0", io25 = "common_overlap_1v0" }
+geometry = "equal_physical_l"
+l_m = 4.5e-7
+metric_basis = "common-1.0-V terminal metrics at equal physical length"
+
+[[view]]
+id = "common_1v0_equal_relative_l"
+families = ["vtg", "io18", "io25"]
+profiles = { vtg = "common_overlap_1v0", io18 = "common_overlap_1v0", io25 = "common_overlap_1v0" }
+geometry = "equal_relative_l"
+l_over_lmin = 2.5
+metric_basis = "common-1.0-V terminal metrics at equal L/Lfloor"
+
+[[view]]
+id = "common_1v8_io18_vs_io25_equal_physical_l"
+families = ["io18", "io25"]
+profiles = { io18 = "nominal_1v8", io25 = "common_overlap_1v8" }
+geometry = "equal_physical_l"
+l_m = 4.0e-7
+metric_basis = "common-1.8-V terminal metrics at equal physical length"
+
+[[view]]
+id = "common_1v8_io18_vs_io25_equal_relative_l"
+families = ["io18", "io25"]
+profiles = { io18 = "nominal_1v8", io25 = "common_overlap_1v8" }
+geometry = "equal_relative_l"
+l_over_lmin = 2.25
+metric_basis = "common-1.8-V terminal metrics at equal L/Lfloor"
