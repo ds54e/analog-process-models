@@ -2,35 +2,35 @@
   "schema": "apm.v4-generation-calibration-evidence.v1",
   "milestone": "V4-M1-CALIBRATION",
   "status": "validated",
-  "created_utc": "2026-09-04T12:26:43.059953+00:00",
-  "implementation_commit": "bcc6f5ad6f1fec348811884f42e02e95620fc17b",
+  "created_utc": "2026-09-04T13:16:55.165606+00:00",
+  "implementation_commit": "6773e0c6d8382723e9041a8d19034173e5242875",
   "release_claim": false,
   "completion_state": "MIXED_VOLTAGE_CALIBRATION_CANDIDATES_FROZEN",
   "claim_boundary": "This is calibration-only evidence. It freezes deterministic io18/io25 candidate cards before first evaluation of the committed sealed device, charge, terminal-Y, and circuit holdouts. It does not promote a public model or satisfy a device, distinctness, circuit, or deterministic-canonical-card gate.",
   "full_report": {
-    "generated_path": ".apm/results/v4-generation-epoch1-calibration-exact-bcc6f5a/report.json",
-    "sha256": "02bd9854d55eef5255b7b3e16524518a4c479fe192a0128671cd128ad9bfa938",
+    "generated_path": ".apm/results/v4-generation-epoch1-calibration-exact-6773e0c/report.json",
+    "sha256": "aaefa93100cf8afd75cb44c8a58bd4f6c459bdc8ff4a24c3965973d6646bc8b7",
     "status": "pass",
     "simulator_evaluation_count": 345,
     "retention": "ignored reproducible full result"
   },
   "repeat_execution": {
-    "development_report_sha256": "a9f0be8eb39dffa3b9d22e24793dbd0058aee03262a81b87573e15a77ab632b2",
-    "exact_commit_report_sha256": "02bd9854d55eef5255b7b3e16524518a4c479fe192a0128671cd128ad9bfa938",
+    "development_report_sha256": "12538b2d0d55841bfc538eedf728f3f9bba69ac0ca9665042d2144fbf57567a6",
+    "exact_commit_report_sha256": "aaefa93100cf8afd75cb44c8a58bd4f6c459bdc8ff4a24c3965973d6646bc8b7",
     "canonical_content_identical_excluding_created_utc": true,
-    "canonical_content_sha256": "6065dbf45bcd1892d1c3e6efb2f482740b2d368a8ad0f0d924010466e9b98667"
+    "canonical_content_sha256": "c09671aff8762ebf79ae6d0a71aa3d5cc043015dfac6120972b6e6a8968619ab"
   },
   "bound_inputs": {
     "generation_contract": {
       "path": "tools/modelgen/apm045_mixed_voltage/generation_epoch_1.toml",
-      "sha256": "7b955ab546ea7a65150f4ee01898a362def2d94516bbb35f60b59e8f7b618f93",
+      "sha256": "3d98bd03a27e5caaa3a7db01015e1cca803ddd21e8249e03069c62e6648e9859",
       "epoch": 1,
       "state": "SEALED_BEFORE_FINAL_CANDIDATE_GENERATION"
     },
     "kernel": {
       "path": "tools/modelgen/apm045_mixed_voltage/kernel.py",
-      "identity": "apm.modelgen.observable-kernel@1.1.0",
-      "sha256": "469b139931a2ad064e3cf40281fd7a81214c610ca26fb0753506dddf7304516c"
+      "identity": "apm.modelgen.observable-kernel@1.2.0",
+      "sha256": "005e6b9f8ebcf704e21b7f1d2fb736e9a1c3fa3e20be49303172891041c5ff5c"
     },
     "synthesis": {
       "path": "tools/modelgen/apm045_mixed_voltage/synthesize_families.py",
@@ -90,28 +90,35 @@
   },
   "card_hashes": {
     "io18": {
-      "52001": {"n": "7a9c5e598354a6b83f96fc791091ed6747b08f05f2827b60845854b03adbd871", "p": "cae277e1894515858b9c30f0c4cb051533078069750473851f1cf0edd16e7e2b"},
-      "52002": {"n": "81aa4f7e6b682a4d38ad5af52878345dbf0c5179b0c9cb24a30199d65c7e297d", "p": "a25033492c0cb8d9fdc751b3c33f94abeb19810dd93909cda73e69cbbaa4257c"},
-      "52003": {"n": "9d2e72e06f56264256a613fcddfcd6052f76171c7f31c074b8efc4a8bc819447", "p": "b7bfaa274b266827a6c0854251a3d89a5ac23b7f2550e6fabcdb7c72cec70dff"},
-      "52004": {"n": "a54843389755d88bc0cbe8164769e87ce076ccca7647385ddde1ba6bdd34fb59", "p": "f729a81d4012cea3501d53f4c7f4aa3c77966408a67416382b612732eb6ff26c"},
-      "52005": {"n": "a44ce38fbcd03ac3a52e19a430b7f9704c0deaed4918956cbb27c1b13830ff3c", "p": "5ed74c31fabcd748036f1d3250b87cb306cbd6e3a7d0f7fdc29cd8a06e8d8c24"}
+      "52001": {"n": "17f24825658230a0e2aa46197535ef758a19e7b82bb4fec54d705d3117f2ad88", "p": "2c47bcbf3e57045a57acf282665ccc6232cc1a6444a4fcf79a03d8d78bb3f1c8"},
+      "52002": {"n": "d42a4cf23b0e112f7e4cc728e734edf792870141c061897917c9ecdffcc6c6ea", "p": "d97dcc25000b38c0fd79aeaf6dde7411ba340bd7abb78772217ef2ea4607c85e"},
+      "52003": {"n": "e0c2cfca016a2f3db4dd5c967c179de0d8b60eadd5f16dab72d2f75118d5bc30", "p": "ee7e05b8be366ef3c0da182877b098f6f51f20bed8510c046663ab86048f7e3b"},
+      "52004": {"n": "e0531b574df39540e17798504a482d495cf06e8d4e4d1db339280351f8b76d9d", "p": "483d5baf7c06ef41be7a05d7c2a8af1c22e8b604679478c9ec82dbf82d567db1"},
+      "52005": {"n": "516ef79b3f39d4fabfab11ac2c86572534be52314bf371f1a97ea13414225d5f", "p": "4c08819f21b6be4288ff7e235dbd8d794e17219f980dac3b7da39bb99efac0c9"}
     },
     "io25": {
-      "52001": {"n": "2ad3090a95045bda26e20202c48c3cf6856150d42a6915d02d7f9ceaf479d7e1", "p": "e9d12182ee3952fadf6016896ea488d4809a079237fc342ccca3c07d258ba6e2"},
-      "52002": {"n": "3ba1a016b0de09a882955248d0f26ce0d7eb0a5f6ff8804b02ac3820d9d1a46f", "p": "1c944b113174cea3e66f312edb9a1e6f414bc92a716e616634e8311627c05785"},
-      "52003": {"n": "1f99994afd395c5310e3ee16fbf717315eb448a690648d5df222aedd26ae48be", "p": "fcbb8bdd022ddf5e6633aecc816f22f6fcab4d70ae9303ff779005f97798716f"},
-      "52004": {"n": "041960d0a9c77941ad57e481500d4ce860202f1319cb07254d532a91dfc4fc12", "p": "b5cc1eaa3b366e452d3b8683d746d4ad76d62882d233f90edd52fbaf8d6171c1"},
-      "52005": {"n": "9664fad53add4247ac7e65fbcdbaaf162b6c83590cb9c38b18aa3e0cbb0d6999", "p": "e7b4271b92f8bdeaafcc563f25111e84357c72bbee8b62f8919b38ae01f7c02e"}
+      "52001": {"n": "af91ab3f64070019e51c51eddde1ddeb88766c6f1e409cc2a076c9d7f5bf00ec", "p": "5d5864a92d1666661c16d08a226aff621a2cacf006837cfc579e53dd1bab0c18"},
+      "52002": {"n": "d155cb8f20d3bcb30d1d043c5f7bc736e235c9b2dd5dd4c896bc0cdb9db1897f", "p": "7cd0f87d40e5d77bd433f9c27589adea57265792c4d59eca3baad41b344bd760"},
+      "52003": {"n": "6005e19e1eaa7df2f6acecd470ca3fba53ddbb722fd838d7ef70a5733a9114de", "p": "174417447f546f8a6e656664d048e1f2c8f00f04c40d1ada19e34be495a33d6e"},
+      "52004": {"n": "776906571e09a3792ef07cf0180fab9569944d74ca9c35f6a5ef782411a0d718", "p": "2602c89d7b1825678b309653ca4ce6f5b55d64771212c8ddf5b6078e00109d06"},
+      "52005": {"n": "f1f8840dc4a44d0a3d70422fd56dc0dccc449895ca54ca69017f894a62bfbfdb", "p": "0f840092b47dd0f00b5c92100dbed9b977774205269296de686f6dcef82fd3c7"}
     }
   },
   "commands": [
     {
-      "command": ".venv/bin/python -m tools.modelgen.apm045_mixed_voltage.synthesize_families --calibration-only --output .apm/results/v4-generation-epoch1-calibration-exact-bcc6f5a --replace-output",
+      "command": ".venv/bin/python -m tools.modelgen.apm045_mixed_voltage.synthesize_families --calibration-only --output .apm/results/v4-generation-epoch1-calibration-exact-6773e0c --replace-output",
       "status": "pass"
     },
-    {"command": ".venv/bin/pytest -q", "status": "pass", "result": "104 passed"},
+    {"command": ".venv/bin/pytest -q", "status": "pass", "result": "106 passed"},
     {"command": ".venv/bin/ruff check .", "status": "pass"},
-    {"command": ".venv/bin/reuse lint", "status": "pass", "result": "262/262 files licensed"},
+    {"command": ".venv/bin/reuse lint", "status": "pass", "result": "267/267 files licensed"},
     {"command": "audit_distribution(Path.cwd())", "status": "pass"}
-  ]
+  ],
+  "subsequent_qualification": {
+    "epoch": 1,
+    "status": "failed_closed",
+    "evidence": "validation/evidence/v4_qualification_epoch1_failure.json",
+    "candidate_parameters_repaired_after_unseal": false,
+    "release_gate_promotion": false
+  }
 }

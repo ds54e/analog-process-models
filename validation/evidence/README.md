@@ -33,7 +33,12 @@ complete real-ngspice four-record reconstruction report while explicitly
 making no io18/io25 device or release claim. The separately bounded
 calibration-only generation epoch is recorded in
 `v4_generation_epoch1_calibration.json`; its candidate and sealed-definition
-hashes are pre-holdout evidence, not public-family promotion.
+hashes are pre-holdout evidence, not public-family promotion. Epoch 1's first
+unseal failed its stricter io25 all-curve gm/Id-reachability rule and is
+preserved in `v4_qualification_epoch1_failure.json`. That compact record binds
+the clean unseal receipt and full failure report, forbids reuse or repair, and
+does not promote its passing subdomains. A later attempt must use a new recorded
+generation epoch, new seeds, and a newly sealed holdout definition.
 
 ## Status vocabulary
 

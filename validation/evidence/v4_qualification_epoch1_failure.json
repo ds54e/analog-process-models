@@ -1,0 +1,100 @@
+{
+  "schema": "apm.v4-mixed-voltage-qualification-failure.v1",
+  "status": "failed_closed",
+  "created_utc": "2026-09-04T13:35:06.188070+00:00",
+  "qualification_epoch": 1,
+  "generation_epoch": 1,
+  "implementation_commit": "6773e0c6d8382723e9041a8d19034173e5242875",
+  "release_gate_promotion": false,
+  "failure_classification": {
+    "report_failure_state": "EPISTEMIC_UNCERTAINTY_TOO_WIDE",
+    "root_cause_state": "IO25_CONTRACT_INCONSISTENT",
+    "root_cause": "The epoch-1 sealed method required every intermediate gm/Id target at every holdout curve. All ten io25 N/P candidates explicitly returned target_not_reachable for the 17.5 1/V target on subsets of the 85 C and 125 C qualified-current regions.",
+    "method_finding": "The general v4 result contract permits explicit target_not_reachable states and near-off exclusion, but epoch 1 sealed a stricter all-points reachability rule. That frozen rule is not reinterpreted after unsealing.",
+    "candidate_parameter_failure_inferred": false
+  },
+  "full_report": {
+    "generated_path": ".apm/results/v4-qualification-epoch1-unsealed-exact-6773e0c/report.json",
+    "sha256": "5c98f81b7a6123734fa9773c55b54cd4ab100b6f83757dd2fa9b960d24b25cc0",
+    "status": "fail",
+    "retention": "ignored local full result; compact failure evidence is tracked"
+  },
+  "unseal_receipt": {
+    "generated_path": ".apm/results/v4-qualification-epoch1-unsealed-exact-6773e0c/unseal_receipt.json",
+    "sha256": "399b92658862aa6f19c5625681d69ee916a008139987fdab839ad3a32a1bc58d",
+    "clean_commit": true,
+    "definitions_unsealed": [
+      "sealed_device_holdout",
+      "sealed_charge_holdout",
+      "terminal_y.holdout",
+      "sealed_circuit_holdout"
+    ]
+  },
+  "bound_inputs": {
+    "qualification_input": {
+      "path": "tools/modelgen/apm045_mixed_voltage/qualification_epoch_1.toml",
+      "sha256": "4e27337ee2d7ada4b4aa2d4e671e2d3c0376e2c01b338b52a6fe5a40d96a0689"
+    },
+    "generation_contract": {
+      "path": "tools/modelgen/apm045_mixed_voltage/generation_epoch_1.toml",
+      "sha256": "3d98bd03a27e5caaa3a7db01015e1cca803ddd21e8249e03069c62e6648e9859"
+    },
+    "calibration_report": {
+      "generated_path": ".apm/results/v4-generation-epoch1-calibration-exact-6773e0c/report.json",
+      "sha256": "aaefa93100cf8afd75cb44c8a58bd4f6c459bdc8ff4a24c3965973d6646bc8b7",
+      "canonical_content_sha256": "c09671aff8762ebf79ae6d0a71aa3d5cc043015dfac6120972b6e6a8968619ab"
+    },
+    "qualification_implementation_sha256": "b20fb80ab6d567401cb62facc1a4dac88653bece976d1d063460a198ce41e4f6",
+    "terminal_observables_implementation_sha256": "68f8070f170f0cc66c006c30976b6b8bee63a61e10d9ea0460c3632304e56477",
+    "circuit_fixtures_implementation_sha256": "a17a36d1d0c9458f14757fe5dc85e9bbd1fdc8355708c5504bbf9ee70b2d9677"
+  },
+  "sealed_definition_sha256": {
+    "sealed_device_holdout": "5000c3366c9729448d68c8db98b39a5c4ca05b2f6e366d58feedf04173e6ff0c",
+    "sealed_charge_holdout": "15988089e75155d77612e675cd2f0e243c0514c87db45aa2ec2cfdb9ac32b884",
+    "sealed_circuit_holdout": "50c9cb18c826b337e1b91a3519c879c3d57eb12cff4dcb7dd2684fafedaa116b"
+  },
+  "observed_outcome": {
+    "candidate_seeds": [
+      52001,
+      52002,
+      52003,
+      52004,
+      52005
+    ],
+    "io18_individually_qualified_seed_pairs": 5,
+    "io25_individually_qualified_seed_pairs": 0,
+    "domain_pass_counts": {
+      "body_effect": 20,
+      "sealed_charge_holdout": 20,
+      "sealed_device_holdout": 10,
+      "terminal_y": 20
+    },
+    "domain_fail_counts": {
+      "body_effect": 0,
+      "sealed_charge_holdout": 0,
+      "sealed_device_holdout": 10,
+      "terminal_y": 0
+    },
+    "circuit_candidate_pair_pass_count": 10,
+    "io25_target_not_reachable_count": 168,
+    "io25_target_not_reachable_targets_per_v": [
+      17.5
+    ],
+    "io25_target_not_reachable_temperatures_c": [
+      85,
+      125
+    ],
+    "io25_observed_qualified_gmid_max_range_per_v": [
+      15.17440681447251,
+      17.415687378515358
+    ]
+  },
+  "failure_policy": {
+    "epoch_1_candidate_parameters_modified_after_unseal": false,
+    "epoch_1_holdout_reuse_for_repair": false,
+    "epoch_1_passing_subdomains_promoted_as_release_gates": false,
+    "next_attempt_requires_new_generation_epoch": true,
+    "next_attempt_requires_new_candidate_seeds": true,
+    "next_attempt_requires_new_sealed_holdout_definition": true
+  }
+}

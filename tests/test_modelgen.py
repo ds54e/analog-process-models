@@ -21,9 +21,12 @@ from tools.modelgen.apm045_mixed_voltage.kernel import (
     NgspiceEvaluator,
     ParameterBound,
     SweepRequest,
+    canonical_json,
     curves_sha256,
     hard_constraint_observations,
     render_bsim4_card,
+    sha256_bytes,
+    sha256_file,
 )
 from tools.modelgen.apm045_mixed_voltage.qualify_reconstruction import (
     COMPLETION_STATE,
@@ -50,6 +53,12 @@ GENERATION_CONFIGURATION = (
 )
 QUALIFICATION_CONFIGURATION = (
     ROOT / "tools/modelgen/apm045_mixed_voltage/qualification_epoch_1.toml"
+)
+GENERATION_CONFIGURATION_2 = (
+    ROOT / "tools/modelgen/apm045_mixed_voltage/generation_epoch_2.toml"
+)
+QUALIFICATION_CONFIGURATION_2 = (
+    ROOT / "tools/modelgen/apm045_mixed_voltage/qualification_epoch_2.toml"
 )
 NGSPICE = ROOT / ".apm/toolchain/ngspice-47/bin/ngspice"
 
@@ -231,6 +240,45 @@ def test_qualification_epoch_seals_methods_before_unsealing() -> None:
     ]
 
 
+def test_epoch2_is_disjoint_from_failed_epoch1_and_explicit_about_near_off() -> None:
+    with GENERATION_CONFIGURATION_2.open("rb") as handle:
+        generation2 = tomllib.load(handle)
+    with QUALIFICATION_CONFIGURATION_2.open("rb") as handle:
+        qualification2 = tomllib.load(handle)
+    generation1 = _generation_configuration()
+    failure_path = ROOT / qualification2["prior_failure_evidence"]
+
+    assert generation2["generation_epoch"] == 2
+    assert qualification2["qualification_epoch"] == 2
+    assert set(generation1["seeds"]).isdisjoint(generation2["seeds"])
+    assert qualification2["prior_holdout_reuse"] is False
+    assert sha256_file(failure_path) == qualification2["prior_failure_evidence_sha256"]
+    assert (
+        qualification2["device_holdout"]["criteria"][
+            "minimum_reachable_intermediate_targets_per_curve"
+        ]
+        == 2
+    )
+    assert qualification2["device_holdout"]["criteria"][
+        "target_not_reachable_outside_qualified_region_permitted"
+    ]
+    for name in (
+        "sealed_device_holdout",
+        "sealed_charge_holdout",
+        "sealed_circuit_holdout",
+    ):
+        assert sha256_bytes(canonical_json(generation1[name]).encode()) != sha256_bytes(
+            canonical_json(generation2[name]).encode()
+        )
+    assert _validate_configuration(generation2, ROOT)[
+        "calibration_holdout_separation"
+    ] == {
+        "temperature_disjoint": True,
+        "length_disjoint": True,
+        "width_disjoint": True,
+        "idvg_bias_disjoint": True,
+        "idvd_bias_disjoint": True,
+    }
 def test_terminal_observable_requests_fail_closed_on_invalid_coordinates() -> None:
     with pytest.raises(ModelgenError):
         GateTrajectory("duplicate", 27, 1e-7, 1e-6, 0.5, (0.0, 0.1, 0.1, 0.2, 0.3))

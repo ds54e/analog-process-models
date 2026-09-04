@@ -11,10 +11,10 @@ Target release: v4.0.0
 State: ACTIVE DEVELOPMENT
 
 V4 required gates:
-  1/16 proven
+  2/16 proven
 
 Current milestone:
-  QUALIFICATION EPOCH 1 SEALED / KERNEL 1.2 EXACT REQUALIFICATION PENDING
+  GENERATION/QUALIFICATION EPOCH 2 SEALED / EXACT CALIBRATION PENDING
 
 Public-readiness cleanup:
   COMPLETE
@@ -68,30 +68,33 @@ commit `0e216fe` was fast-forwarded into this development checkout on
 2026-09-04. The required local ngspice 47, OpenVAF-Re-Loaded, PSP103, and
 BSIM-CMG toolchain passed `apm doctor` before v4 implementation began.
 
-The `evidence.public_matrix` gate is proven. Kernel 1.1.0's unfiltered
-exact-clean-commit run at `bcc6f5ad6f1fec348811884f42e02e95620fc17b`
-passed all four APM022/SVT and APM045/VTG N/P reconstruction records. Kernel
-1.2.0 removes a stray continuation token that ngspice ignored with a warning;
-the electrical parameters are unchanged, but the current kernel and rendered
-card bytes require a new exact clean-commit reconstruction before the
-`modelgen.reconstruction` gate is reclaimed. The 1.1 evidence remains recorded
-as engineering history in `validation/evidence/v4_modelgen_foundation.json`.
+The `evidence.public_matrix` and `modelgen.reconstruction` gates are proven.
+Kernel 1.2.0 removes a stray continuation token that ngspice ignored with a
+warning in 1.1-rendered cards. Its unfiltered exact-clean-commit run at
+`6773e0c6d8382723e9041a8d19034173e5242875` passed all four APM022/SVT and
+APM045/VTG N/P reconstruction records. Terminal hashes, metrics, parameters,
+and counts remained identical to kernel 1.1 while the corrected rendered card
+bytes changed. Compact evidence is
+`validation/evidence/v4_modelgen_foundation.json`.
 
-Mixed-voltage generation epoch 1 and qualification epoch 1 are sealed. A
-kernel-1.2 calibration-only development replay retained five independently
-seeded io18 and io25 N/P candidate pairs after
-literal electrostatics/transport/output/charge/temperature staged release and
-final cross-domain rechecks. The prescribed geometry study selected provisional
-APM-supported floors of 0.08 um for io18 and 0.18 um for io25, and every retained
-candidate passed the 0.25--16 um width challenge with
-`WIDTH_INVARIANT_IN_SCOPE`. Sealed device, charge, Y-matrix, and circuit
-holdouts have not been unsealed; no new family is promoted yet. The committed
-one-shot qualifier requires a clean worktree, writes an unseal receipt before
-evaluation, forbids output replacement during unsealing, and performs medoid
-selection only after circuit results. Kernel-1.2 exact calibration and
-reconstruction evidence is pending; the kernel-1.1 compact pre-holdout evidence
-remains engineering history in
-`validation/evidence/v4_generation_epoch1_calibration.json`.
+Mixed-voltage generation/qualification epoch 1 failed closed after its first
+clean-commit unseal. All charge, Y-matrix, body-effect, and circuit candidate
+checks passed, as did every io18 device candidate. The epoch-1 method required
+17.5 1/V at every io25 high-temperature curve; all io25 candidate pairs were
+therefore rejected when subsets explicitly returned `target_not_reachable`.
+No epoch-1 candidate was repaired, no failed holdout is reused, and no passing
+subdomain is promoted. Compact failure evidence is
+`validation/evidence/v4_qualification_epoch1_failure.json`.
+
+Generation and qualification epoch 2 are now sealed with disjoint seeds and
+new device, charge, Y-matrix, and circuit holdout definitions. Its method
+implements the release contract's explicit `target_not_reachable` and near-off
+classification while requiring at least two qualified intermediate gm/Id
+targets per curve. A calibration-only development run retained five new
+independently seeded io18 and io25 N/P candidate pairs, again with provisional
+APM-supported floors of 0.08 um and 0.18 um and full 0.25--16 um
+`WIDTH_INVARIANT_IN_SCOPE` behavior. Exact clean-commit calibration and the
+first epoch-2 unseal remain pending; no new family is promoted yet.
 The released v3.0.0 tag, tagged commit, cards, evidence, and GitHub Release
 remain unchanged.
 

@@ -47,6 +47,41 @@ ignored `.apm/` workspace. A release claim uses a compact committed evidence
 summary bound to the generator, configuration, reference-model, tool, and
 full-report hashes.
 
+## New-family epochs
+
+Calibration is separate from unsealing. Generate the current epoch's frozen
+candidates without evaluating any holdout:
+
+```bash
+.venv/bin/python -m tools.modelgen.apm045_mixed_voltage.synthesize_families \
+  --config tools/modelgen/apm045_mixed_voltage/generation_epoch_2.toml \
+  --output .apm/results/v4-generation-epoch2-calibration \
+  --calibration-only
+```
+
+Then run the repeatable, non-holdout seal audit:
+
+```bash
+.venv/bin/python -m tools.modelgen.apm045_mixed_voltage.qualify_families \
+  --config tools/modelgen/apm045_mixed_voltage/qualification_epoch_2.toml \
+  --calibration-report .apm/results/v4-generation-epoch2-calibration/report.json \
+  --output .apm/results/v4-qualification-epoch2-preflight \
+  --preflight
+```
+
+`--unseal` is accepted only from a clean committed tree and an empty output
+directory. It writes the unseal receipt before the first holdout job and does
+not accept `--replace-output`. Candidate parameters are immutable throughout
+qualification, and medoid selection occurs only after circuit results.
+
+Epoch 1 is retained as failed-closed history. Its strict method rejected io25
+when 17.5 1/V was explicitly not reachable in subsets of the high-temperature
+qualified-current region. Epoch 2 uses disjoint seeds and new holdout
+definitions; it implements the release contract's explicit
+`target_not_reachable`/near-off states while still requiring two qualified
+intermediate inversion targets on every curve. Neither old coordinates nor old
+candidates are reused for repair.
+
 ## Claim boundary
 
 Successful reconstruction establishes that the fitting machinery can recover

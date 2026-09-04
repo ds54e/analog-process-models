@@ -1,9 +1,9 @@
 {
   "schema": "apm.v4-modelgen-foundation-evidence.v1",
-  "milestone": "V4-M0R1",
+  "milestone": "V4-M0R2",
   "status": "validated",
-  "created_utc": "2026-09-04T12:41:54.131128+00:00",
-  "implementation_commit": "bcc6f5ad6f1fec348811884f42e02e95620fc17b",
+  "created_utc": "2026-09-04T13:33:33.021644+00:00",
+  "implementation_commit": "6773e0c6d8382723e9041a8d19034173e5242875",
   "implementation_commit_exact_report": true,
   "release_claim": false,
   "gates_validated": [
@@ -13,17 +13,17 @@
   "completion_state": "MODELGEN_KERNEL_QUALIFIED",
   "claim_boundary": "This milestone qualifies the offline reconstruction machinery and public evidence boundary. It does not qualify io18/io25 device cards, sealed new-family holdouts, distinctness, circuits, comparisons, variation, noise, Spectre execution, or a v4 release.",
   "full_report": {
-    "generated_path": ".apm/results/v4-modelgen-reconstruction-exact-bcc6f5a/report.json",
-    "sha256": "11efa6d46235f27d13ee775f8df2d22ce2bf5f5bb4de0fab4f2483f0519fad91",
+    "generated_path": ".apm/results/v4-modelgen-reconstruction-exact-6773e0c/report.json",
+    "sha256": "47e0a18bf478d4c14d2be3cf32dabffeac257ce24a62841a136426a2e381a01e",
     "status": "pass",
     "retention": "ignored reproducible full result"
   },
   "bound_inputs": {
     "kernel": {
       "path": "tools/modelgen/apm045_mixed_voltage/kernel.py",
-      "sha256": "469b139931a2ad064e3cf40281fd7a81214c610ca26fb0753506dddf7304516c",
-      "identity": "apm.modelgen.observable-kernel@1.1.0",
-      "width_term_boundary": "K3, K3B, and W0 are explicitly neutral; unsupported implicit narrow-width threshold behavior is disabled."
+      "sha256": "005e6b9f8ebcf704e21b7f1d2fb736e9a1c3fa3e20be49303172891041c5ff5c",
+      "identity": "apm.modelgen.observable-kernel@1.2.0",
+      "width_term_boundary": "K3, K3B, and W0 are explicitly neutral; unsupported implicit narrow-width threshold behavior is disabled. Kernel 1.2 also removes the stray continuation token that ngspice 47 ignored with a warning in 1.1-rendered cards."
     },
     "qualification": {
       "path": "tools/modelgen/apm045_mixed_voltage/qualify_reconstruction.py",
@@ -31,7 +31,7 @@
     },
     "reconstruction_contract": {
       "path": "tools/modelgen/apm045_mixed_voltage/reconstruction.toml",
-      "sha256": "cde021c3cba5e30954eadee25f6a40bcaf467339b6cb7454fc19803015de88e6",
+      "sha256": "4f2acb62fae1e31c45dea9e7ad536b0b952052623eb6c96d55a411fbb8230927",
       "deterministic_seeds": [41001, 41002, 41003]
     },
     "public_evidence_matrix": {
@@ -78,15 +78,14 @@
       "apm045_vtg-p"
     ]
   },
-  "repeat_execution": {
-    "development_report_sha256": "2e508af36c7521131dea8f17449fbe15ed10e9e91b37280734316237e91468a6",
-    "exact_commit_report_sha256": "11efa6d46235f27d13ee775f8df2d22ce2bf5f5bb4de0fab4f2483f0519fad91",
-    "canonical_content_identical_excluding": [
-      "created_utc",
-      "kernel.qualification_implementation_sha256"
-    ],
-    "canonical_content_sha256": "8d95c5941195733844d27de385fc9cd52e5bdf864f30f33cab75de1cb4207304",
-    "difference_reason": "The development run began before the qualifier added its kernel-version binding check; the exact run binds the committed qualifier hash. All fitted parameters, cards, terminal hashes, counts, checks, and metrics are identical."
+  "exact_requalification": {
+    "predecessor_kernel_identity": "apm.modelgen.observable-kernel@1.1.0",
+    "predecessor_exact_report_sha256": "11efa6d46235f27d13ee775f8df2d22ce2bf5f5bb4de0fab4f2483f0519fad91",
+    "current_exact_report_sha256": "47e0a18bf478d4c14d2be3cf32dabffeac257ce24a62841a136426a2e381a01e",
+    "current_canonical_content_sha256_excluding_created_utc": "6e163ac81690283073efcd79afc79b7cfe64f9707e4baa9539c0beb72d322326",
+    "terminal_data_hashes_and_metrics_identical_to_predecessor": true,
+    "rendered_card_hashes_expected_to_change": true,
+    "difference_reason": "Kernel 1.2 removes one ignored stray continuation token from deterministic rendering. The full four-record fit was rerun from the clean current commit; terminal data hashes, counts, checks, parameters, and metrics remained identical while corrected card bytes changed."
   },
   "records": [
     {
@@ -94,7 +93,7 @@
       "status": "pass",
       "objective_rms": 0.26215084365028885,
       "simulator_evaluation_count": 10988,
-      "generated_card_sha256": "53b632cf5a68eef592db4b5db69952d640883a8eb328eeffa7d05667e6c11feb",
+      "generated_card_sha256": "2cc4a054912b818514dd1da003d7fce0be62ebc35e48caa8892ab68aec0a57e3",
       "candidate_holdout_terminal_data_sha256": "a754c38e5bb7f08ea544c8658fb8be0de2e3327e0ba8f0ba177bfdff7aee294a",
       "holdout_metrics": {
         "current_log_p95_dec": 0.09582145026028248,
@@ -110,7 +109,7 @@
       "status": "pass",
       "objective_rms": 0.389623688545073,
       "simulator_evaluation_count": 10713,
-      "generated_card_sha256": "fa50a546d5182cdc35b296c9e1a52753dbb36bd8f4b82e05be83675790885cb3",
+      "generated_card_sha256": "fcdc0ee84914177d009faf8cf36e518353495e614f18e5099c9fbf6a9b44b4f5",
       "candidate_holdout_terminal_data_sha256": "e6224545adf0563dcaa54ac3dae64c4ba1d30cd7c0b46249813a0a97f1d5b195",
       "holdout_metrics": {
         "current_log_p95_dec": 0.0849296244994421,
@@ -126,7 +125,7 @@
       "status": "pass",
       "objective_rms": 1.8896839656313404,
       "simulator_evaluation_count": 8592,
-      "generated_card_sha256": "082cdf0731b759cd7fbe6a76f70f69c47e28af45a0e00bcb88c03b8dc0d50e6c",
+      "generated_card_sha256": "e303936b48fa017dbd5b52b4e0c9f25aba30371581e5606fb651dda3a5c3ca0d",
       "candidate_holdout_terminal_data_sha256": "abac0c106709bf8715ce34ba881237ba7bebac86099e583f0a5805c8e360cd88",
       "holdout_metrics": {
         "current_log_p95_dec": 0.2762484558660484,
@@ -142,7 +141,7 @@
       "status": "pass",
       "objective_rms": 0.7095986911552571,
       "simulator_evaluation_count": 10386,
-      "generated_card_sha256": "23e6dd312e707f5d604a262f17fa3eb5e49f4e31eff25f82bfe0b15f6ef856b1",
+      "generated_card_sha256": "2cf897d7b3e53281d6aa2675d1f0a01d254e59eb10e7ccaaae05be2adbf0ea57",
       "candidate_holdout_terminal_data_sha256": "ca62cfc7165e6e703bd02bce7bb4fce9a931b999ced90793bc8846c13b40b5f4",
       "holdout_metrics": {
         "current_log_p95_dec": 0.1307566216634577,
@@ -164,14 +163,14 @@
   },
   "commands": [
     {
-      "command": ".venv/bin/python -m tools.modelgen.apm045_mixed_voltage.qualify_reconstruction --output .apm/results/v4-modelgen-reconstruction-exact-bcc6f5a --replace-output",
+      "command": ".venv/bin/python -m tools.modelgen.apm045_mixed_voltage.qualify_reconstruction --output .apm/results/v4-modelgen-reconstruction-exact-6773e0c --replace-output",
       "status": "pass",
       "result": "4/4 required records pass; MODELGEN_KERNEL_QUALIFIED"
     },
     {
       "command": ".venv/bin/pytest -q",
       "status": "pass",
-      "result": "104 passed"
+      "result": "106 passed"
     },
     {
       "command": ".venv/bin/ruff check .",
@@ -180,7 +179,7 @@
     {
       "command": ".venv/bin/reuse lint",
       "status": "pass",
-      "result": "262/262 files licensed"
+      "result": "267/267 files licensed"
     },
     {
       "command": "audit_distribution(Path.cwd())",

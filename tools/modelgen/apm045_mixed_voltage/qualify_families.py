@@ -136,8 +136,54 @@ def _validate_contracts(
     generation_path = root / str(qualification["generation_contract"])
     generation = _load_toml(generation_path)
     generation_audit = _validate_configuration(generation, root)
+    if int(qualification["qualification_epoch"]) != int(generation["generation_epoch"]):
+        raise QualificationError("qualification and generation epoch identities differ")
+    if int(qualification["qualification_epoch"]) > 1:
+        if qualification.get("prior_holdout_reuse") is not False:
+            raise QualificationError("later epoch must explicitly forbid prior holdout reuse")
+        prior_path = root / str(qualification["prior_failure_evidence"])
+        if sha256_file(prior_path) != qualification["prior_failure_evidence_sha256"]:
+            raise QualificationError("prior failed-epoch evidence hash mismatch")
+        prior = json.loads(prior_path.read_text(encoding="utf-8"))
+        if (
+            prior.get("schema") != "apm.v4-mixed-voltage-qualification-failure.v1"
+            or prior.get("status") != "failed_closed"
+            or int(prior["qualification_epoch"])
+            != int(qualification["prior_failed_qualification_epoch"])
+            or prior["failure_policy"]["epoch_1_holdout_reuse_for_repair"] is not False
+        ):
+            raise QualificationError("prior failed epoch is not valid fail-closed evidence")
+        if {int(seed) for seed in generation["seeds"]} & {
+            int(seed) for seed in prior["observed_outcome"]["candidate_seeds"]
+        }:
+            raise QualificationError("later generation epoch reused a failed-epoch seed")
+        for name in (
+            "sealed_device_holdout",
+            "sealed_charge_holdout",
+            "sealed_circuit_holdout",
+        ):
+            current_hash = sha256_bytes(canonical_json(generation[name]).encode("utf-8"))
+            if current_hash == prior["sealed_definition_sha256"][name]:
+                raise QualificationError(f"later generation epoch reused {name}")
     if sha256_file(generation_path) != qualification["generation_contract_sha256"]:
         raise QualificationError("generation contract hash does not match qualification seal")
+    device_criteria = qualification["device_holdout"]["criteria"]
+    minimum_reachable = int(
+        device_criteria.get(
+            "minimum_reachable_intermediate_targets_per_curve",
+            len(generation["sealed_device_holdout"]["intermediate_gmid_targets_per_v"]),
+        )
+    )
+    if not 1 <= minimum_reachable <= len(
+        generation["sealed_device_holdout"]["intermediate_gmid_targets_per_v"]
+    ):
+        raise QualificationError("invalid intermediate gm/Id reachability coverage")
+    if int(qualification["qualification_epoch"]) > 1 and not (
+        device_criteria.get("target_not_reachable_outside_qualified_region_permitted")
+        is True
+        and device_criteria.get("near_off_control_region_exclusion_required") is True
+    ):
+        raise QualificationError("later epoch must seal explicit near-off solver semantics")
     synthesis_path = Path(__file__).with_name("synthesize_families.py")
     terminal_path = Path(__file__).with_name("terminal_observables.py")
     circuit_path = Path(__file__).with_name("circuit_fixtures.py")
@@ -426,8 +472,20 @@ def _device_holdout(
                     "vout_v": curve.request.fixed_bias_v,
                 }
             )
-            solutions.append(solution)
             if solution["state"] == "validated":
+                control_fraction = float(solution["vctrl_v"]) / geometry.native_vdd_v
+                solution["vctrl_fraction_vdd"] = control_fraction
+                solution["qualification_state"] = (
+                    "validated"
+                    if float(criteria["qualified_vctrl_fraction_min"])
+                    <= control_fraction
+                    <= float(criteria["qualified_vctrl_fraction_max"])
+                    else "excluded_near_off_control_region"
+                )
+            else:
+                solution["qualification_state"] = solution["state"]
+            solutions.append(solution)
+            if solution["qualification_state"] == "validated":
                 bias_points.append(
                     BiasPoint(
                         point_id=(
@@ -475,6 +533,27 @@ def _device_holdout(
     ]
     threshold_fractions = [value / geometry.native_vdd_v for value in threshold_values]
     length_fraction = _length_order_fraction(curves)
+    solution_groups: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
+    target_groups: dict[float, list[Mapping[str, Any]]] = defaultdict(list)
+    for solution in solutions:
+        solution_groups[str(solution["request_id"])].append(solution)
+        target_groups[float(solution["target_per_v"])].append(solution)
+    minimum_reachable = int(
+        criteria.get(
+            "minimum_reachable_intermediate_targets_per_curve",
+            len(grid["intermediate_gmid_targets_per_v"]),
+        )
+    )
+    allowed_solver_states = {"validated", "target_not_reachable"}
+    validated_solutions = [
+        item for item in solutions if item["qualification_state"] == "validated"
+    ]
+    qualified_vctrl = [
+        float(criteria["qualified_vctrl_fraction_min"])
+        <= float(item["vctrl_v"]) / geometry.native_vdd_v
+        <= float(criteria["qualified_vctrl_fraction_max"])
+        for item in validated_solutions
+    ]
     checks = {
         "numerical_hard_contract": hard["status"] == "pass",
         "all_thresholds_bracketed": len(threshold_values) == len(thresholds),
@@ -484,14 +563,26 @@ def _device_holdout(
         "dibl_guardrail": bool(dibl)
         and min(dibl) >= float(criteria["dibl_min_v_per_v"])
         and max(dibl) <= float(criteria["dibl_max_v_per_v"]),
-        "intermediate_gmid_reachable": bool(solutions)
-        and all(item["state"] == "validated" for item in solutions),
+        "solver_states_explicit": bool(solutions)
+        and all(item["state"] in allowed_solver_states for item in solutions),
+        "intermediate_gmid_reachability_coverage": bool(solution_groups)
+        and all(
+            sum(item["qualification_state"] == "validated" for item in group)
+            >= minimum_reachable
+            for group in solution_groups.values()
+        )
+        and all(
+            len(group) == len(solution_groups)
+            for group in target_groups.values()
+        ),
         "intermediate_gmid_accuracy": bool(solutions)
         and all(
             item.get("relative_error", math.inf)
             <= float(criteria["gmid_target_relative_tolerance_max"])
-            for item in solutions
+            for item in validated_solutions
         ),
+        "validated_control_voltage_region": bool(qualified_vctrl)
+        and all(qualified_vctrl),
         "length_current_order": length_fraction
         >= float(criteria["required_length_current_order_fraction"]),
         "temperature_current_ratio": bool(temperature_ratios)
@@ -525,6 +616,7 @@ def _device_holdout(
             "intermediate_gmid_targets_per_v": [
                 float(value) for value in grid["intermediate_gmid_targets_per_v"]
             ],
+            "minimum_reachable_intermediate_targets_per_curve": minimum_reachable,
         },
         "metrics": {
             "threshold_v_median": _median(threshold_values),
@@ -542,12 +634,20 @@ def _device_holdout(
             "id_per_width_at_gmid_median_a_per_m": _median(
                 item["idmag_a"] / item["w_m"]
                 for item in solutions
-                if item["state"] == "validated"
+                if item["qualification_state"] == "validated"
             ),
             "gds_over_id_median_per_v": _median(
                 item["gds_over_id_per_v"] for item in derivatives
             ),
             "gm_over_gds_median": _median(item["gm_over_gds"] for item in derivatives),
+            "gmid_solution_state_counts": {
+                state: sum(item["qualification_state"] == state for item in solutions)
+                for state in (
+                    "validated",
+                    "excluded_near_off_control_region",
+                    "target_not_reachable",
+                )
+            },
         },
         "thresholds_v": thresholds,
         "gmid_solutions": solutions,
@@ -1937,12 +2037,18 @@ def qualify(
             "minimum_count": len(eligible[family]) >= minimum,
         }
     if not all(item["minimum_count"] for item in eligibility.values()):
+        if not eligibility["io25"]["minimum_count"]:
+            early_failure_state = qualification["failure_states"]["io25"]
+        elif not eligibility["io18"]["minimum_count"]:
+            early_failure_state = qualification["failure_states"]["io18"]
+        else:  # pragma: no cover - defensive completeness
+            early_failure_state = qualification["failure_states"]["ensemble"]
         failure_report = {
             "schema": SCHEMA,
             "created_utc": _utc_now(),
             "status": "fail",
             "completion_state": None,
-            "failure_state": qualification["failure_states"]["ensemble"],
+            "failure_state": early_failure_state,
             "unseal_receipt": receipt,
             "preflight": preflight,
             "eligibility": eligibility,
@@ -2094,7 +2200,7 @@ def _arguments() -> argparse.Namespace:
     parser.add_argument(
         "--config",
         type=Path,
-        default=Path(__file__).with_name("qualification_epoch_1.toml"),
+        default=Path(__file__).with_name("qualification_epoch_2.toml"),
     )
     parser.add_argument("--calibration-report", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
