@@ -1,0 +1,535 @@
+# Machine-readable release contract for APM v4.0.0.
+# This file is independent of the frozen v3 release contract in
+# validation/release_gates.toml. Do not reinterpret or overwrite v3 evidence.
+
+schema = "apm.release-gates.v4"
+target = "v4.0.0"
+status = "active-development-gate-definition"
+technical_contract = "V4_MIXED_VOLTAGE.md"
+
+[policy]
+missing_evidence_is_failure = true
+required_skipped_check_is_failure = true
+clean_clone_required = true
+reference_simulator = "ngspice 47"
+reference_platform = "WSL2 + RHEL-compatible EL9 Linux + x86_64"
+existing_released_tags_immutable = true
+force_push_forbidden = true
+foundry_correlation_claim_forbidden = true
+reliability_claim_forbidden = true
+standalone_io33_family_forbidden = true
+real_spectre_claim_forbidden_without_real_tool_evidence = true
+final_v4_tag_creation_authorized_after_all_gates_pass = true
+github_v4_release_creation_authorized_after_exact_tag_requalification = true
+
+[runtime]
+required_ngspice_major = 47
+required_openvaf_tag = "v24.0.2mob"
+python_minimum = "3.9"
+required_noise_solver = "Sparse"
+required_noise_solver_forbidden = "KLU"
+
+[release_metadata]
+target_version = "4.0.0"
+package_version_must_match_target = true
+release_notes_required = true
+release_notes_path = "CHANGELOG.md"
+release_document = "RELEASE_V4.md"
+unresolved_release_placeholders_forbidden = true
+version_metadata_paths = ["pyproject.toml", "src/apm/__init__.py", "src/apm/cli.py"]
+forbidden_release_placeholder_tokens = [
+  "TBD",
+  "not_started",
+  "draft-values-unfrozen",
+  "candidate-unqualified",
+]
+
+[compatibility]
+v3_tag = "v3.0.0"
+v3_tagged_commit = "995e0ce7cdd0c37ef9f3397008637f9d239c746e"
+v3_release_contract_path = "validation/release_gates.toml"
+preserve_existing_result_schema = [
+  "apm.characterization.v2",
+  "apm.noise-characterization.v1",
+  "apm.noise-comparison.v1",
+]
+preserve_existing_noise_fit_identity = "apm.noise-fit.contiguous-regions@1.0.0"
+preserve_existing_noise_acquisition_identity = "apm.noise-acquisition.bounded-white-search@1.0.0"
+preserve_existing_apm045_upstream_families = ["vtl", "vtg", "vth", "thkox"]
+existing_apm045_upstream_cards_must_remain_byte_identical = true
+existing_cross_process_anchor = "apm045/vtg"
+
+[technology_catalog]
+required_technologies = ["apm350", "apm130", "apm045", "apm022", "apm016f"]
+required_family_count = 15
+required_public_device_count = 30
+manifest_driven = true
+n_p_symmetry_required = false
+family_id_is_technology_local = true
+
+[technology_catalog.required_families]
+apm350 = ["general"]
+apm130 = ["lv", "hv"]
+apm045 = ["vtl", "vtg", "vth", "thkox", "io18", "io25"]
+apm022 = ["lvt", "svt", "hvt"]
+apm016f = ["lvt", "svt", "hvt"]
+
+[technology_catalog.cross_process_anchors]
+apm350 = "general"
+apm130 = "lv"
+apm045 = "vtg"
+apm022 = "svt"
+apm016f = "svt"
+
+[apm045_mixed_voltage]
+required_new_families = ["io18", "io25"]
+forbidden_new_families = ["io33"]
+compact_model = "bsim4"
+card_dialect = "4.8.2"
+architecture = "planar_bulk"
+origin = "apm_authored"
+public_parameters = ["w", "l"]
+required_temperatures_c = [-40, 27, 85, 125]
+
+[apm045_mixed_voltage.io18]
+default_profile = "nominal_1v8"
+required_profiles = ["nominal_1v8", "common_overlap_1v0"]
+nominal_reference_vdd_v = 1.8
+
+[apm045_mixed_voltage.io25]
+default_profile = "nominal_2v5"
+required_profiles = ["nominal_2v5", "common_overlap_1v8", "common_overlap_1v0"]
+nominal_reference_vdd_v = 2.5
+
+[geometry]
+foundry_design_rule_minimum_claim_forbidden = true
+selected_l_floor_must_be_qualified = true
+selected_w_floor_must_be_qualified = true
+public_m_nf_finger_parameters_forbidden = true
+
+[geometry.io18]
+initial_candidate_l_floor_um = [0.08, 0.10, 0.12, 0.15, 0.18, 0.20]
+
+[geometry.io25]
+initial_candidate_l_floor_um = [0.18, 0.20, 0.25, 0.30, 0.35, 0.40]
+
+[geometry.width_challenge]
+initial_widths_um = [0.25, 0.5, 1.0, 2.0, 5.0, 10.0, 16.0]
+allowed_outcomes = ["WIDTH_INVARIANT_IN_SCOPE", "WIDTH_VALIDITY_FLOOR_ESTABLISHED"]
+
+[public_evidence]
+machine_readable_matrix_required = true
+required_fields = [
+  "id",
+  "title",
+  "source_kind",
+  "source_locator",
+  "observed_fact",
+  "confidence",
+  "allowed_use",
+  "forbidden_use",
+]
+private_or_proprietary_source_forbidden = true
+physical_oxide_to_bsim_toxe_direct_copy_forbidden_without_explicit_evidence = true
+source_fact_engineering_prior_contract_separation_required = true
+
+[modelgen]
+offline_only = true
+runtime_dependency_forbidden = true
+deterministic_regeneration_required = true
+byte_identical_canonical_card_regeneration_required = true
+reference_real_tool_required = true
+staged_parameter_release_required = true
+hard_constraint_rejection_required = true
+parameter_sensitivity_required = true
+sealed_holdout_required = true
+minimum_retained_feasible_ensemble_count = 3
+canonical_selection_must_be_predeclared = true
+canonical_selection_default = "observable_space_medoid"
+
+[modelgen.reconstruction]
+required_fixtures = ["apm022/svt", "apm045/vtg"]
+original_parameter_recovery_required = false
+held_out_terminal_behavior_recovery_required = true
+
+[modelgen.initial_feature_boundary]
+expected_disabled_features = [
+  "gate_current",
+  "gidl",
+  "distributed_body_resistance",
+  "distributed_gate_resistance",
+  "ac_nqs",
+  "transient_nqs",
+]
+enabled_feature_requires_explicit_target_and_validation = true
+
+[modelgen.stage_limits]
+electrostatics_max_free_parameters = 8
+transport_max_free_parameters = 6
+output_max_free_parameters = 5
+charge_max_free_parameters = 6
+temperature_max_free_parameters = 5
+
+[characterization]
+base_schema = "apm.characterization.v2"
+base_schema_must_remain_backward_compatible = true
+required_metrics = [
+  "id_vg",
+  "id_vd",
+  "gm_over_id",
+  "gm_over_gds",
+  "length_scaling",
+  "dibl",
+  "terminal_y_matrix",
+  "capacitance",
+  "temperature",
+  "ion",
+  "ioff",
+  "log10_ion_over_ioff",
+  "subthreshold_swing",
+]
+finite_difference_convergence_required = true
+native_oracle_diagnostic_only = true
+raw_y_matrix_required = true
+terminal_order = ["d", "g", "s", "b"]
+raw_signed_terminal_quantities_required = true
+silent_endpoint_clipping_forbidden = true
+
+[mixed_voltage_qualification]
+result_schema = "apm.mixed-voltage-qualification.v1"
+required_domains = [
+  "width_scaling",
+  "body_effect",
+  "bias_reachability",
+  "intrinsic_gate_charge",
+  "epistemic_ensemble",
+  "sealed_device_holdout",
+  "sealed_circuit_holdout",
+  "io18_io25_distinctness",
+]
+gmid_targets_per_v = [5.0, 10.0, 15.0, 20.0]
+required_target_solver_state = ["validated", "target_not_reachable", "simulation_failed"]
+near_off_may_be_excluded_with_explicit_status = true
+
+[mixed_voltage_qualification.numerical]
+idvg_monotonic_qualified_region_required = true
+idvd_monotonic_qualified_region_required = true
+positive_gm_qualified_region_required = true
+positive_gds_qualified_region_required = true
+finite_difference_p95_relative_max = 0.02
+native_oracle_p95_relative_max = 0.02
+y_kcl_normalized_residual_max = 1.0e-6
+nan_inf_forbidden = true
+
+[mixed_voltage_qualification.structural]
+required_capacitance_density_order = ["apm045/vtg", "apm045/io18", "apm045/io25"]
+required_capacitance_density_relation = "strictly_decreasing_in_declared_comparison_scope"
+model_supported_geometry_hierarchy_review_required = true
+
+[mixed_voltage_qualification.distinctness]
+required_checks = [
+  "IO18_IO25_CAPACITANCE_DISTINCTION",
+  "IO18_IO25_CURRENT_DENSITY_DISTINCTION",
+  "IO18_IO25_DESIGN_REALIZATION_DISTINCTION",
+]
+required_common_reference_vdd_v = 1.8
+required_common_gmid_targets_per_v = [5.0, 10.0, 15.0, 20.0]
+forced_gm_over_gds_order_forbidden = true
+forced_noise_order_forbidden = true
+forced_leakage_order_forbidden = true
+forced_total_gate_charge_order_forbidden = true
+failure_state = "IO18_DISTINCTNESS_NOT_ESTABLISHED"
+
+[epistemic_ensemble]
+separate_from_benchmark_variation = true
+minimum_retained_feasible_candidates_per_family = 3
+required_summary_metrics = [
+  "vth",
+  "dibl",
+  "id_per_width_vs_gmid",
+  "gds_over_id",
+  "gm_over_gds",
+  "cgg_per_width_or_area",
+  "cgd_over_cgg",
+  "body_effect",
+  "temperature",
+]
+required_claim_classes = [
+  "ROBUST_ACROSS_ENSEMBLE",
+  "MAJORITY_ACROSS_ENSEMBLE",
+  "EPISTEMICALLY_UNRESOLVED",
+]
+required_structural_claim_reversal_is_failure = true
+failure_state = "EPISTEMIC_UNCERTAINTY_TOO_WIDE"
+
+[sealed_holdout]
+calibration_and_holdout_must_be_declared_before_final_fit = true
+device_holdout_must_include_noncalibration_temperature = true
+device_holdout_must_include_intermediate_length = true
+device_holdout_must_include_intermediate_vds = true
+device_holdout_must_include_intermediate_gmid = true
+device_holdout_must_include_multiple_widths = true
+failed_holdout_reuse_for_repair_forbidden = true
+new_generation_epoch_required_after_unsealed_failure = true
+
+[circuit_qualification]
+required_fixture_classes = [
+  "mos_diode",
+  "current_mirror_1to1",
+  "source_follower",
+  "resistive_load_common_source",
+  "pmos_pass_device",
+]
+sealed_circuit_qualification_required = true
+circuit_results_must_not_be_used_as_foundry_fit_targets = true
+layout_area_claim_forbidden = true
+layout_extracted_gate_charge_claim_forbidden = true
+
+[circuit_qualification.pass_device]
+required_scenarios = [
+  "io18_vin1v8_vout1v0",
+  "io25_underdrive_vin1v8_vout1v0",
+  "io25_nominal_vin2v5_vout1v2",
+]
+representative_loads_a = [1.0e-4, 5.0e-4, 1.0e-3]
+explicit_parallel_units_required = true
+unbounded_virtual_single_device_forbidden = true
+required_metrics = [
+  "required_vsg",
+  "total_width",
+  "gmid",
+  "gds_over_id",
+  "ron_times_width",
+  "intrinsic_gate_charge_per_width",
+  "intrinsic_gate_charge_per_current",
+]
+
+[mixed_voltage_comparison]
+versioned_output_required = true
+suggested_schema = "apm.mixed-voltage-comparison.v1"
+preserve_existing_v3_apm045_gate_stack_set_meaning = true
+required_views = [
+  "native_relative_geometry",
+  "common_1v0_equal_physical_l",
+  "common_1v0_equal_relative_l",
+  "common_1v8_io18_vs_io25_equal_physical_l",
+  "common_1v8_io18_vs_io25_equal_relative_l",
+  "equal_inversion",
+]
+required_equal_inversion_targets_per_v = [5.0, 10.0, 15.0, 20.0]
+raw_source_identity_required = true
+native_family_metrics_and_common_bias_terminal_metrics_must_be_explicitly_labeled = true
+
+[intrinsic_charge]
+public_wrapper_w_l_only = true
+layout_dependent_charge_claim_forbidden = true
+required_normalized_metrics = [
+  "qg_intrinsic_per_width",
+  "qg_intrinsic_per_current",
+  "cgg_per_width",
+  "cgd_per_width",
+  "cgd_over_cgg",
+]
+
+[variation]
+benchmark_modes = ["global", "local", "all"]
+benchmark_intents = ["vth_shift", "drive_shift"]
+new_family_native_variation_available = false
+epistemic_ensemble_must_not_be_reported_as_variation = true
+
+[noise]
+result_schema = "apm.noise-characterization.v1"
+comparison_schema = "apm.noise-comparison.v1"
+fit_method_identity = "apm.noise-fit.contiguous-regions@1.0.0"
+acquisition_policy_identity = "apm.noise-acquisition.bounded-white-search@1.0.0"
+process_noise_tuning_authorized = false
+new_families_must_enter_catalog_plan = true
+catalog_request_counts_must_be_derived_from_live_catalog = true
+fresh_release_catalog_required = true
+strict_resume_required = true
+tamper_rejection_required = true
+unobserved_regions_remain_null = true
+
+[spectre]
+artifacts_required_for_all_families = true
+model_only = true
+status = "experimental_unverified"
+real_tool_validation_required = false
+virtuoso_integration_required = false
+
+[licensing]
+exact_provenance_required = true
+ambiguous_redistribution_forbidden = true
+private_or_proprietary_pdk_input_forbidden = true
+third_party_relicensing_forbidden = true
+reuse_spdx_audit_required = true
+public_generation_inputs_only = true
+
+[distribution]
+generated_binaries_committed = false
+large_raw_results_committed = false
+optimizer_work_directories_committed = false
+credentials_or_private_artifacts_forbidden = true
+generated_cache_result_files_must_be_ignored = true
+
+[documentation]
+required_topics = [
+  "v4_scope",
+  "mixed_voltage_claim_boundary",
+  "public_evidence_matrix",
+  "io18_io25_family_semantics",
+  "model_supported_geometry_not_foundry_design_rules",
+  "model_generation_method",
+  "epistemic_ensemble_meaning",
+  "sealed_holdout",
+  "circuit_qualification",
+  "mixed_voltage_comparison",
+  "noise_claim_boundary",
+  "variation_claim_boundary",
+  "spectre_status",
+  "not_a_manufacturable_pdk",
+]
+
+[stop_states]
+allowed = [
+  "MODELGEN_RECONSTRUCTION_FAILED",
+  "IO25_CONTRACT_INCONSISTENT",
+  "IO18_CONTRACT_INCONSISTENT",
+  "IO18_DISTINCTNESS_NOT_ESTABLISHED",
+  "PARAMETER_IDENTIFIABILITY_FAILURE",
+  "EPISTEMIC_UNCERTAINTY_TOO_WIDE",
+  "DC_CHARGE_CONFLICT",
+  "CIRCUIT_HOLDOUT_FAILURE",
+  "PROVENANCE_BOUNDARY_AMBIGUOUS",
+]
+weakening_gate_to_avoid_stop_forbidden = true
+
+[completion_states]
+required = [
+  "MODELGEN_KERNEL_QUALIFIED",
+  "IO25_DEVICE_QUALIFIED",
+  "IO25_APPLICATION_QUALIFIED",
+  "IO18_DEVICE_QUALIFIED",
+  "IO18_APPLICATION_QUALIFIED",
+  "IO18_IO25_DISTINCTNESS_ESTABLISHED",
+  "MIXED_VOLTAGE_COMPARISON_QUALIFIED",
+  "MIXED_VOLTAGE_NOISE_INTEGRATED",
+  "MIXED_VOLTAGE_VARIATION_INTEGRATED",
+  "V4_CANDIDATE_QUALIFIED",
+  "V4_TAG_REQUALIFIED",
+]
+
+[final_validation]
+apm_doctor_required = true
+full_test_suite_required = true
+v3_regression_required = true
+v4_release_validator_required = true
+all_required_family_characterization_required = true
+mixed_voltage_qualification_required = true
+mixed_voltage_comparison_required = true
+benchmark_global_local_all_required = true
+noise_foundation_method_catalog_required = true
+fresh_noise_catalog_required = true
+strict_resume_required = true
+license_provenance_audit_required = true
+public_hygiene_audit_required = true
+readme_claim_audit_required = true
+fresh_clone_from_repository_required = true
+release_metadata_audit_required = true
+exact_tag_requalification_required = true
+
+[[gate]]
+id = "compatibility.v3_immutable"
+required = true
+validation = "git_hash_and_regression_audit"
+summary = "Released v3 history and the existing APM045 upstream model families remain unchanged while v3 electrical/noise contracts regress cleanly."
+
+[[gate]]
+id = "evidence.public_matrix"
+required = true
+validation = "schema_and_manual_audit"
+summary = "Every v4 public research input declares observed facts, allowed use, forbidden use, confidence, and provenance without private PDK leakage."
+
+[[gate]]
+id = "modelgen.reconstruction"
+required = true
+validation = "real_tool_and_sealed_holdout"
+summary = "The offline generator reconstructs held-out terminal behavior for APM022/SVT and APM045/VTG without requiring original parameter recovery."
+
+[[gate]]
+id = "modelgen.deterministic_regeneration"
+required = true
+validation = "hash_and_repeat_execution"
+summary = "Frozen generation inputs reproduce canonical io18/io25 model cards byte-identically and bind generator/tool/model identities."
+
+[[gate]]
+id = "models.io25"
+required = true
+validation = "real_tool_device_contract"
+summary = "APM045/io25 passes nominal 2.5 V terminal, geometry, charge, temperature, ensemble, and sealed holdout contracts."
+
+[[gate]]
+id = "models.io18"
+required = true
+validation = "real_tool_device_contract"
+summary = "APM045/io18 passes nominal 1.8 V terminal, geometry, charge, temperature, ensemble, and sealed holdout contracts."
+
+[[gate]]
+id = "mixed_voltage.distinctness"
+required = true
+validation = "real_tool_common_bias_and_ensemble"
+summary = "io18 and io25 establish capacitance-density, current-density, and design-realization distinction at common 1.8 V without arbitrary ordering of unrelated metrics."
+
+[[gate]]
+id = "mixed_voltage.circuit_holdout"
+required = true
+validation = "fresh_sealed_real_tool"
+summary = "MOS diode, mirror, source follower, common-source, and PMOS pass-device fixtures pass on unseen qualification conditions."
+
+[[gate]]
+id = "mixed_voltage.comparison"
+required = true
+validation = "real_tool_and_result_audit"
+summary = "Versioned native/common-bias/equal-geometry/equal-inversion mixed-voltage comparisons execute with exact source identities and explicit metric bases."
+
+[[gate]]
+id = "variation.v4"
+required = true
+validation = "tests_and_real_tool"
+summary = "APM benchmark Global/Local/All integrates io18/io25 without presenting the epistemic model ensemble as process variation."
+
+[[gate]]
+id = "noise.v4_catalog"
+required = true
+validation = "fresh_real_tool_and_resume_audit"
+summary = "Fresh stationary-noise planning/execution includes all 15 families and 30 public MOS devices, with request counts derived from the live catalog and strict resume/tamper semantics preserved."
+
+[[gate]]
+id = "spectre.model_only"
+required = true
+validation = "structural"
+summary = "io18/io25 Spectre artifacts are present and remain explicitly experimental/unverified."
+
+[[gate]]
+id = "licensing.provenance"
+required = true
+validation = "audit"
+summary = "All new public evidence and APM-authored model/generation files have auditable provenance, redistribution boundaries, and REUSE/SPDX compliance."
+
+[[gate]]
+id = "release.clean_clone_v4"
+required = true
+validation = "clean_clone_real_tool"
+summary = "The exact v4 candidate passes bootstrap, doctor, tests, v3 regression, v4 modelgen/device/circuit/comparison/variation/noise gates, provenance, and public-hygiene checks from a fresh HTTPS clone."
+
+[[gate]]
+id = "release.claim_audit_v4"
+required = true
+validation = "hash_bound_manual_and_static_audit"
+summary = "Public v4 claims match evidence and explicitly exclude foundry/silicon correlation, reliability, standalone io33 qualification, layout-dependent accuracy, calibrated leakage/noise, and real Spectre validation."
+
+[[gate]]
+id = "release.exact_tag_requalification"
+required = true
+validation = "exact_tag_fresh_clone"
+summary = "After annotated v4.0.0 tag creation, the exact tag is freshly requalified before the GitHub Release is considered complete."
