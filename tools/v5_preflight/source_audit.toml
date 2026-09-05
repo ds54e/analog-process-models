@@ -1,0 +1,53 @@
+# SPDX-FileCopyrightText: 2026 APM preflight contributors
+# SPDX-License-Identifier: Apache-2.0
+schema = "apm-v5-preflight-source-audit.draft"
+status = "NOT_A_RELEASED_STATISTICAL_PROFILE"
+
+[[source]]
+id = "hart_jeds_2020"
+title = "Characterization and Modeling of Mismatch in Cryo-CMOS"
+doi = "10.1109/JEDS.2020.2976546"
+url = "https://pure.tudelft.nl/ws/portalfiles/portal/71537207/09015956.pdf"
+inspected = "PDF page index 5, printed p.267, Figure 8, Figures 9/10, Table 1; parsed extraction and modeling text"
+source_kind = "primary_measured_device_paper"
+family_relation = "neighbor-process LVT core; not APM VTG measurements"
+source_temperature_k = 300.0
+source_vds_magnitude_v = 0.05
+source_beta_runtime_adoption = "BLOCKED_NORMALIZATION_UNRESOLVED"
+source_vth_runtime_adoption = "REQUIRES_EXTRACTION_AND_GEOMETRY_TRANSFER_QUALIFICATION"
+
+[[unresolved_quantity]]
+id = "hart_table1_n40_beta_300k"
+source_id = "hart_jeds_2020"
+reported_value = 5.6
+reported_ci95_halfwidth = 0.2
+reported_unit = "percent micrometre"
+reported_statistic = "matched-pair relative current-factor mismatch coefficient"
+source_width_um = 0.12
+source_length_um = 0.04
+literal_fraction_um = 0.056
+literal_predicted_pair_sigma_fraction = 0.8082903768654761
+approved_runtime_value_present = false
+state = "TABLE_FIGURE_NORMALIZATION_UNRESOLVED"
+policy = "Do not divide by 10 or 100, reinterpret percent, or use source-inconsistent value as a calibration target. Resolve using an authoritative correction, independently auditable source data, or a defensible new source profile."
+
+[[candidate_followup]]
+id = "hart_thesis_2022"
+title = "Cryogenic CMOS Characterization for Quantum Computer Applications"
+doi = "10.4233/uuid:0ab4ca6c-dc69-4207-970f-d3b9f0d9c5b4"
+url = "https://research.tudelft.nl/en/publications/cryogenic-cmos-characterization-for-quantum-computer-applications/"
+status = "METADATA_FOUND_FULLTEXT_NOT_RETRIEVED_IN_THIS_SESSION"
+allowed_claim = "A later thesis by the first author exists and is a targeted follow-up. No claim it corrects the beta coefficient."
+
+[[candidate_followup]]
+id = "graz_40nm_ro_2025"
+doi = "10.3217/kmsss-7t239"
+url = "https://repository.tugraz.at/records/kmsss-7t239"
+status = "METADATA_ONLY_OUTSIDE_V5_LOCAL_SCOPE"
+allowed_claim = "Public circuit-level variability dataset exists. Not a beta/Pelgrom coefficient source. No numerical values adopted."
+
+[software_test_inputs]
+kind = "ARTIFICIAL_NUMERICAL_FIXTURE_ONLY"
+beta_coefficients_are_source_data = false
+mapping_targets_vth_v = [-0.01, 0.01]
+mapping_targets_beta_fraction = [-0.02, 0.02]

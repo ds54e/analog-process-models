@@ -1,0 +1,64 @@
+{
+  "schema": "apm.v5-preflight-preparation.v1",
+  "status": "PREPARED_NOT_REAL_TOOL_QUALIFIED",
+  "date": "2026-09-05",
+  "repository_base_commit": "b09d104759296e6dd59c6f08e6cd30fa716d6461",
+  "purpose": "Import repository-owned preflight instructions and exploratory tools; not an APM v5 release.",
+  "original_packet_sha256": "5a02b0387c592286cb9ff366c269e6ee0225ce9bca591d27beeb3af07a0f0ae7",
+  "import_changes": [
+    "Repository-relative instructions replace attachment-only handoff.",
+    "Python source normalized with ast.unparse; no nominal models imported or edited.",
+    "Bad-path control rejects unrelated simulator errors; three artificial regression tests added."
+  ],
+  "checks": {
+    "preflight_offline_tests": {
+      "status": "pass",
+      "passed": 34,
+      "command": "PYTHONPATH=tools/v5_preflight python -m pytest -q tools/v5_preflight/tests",
+      "scope": "Artificial numerical inputs and code/deck construction only."
+    },
+    "python_syntax": {
+      "status": "pass"
+    },
+    "source_audit_toml_parse": {
+      "status": "pass"
+    },
+    "new_file_spdx_presence": {
+      "status": "pass",
+      "scope": "Presence inspection only; not a full REUSE lint run."
+    },
+    "real_ngspice": {
+      "status": "not_run",
+      "reason": "No ngspice binary in preparation environment."
+    },
+    "repository_pytest_ruff_reuse_provenance_validate": {
+      "status": "not_run",
+      "reason": "No full reference checkout/toolchain available in preparation environment; Codex must run these."
+    }
+  },
+  "preparation_environment": {
+    "python": "3.13.5",
+    "numpy": "2.3.5",
+    "scipy": "1.17.0",
+    "pytest": "9.0.2"
+  },
+  "source_beta_normalization": "UNRESOLVED_NOT_APPROVED_FOR_RUNTIME",
+  "file_sha256": {
+    "GOAL.md": "28b026410e6dfc86ab3c75f2b29cf6f3681e0d099c00e1fe0ac2d23f0836544c",
+    "STATUS.md": "b2431dc0bfceb13373fbb65d5ff88d2ea3e382d3f18fae61bb1f83f10e5ddd69",
+    "V5_PREFLIGHT.md": "db24ddf8414f98a9145300d93ed901b49c39f817fbcf1ad32fb8482175fd3915",
+    "tools/v5_preflight/README.md": "48d52c9ad022ec22cc99c75876f8b4f2775e2c556b7103d425d95a4eeaa9eca1",
+    "tools/v5_preflight/CODEX_PROMPT.md": "3bb3d13fdd487452146b4ef13631cfbc400506525c73de2a222c057bffda45e2",
+    "tools/v5_preflight/V5_MINIMUM_EXPERIMENT.md": "5727ca1085c5229e6a3d3baf015c40ea92a2f35f1077d22085f05ec17a6aaee7",
+    "tools/v5_preflight/source_audit.toml": "b398bf31f821534600d8eb93124850f510646faa4c5840d1ca26936d7ccea97f",
+    "tools/v5_preflight/numerical_core.py": "b869b0b7781d517d3aa6e4dad430aacdee762818dd7ea4b29f3a76ae48aaa508",
+    "tools/v5_preflight/run_spike.py": "7c5e5cb9542ed043cfbbe632f7bf04a720c5a86c316082d6547e5a7ce91935be",
+    "tools/v5_preflight/tests/test_numerical_core.py": "a92ce3340f27351b653aebadbdc17ac80393b051304e57148fbbcbe82099b66b",
+    "tools/v5_preflight/tests/test_spice_templates.py": "d373f4942537a5cc7055f1b1a12e3f0d4c4d6fc9d81435c29b57fff024895c57"
+  },
+  "release_qualification": false,
+  "notes": [
+    "This snapshot concerns preparation only. Never overwrite it as if it were a real-SPICE execution report.",
+    "The standalone runner still needs independent per-experiment/per-polarity reporting review, as the task instructions specify."
+  ]
+}
