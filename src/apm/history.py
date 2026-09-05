@@ -97,8 +97,18 @@ def verify_history(root):
         require_history(root)
         data = load_index(root)
         inv = inventory(root)
+        snapshot_commits = {
+            'v6-baseline': BASELINE,
+            'v5-preflight': inv['frozen_scopes']['preflight']['authority'],
+            'v3-publication': git_text(root, 'log', '-1', '--format=%H', BASELINE, '--',
+                                       'validation/evidence/publication_v3.json'),
+        }
+        checks['supplementary_authorities'] = (
+            set(data.get('snapshot', {})) == set(snapshot_commits)
+            and all(data['snapshot'][k]['commit'] == v for k, v in snapshot_commits.items()))
         authorities = {r[k]["commit"]: r[k] for r in data["legacy"] for k in ("source", "evidence")}
         authorities[BASELINE] = data["baseline"]
+        authorities.update({r['commit']: r for r in data.get('snapshot', {}).values()})
         for release in data["legacy"]:
             tag = release["tag"]
             checks[tag + ".annotated_object"] = (
@@ -188,6 +198,9 @@ def export_tree(root, release_id, kind, destination):
     if report["status"] != "PASS":
         raise HistoryError("HISTORY_NOT_VERIFIED: " + report.get("error", str(report["checks"])))
     release = next((r for r in load_index(root)["legacy"] if r["tag"] == release_id), None)
+    snapshot = load_index(root).get('snapshot', {}).get(release_id)
+    if release is None and snapshot and kind == 'source':
+        release = {'source': snapshot}
     if release is None:
         raise HistoryError("UNKNOWN_RELEASE")
     destination = Path(os.path.abspath(destination.expanduser()))

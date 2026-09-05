@@ -24,6 +24,9 @@ def research_command(args) -> dict:
         return describe(root)
     tool=resolve_toolchain(root)
     if args.research_command=='sample':
+        if args.output.exists() or args.output.is_symlink():
+            from .research_numerics import ResearchError
+            raise ResearchError('REALIZATION_OUTPUT_OCCUPIED: choose a new path; preserve saved draws')
         profile=load_profile(args.profile,allow_artificial=args.allow_artificial,root=root)
         request=read_request(args.request)
         mapper=ReferenceMapper(root,tool.ngspice,args.state.resolve(),profile)

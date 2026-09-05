@@ -1,0 +1,1015 @@
+{
+  "checks": [
+    {
+      "current": "tests/test_benchmark.py::test_benchmark_v2_values_are_frozen_and_release_placeholder_free",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_benchmark.py::test_benchmark_v2_values_are_frozen_and_release_placeholder_free"
+    },
+    {
+      "current": "tests/test_benchmark.py::test_same_seed_is_identical_and_different_seed_differs",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_benchmark.py::test_same_seed_is_identical_and_different_seed_differs"
+    },
+    {
+      "current": "tests/test_benchmark.py::test_modes_share_draws_but_apply_only_documented_components",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_benchmark.py::test_modes_share_draws_but_apply_only_documented_components"
+    },
+    {
+      "current": "tests/test_benchmark.py::test_global_latent_is_shared_across_families_of_same_technology_and_polarity",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_benchmark.py::test_global_latent_is_shared_across_families_of_same_technology_and_polarity"
+    },
+    {
+      "current": "tests/test_benchmark.py::test_matching_size_uses_planar_area_and_finfet_nfin_length",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_benchmark.py::test_matching_size_uses_planar_area_and_finfet_nfin_length"
+    },
+    {
+      "current": "tests/test_benchmark.py::test_fourfold_matching_size_halves_local_sigma_for_same_draw",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_benchmark.py::test_fourfold_matching_size_halves_local_sigma_for_same_draw"
+    },
+    {
+      "current": "tests/test_benchmark.py::test_corner_semantics_map_canonical_intents_through_family_adapters",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_benchmark.py::test_corner_semantics_map_canonical_intents_through_family_adapters"
+    },
+    {
+      "current": "tests/test_benchmark.py::test_passive_composition_and_temperature_are_explicit",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_benchmark.py::test_passive_composition_and_temperature_are_explicit"
+    },
+    {
+      "current": "tests/test_benchmark.py::test_resolved_sample_hash_detects_tampering_and_write_is_non_destructive",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_benchmark.py::test_resolved_sample_hash_detects_tampering_and_write_is_non_destructive"
+    },
+    {
+      "current": "tests/test_benchmark.py::test_invalid_geometry_or_matching_size_is_rejected",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_benchmark.py::test_invalid_geometry_or_matching_size_is_rejected"
+    },
+    {
+      "current": "tests/test_catalog.py::test_anchor_families_are_discovered_from_v2_manifests",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_catalog.py::test_anchor_families_are_discovered_from_v2_manifests"
+    },
+    {
+      "current": "tests/test_catalog.py::test_selector_identity_levels",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_catalog.py::test_selector_identity_levels"
+    },
+    {
+      "current": "tests/test_catalog.py::test_fixture_family_requires_no_production_loader_branch",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_catalog.py::test_fixture_family_requires_no_production_loader_branch"
+    },
+    {
+      "current": "tests/test_compare.py::test_comparison_cli_and_catalog_sets_are_concrete_contracts",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_compare.py::test_comparison_cli_and_catalog_sets_are_concrete_contracts"
+    },
+    {
+      "current": "tests/test_compare.py::test_mixed_voltage_comparison_input_is_frozen_and_source_bound",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_compare.py::test_mixed_voltage_comparison_input_is_frozen_and_source_bound"
+    },
+    {
+      "current": "tests/test_compare.py::test_cross_process_relations_do_not_mix_planar_and_finfet_bases",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_compare.py::test_cross_process_relations_do_not_mix_planar_and_finfet_bases"
+    },
+    {
+      "current": "tests/test_compare.py::test_same_basis_planar_relations_report_normalized_ratios",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_compare.py::test_same_basis_planar_relations_report_normalized_ratios"
+    },
+    {
+      "current": "tests/test_compare.py::test_comparison_rejects_identical_selectors_before_running_tools",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_compare.py::test_comparison_rejects_identical_selectors_before_running_tools"
+    },
+    {
+      "current": "tests/test_compiler_provenance.py::test_missing_receipt_is_unverified",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_compiler_provenance.py::test_missing_receipt_is_unverified"
+    },
+    {
+      "current": "tests/test_compiler_provenance.py::test_observed_provenance_rejects_drift",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_compiler_provenance.py::test_observed_provenance_rejects_drift"
+    },
+    {
+      "current": "tests/test_compiler_provenance.py::test_legacy_asserted_cache_is_never_reused",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_compiler_provenance.py::test_legacy_asserted_cache_is_never_reused"
+    },
+    {
+      "current": "tests/test_compiler_provenance.py::test_bound_cache_rejects_changed_osdi",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_compiler_provenance.py::test_bound_cache_rejects_changed_osdi"
+    },
+    {
+      "current": "tests/test_modelgen.py::test_calibration_replay_hash_excludes_only_rebuild_local_tool_fields",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_modelgen.py::test_calibration_replay_hash_excludes_only_rebuild_local_tool_fields"
+    },
+    {
+      "current": "tests/test_modelgen.py::test_calibration_replay_binding_preserves_first_unseal_identity",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_modelgen.py::test_calibration_replay_binding_preserves_first_unseal_identity"
+    },
+    {
+      "current": "tests/test_modelgen.py::test_reconstruction_input_has_frozen_fixtures_stages_and_sealed_grids",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_modelgen.py::test_reconstruction_input_has_frozen_fixtures_stages_and_sealed_grids"
+    },
+    {
+      "current": "tests/test_modelgen.py::test_public_evidence_matrix_separates_facts_priors_and_contracts",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_modelgen.py::test_public_evidence_matrix_separates_facts_priors_and_contracts"
+    },
+    {
+      "current": "tests/test_modelgen.py::test_renderer_is_canonical_and_disables_unqualified_features",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_modelgen.py::test_renderer_is_canonical_and_disables_unqualified_features"
+    },
+    {
+      "current": "tests/test_modelgen.py::test_generation_epoch_is_sealed_and_matches_frozen_geometry_search",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_modelgen.py::test_generation_epoch_is_sealed_and_matches_frozen_geometry_search"
+    },
+    {
+      "current": "tests/test_modelgen.py::test_qualification_epoch_seals_methods_before_unsealing",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_modelgen.py::test_qualification_epoch_seals_methods_before_unsealing"
+    },
+    {
+      "current": "tests/test_modelgen.py::test_epoch2_is_disjoint_from_failed_epoch1_and_explicit_about_near_off",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_modelgen.py::test_epoch2_is_disjoint_from_failed_epoch1_and_explicit_about_near_off"
+    },
+    {
+      "current": "tests/test_modelgen.py::test_epoch3_is_disjoint_and_seals_where_reachable_distinctness",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_modelgen.py::test_epoch3_is_disjoint_and_seals_where_reachable_distinctness"
+    },
+    {
+      "current": "tests/test_modelgen.py::test_terminal_observable_requests_fail_closed_on_invalid_coordinates",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_modelgen.py::test_terminal_observable_requests_fail_closed_on_invalid_coordinates"
+    },
+    {
+      "current": "tests/test_modelgen.py::test_generation_draws_are_deterministic_independent_and_center_bounded",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_modelgen.py::test_generation_draws_are_deterministic_independent_and_center_bounded"
+    },
+    {
+      "current": "tests/test_modelgen.py::test_width_challenge_audit_passes_only_invariant_full_grid",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_modelgen.py::test_width_challenge_audit_passes_only_invariant_full_grid"
+    },
+    {
+      "current": "tests/test_modelgen.py::test_parameter_bounds_fail_closed",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_modelgen.py::test_parameter_bounds_fail_closed"
+    },
+    {
+      "current": "tests/test_modelgen.py::test_terminal_cgg_participates_in_hash_and_hard_rejection",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_modelgen.py::test_terminal_cgg_participates_in_hash_and_hard_rejection"
+    },
+    {
+      "current": "tests/test_modelgen.py::test_filtered_runs_cannot_claim_full_kernel_qualification",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_modelgen.py::test_filtered_runs_cannot_claim_full_kernel_qualification"
+    },
+    {
+      "current": "tests/test_modelgen.py::test_real_ngspice_terminal_cgg_is_external_and_bias_dependent",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_modelgen.py::test_real_ngspice_terminal_cgg_is_external_and_bias_dependent"
+    },
+    {
+      "current": "tests/test_native_variation.py::test_native_cli_and_selected_upstream_profiles_are_explicit",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_native_variation.py::test_native_cli_and_selected_upstream_profiles_are_explicit"
+    },
+    {
+      "current": "tests/test_native_variation.py::test_upstream_native_process_profile_is_parsed_without_translating_parameters",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_native_variation.py::test_upstream_native_process_profile_is_parsed_without_translating_parameters"
+    },
+    {
+      "current": "tests/test_native_variation.py::test_upstream_native_mismatch_coefficients_and_wrapper_are_explicit",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_native_variation.py::test_upstream_native_mismatch_coefficients_and_wrapper_are_explicit"
+    },
+    {
+      "current": "tests/test_native_variation.py::test_local_correlation_helper_is_python39_compatible",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_native_variation.py::test_local_correlation_helper_is_python39_compatible"
+    },
+    {
+      "current": "tests/test_noise.py::test_noise_domain_is_separate_and_spike_selectors_are_exact",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_noise.py::test_noise_domain_is_separate_and_spike_selectors_are_exact"
+    },
+    {
+      "current": "tests/test_noise.py::test_noise_geometry_preserves_native_planar_and_finfet_semantics",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_noise.py::test_noise_geometry_preserves_native_planar_and_finfet_semantics"
+    },
+    {
+      "current": "tests/test_noise.py::test_canonical_probe_conversion_preserves_sign_scale_and_psd_units",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_noise.py::test_canonical_probe_conversion_preserves_sign_scale_and_psd_units"
+    },
+    {
+      "current": "tests/test_noise.py::test_noise_wrdata_preserves_backend_source_names_without_universal_mapping",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_noise.py::test_noise_wrdata_preserves_backend_source_names_without_universal_mapping"
+    },
+    {
+      "current": "tests/test_noise.py::test_bias_refinement_resolves_target_instead_of_returning_nearest_coarse_row",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_noise.py::test_bias_refinement_resolves_target_instead_of_returning_nearest_coarse_row"
+    },
+    {
+      "current": "tests/test_noise.py::test_fail_closed_fit_never_uses_last_point_as_white_floor",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_noise.py::test_fail_closed_fit_never_uses_last_point_as_white_floor"
+    },
+    {
+      "current": "tests/test_noise.py::test_flat_spectrum_records_no_flicker_but_valid_white_region",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_noise.py::test_flat_spectrum_records_no_flicker_but_valid_white_region"
+    },
+    {
+      "current": "tests/test_noise.py::test_contiguous_method_recovers_known_flicker_white_corner",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_noise.py::test_contiguous_method_recovers_known_flicker_white_corner"
+    },
+    {
+      "current": "tests/test_noise.py::test_contiguous_method_selects_interior_plateau_before_high_frequency_rise",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_noise.py::test_contiguous_method_selects_interior_plateau_before_high_frequency_rise"
+    },
+    {
+      "current": "tests/test_noise.py::test_contiguous_method_rejects_insufficient_candidate_span",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_noise.py::test_contiguous_method_rejects_insufficient_candidate_span"
+    },
+    {
+      "current": "tests/test_noise.py::test_contiguous_method_rejects_malformed_input",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_noise.py::test_contiguous_method_rejects_malformed_input"
+    },
+    {
+      "current": "tests/test_noise.py::test_zero_psd_is_preserved_but_log_fits_fail_closed",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_noise.py::test_zero_psd_is_preserved_but_log_fits_fail_closed"
+    },
+    {
+      "current": "tests/test_noise.py::test_normative_synthetic_qualification_covers_all_eight_cases",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_noise.py::test_normative_synthetic_qualification_covers_all_eight_cases"
+    },
+    {
+      "current": "tests/test_noise.py::test_bounded_acquisition_policy_is_exact_and_versioned",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_noise.py::test_bounded_acquisition_policy_is_exact_and_versioned"
+    },
+    {
+      "current": "tests/test_noise.py::test_showmod_parser_requires_parameter_level_values_and_preserves_sentinels",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_noise.py::test_showmod_parser_requires_parameter_level_values_and_preserves_sentinels"
+    },
+    {
+      "current": "tests/test_noise.py::test_required_noise_log_must_attest_sparse_and_reject_klu",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_noise.py::test_required_noise_log_must_attest_sparse_and_reject_klu"
+    },
+    {
+      "current": "tests/test_noise.py::test_analytic_correlation_fixture_is_decisive_and_single_source",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_noise.py::test_analytic_correlation_fixture_is_decisive_and_single_source"
+    },
+    {
+      "current": "tests/test_noise.py::test_noise_cli_contracts_preserve_v3_schema_identity_in_v4_package",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_noise.py::test_noise_cli_contracts_preserve_v3_schema_identity_in_v4_package"
+    },
+    {
+      "current": "tests/test_noise_catalog.py::test_manifest_plan_derives_v4_logical_and_deduplicated_coverage",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_noise_catalog.py::test_manifest_plan_derives_v4_logical_and_deduplicated_coverage"
+    },
+    {
+      "current": "tests/test_noise_catalog.py::test_catalog_plan_is_deterministic_and_deduplicates_identical_physical_requests",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_noise_catalog.py::test_catalog_plan_is_deterministic_and_deduplicates_identical_physical_requests"
+    },
+    {
+      "current": "tests/test_noise_catalog.py::test_request_identity_binds_semantics_and_native_geometry",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_noise_catalog.py::test_request_identity_binds_semantics_and_native_geometry"
+    },
+    {
+      "current": "tests/test_noise_catalog.py::test_model_identity_closes_nested_spice_includes",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_noise_catalog.py::test_model_identity_closes_nested_spice_includes"
+    },
+    {
+      "current": "tests/test_noise_catalog.py::test_resume_reuses_only_exact_completed_request_and_artifact_hashes",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_noise_catalog.py::test_resume_reuses_only_exact_completed_request_and_artifact_hashes"
+    },
+    {
+      "current": "tests/test_noise_catalog.py::test_result_content_hash_excludes_only_its_self_describing_manifest",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_noise_catalog.py::test_result_content_hash_excludes_only_its_self_describing_manifest"
+    },
+    {
+      "current": "tests/test_noise_catalog.py::test_reference_interpolation_and_common_band_integration_are_deterministic",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_noise_catalog.py::test_reference_interpolation_and_common_band_integration_are_deterministic"
+    },
+    {
+      "current": "tests/test_noise_catalog.py::test_explicit_vctrl_path_runs_canonical_finite_difference_validation",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_noise_catalog.py::test_explicit_vctrl_path_runs_canonical_finite_difference_validation"
+    },
+    {
+      "current": "tests/test_noise_catalog.py::test_noise_catalog_cli_contract_preserves_package_version",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_noise_catalog.py::test_noise_catalog_cli_contract_preserves_package_version"
+    },
+    {
+      "current": "tests/test_lifecycle.py and tests/test_history.py",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_release_validate.py::test_release_contract_and_implementation_are_exact"
+    },
+    {
+      "current": "tests/test_lifecycle.py and tests/test_history.py",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_release_validate.py::test_v4_release_contract_and_implementation_are_exact"
+    },
+    {
+      "current": "tests/test_lifecycle.py and tests/test_history.py",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_release_validate.py::test_v4_candidate_gate_evaluation_keeps_exact_tag_pending"
+    },
+    {
+      "current": "tests/test_lifecycle.py and tests/test_history.py",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_release_validate.py::test_v4_exact_tag_evaluation_requires_all_sixteen_gates"
+    },
+    {
+      "current": "tests/test_lifecycle.py and tests/test_history.py",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_release_validate.py::test_v4_catalog_public_evidence_and_holdout_evidence_are_bound"
+    },
+    {
+      "current": "tests/test_lifecycle.py and tests/test_history.py",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_release_validate.py::test_gate_evaluation_fails_closed"
+    },
+    {
+      "current": "tests/test_lifecycle.py and tests/test_history.py",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_release_validate.py::test_gate_evaluation_rejects_stale_or_nonexistent_evidence"
+    },
+    {
+      "current": "tests/test_lifecycle.py and tests/test_history.py",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_release_validate.py::test_v4_repository_audits_and_frozen_v3_validator_are_fail_closed"
+    },
+    {
+      "current": "tests/test_lifecycle.py and tests/test_history.py",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_release_validate.py::test_metadata_audit_rejects_development_versions"
+    },
+    {
+      "current": "tests/test_lifecycle.py and tests/test_history.py",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_release_validate.py::test_clean_clone_attestation_is_tied_to_exact_commit"
+    },
+    {
+      "current": "tests/test_lifecycle.py and tests/test_history.py",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_release_validate.py::test_v4_candidate_attestation_is_detached_and_exact"
+    },
+    {
+      "current": "tests/test_lifecycle.py and tests/test_history.py",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_release_validate.py::test_clean_clone_inventory_detects_ignored_generated_state"
+    },
+    {
+      "current": "tests/test_lifecycle.py and tests/test_history.py",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_release_validate.py::test_clean_clone_tag_audit_detects_final_v3_tag"
+    },
+    {
+      "current": "tests/test_lifecycle.py and tests/test_history.py",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_release_validate.py::test_attestation_launcher_disables_bytecode_before_project_import"
+    },
+    {
+      "current": "tests/test_lifecycle.py and tests/test_history.py",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_release_validate.py::test_validate_cli_exposes_release_output"
+    },
+    {
+      "current": "tests/test_lifecycle.py and tests/test_history.py",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_release_validate.py::test_contract_mismatch_is_an_error"
+    },
+    {
+      "current": "tests/test_lifecycle.py and tests/test_history.py",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_release_validate_v5.py::test_all_candidate_gates_pass_without_post_tag"
+    },
+    {
+      "current": "tests/test_lifecycle.py and tests/test_history.py",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_release_validate_v5.py::test_incomplete_or_stale_candidate_never_passes"
+    },
+    {
+      "current": "tests/test_lifecycle.py and tests/test_history.py",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_release_validate_v5.py::test_required_contract_cannot_be_silently_weakened"
+    },
+    {
+      "current": "tests/test_confirmation.py::test_raw_receipt_requires_exact_inventory_hash_and_success",
+      "disposition": "equivalent current replacement; original also retained in history",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_release_validate_v5.py::test_raw_receipt_requires_exact_inventory_hash_and_success"
+    },
+    {
+      "current": "tests/test_lifecycle.py and tests/test_history.py",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_release_validate_v5.py::test_fresh_clone_requires_new_destination_and_sealed_attestation"
+    },
+    {
+      "current": "tests/test_lifecycle.py and tests/test_history.py",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_release_validate_v5.py::test_cli_candidate_only_and_release_modes_exclusive"
+    },
+    {
+      "current": "tests/test_confirmation.py::test_shipped_registry_explicitly_blocks_original_beta",
+      "disposition": "equivalent current replacement; original also retained in history",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_release_validate_v5.py::test_shipped_registry_explicitly_blocks_original_beta"
+    },
+    {
+      "current": "tests/test_confirmation.py::test_confirmation_plan_cannot_omit_required_scope",
+      "disposition": "equivalent current replacement; original also retained in history",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_release_validate_v5.py::test_confirmation_plan_cannot_omit_required_scope"
+    },
+    {
+      "current": "tests/test_lifecycle.py and tests/test_history.py",
+      "disposition": "historical mission assertion replaced by current lifecycle and exact source/evidence identity; original executed at baseline",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_repository_contract.py::test_post_v5_goal_and_historical_document_status_are_explicit"
+    },
+    {
+      "current": "tests/test_history.py and tests/test_lifecycle.py",
+      "disposition": "historical mission/copied-artifact assertion replaced by exact-object/current-asset/lifecycle checks",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_repository_contract.py::test_current_guidance_and_frozen_v4_artifact_audits_pass"
+    },
+    {
+      "current": "tests/test_history.py and tests/test_lifecycle.py",
+      "disposition": "historical mission/copied-artifact assertion replaced by exact-object/current-asset/lifecycle checks",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_repository_contract.py::test_current_guidance_audit_fails_closed_on_completed_goal"
+    },
+    {
+      "current": "tests/test_history.py and tests/test_lifecycle.py",
+      "disposition": "historical mission/copied-artifact assertion replaced by exact-object/current-asset/lifecycle checks",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_repository_contract.py::test_frozen_v4_audit_fails_closed_on_byte_drift"
+    },
+    {
+      "current": "tests/test_repository_contract.py::test_psp_product_documentation_acknowledgement_is_preserved",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_repository_contract.py::test_psp_product_documentation_acknowledgement_is_preserved"
+    },
+    {
+      "current": "tests/test_history.py and tests/test_lifecycle.py",
+      "disposition": "historical mission/copied-artifact assertion replaced by exact-object/current-asset/lifecycle checks",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_repository_contract.py::test_preflight_bytes_remain_immutable"
+    },
+    {
+      "current": "tests/test_repository_contract.py::test_preserved_catalog_matches_current_manifests",
+      "disposition": "equivalent current replacement; remove dependency on historical policy data",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_repository_contract.py::test_v3_contract_is_frozen_and_v4_contract_matches_the_live_catalog"
+    },
+    {
+      "current": "tests/test_repository_contract.py::test_reference_runtime_pin_is_preserved",
+      "disposition": "equivalent current replacement; remove dependency on historical policy data",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_repository_contract.py::test_reference_runtime_contract_is_el9_ngspice47_osdi"
+    },
+    {
+      "current": "tests/test_repository_contract.py::test_preserved_noise_method_identities",
+      "disposition": "equivalent current replacement; remove dependency on historical policy data",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_repository_contract.py::test_v3_noise_release_contract_freezes_validated_method_identities"
+    },
+    {
+      "current": "tests/test_repository_contract.py::test_public_geometry_and_identity_contract_is_manifest_enforced",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_repository_contract.py::test_public_geometry_and_identity_contract_is_manifest_enforced"
+    },
+    {
+      "current": "tests/test_repository_contract.py::test_all_provenance_files_match_identity_model_and_spectre_boundary",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_repository_contract.py::test_all_provenance_files_match_identity_model_and_spectre_boundary"
+    },
+    {
+      "current": "tests/test_repository_contract.py::test_provenance_inventories_cover_every_shipped_model_asset_and_hash",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_repository_contract.py::test_provenance_inventories_cover_every_shipped_model_asset_and_hash"
+    },
+    {
+      "current": "tests/test_repository_contract.py::test_required_osdi_sources_are_self_contained_and_generated_binaries_are_ignored",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_repository_contract.py::test_required_osdi_sources_are_self_contained_and_generated_binaries_are_ignored"
+    },
+    {
+      "current": "tests/test_repository_contract.py::test_every_family_wrapper_has_exact_public_names_and_small_interface",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_repository_contract.py::test_every_family_wrapper_has_exact_public_names_and_small_interface"
+    },
+    {
+      "current": "tests/test_repository_contract.py::test_apm130_lv_hv_are_independent_upstream_families_with_geometry_semantics",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_repository_contract.py::test_apm130_lv_hv_are_independent_upstream_families_with_geometry_semantics"
+    },
+    {
+      "current": "tests/test_repository_contract.py::test_apm045_threshold_and_gate_stack_domains_are_explicit",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_repository_contract.py::test_apm045_threshold_and_gate_stack_domains_are_explicit"
+    },
+    {
+      "current": "tests/test_repository_contract.py::test_apm022_variants_change_only_threshold_and_are_not_ptm_derived",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_repository_contract.py::test_apm022_variants_change_only_threshold_and_are_not_ptm_derived"
+    },
+    {
+      "current": "tests/test_repository_contract.py::test_apm016f_variants_are_workfunction_dominant_and_preserve_nfin",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_repository_contract.py::test_apm016f_variants_are_workfunction_dominant_and_preserve_nfin"
+    },
+    {
+      "current": "tests/test_repository_contract.py::test_finfet_result_geometry_never_invents_width",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_repository_contract.py::test_finfet_result_geometry_never_invents_width"
+    },
+    {
+      "current": "tests/test_repository_contract.py::test_doctor_observable_parser_ignores_unrelated_equals_signs",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_repository_contract.py::test_doctor_observable_parser_ignores_unrelated_equals_signs"
+    },
+    {
+      "current": "tests/test_repository_contract.py::test_constant_current_threshold_is_linearly_interpolated",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_repository_contract.py::test_constant_current_threshold_is_linearly_interpolated"
+    },
+    {
+      "current": "tests/test_repository_contract.py::test_capacitance_derivation_uses_raw_ordered_gate_y_terms",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_repository_contract.py::test_capacitance_derivation_uses_raw_ordered_gate_y_terms"
+    },
+    {
+      "current": "tests/test_repository_contract.py::test_benchmark_v2_contract_has_global_local_all_and_technology_latents",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_repository_contract.py::test_benchmark_v2_contract_has_global_local_all_and_technology_latents"
+    },
+    {
+      "current": "tests/test_repository_contract.py::test_v1_runtime_single_sources_are_removed",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_repository_contract.py::test_v1_runtime_single_sources_are_removed"
+    },
+    {
+      "current": "tests/test_repository_contract.py::test_release_validation_and_provenance_commands_are_cli_contracts",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_repository_contract.py::test_release_validation_and_provenance_commands_are_cli_contracts"
+    },
+    {
+      "current": "tests/test_repository_contract.py::test_spectre_is_model_only_experimental_and_not_real_tool_gate",
+      "disposition": "equivalent current replacement; remove dependency on historical policy data",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_repository_contract.py::test_spectre_is_model_only_experimental_and_not_real_tool_gate"
+    },
+    {
+      "current": "tests/test_history.py and tests/test_lifecycle.py",
+      "disposition": "historical mission/copied-artifact assertion replaced by exact-object/current-asset/lifecycle checks",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_repository_contract.py::test_release_contract_requires_v3_metadata_and_all_18_gates"
+    },
+    {
+      "current": "tests/test_history.py and tests/test_lifecycle.py",
+      "disposition": "historical mission/copied-artifact assertion replaced by exact-object/current-asset/lifecycle checks",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_repository_contract.py::test_reference_clean_clone_and_fail_closed_policy_remain_required"
+    },
+    {
+      "current": "tests/test_history.py and tests/test_lifecycle.py",
+      "disposition": "historical mission/copied-artifact assertion replaced by exact-object/current-asset/lifecycle checks",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_repository_contract.py::test_frozen_v5_audit_and_released_package_identity"
+    },
+    {
+      "current": "tests/test_history.py and tests/test_lifecycle.py",
+      "disposition": "historical mission/copied-artifact assertion replaced by exact-object/current-asset/lifecycle checks",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_repository_contract.py::test_frozen_v5_audit_rejects_drift"
+    },
+    {
+      "current": "tests/test_history.py and tests/test_lifecycle.py",
+      "disposition": "historical mission/copied-artifact assertion replaced by exact-object/current-asset/lifecycle checks",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_repository_contract.py::test_post_release_main_rejects_obsolete_package_identity"
+    },
+    {
+      "current": "tests/test_research.py::test_profiles_require_explicit_adoption",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research.py::test_profiles_require_explicit_adoption"
+    },
+    {
+      "current": "tests/test_research.py::test_invalid_instance_maps_fail",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research.py::test_invalid_instance_maps_fail"
+    },
+    {
+      "current": "tests/test_research.py::test_length_interpolation_and_width_law",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research.py::test_length_interpolation_and_width_law"
+    },
+    {
+      "current": "tests/test_research.py::test_draw_identity_ignores_geometry_and_source_but_realization_changes",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research.py::test_draw_identity_ignores_geometry_and_source_but_realization_changes"
+    },
+    {
+      "current": "tests/test_research.py::test_failed_draw_is_persisted_without_mapping_or_redraw",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research.py::test_failed_draw_is_persisted_without_mapping_or_redraw"
+    },
+    {
+      "current": "tests/test_research.py::test_double_counting_and_corrupt_sample_rejected",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research.py::test_double_counting_and_corrupt_sample_rejected"
+    },
+    {
+      "current": "tests/test_research.py::test_typed_recipe_executes_and_cache_tamper_fails",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research.py::test_typed_recipe_executes_and_cache_tamper_fails"
+    },
+    {
+      "current": "tests/test_research.py::test_bad_path_zero_exit_is_not_success",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research.py::test_bad_path_zero_exit_is_not_success"
+    },
+    {
+      "current": "tests/test_research.py::test_replay_changes_recipe_but_preserves_physical_binding",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research.py::test_replay_changes_recipe_but_preserves_physical_binding"
+    },
+    {
+      "current": "tests/test_research.py::test_controlled_startup_overrides_unbound_host_setting",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research.py::test_controlled_startup_overrides_unbound_host_setting"
+    },
+    {
+      "current": "tests/test_research.py::test_failed_measurement_keeps_executed_run_receipt",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research.py::test_failed_measurement_keeps_executed_run_receipt"
+    },
+    {
+      "current": "tests/test_research.py::test_unsupported_variation_mode_is_an_error",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research.py::test_unsupported_variation_mode_is_an_error"
+    },
+    {
+      "current": "tests/test_research_charge.py::test_conserved_dynamic_charges_and_fault_injection",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research_charge.py::test_conserved_dynamic_charges_and_fault_injection"
+    },
+    {
+      "current": "tests/test_research_numerics.py::test_key_replay",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research_numerics.py::test_key_replay"
+    },
+    {
+      "current": "tests/test_research_numerics.py::test_key_insertion_and_order",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research_numerics.py::test_key_insertion_and_order"
+    },
+    {
+      "current": "tests/test_research_numerics.py::test_key_workers",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research_numerics.py::test_key_workers"
+    },
+    {
+      "current": "tests/test_research_numerics.py::test_bad_seed",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research_numerics.py::test_bad_seed"
+    },
+    {
+      "current": "tests/test_research_numerics.py::test_pair_sqrt2",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research_numerics.py::test_pair_sqrt2"
+    },
+    {
+      "current": "tests/test_research_numerics.py::test_width_scaling",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research_numerics.py::test_width_scaling"
+    },
+    {
+      "current": "tests/test_research_numerics.py::test_length_scaling_has_coefficient",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research_numerics.py::test_length_scaling_has_coefficient"
+    },
+    {
+      "current": "tests/test_research_numerics.py::test_pair_unequal_sizes",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research_numerics.py::test_pair_unequal_sizes"
+    },
+    {
+      "current": "tests/test_research_numerics.py::test_relative_definition",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research_numerics.py::test_relative_definition"
+    },
+    {
+      "current": "tests/test_research_numerics.py::test_relative_bad_value",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research_numerics.py::test_relative_bad_value"
+    },
+    {
+      "current": "tests/test_research_numerics.py::test_covariance",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research_numerics.py::test_covariance"
+    },
+    {
+      "current": "tests/test_research_numerics.py::test_latent_population",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research_numerics.py::test_latent_population"
+    },
+    {
+      "current": "tests/test_research_numerics.py::test_tail",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research_numerics.py::test_tail"
+    },
+    {
+      "current": "tests/test_research_numerics.py::test_extraction_analytic",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research_numerics.py::test_extraction_analytic"
+    },
+    {
+      "current": "tests/test_research_numerics.py::test_extraction_refinement",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research_numerics.py::test_extraction_refinement"
+    },
+    {
+      "current": "tests/test_research_numerics.py::test_extraction_endpoint",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research_numerics.py::test_extraction_endpoint"
+    },
+    {
+      "current": "tests/test_research_numerics.py::test_extraction_duplicate_axis",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research_numerics.py::test_extraction_duplicate_axis"
+    },
+    {
+      "current": "tests/test_research_numerics.py::test_extraction_nonfinite",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research_numerics.py::test_extraction_nonfinite"
+    },
+    {
+      "current": "tests/test_research_numerics.py::test_extraction_two_peaks",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research_numerics.py::test_extraction_two_peaks"
+    },
+    {
+      "current": "tests/test_research_numerics.py::test_mapping_inversion",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research_numerics.py::test_mapping_inversion"
+    },
+    {
+      "current": "tests/test_research_numerics.py::test_mapping_no_resample_or_clip",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research_numerics.py::test_mapping_no_resample_or_clip"
+    },
+    {
+      "current": "tests/test_research_numerics.py::test_mapping_impossible_target",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research_numerics.py::test_mapping_impossible_target"
+    },
+    {
+      "current": "tests/test_research_numerics.py::test_hash_no_nan",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_research_numerics.py::test_hash_no_nan"
+    },
+    {
+      "current": "tests/test_spectre.py::test_spectre_cli_is_explicitly_structural",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_spectre.py::test_spectre_cli_is_explicitly_structural"
+    },
+    {
+      "current": "tests/test_spectre.py::test_all_spectre_artifacts_pass_static_gate",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_spectre.py::test_all_spectre_artifacts_pass_static_gate"
+    },
+    {
+      "current": "tests/test_spectre.py::test_spectre_public_names_match_all_family_ngspice_names",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_spectre.py::test_spectre_public_names_match_all_family_ngspice_names"
+    },
+    {
+      "current": "tests/test_spectre.py::test_spectre_generation_is_byte_reproducible",
+      "disposition": "preserved current scientific/provenance/regression check",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_spectre.py::test_spectre_generation_is_byte_reproducible"
+    },
+    {
+      "current": "tests/test_lifecycle.py and tests/test_history.py",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_v5_exact_tag_procedure.py::test_full_rerun_evidence_rejection"
+    },
+    {
+      "current": "tests/test_lifecycle.py and tests/test_history.py",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_v5_exact_tag_procedure.py::test_tag_identity_rejects_wrong_or_moving_refs"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_experiment_reporting.py::test_negative_requires_complete_mechanism"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_experiment_reporting.py::test_bad_path_readback_mismatch_alone_or_solver_error_is_inconclusive"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_experiment_reporting.py::test_reset_must_prove_application_before_loss"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_experiment_reporting.py::test_timeout_preserves_request_and_partial_logs"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_experiment_reporting.py::test_application_does_not_invoke_mg"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_experiment_reporting.py::test_endpoint_failure_retains_all_grids_and_blocks_all_targets"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_experiment_reporting.py::test_main_continues_both_polarities_after_stage_failure"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_numerical_core.py::test_key_replay"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_numerical_core.py::test_key_insertion_and_order"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_numerical_core.py::test_key_workers"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_numerical_core.py::test_bad_seed"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_numerical_core.py::test_pair_sqrt2"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_numerical_core.py::test_width_scaling"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_numerical_core.py::test_length_scaling_has_coefficient"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_numerical_core.py::test_pair_unequal_sizes"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_numerical_core.py::test_relative_definition"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_numerical_core.py::test_relative_bad_value"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_numerical_core.py::test_covariance"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_numerical_core.py::test_latent_population"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_numerical_core.py::test_tail"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_numerical_core.py::test_extraction_analytic"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_numerical_core.py::test_extraction_refinement"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_numerical_core.py::test_extraction_endpoint"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_numerical_core.py::test_extraction_duplicate_axis"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_numerical_core.py::test_extraction_nonfinite"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_numerical_core.py::test_extraction_two_peaks"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_numerical_core.py::test_mapping_inversion"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_numerical_core.py::test_mapping_no_resample_or_clip"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_numerical_core.py::test_mapping_impossible_target"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_numerical_core.py::test_hash_no_nan"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_spice_templates.py::test_n_template"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_spice_templates.py::test_p_template"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_spice_templates.py::test_negative_templates"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_spice_templates.py::test_path_injection_rejected"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_spice_templates.py::test_readback_parse"
+    },
+    {
+      "current": "history.original_execution (preflight source)",
+      "disposition": "historical original suite; execute only in its original source",
+      "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tools/v5_preflight/tests/test_spice_templates.py::test_readback_missing"
+    }
+  ],
+  "schema": "apm.check-migration.v1"
+}

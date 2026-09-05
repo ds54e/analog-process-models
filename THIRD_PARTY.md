@@ -1,6 +1,6 @@
 # Third-party model policy and provenance
 
-APM 3.0.0 is self-contained for transistor-model sources, but repository-level
+APM is self-contained for transistor-model sources, but repository-level
 licensing is never assumed to override a model file's own terms.
 
 ## Distribution rules

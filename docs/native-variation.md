@@ -6,10 +6,18 @@ benchmark variation. Every persisted row uses
 `variation_origin = "native"`, exact family identity, and the upstream
 profile name.
 
-```console
-apm build-models
-apm apm130-native-check --output .apm/results/apm130-native
+Work at the repository root after setup and `apm build-models`; this flow requires
+PSP103 OSDI, the pinned IHP libraries and ngspice 47.
+
+<!-- apm-journey: native -->
+```bash
+.venv/bin/apm apm130-native-check --output .apm/tutorial-native
 ```
+
+Inspect `.apm/tutorial-native/report.json` and the LV/HV family tables listed
+below for retained native profile names, seed cohorts and raw resolved parameters.
+This exercises the selected upstream model behavior, not yield qualification.
+
 
 The command refuses to overwrite a non-empty directory and invokes ngspice with
 `-n`, so `~/.spiceinit` and GUI state do not participate.

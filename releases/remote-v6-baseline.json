@@ -1,0 +1,43 @@
+{
+  "observation": "Read during v6 implementation, before candidate freeze; no release writes performed",
+  "releases": [
+    {
+      "assets": [],
+      "body_sha256": "ae1464b69d51194385336005d57546462f1f6768b40eb6e9f1408755b56376bc",
+      "created_at": "2026-09-05T07:01:59Z",
+      "draft": false,
+      "id": 383185435,
+      "name": "Analog Process Models v5.0.0",
+      "prerelease": false,
+      "published_at": "2026-09-05T08:32:51Z",
+      "tag_name": "v5.0.0",
+      "target_commitish": "381517fda5107fabf98af7801d5a5103f38e230c"
+    },
+    {
+      "assets": [],
+      "body_sha256": "b0831dc54375476eb15bcb5394821859c9bf8a9a9b900cb5497a1ee3ca5ad98b",
+      "created_at": "2026-09-04T17:11:54Z",
+      "draft": false,
+      "id": 382911346,
+      "name": "Analog Process Models v4.0.0",
+      "prerelease": false,
+      "published_at": "2026-09-04T17:41:47Z",
+      "tag_name": "v4.0.0",
+      "target_commitish": "main"
+    },
+    {
+      "assets": [],
+      "body_sha256": "721cfd2a6bf52a05e5aa80e5953ecbe1ef6a90eeec7e1442d7f5cef47fb0ea05",
+      "created_at": "2026-08-30T08:01:26Z",
+      "draft": false,
+      "id": 379221176,
+      "name": "Analog Process Models v3.0.0",
+      "prerelease": false,
+      "published_at": "2026-08-30T08:22:17Z",
+      "tag_name": "v3.0.0",
+      "target_commitish": "main"
+    }
+  ],
+  "repository": "ds54e/analog-process-models",
+  "schema": "apm.remote-release-inventory.v1"
+}

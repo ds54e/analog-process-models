@@ -18,11 +18,14 @@ source-download caches may be used; ordinary reuse is described below.
 
 <!-- apm-journey: cold -->
 ```bash
+(
+unset APM_TOOLCHAIN_DIR APM_NGSPICE APM_OPENVAF APM_OPENVAF_RECEIPT
 APM_BUILD_JOBS=4 APM_STATE_DIR="$PWD/.apm/tutorial-cold" tools/bootstrap-el9.sh
 APM_VENV="$PWD/.apm/tutorial-python" PIP_CONSTRAINT="$PWD/validation/v5_reference_constraints.txt" tools/setup-python.sh
 APM_STATE_DIR="$PWD/.apm/tutorial-cold" .apm/tutorial-python/bin/apm build-models
 APM_STATE_DIR="$PWD/.apm/tutorial-cold" .apm/tutorial-python/bin/apm doctor
 APM_STATE_DIR="$PWD/.apm/tutorial-cold" .apm/tutorial-python/bin/apm characterize apm045/vtg/nmos --output .apm/tutorial-first-result
+)
 ```
 
 Inspect `.apm/tutorial-cold/build/osdi/build.json` for bound source/compiler/OSDI

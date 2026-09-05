@@ -1,0 +1,21 @@
+* SPDX-FileCopyrightText: 2026 APM contributors
+* SPDX-License-Identifier: Apache-2.0
+* Nominal PSP103 OSDI example: build models before running this circuit.
+.lib ../../models/apm130/vendor/ihp-sg13g2-models/cornerMOSlv.lib mos_tt
+.include ../../models/apm130/families/lv/ngspice/wrapper.inc
+Vd d 0 0.6
+Vg g 0 0.8
+Xdevice d g 0 0 apm130_lv_nmos w=2u l=0.26u
+.control
+set num_threads=1
+pre_osdi ../../.apm/build/osdi/psp103.osdi
+pre_osdi ../../.apm/build/osdi/psp103-nqs.osdi
+set wr_singlescale
+set wr_vecnames
+op
+print i(vd)
+dc Vg 0 1.2 0.01
+wrdata ../../.apm/tutorial-nominal/apm130-idvg.txt v(g) i(vd)
+quit
+.endc
+.end

@@ -125,17 +125,21 @@ Input uses schema `apm.benchmark-request.v2`; each MOS entry declares a
 `technology/family/device` selector, legal public geometry, and its top-level
 ngspice X-instance name. See `examples/benchmark_request.json`.
 
-```console
-apm sample-variation \
-  --request examples/benchmark_request.json \
-  --mode all \
-  --seed 20260830 \
-  --output .apm/results/sample-all.json
+Work at the repository root with the configured environment. Sampling itself uses
+Python; the second command executes the supported all-family real-tool Benchmark
+regression, including MOS modes/corners and passive checks.
 
-apm resolve-corner bench_fs \
-  --request examples/benchmark_request.json \
-  --output .apm/results/bench-fs.json
+<!-- apm-journey: benchmark -->
+```bash
+.venv/bin/apm sample-variation --request examples/benchmark_request.json --mode all --seed 20260830 --output .apm/tutorial-benchmark-sample.json
+.venv/bin/apm benchmark-check --output .apm/tutorial-benchmark
 ```
+
+Inspect the saved sample's `seed`, resolved latents, observable intents and raw
+adapter values, then `.apm/tutorial-benchmark/report.json` and its linked tables.
+Threshold shifts use V and drive shifts are dimensionless fractional changes.
+This confirms configured synthetic behavior, not measured process statistics.
+
 
 ngspice benchmark randomness is generated in Python with NumPy
 `Generator(PCG64)`. A canonical order generates all Global latents followed

@@ -6,14 +6,22 @@ its declared devices, and a device selector restricts the run to that device.
 An explicit `--profile` is valid for a family/device selector. Every command
 refuses to overwrite a non-empty output directory.
 
-Examples:
+Work at the repository root after [setup](getting-started.md), with ngspice 47
+and required OSDI artifacts built. Execute one family and its threshold comparison:
 
-```console
-apm characterize apm130 --output .apm/results/apm130
-apm characterize apm045/thkox --profile common_overlap_1v0 \
-  --output .apm/results/apm045-thkox-overlap
-apm characterize apm016f/svt/nfet --output .apm/results/apm016f-svt-n
+<!-- apm-journey: characterize -->
+```bash
+.venv/bin/apm characterize apm045/vtg --output .apm/tutorial-characterization
+.venv/bin/apm compare-set apm045 threshold --output .apm/tutorial-threshold
 ```
+
+Inspect `.apm/tutorial-characterization/metadata.json`, `derived.csv` and
+`y_matrix.json`, then `.apm/tutorial-threshold/comparison.csv` and `report.json`.
+Currents are A, gm/gds are S, gm/Id is V⁻¹ and capacitances are F. A positive
+comparison magnitude does not replace the separately saved signed terminal value.
+These studies characterize compact-model behavior, not foundry correlation,
+silicon calibration or voltage reliability. The qualification's tutorial report
+records observations drawn from these actual files.
 
 Full result directories are reproducible but normally untracked. Compact
 milestone evidence belongs under `validation/evidence/`.

@@ -1,0 +1,32 @@
+{
+  "src/apm/confirmation.py": {
+    "changes": "Current helper ownership only; audit scan excludes its own renamed module. Confirmation additionally enforces the complete declared 4096-pair count.",
+    "commit": "25140f57c4c3714f6ab4c9c9df44698ad7732662",
+    "names": [
+      "audit_plan",
+      "validate_run_file",
+      "audit_confirmation"
+    ],
+    "source": "src/apm/release_validate_v5.py",
+    "source_sha256": "d683b739cdd005381e60e72911fe77bd61d77c47167a28c56606ce1c6755c48c"
+  },
+  "src/apm/validation_support.py": {
+    "changes": "Current helper ownership only; audit scan excludes its own renamed module. Confirmation additionally enforces the complete declared 4096-pair count.",
+    "commit": "25140f57c4c3714f6ab4c9c9df44698ad7732662",
+    "names": [
+      "TRACKED_FORBIDDEN_PARTS",
+      "TRACKED_FORBIDDEN_SUFFIXES",
+      "SECRET_PATTERNS",
+      "PRIVATE_PATH_PATTERNS",
+      "HISTORICAL_REPRODUCIBILITY_PATH_RE",
+      "INCLUDE_RE",
+      "BUILTIN_VERILOG_A_INCLUDES",
+      "audit_distribution",
+      "audit_migration",
+      "_tracked_files",
+      "_check_map"
+    ],
+    "source": "src/apm/release_validate.py",
+    "source_sha256": "620aafa6047118883bc16a243a8e4e65b4aeaaef9232a412f1b8837382646d89"
+  }
+}

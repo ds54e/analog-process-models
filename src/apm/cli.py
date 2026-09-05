@@ -26,6 +26,7 @@ from .compare import (
     validate_all_characterizations,
 )
 from .doctor import run_doctor
+from .lifecycle import ValidationError as ReleaseValidationError
 from .maintenance_validate import validate_maintenance_repository
 from .model_build import build_models
 from .native_variation import NativeVariationError, validate_apm130_native
@@ -35,8 +36,6 @@ from .noise_method_validate import NoiseMethodValidationError, validate_noise_me
 from .noise_validate import NoiseValidationError, validate_noise_spike
 from .paths import repository_root
 from .provenance_validate import ProvenanceValidationError, validate_provenance
-from .release_validate import ReleaseValidationError, validate_release
-from .release_validate_v4 import validate_release_v4
 from .research_numerics import ResearchError
 from .spectre_validate import SpectreStructureError, validate_spectre
 from .toolchain import ToolchainError
@@ -81,9 +80,19 @@ def build_parser() -> argparse.ArgumentParser:
     rr.add_argument("--realization", type=Path, required=True)
     rr.add_argument("--output", type=Path, required=True)
     rr.add_argument("--temperature-c", type=float, default=26.85)
-    rc = research_sub.add_parser("check", help="Execute the frozen v5 engineering plan")
+    rc = research_sub.add_parser("check", help="Execute the preserved Research numerical methodology on current code")
     rc.add_argument("--output", type=Path, required=True)
     rc.add_argument("--suite", choices=("sampler", "mapping", "statistics", "circuits", "replay", "io", "all"), default="all")
+
+    p_history = sub.add_parser("history", help="List, verify or export exact historical source/evidence")
+    hs = p_history.add_subparsers(dest="history_command", required=True)
+    hs.add_parser("list")
+    hv = hs.add_parser("verify")
+    hv.add_argument("--output", type=Path)
+    he = hs.add_parser("export")
+    he.add_argument("release")
+    he.add_argument("kind", choices=("source", "evidence"))
+    he.add_argument("--output", type=Path, required=True)
 
     p_list = sub.add_parser("list", help="List manifest-discovered catalog entities")
     p_list.add_argument("kind", choices=("technologies", "families", "devices"))
@@ -110,7 +119,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--release",
         action="store_true",
         help=(
-            "Evaluate the frozen historical v3.0 candidate contract; retained only for "
+            "Historical v3 workflow migration diagnostic; use its exact source for "
             "immutable-release reproducibility"
         ),
     )
@@ -119,7 +128,7 @@ def build_parser() -> argparse.ArgumentParser:
         choices=("candidate", "exact-tag"),
         metavar="PHASE",
         help=(
-            "Reproduce the frozen historical v4.0 candidate or exact-tag release contract "
+            "Historical v4 migration diagnostic; reproduce the original contract "
             "from an attested fresh clone"
         ),
     )
@@ -127,8 +136,14 @@ def build_parser() -> argparse.ArgumentParser:
         "--release-v5",
         choices=("candidate",),
         metavar="PHASE",
-        help="Qualify an exact fresh v5 candidate; never create a tag or publish",
+        help="Historical v5 migration diagnostic; use its exact source",
     )
+    release_mode.add_argument("--qualify", choices=("candidate", "exact-tag"),
+                              help="Execute the current release campaign; never create tags/releases")
+    p_validate.add_argument("--scope", choices=("current", "product"), default="current",
+                            help="Product omits Git/history and maintainer tool checks explicitly")
+    p_validate.add_argument("--approval-file", type=Path,
+                            help="External approved candidate and existing tag identity, exact-tag only")
     p_validate.add_argument(
         "--output",
         type=Path,
@@ -241,6 +256,23 @@ def main() -> int:
     parser = build_parser()
     args = parser.parse_args()
     try:
+        if args.command == "history":
+            from .history import export_tree, load_index, verify_history
+            root = repository_root()
+            if args.history_command == "list":
+                result = {"status": "INDEX_ONLY", "releases": load_index(root)["legacy"],
+                          "note": "Listing local locators is not history verification."}
+            elif args.history_command == "export":
+                result = export_tree(root, args.release, args.kind, args.output)
+            else:
+                result = verify_history(root)
+                if args.output:
+                    from .lifecycle import write_report
+                    if args.output.exists():
+                        raise ReleaseValidationError("HISTORY_REPORT_DESTINATION_OCCUPIED")
+                    write_report(args.output, result)
+            print(json.dumps(result, indent=2, sort_keys=True))
+            return 1 if result["status"] in ("FAIL", "NOT_VERIFIED") else 0
         if args.command == "list":
             catalog = load_catalog(repository_root())
             if args.kind == "technologies":
@@ -280,15 +312,26 @@ def main() -> int:
             print(json.dumps(result, indent=2, sort_keys=True))
             return 0
         if args.command == "validate":
-            if args.release:
-                result = validate_release(args.output)
-            elif args.release_v4:
-                result = validate_release_v4(args.output, phase=args.release_v4)
-            elif args.release_v5:
-                from .release_validate_v5 import validate_release_v5
-                result = validate_release_v5(args.output)
+            if args.release or args.release_v4 or args.release_v5:
+                from .history import load_index
+                tag = "v3.0.0" if args.release else "v4.0.0" if args.release_v4 else "v5.0.0"
+                record = next(r for r in load_index(repository_root())["legacy"] if r["tag"] == tag)
+                raise ReleaseValidationError(
+                    f"HISTORICAL_WORKFLOW_MOVED: {tag} qualification belongs to exact source "
+                    f"{record['source']['commit']}. Use apm history export {tag} source --output "
+                    f"<new-directory> and its preserved procedure. See docs/history.md.")
+            if args.qualify:
+                if args.scope != "current":
+                    raise ReleaseValidationError("RELEASE_REQUIRES_CURRENT_SCOPE")
+                from .release import qualify_release
+                if args.approval_file and args.qualify != "exact-tag":
+                    raise ReleaseValidationError("APPROVAL_ONLY_FOR_EXACT_TAG")
+                approval = json.loads(args.approval_file.read_text()) if args.approval_file else None
+                result = qualify_release(args.output, phase=args.qualify, approval=approval)
             else:
-                result = validate_maintenance_repository(args.output)
+                if args.approval_file:
+                    raise ReleaseValidationError("APPROVAL_ONLY_FOR_EXACT_TAG")
+                result = validate_maintenance_repository(args.output, scope=args.scope)
             print(
                 json.dumps(
                     {

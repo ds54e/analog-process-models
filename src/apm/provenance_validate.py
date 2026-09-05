@@ -503,17 +503,9 @@ def _audit_catalog_distribution(root: Path) -> dict[str, Any]:
                         ) from error
                     _require(path.is_file(), f"missing bound model source: {path}")
     _require(backend_counts == {"ngspice": 15, "spectre": 15}, "backend coverage drifted")
-    v3_contract = _load_toml(root / "validation/release_gates.toml")
-    v4_contract = _load_toml(root / "validation/release_gates_v4.toml")
-    _require(
-        v3_contract.get("distribution", {}).get("separate_transistor_model_download_required")
-        is False,
-        "frozen v3 contract does not require a self-contained transistor distribution",
-    )
-    _require(
-        v4_contract.get("distribution", {}).get("generated_binaries_committed") is False,
-        "v4 distribution contract permits committed generated binaries",
-    )
+    # The actual manifest/include/source closure above enforces self containment.
+    # Generated-binary and Git-distribution checks remain in the dedicated audit;
+    # current provenance no longer reads historical release-policy booleans.
     return {
         "family_count": 15,
         "backend_bindings": backend_counts,

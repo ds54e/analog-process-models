@@ -1,33 +1,41 @@
 <!-- SPDX-FileCopyrightText: 2026 APM contributors -->
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
-# Research local variation (v5.0.0)
+# Sample and replay Research Local devices
 
 This optional flow applies individual VTG N/P threshold/current-factor changes.
 The Hart/TSMC40 companion adaptation is a quantitative **transfer hypothesis**;
 it is not foundry correlation, silicon calibration or yield prediction. The
 original Hart/ST40 beta remains blocked. See the [source decision](../validation/evidence/v5_source_decision.md)
 for the geometry inference, units, extraction convention and uncertainty limits.
-Released `v5.0.0` peels to approved commit
-`381517fda5107fabf98af7801d5a5103f38e230c`. It passed 16/16 candidate gates and
-a separate 17/17 exact-tag requalification before publication. See the
-[release evidence](../validation/evidence/v5_post_release_requalification.md).
-Mutable current main uses `5.0.0+main`; its maintenance checks are separate.
+Work at the repository root after [setup](getting-started.md). This VTG flow uses
+native BSIM4 in ngspice 47. Its statistical reference is 300 K; the 85 °C replay
+below predicts the temperature response of the same raw devices without resampling.
+Choose absent realization/output paths and preserve the input circuit's location.
 
-From a configured repository checkout:
-
-```sh
-apm research describe
-apm research sample --profile variation/research/apm045/derived/hart_tsmc40_profile.json \
-  --request examples/research/request.json --seed 1001 --index 0 \
-  --state .apm/v5/example/maps --output .apm/v5/example/realization.json
-apm research run --request examples/research/request.json \
-  --realization .apm/v5/example/realization.json --output .apm/v5/example/runs
-apm research run --request examples/research/request.json \
-  --realization .apm/v5/example/realization.json --temperature-c 85 \
-  --output .apm/v5/example/runs
-apm research check --suite all --output .apm/v5/confirmation
+<!-- apm-journey: research -->
+```bash
+.venv/bin/apm research describe
+.venv/bin/apm research sample --profile variation/research/apm045/derived/hart_tsmc40_profile.json --request examples/research/request.json --seed 1001 --index 0 --state .apm/tutorial-research/maps --output .apm/tutorial-research/realization.json
+.venv/bin/apm research run --request examples/research/request.json --realization .apm/tutorial-research/realization.json --output .apm/tutorial-research/runs
+.venv/bin/apm research run --request examples/research/request.json --realization .apm/tutorial-research/realization.json --temperature-c 85 --output .apm/tutorial-research/runs
+.venv/bin/apm research run --request examples/research/request-op.json --realization .apm/tutorial-research/realization.json --output .apm/tutorial-research/runs
 ```
+
+Inspect `realization.json` for each UID's `z`, `target`, `raw` and physical identity.
+`target` is threshold change in V and fractional beta change; `raw` is DELVTO in V
+and ln(MULU0). Each printed run directory contains a sealed `run.json`, applied
+parameter readback and `analysis0.txt`. The saved realization file stays unchanged
+across the two DC temperature runs and the final operating-point analysis. To change the analysis, author a typed recipe while retaining the
+same circuit/includes, device map and exact input paths; reuse the realization.
+
+Released baseline realizations remain readable in their previously supported
+identical input/path context. Arbitrary relocation is not promised. A stale or
+corrupt run cache is rejected; choose a fresh output directory and reuse the exact
+saved realization. Editing and rehashing an old record is not a migration method.
+The expensive full numerical campaign is a separate maintainer operation,
+`apm research check --suite all --output <new-directory>`, governed by the
+[preserved confirmation plan](../validation/v5_confirmation_plan.toml).
 
 The example is a hierarchical 1:1 mirror with explicitly ideal reference, supply
 and output clamp. Copy its request and circuit to author another circuit.

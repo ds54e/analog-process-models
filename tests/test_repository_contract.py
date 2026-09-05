@@ -14,7 +14,6 @@ try:
 except ModuleNotFoundError:  # pragma: no cover - Python 3.9/3.10
     import tomli as tomllib
 
-from apm import maintenance_validate
 from apm.catalog import load_catalog
 from apm.characterize import (
     CharacterizationError,
@@ -24,12 +23,6 @@ from apm.characterize import (
 )
 from apm.cli import build_parser
 from apm.doctor import _extract_observables
-from apm.maintenance_validate import (
-    V4_FROZEN_AUTHORITY_COMMIT,
-    audit_current_guidance,
-    audit_frozen_v4_artifacts,
-    audit_maintenance_package_identity,
-)
 from apm.model_build import MODEL_SOURCES
 from apm.noise import ACQUISITION_POLICY_ID, ACQUISITION_POLICY_VERSION
 from apm.noise_fit import FIT_METHOD_IDENTITY
@@ -52,85 +45,16 @@ EXPECTED_FAMILIES = {
 }
 
 
-def test_selected_v6_mission_preserves_v5_history_and_approval_boundary() -> None:
-    from apm.history import load_index
-    from apm.lifecycle import load_contract
-    contract = load_contract(ROOT)
-    assert contract["release"] == "6.0.0"
-    assert contract["phase"] in ("implementation", "candidate")
-    assert contract["create_tag_authorized"] is False
-    assert contract["publish_release_authorized"] is False
-    v5 = next(x for x in load_index(ROOT)["legacy"] if x["tag"] == "v5.0.0")
-    assert v5["source"]["commit"] == maintenance_validate.V5_TAGGED_COMMIT
-    assert v5["tag_object"] == maintenance_validate.V5_TAG_OBJECT
-    assert "docs/maintainers/v6-plan.md" in (ROOT / "GOAL.md").read_text()
-    assert "releases/index.toml" in (ROOT / "AGENTS.md").read_text()
 
 
-def test_current_guidance_and_frozen_v4_artifact_audits_pass() -> None:
-    guidance = audit_current_guidance(ROOT)
-    frozen = audit_frozen_v4_artifacts(ROOT)
-    package = audit_maintenance_package_identity(ROOT)
-    assert guidance["status"] == "pass", guidance
-    assert frozen["status"] == "pass", frozen
-    assert package["status"] == "pass", package
-    assert frozen["authority_commit"] == V4_FROZEN_AUTHORITY_COMMIT
-    assert frozen["artifact_count"] == 52
-    assert {
-        "tools/modelgen/apm045_mixed_voltage/calibration_replay_v4.toml",
-        "tools/modelgen/apm045_mixed_voltage/generation_epoch_1.toml",
-        "tools/modelgen/apm045_mixed_voltage/generation_epoch_2.toml",
-        "tools/modelgen/apm045_mixed_voltage/generation_epoch_3.toml",
-        "tools/modelgen/apm045_mixed_voltage/qualification_epoch_1.toml",
-        "tools/modelgen/apm045_mixed_voltage/qualification_epoch_2.toml",
-        "tools/modelgen/apm045_mixed_voltage/qualification_epoch_3.toml",
-        "tools/modelgen/apm045_mixed_voltage/reconstruction.toml",
-    } <= set(frozen["artifact_paths"])
-    assert frozen["mismatches"] == []
-    assert frozen["mode_mismatches"] == []
 
 
-def test_current_guidance_audit_fails_closed_on_completed_goal(tmp_path: Path) -> None:
-    for relative in (
-        "AGENTS.md",
-        "APM045_POSITIONING.md",
-        "ENVIRONMENT.md",
-        "GOAL.md",
-        "README.md",
-        "SECURITY.md",
-        "models/apm045/README.md",
-    ):
-        source = ROOT / relative
-        destination = tmp_path / relative
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        destination.write_bytes(source.read_bytes())
-    (tmp_path / "GOAL.md").write_text(
-        "# APM v4.0.0 — APM045 Mixed-Voltage Electrical Families (complete)\n\n"
-        "Complete and release **APM v4.0.0**.\n",
-        encoding="utf-8",
-    )
-    result = audit_current_guidance(tmp_path)
-    assert result["status"] == "fail"
-    assert "goal_is_selected_v6_mission" in result["failed_checks"]
 
 
-def test_frozen_v4_audit_fails_closed_on_byte_drift(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    target = ROOT / "tools/modelgen/apm045_mixed_voltage/generation_epoch_1.toml"
-    read_worktree = maintenance_validate._worktree_bytes
 
-    def altered_bytes(path: Path) -> bytes | None:
-        payload = read_worktree(path)
-        return payload + b"\n" if path == target and payload is not None else payload
 
-    monkeypatch.setattr(maintenance_validate, "_worktree_bytes", altered_bytes)
-    result = audit_frozen_v4_artifacts(ROOT)
-    assert result["status"] == "fail"
-    assert "frozen_artifact_bytes_exact" in result["failed_checks"]
-    assert {item["path"] for item in result["mismatches"]} == {
-        "tools/modelgen/apm045_mixed_voltage/generation_epoch_1.toml"
-    }
+
+
 
 
 def test_psp_product_documentation_acknowledgement_is_preserved() -> None:
@@ -150,15 +74,7 @@ def test_psp_product_documentation_acknowledgement_is_preserved() -> None:
     assert "acknowledge NXP Semiconductors" in normalized
 
 
-def test_preflight_bytes_remain_immutable(monkeypatch: pytest.MonkeyPatch) -> None:
-    assert maintenance_validate.audit_frozen_preflight(ROOT)["status"] == "pass"
-    original = maintenance_validate._worktree_bytes
-    target = ROOT / "tools/v5_preflight/run_spike.py"
-    monkeypatch.setattr(maintenance_validate, "_worktree_bytes",
-                        lambda path: b"changed" if path == target else original(path))
-    result = maintenance_validate.audit_frozen_preflight(ROOT)
-    assert result["status"] == "fail"
-    assert result["mismatches"] == ["tools/v5_preflight/run_spike.py"]
+
 
 
 def load_toml(relative: str) -> dict:
@@ -166,62 +82,30 @@ def load_toml(relative: str) -> dict:
         return tomllib.load(handle)
 
 
-def test_v3_contract_is_frozen_and_v4_contract_matches_the_live_catalog() -> None:
-    v3 = load_toml("validation/release_gates.toml")
-    v4 = load_toml("validation/release_gates_v4.toml")
+def test_preserved_catalog_matches_current_manifests() -> None:
     catalog = load_catalog(ROOT)
-    assert tuple(v3["technology_catalog"]["required_technologies"]) == EXPECTED_TECHNOLOGIES
-    assert v3["technology_catalog"]["required_family_count"] == 13
-    assert v3["technology_catalog"]["required_families"]["apm045"] == [
-        "vtl",
-        "vtg",
-        "vth",
-        "thkox",
-    ]
-    assert tuple(v4["technology_catalog"]["required_technologies"]) == EXPECTED_TECHNOLOGIES
-    assert v4["technology_catalog"]["required_family_count"] == 15
-    assert v4["technology_catalog"]["required_public_device_count"] == 30
-    assert tuple(item.technology_id for item in catalog.technologies) == tuple(
-        sorted(EXPECTED_TECHNOLOGIES)
-    )
-    assert sum(len(item.families) for item in catalog.technologies) == 15
-    for technology_id, expected in EXPECTED_FAMILIES.items():
-        assert {item.family_id for item in catalog.technology(technology_id).families} == set(
-            expected
-        )
-        assert v4["technology_catalog"]["required_families"][technology_id] == list(expected)
+    assert tuple(t.technology_id for t in catalog.technologies) == tuple(sorted(EXPECTED_TECHNOLOGIES))
+    assert sum(len(t.families) for t in catalog.technologies) == 15
+    for technology, expected in EXPECTED_FAMILIES.items():
+        assert {f.family_id for f in catalog.technology(technology).families} == set(expected)
 
 
-def test_reference_runtime_contract_is_el9_ngspice47_osdi() -> None:
-    runtime = load_toml("validation/release_gates.toml")["runtime"]
-    assert runtime["primary_distribution"] == "AlmaLinux 9"
-    assert runtime["acceptable_distribution_class"] == "RHEL-compatible EL9"
-    assert runtime["architecture"] == "x86_64"
-    assert runtime["required_ngspice_major"] == 47
-    assert runtime["osdi_required"] is True
-    assert runtime["python_minimum"] == "3.9"
+def test_reference_runtime_pin_is_preserved() -> None:
+    from apm.compiler_provenance import EXPECTED_COMMIT
+    assert EXPECTED_COMMIT == "fdf2522b70f42793f64b1c72f0195c96dea0cc19"
+    bootstrap = (ROOT / "tools/bootstrap-el9.sh").read_text()
+    assert 'apm_ngspice_version="47"' in bootstrap
+    assert '"${VERSION_ID%%.*}" == "9"' in bootstrap
+    assert '--enable-osdi' in bootstrap
+    assert 'x86_64' in bootstrap
 
 
-def test_v3_noise_release_contract_freezes_validated_method_identities() -> None:
-    noise = load_toml("validation/release_gates.toml")["noise"]
-    assert noise["result_schema"] == "apm.noise-characterization.v1"
-    assert noise["comparison_schema"] == "apm.noise-comparison.v1"
-    assert noise["fit_method_identity"] == FIT_METHOD_IDENTITY
-    assert noise["acquisition_policy_identity"] == (
-        f"{ACQUISITION_POLICY_ID}@{ACQUISITION_POLICY_VERSION}"
-    )
-    assert noise["catalog_planned_logical_request_count"] == 376
-    assert noise["catalog_unique_request_count"] == 290
-    assert noise["process_noise_tuning_authorized"] is False
+def test_preserved_noise_method_identities() -> None:
+    assert FIT_METHOD_IDENTITY == "apm.noise-fit.contiguous-regions@1.0.0"
+    assert f"{ACQUISITION_POLICY_ID}@{ACQUISITION_POLICY_VERSION}" == "apm.noise-acquisition.bounded-white-search@1.0.0"
 
 
 def test_public_geometry_and_identity_contract_is_manifest_enforced() -> None:
-    gates = load_toml("validation/release_gates.toml")
-    public = gates["public_devices"]
-    assert public["terminals"] == ["d", "g", "s", "b"]
-    assert public["planar_parameters"] == ["w", "l"]
-    assert public["finfet_parameters"] == ["l", "nfin"]
-    assert set(public["forbidden_common_parameters"]) == {"m", "nf", "ng"}
     catalog = load_catalog(ROOT)
     names: set[str] = set()
     for technology in catalog.technologies:
@@ -483,101 +367,24 @@ def test_release_validation_and_provenance_commands_are_cli_contracts(tmp_path: 
 
 
 def test_spectre_is_model_only_experimental_and_not_real_tool_gate() -> None:
-    spectre = load_toml("validation/release_gates.toml")["spectre"]
-    assert spectre["artifacts_required_for_all_families"] is True
-    assert spectre["model_only"] is True
-    assert spectre["status"] == "experimental_unverified"
-    assert spectre["real_tool_validation_required"] is False
-    assert spectre["virtuoso_integration_required"] is False
+    for technology in load_catalog(ROOT).technologies:
+        for family in technology.families:
+            assert family.backend("spectre").wrapper_path.is_file()
+        provenance = load_toml(f"models/{technology.technology_id}/provenance.toml")
+        assert provenance["spectre"]["status"] == "experimental_unverified"
+        assert provenance["spectre"]["real_tool_validation"] is False
 
 
-def test_release_contract_requires_v3_metadata_and_all_18_gates() -> None:
-    contract = load_toml("validation/release_gates.toml")
-    release = contract["release_metadata"]
-    assert contract["schema"] == "apm.release-gates.v3"
-    assert contract["target"] == "v3.0.0"
-    assert release["target_version"] == "3.0.0"
-    assert release["package_version_must_match_target"] is True
-    assert release["unresolved_release_placeholders_forbidden"] is True
-    gates = contract["gate"]
-    assert len(gates) == 18
-    assert all(gate["required"] is True for gate in gates)
-    assert len({gate["id"] for gate in gates}) == 18
 
 
-def test_reference_clean_clone_and_fail_closed_policy_remain_required() -> None:
-    policy = load_toml("validation/release_gates.toml")["policy"]
-    assert policy["clean_clone_required"] is True
-    assert policy["repository_visibility_may_change"] is False
-    assert policy["missing_evidence_is_failure"] is True
-    assert policy["required_skipped_check_is_failure"] is True
-    assert policy["historical_evidence_satisfies_v3"] is False
-    assert policy["final_tag_creation_authorized"] is False
-    assert policy["github_release_creation_authorized"] is False
 
 
-def test_frozen_v5_audit_and_released_package_identity() -> None:
-    result = maintenance_validate.audit_frozen_v5_artifacts(ROOT)
-    assert result["status"] == "pass", result
-    assert result["artifact_count"] >= 30
-    assert result["authority_commit"] == maintenance_validate.V5_FROZEN_AUTHORITY_COMMIT
-    assert result["mismatches"] == []
-    assert result["tag_object"] == "b1a4246b9189fe33915d457e9d7f2938869b8fdf"
-    identity = audit_maintenance_package_identity(ROOT)
-    assert identity["status"] == "pass", identity
-    assert identity["main_version"] in {"6.0.0.dev0", "6.0.0"}
-    assert set(identity["tagged_source_versions"].values()) == {"5.0.0"}
 
 
-@pytest.mark.parametrize("fault", ["bytes", "index_mode", "tag_object", "extra_inventory"])
-def test_frozen_v5_audit_rejects_drift(monkeypatch: pytest.MonkeyPatch, fault: str) -> None:
-    original_git = maintenance_validate._git
-    original_bytes = maintenance_validate._worktree_bytes
-    target = "validation/evidence/v5_release_candidate.json"
-
-    def read(path: Path) -> bytes | None:
-        value = original_bytes(path)
-        if fault == "bytes" and path == ROOT / target and value is not None:
-            return value + b"\n"
-        return value
-
-    def git(root: Path, *args: str) -> str:
-        result = original_git(root, *args)
-        if fault == "tag_object" and args == ("rev-parse", "refs/tags/v5.0.0"):
-            return "0" * 40
-        if fault == "extra_inventory" and args[:3] == ("ls-files", "--cached", "--others"):
-            return result + "\nvalidation/evidence/v5_unapproved.json"
-        if fault == "index_mode" and args[:2] == ("ls-files", "--stage"):
-            return "\n".join(
-                "100755" + line[6:] if line.endswith("\t" + target) else line
-                for line in result.splitlines()
-            )
-        return result
-
-    monkeypatch.setattr(maintenance_validate, "_git", git)
-    monkeypatch.setattr(maintenance_validate, "_worktree_bytes", read)
-    result = maintenance_validate.audit_frozen_v5_artifacts(ROOT)
-    assert result["status"] == "fail", result
-    expected = {
-        "bytes": "bytes_and_modes_exact",
-        "index_mode": "bytes_and_modes_exact",
-        "tag_object": "v5_tag_object_exact",
-        "extra_inventory": "inventory_exact",
-    }
-    assert expected[fault] in result["failed_checks"]
 
 
-@pytest.mark.parametrize("obsolete", ["4.0.0+main", "5.0.0.dev0", "5.0.0"])
-def test_post_release_main_rejects_obsolete_package_identity(
-    monkeypatch: pytest.MonkeyPatch, obsolete: str
-) -> None:
-    original = maintenance_validate._project_version
-    current = (ROOT / "pyproject.toml").read_bytes()
-    monkeypatch.setattr(
-        maintenance_validate,
-        "_project_version",
-        lambda data: obsolete if data == current else original(data),
-    )
-    result = audit_maintenance_package_identity(ROOT)
-    assert result["status"] == "fail", result
-    assert "main_has_post_release_local_identity" in result["failed_checks"]
+
+
+
+
+

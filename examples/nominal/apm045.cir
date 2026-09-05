@@ -1,0 +1,19 @@
+* SPDX-FileCopyrightText: 2026 APM contributors
+* SPDX-License-Identifier: Apache-2.0
+* Nominal VTG NMOS using the public d g s b / w l wrapper.
+.include ../../models/apm045/vendor/freepdk45/NMOS_VTG.inc
+.include ../../models/apm045/families/vtg/ngspice/wrapper.inc
+Vd d 0 0.5
+Vg g 0 0.6
+Xdevice d g 0 0 apm045_vtg_nmos w=2u l=0.24u
+.control
+set num_threads=1
+set wr_singlescale
+set wr_vecnames
+op
+print i(vd)
+dc Vg 0 1 0.01
+wrdata ../../.apm/tutorial-nominal/apm045-idvg.txt v(g) i(vd)
+quit
+.endc
+.end

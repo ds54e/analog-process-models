@@ -80,3 +80,21 @@ commit = "150084368815f6a57eae9f3e707f685149e920d3"
 tree = "15f69ac8b71fa53a771076a3d139282d7be17d49"
 artifact_count = 371
 inventory_sha256_git = "30d0c2305c0126bd0e9c18942f3e58da9c66080dd761e0f1721af6a5397487d3"
+
+[snapshot.v6-baseline]
+commit = "25140f57c4c3714f6ab4c9c9df44698ad7732662"
+tree = "06889a3a7bbf648724b6e6fa39f388383c9d4e63"
+artifact_count = 374
+inventory_sha256_git = "14f64b9448fd8d0ee0cf14afec8ada7ee8b68d0574a8cf11f999f1aca6af137c"
+
+[snapshot.v5-preflight]
+commit = "bbb585306f13614b7649c36dd5b7510c845daed9"
+tree = "9f62a154622b1fe25a17fbfd573f792601807513"
+artifact_count = 323
+inventory_sha256_git = "abf4e74c0da646d818ca38f0089eac053dffc4c77e9653ca0a91925d98480073"
+
+[snapshot.v3-publication]
+commit = "e0943a43d973c8eed27b10452d0d774eaf8ca3c1"
+tree = "435a97bbb7d733a25588ea270c497a451df5988a"
+artifact_count = 255
+inventory_sha256_git = "df155f50e5bb120a7971af3a333af3959733ebc8e3e4bbc9b93b3fd64ad7d141"
