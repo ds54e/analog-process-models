@@ -3,7 +3,7 @@
 
 # APM status
 
-State: **V6_IMPLEMENTING**. No candidate is qualified and no v6 tag/release exists.
+State: **V6_CANDIDATE**. Full fresh-clone qualification is pending. No v6 tag/release exists.
 
 Starting main: `25140f57c4c3714f6ab4c9c9df44698ad7732662`, fast-forwarded from
 `4cd57d98a54ad1cfe8deedf38de39a0b81a22d52`. The intervening commits only add the
@@ -25,7 +25,7 @@ local and byte-exact. [Helper](releases/helper-migration.json) and
 [check](releases/check-migration.json) mappings cover the migration.
 
 Current runtime no longer imports historical release implementations. The latest
-development suite passed **216 tests, zero skips**, including synthetic exact-tag
+development suite passed **230 tests, zero skips**, including synthetic exact-tag
 orchestration, incomplete/corrupt evidence, current root discovery and legacy
 integrity controls. Current guides have reviewed executable blocks and a
 [source-linked editorial review](docs/maintainers/v6-editorial-review.md).
@@ -34,8 +34,15 @@ compiler/bootstrap run succeeded. These are development observations, not a clea
 candidate qualification. Baseline electrical, Benchmark/native and noise regressions
 also passed; initial incorrect command names remain recorded as failed attempts.
 
-The full current campaign, same-input old/new comparison and 90,112-pair Research
-confirmation are being qualified under [predeclared acceptance](validation/acceptance.toml).
-No numerical source/algorithm change or scientific blocker has been established.
+Same-input baseline/v6 comparison passed: 3,242 physical data files, Benchmark
+saved data, 65,536 latent pairs, raw/target parameters and three legacy-realization
+replays were exact. Model/method/tool identities and unavailable-state classifications
+were preserved. See [development evidence](validation/evidence/v6_development.json),
+including retained launcher/postprocessing failures and their verified repairs.
+
+This source freezes candidate identity `6.0.0` and the complete executable acceptance
+plan. Its independent GitHub-clone campaign must still run all 57 required checks,
+including 90,112 Research SPICE pairs and 12,288 circuit realizations. A later result
+summary will identify the exact candidate commit/tree; that summary commit is separate.
 The existing EL9/WSL2 tools and ignored historical raw evidence are preserved.
 No v6 tag or release has been created; GitHub About remains an unapplied proposal.

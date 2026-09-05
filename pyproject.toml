@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "analog-process-models"
-version = "6.0.0.dev0"
+version = "6.0.0"
 description = "Open compact models and ngspice tools for analog device, noise, and mismatch studies."
 readme = "README.md"
 requires-python = ">=3.9"

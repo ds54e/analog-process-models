@@ -11,6 +11,21 @@ from apm.confirmation import validate_run_file
 from apm.research import SCHEMAS, save, seal
 
 
+@pytest.mark.parametrize('fault', ['correct', 'wrong_seed', 'wrong_index', 'unresolved', 'wrong_run_binding', 'corrupt'])
+def test_cohort_denominator_is_bound_to_distinct_saved_draws(tmp_path, fault):
+    from apm.confirmation import validate_cohort_realization
+    realized = seal({'schema': SCHEMAS['realization'], 'seed': 42, 'sample_index': 1000000,
+                     'status': 'RESOLVED' if fault != 'unresolved' else 'FAILED'})
+    if fault == 'corrupt':
+        realized['sample_index'] = 7
+    run = seal({'schema': SCHEMAS['run'], 'subject': {'realization_id':
+               'wrong' if fault == 'wrong_run_binding' else realized['content_id']}})
+    save(tmp_path / 'realization.json', realized)
+    save(tmp_path / 'run.json', run)
+    assert validate_cohort_realization(tmp_path, 41 if fault == 'wrong_seed' else 42,
+                                      999999 if fault == 'wrong_index' else 1000000) is (fault == 'correct')
+
+
 def test_raw_receipt_requires_exact_inventory_hash_and_success(tmp_path):
     raw = tmp_path / "raw.txt"
     raw.write_text("observed\n")

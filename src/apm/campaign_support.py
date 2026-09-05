@@ -52,13 +52,16 @@ def inventory(folder, destination):
         if path.is_file() and path != destination:
             files.append({'path': str(path), 'size': path.stat().st_size, 'sha256': digest(path)})
     return write_report(destination, {'schema': 'apm.raw-inventory.v1',
-                                      'files': files, 'count': len(files)})
+                                      'folder': str(folder), 'files': files, 'count': len(files)})
 
 
 def verify_inventory(path):
     data = read(path)
     files = data['files']
-    return bool(files) and len(files) == data['count'] == len({x['path'] for x in files}) and all(
+    actual = {str(p) for p in Path(data['folder']).rglob('*') if p.is_file() and p != path}
+    return bool(files) and actual == {x['path'] for x in files} and len(files) == data['count'] == len(actual) and all(
+        not Path(x['path']).is_symlink()
+        and
         Path(x['path']).is_file() and Path(x['path']).stat().st_size == x['size']
         and digest(Path(x['path'])) == x['sha256'] for x in files)
 
@@ -67,7 +70,7 @@ def pytest_coverage(path):
     import xml.etree.ElementTree as ET
     document = ET.parse(path).getroot()
     cases = list(document.iter('testcase'))
-    failed = [c.attrib for c in cases if len(c)]
+    failed = [c.attrib for c in cases if any(c.find(k) is not None for k in ('skipped', 'error', 'failure'))]
     return {'status': 'PASS' if cases and not failed else 'FAIL', 'count': len(cases),
             'failed_or_skipped': failed,
             'cases': [c.attrib for c in cases]}

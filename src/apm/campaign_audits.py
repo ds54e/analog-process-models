@@ -22,7 +22,8 @@ CURRENT_DOCUMENTS = ['README.md', 'AGENTS.md', 'GOAL.md', 'STATUS.md', 'ENVIRONM
                      'docs/characterization.md', 'docs/noise.md', 'docs/variation.md',
                      'docs/benchmark-variation.md', 'docs/native-variation.md',
                      'docs/research-local.md', 'docs/models.md', 'docs/spectre.md',
-                     'docs/history.md', 'docs/source-snapshot.md', 'docs/maintainers/index.md']
+                     'docs/history.md', 'docs/source-snapshot.md', 'docs/maintainers/index.md',
+                     'docs/maintainers/v6-editorial-review.md']
 
 
 def docs_audit(root):
@@ -85,6 +86,7 @@ def migration_audit(root, output):
                 bad_destinations.append(row)
     helpers = []
     for target, row in read(root / 'releases/helper-migration.json').items():
+        target = target.partition('#')[0]
         source = git(root, 'show', row['commit'] + ':' + row['source'])
         if digest_bytes(source) != row['source_sha256']:
             raise ValueError('HELPER_ORIGIN_DRIFT')
@@ -151,7 +153,8 @@ def original_execution(root, output):
         if name == 'v6-baseline':
             preflight_xml = logs / 'preflight.xml'
             preflight = run(clone, logs, 'preflight', [sys.executable, '-m', 'pytest', '-q',
-                            'tools/v5_preflight/tests', '--junitxml=' + str(preflight_xml)], env=env)
+                            'tools/v5_preflight/tests', '--junitxml=' + str(preflight_xml)],
+                            env={**env, 'PYTHONPATH': str(site) + ':' + str(clone / 'tools/v5_preflight')})
             checks['original_preflight'] = preflight['returncode'] == 0 and pytest_coverage(preflight_xml)['status'] == 'PASS'
         records.append({'name': name, 'commit': commit, 'tree': git_text(clone, 'rev-parse', 'HEAD^{tree}'),
                         'checks': checks, 'identity': observed, 'coverage': coverage,

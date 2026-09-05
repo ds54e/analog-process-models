@@ -124,3 +124,36 @@ def test_retained_asset_hash_and_mode_drift_fail(monkeypatch):
     result = history.verify_assets(ROOT)
     assert result['status'] == 'FAIL'
     assert 'validation/evidence/v5_source_decision.md' in result['mismatches']
+
+
+def test_symlink_target_escape_is_rejected_before_destination_creation(tmp_path, monkeypatch):
+    monkeypatch.setattr(history, 'verify_history', lambda root: {'status': 'PASS'})
+    monkeypatch.setattr(history, 'entries', lambda root, commit: {'link': {'mode': '120000', 'kind': 'blob', 'blob': 'f' * 40}})
+    monkeypatch.setattr(history, 'git', lambda root, *args: b'../../escape')
+    destination = tmp_path / 'unsafe'
+    with pytest.raises(history.HistoryError, match='EXPORT_SYMLINK_ESCAPE'):
+        history.export_tree(ROOT, 'v5.0.0', 'source', destination)
+    assert not destination.exists()
+
+
+def test_git_replacement_does_not_reinterpret_exact_original_bytes(tmp_path):
+    import subprocess
+
+    def git(*args):
+        return subprocess.check_output(['git', *args], cwd=tmp_path, stderr=subprocess.DEVNULL).decode().strip()
+    git('init', '-b', 'main')
+    git('config', 'user.name', 'APM fixture')
+    git('config', 'user.email', 'fixture@example.invalid')
+    (tmp_path / 'data').write_text('original')
+    git('add', '.')
+    git('commit', '-m', 'original synthetic fixture')
+    original = git('rev-parse', 'HEAD')
+    (tmp_path / 'data').write_text('replacement')
+    git('commit', '-am', 'replacement synthetic fixture')
+    replacement = git('rev-parse', 'HEAD')
+    git('replace', original, replacement)
+    assert git('show', original + ':data') == 'replacement'
+    assert history.git_text(tmp_path, 'show', original + ':data') == 'original'
+    missing = 'f' * 40
+    with pytest.raises(history.HistoryError, match='MISSING_HISTORY'):
+        history.git(tmp_path, 'cat-file', 'blob', missing)

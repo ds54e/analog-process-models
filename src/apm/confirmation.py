@@ -54,6 +54,18 @@ def validate_run_file(path, expected_hash):
         return False
 
 
+def validate_cohort_realization(folder, seed, index):
+    """The requested denominator contains distinct saved draws, not repeated receipts."""
+    try:
+        realized = verify(json.loads((folder / 'realization.json').read_text()), SCHEMAS['realization'])
+        run = verify(json.loads((folder / 'run.json').read_text()), SCHEMAS['run'])
+        return (realized['seed'] == seed and realized['sample_index'] == index
+                and realized['status'] == 'RESOLVED'
+                and run['subject']['realization_id'] == realized['content_id'])
+    except (OSError, KeyError, ValueError, TypeError):
+        return False
+
+
 
 def audit_confirmation(root, output, plan, head):
     reports = {}
@@ -127,6 +139,7 @@ def audit_confirmation(root, output, plan, head):
             for r in s["records"]
         ),
         "circuits": bool(c)
+        and len(c.get("records", [])) == 2 * len(plan["circuit_families"])
         and {(r["polarity"], r["family"]) for r in c.get("records", [])}
         == {(p, k) for p in ("n", "p") for k in plan["circuit_families"]}
         and all(
@@ -135,6 +148,8 @@ def audit_confirmation(root, output, plan, head):
         ),
         "replay": bool(re)
         and len(re.get("records", [])) == 8
+        and {(r["polarity"], r["temperature_c"]) for r in re.get("records", [])}
+        == {(p, t) for p in ("n", "p") for t in plan["replay_temperature_c"]}
         and all(
             r["status"] == "PASS"
             and abs(r["ac_tran_amplitude_ratio"] - 1) <= 0.02
@@ -143,6 +158,7 @@ def audit_confirmation(root, output, plan, head):
             for r in re["records"]
         ),
         "io": bool(io)
+        and len(io.get("records", [])) == 4
         and {(r["family"], r["polarity"]) for r in io.get("records", [])}
         == {(f, p) for f in ("io18", "io25") for p in ("n", "p")}
         and all(
@@ -211,12 +227,19 @@ def audit_confirmation(root, output, plan, head):
                     or cohort["requested"] != n
                     or len(cohort["rows"]) != n
                     or {x["index"] for x in cohort["rows"]} != set(range(n))
+                    or len({x.get("run") for x in cohort["rows"]}) != n
                 ):
                     complete = False
                 for row in cohort["rows"]:
                     if row.get("status") != "PASS" or not validate_run_file(
                         folder.parent / "runs" / row.get("run", "missing") / "run.json",
                         row.get("report_sha256"),
+                    ):
+                        complete = False
+                    if not validate_cohort_realization(
+                        folder.parent / 'runs' / row.get('run', 'missing'),
+                        plan['statistics_seed' if stage == 'statistics' else 'circuits_seed'],
+                        row['index'] + plan['sample_index_start'],
                     ):
                         complete = False
             except (OSError, KeyError, ValueError, TypeError):
@@ -243,4 +266,3 @@ def audit_confirmation(root, output, plan, head):
         "references": refs,
         "issues": issues,
     }
-

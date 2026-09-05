@@ -63,3 +63,33 @@ an error. Tools can also be selected with `APM_TOOLCHAIN_DIR`, `APM_NGSPICE` and
 Next: [use models in a circuit](using-models.md),
 [characterize devices](characterization.md), or [choose a variation flow](variation.md).
 Current environment details are in [ENVIRONMENT.md](../ENVIRONMENT.md).
+
+## Diagnose a failed request
+
+Keep failed outputs and saved realizations. The diagnostic names identify the
+condition to fix; a new seed changes the physical sample and is not a retry.
+
+| Diagnostic | Meaning and recovery |
+| --- | --- |
+| `UNSUPPORTED_RESEARCH_DEVICE` | The family/geometry is outside Research Local support; use a documented supported request or a different variation flow. |
+| `CORRUPT_OR_UNVERSIONED_RECORD` | A saved record no longer verifies; recover the original file. Do not edit and rehash it. |
+| `CACHE_REJECTED` | A run cache is stale or damaged; keep it and use a fresh output directory with the same saved realization. |
+| `APM_REPO_ROOT is not an APM checkout` | Correct the explicit root; it deliberately takes precedence over working-directory discovery. |
+| `REALIZATION_OUTPUT_OCCUPIED` | Preserve the existing physical realization and select an absent path for another sample. |
+| `MISSING_HISTORY` | Use a full clone or the documented bundle for strict history checks; ordinary source-snapshot use has a smaller scope. |
+
+For a reproducible diagnostic exercise, first complete the Research and no-Git
+snapshot examples linked above/in the [guide index](index.md). At the repository
+root, with `.venv` and absent `.apm/tutorial-failures`, run this reviewed block.
+The helper creates deliberately damaged **copies** and a false run-cache record;
+it preserves the original saved physical file and checks that simulation does not
+start for the corrupt record. Expected nonzero subprocess exits are recorded as
+such, and the final report passes only when all six particular mechanisms occur.
+
+<!-- apm-journey: failures -->
+```bash
+.venv/bin/python tools/check_tutorial_failures.py --output .apm/tutorial-failures
+```
+
+Inspect `.apm/tutorial-failures/report.json`, `checks`, `records`, and the retained
+stdout/stderr files. This demonstrates error handling, not device/model calibration.

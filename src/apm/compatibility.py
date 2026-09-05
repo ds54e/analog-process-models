@@ -9,6 +9,7 @@ are normalized; this is not a general metadata-stripping comparator.
 from __future__ import annotations
 
 import csv
+import re
 import sys
 
 import numpy as np
@@ -33,6 +34,8 @@ BENCHMARK_FIELDS = ('schema', 'status', 'benchmark_configuration', 'checks', 'va
 
 def normalize(value, replacements):
     if isinstance(value, str):
+        if callable(replacements):
+            return replacements(value)
         for a, b in replacements:
             value = value.replace(a, b)
         return value
@@ -41,6 +44,14 @@ def normalize(value, replacements):
     if isinstance(value, dict):
         return {normalize(k, replacements): normalize(v, replacements) for k, v in value.items()}
     return value
+
+
+def compiled_replacements(replacements):
+    """Match declared path/identity strings once, without scanning every CSV cell 660 times."""
+    mapping = dict(replacements)
+    pattern = re.compile('|'.join(re.escape(k) for k in sorted(mapping, key=len, reverse=True)))
+    minimum = min(map(len, mapping))
+    return lambda value: value if len(value) < minimum else pattern.sub(lambda m: mapping[m[0]], value)
 
 
 def noise_names(folder):
@@ -57,7 +68,7 @@ def noise_names(folder):
     return replacements, sorted(requests, key=canonical)
 
 
-def physical_files(folder, replacements):
+def physical_index(folder, replacements):
     result = {}
     for path in sorted(folder.rglob('*')):
         if path.suffix != '.csv' and path.name not in JSON_PHYSICAL:
@@ -67,16 +78,25 @@ def physical_files(folder, replacements):
         if 'resume_qualification' in path.parts:
             continue
         name = normalize(str(path.relative_to(folder)), replacements)
-        if path.suffix == '.csv':
-            with path.open() as stream:
-                reader = csv.DictReader(stream)
-                fields = reader.fieldnames
-                rows = [{k: normalize(v, replacements) for k, v in r.items() if k not in CSV_IDENTITIES}
-                        for r in reader]
-            result[name] = {'fields': fields, 'rows': sorted(rows, key=canonical)}
-        else:
-            result[name] = normalize(read(path), replacements)
+        if name in result:
+            raise ValueError('DUPLICATE_PHYSICAL_FILE_IDENTITY')
+        result[name] = path
     return result
+
+
+def physical_file(path, replacements):
+    if path.suffix == '.csv':
+        with path.open() as stream:
+            reader = csv.DictReader(stream)
+            fields = reader.fieldnames
+            rows = [{k: normalize(v, replacements) for k, v in r.items() if k not in CSV_IDENTITIES}
+                    for r in reader]
+        return {'fields': fields, 'rows': sorted(rows, key=canonical)}
+    return normalize(read(path), replacements)
+
+
+def physical_files(folder, replacements):
+    return {name: physical_file(path, replacements) for name, path in physical_index(folder, replacements).items()}
 
 
 def compare_outputs(output):
@@ -86,13 +106,14 @@ def compare_outputs(output):
     for name, folder in (('baseline', base), ('current', current)):
         repl = [(str(folder), '<OUTPUT>')]
         noise_repl, requests = noise_names(folder / 'noise_catalog')
-        replacements[name] = repl + noise_repl
-        write_report(folder / 'physical-noise-requests.json', requests)
+        replacements[name] = compiled_replacements(repl + noise_repl)
+        write_report(folder / 'comparison-noise-requests.json', {'requests': requests})
     for stage in REGRESSIONS:
-        a = physical_files(base / stage, replacements['baseline'])
-        b = physical_files(current / stage, replacements['current'])
+        a = physical_index(base / stage, replacements['baseline'])
+        b = physical_index(current / stage, replacements['current'])
         shared = set(a) & set(b)
-        mismatches = [k for k in sorted(shared) if a[k] != b[k]]
+        mismatches = [k for k in sorted(shared) if digest(a[k]) != digest(b[k])
+                      and physical_file(a[k], replacements['baseline']) != physical_file(b[k], replacements['current'])]
         missing = sorted(set(a) ^ set(b))
         stage_checks = {'exact_physical_files': bool(shared) and not missing and not mismatches,
                         'same_failure_classification': read(base / stage / 'report.json')['status']
@@ -108,7 +129,7 @@ def compare_outputs(output):
             write_report(output / 'benchmark-projections.json', {'baseline': a, 'current': b})
         if stage == 'noise_catalog':
             old, new = read(base / stage / 'plan.json'), read(current / stage / 'plan.json')
-            stage_checks['same_requests_models_methods_tools'] = read(base / 'physical-noise-requests.json') == read(current / 'physical-noise-requests.json')
+            stage_checks['same_requests_models_methods_tools'] = read(base / 'comparison-noise-requests.json') == read(current / 'comparison-noise-requests.json')
             stage_checks['same_family_model_and_tool_bindings'] = all(old[k] == new[k] for k in
                 ('family_bindings', 'frozen_methods', 'reference_tools', 'logical_request_counts', 'unique_request_count'))
             stage_checks['same_terminal_status_counts'] = read(base / stage / 'report.json')['terminal_status_counts'] == read(current / stage / 'report.json')['terminal_status_counts']
@@ -156,6 +177,15 @@ def execute_comparison(root, output):
         run(clone, logs, name + '-install', [sys.executable, '-m', 'pip', 'install', '--no-deps', '--target', str(site), str(clone)])
         env = {'APM_REPO_ROOT': str(clone), 'APM_STATE_DIR': str(folder / 'state'),
                'PYTHONPATH': str(site), 'OMP_NUM_THREADS': '1', 'OPENBLAS_NUM_THREADS': '1'}
+        identity = run(clone, logs, name + '-identity', [sys.executable, '-c',
+            'import apm,importlib.metadata,json; print(json.dumps({"runtime":apm.__version__,"installed":importlib.metadata.version("analog-process-models"),"module":apm.__file__}))'], env=env)
+        observed = read(identity['stdout'])
+        from pathlib import Path
+
+        from .history import tomllib
+        expected = tomllib.loads((clone / 'pyproject.toml').read_text())['project']['version']
+        if observed['runtime'] != expected or observed['installed'] != expected or not Path(observed['module']).is_relative_to(site):
+            raise ValueError('COMPARISON_PACKAGE_ISOLATION_FAILED')
         run(clone, logs, name + '-build', [sys.executable, '-m', 'apm.cli', 'build-models'], env=env)
         for stage, command in REGRESSIONS.items():
             run(clone, logs, name + '-' + stage, [sys.executable, '-m', 'apm.cli', command, '--output', str(folder / stage)], env=env)

@@ -1,6 +1,6 @@
 {
   "src/apm/confirmation.py": {
-    "changes": "Current helper ownership only; audit scan excludes its own renamed module. Confirmation additionally enforces the complete declared 4096-pair count.",
+    "changes": "Preserved numerical thresholds and raw audits; current owner enforces exact declared 4096-pair cohorts, declared 1024 circuit realizations, unique complete circuit/IO records and the exact replay temperature/polarity grid.",
     "commit": "25140f57c4c3714f6ab4c9c9df44698ad7732662",
     "names": [
       "audit_plan",
@@ -11,7 +11,7 @@
     "source_sha256": "d683b739cdd005381e60e72911fe77bd61d77c47167a28c56606ce1c6755c48c"
   },
   "src/apm/validation_support.py": {
-    "changes": "Current helper ownership only; audit scan excludes its own renamed module. Confirmation additionally enforces the complete declared 4096-pair count.",
+    "changes": "Exact AST preservation except audit_migration additionally excludes its own renamed current module from the legacy-marker self-scan.",
     "commit": "25140f57c4c3714f6ab4c9c9df44698ad7732662",
     "names": [
       "TRACKED_FORBIDDEN_PARTS",
@@ -28,5 +28,14 @@
     ],
     "source": "src/apm/release_validate.py",
     "source_sha256": "620aafa6047118883bc16a243a8e4e65b4aeaaef9232a412f1b8837382646d89"
+  },
+  "src/apm/validation_support.py#_run_logged_command": {
+    "changes": "Exact AST-preserved promotion of the logged subprocess runner into current validation support.",
+    "commit": "25140f57c4c3714f6ab4c9c9df44698ad7732662",
+    "names": [
+      "_run_logged_command"
+    ],
+    "source": "src/apm/maintenance_validate.py",
+    "source_sha256": "b2d50d64a94552227a31871daf04b2a42ab8854f63a3b7b57ace1208dc18a60b"
   }
 }

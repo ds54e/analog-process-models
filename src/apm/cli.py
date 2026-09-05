@@ -260,7 +260,8 @@ def main() -> int:
             from .history import export_tree, load_index, verify_history
             root = repository_root()
             if args.history_command == "list":
-                result = {"status": "INDEX_ONLY", "releases": load_index(root)["legacy"],
+                index = load_index(root)
+                result = {"status": "INDEX_ONLY", "releases": index["legacy"], "snapshots": index["snapshot"],
                           "note": "Listing local locators is not history verification."}
             elif args.history_command == "export":
                 result = export_tree(root, args.release, args.kind, args.output)

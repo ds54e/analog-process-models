@@ -18,7 +18,7 @@ from .compatibility import REGRESSIONS, execute_comparison
 from .compiler_provenance import digest, observe_compiler
 from .confirmation import audit_confirmation, audit_plan
 from .history import load_index, tomllib, verify_assets, verify_history
-from .journeys import execute_block, negative_journey, observations
+from .journeys import execute_block, observations
 from .lifecycle import load_contract, package_identity, source_identity, write_report
 from .maintenance_validate import audit_architecture
 from .release import record_check
@@ -95,21 +95,30 @@ def execute_campaign(root, output, subject):
     prerequisites = {x: shutil.which(x) for x in ('git', 'python3', 'gcc', 'g++', 'autoconf',
                      'automake', 'bison', 'flex', 'make', 'curl', 'tar', 'cpio', 'rpm2cpio', 'sha256sum')}
     cold_absent = all(not (root / '.apm' / p).exists() for p in ('tutorial-cold', 'tutorial-python', 'tutorial-first-result'))
-    attempt('environment', lambda: {'status': 'PASS' if all(prerequisites.values()) and cold_absent else 'FAIL',
+    os_release = Path('/etc/os-release').read_text()
+    reference_host = platform.machine() == 'x86_64' and 'microsoft-standard-WSL2' in platform.release()
+    reference_host &= any(line.startswith('VERSION_ID="9') for line in os_release.splitlines())
+    reference_host &= any(word in os_release.lower() for word in ('rhel', 'almalinux', 'rocky', 'centos'))
+    attempt('environment', lambda: {'status': 'PASS' if all(prerequisites.values()) and cold_absent and reference_host else 'FAIL',
                                    'prerequisites': prerequisites, 'cold_prefixes_absent': cold_absent,
+                                   'reference_host': reference_host,
                                    'machine': platform.machine(), 'kernel': platform.release(),
-                                   'os_release': Path('/etc/os-release').read_text(), 'python': sys.version})
+                                   'os_release': os_release, 'python': sys.version})
     for name in ('discover', 'cold'):
-        attempt(name, lambda name=name: execute_block(root, output / 'journeys', name))
+        attempt(name, lambda name=name: execute_block(root, output / 'journeys', name)
+                if name != 'cold' or cold_absent else {'status': 'FAIL', 'error': 'COLD_DESTINATION_OCCUPIED'})
+    attempt('cold-doctor', lambda: read(root / '.apm/tutorial-cold/doctor/report.json'))
     attempt('build', lambda: run(root, logs, 'build', cli + ['build-models']))
     attempt('warm', lambda: execute_block(root, output / 'journeys', 'warm'))
     attempt('tools-after', lambda: tool_snapshot(root))
     # All named blocks are individually attempted even if a sibling fails.
     for name in ('nominal', 'characterize', 'noise', 'benchmark', 'native', 'research', 'history-example', 'snapshot'):
         block = 'history' if name == 'history-example' else name
-        attempt(name, lambda block=block: execute_block(root, output / 'journeys', block))
+        key = name + '-example' if name in ('benchmark', 'native') else name
+        attempt(key, lambda block=block: execute_block(root, output / 'journeys', block))
     attempt('observations', lambda: {'status': 'PASS', **observations(root)})
-    attempt('negative-runtime', lambda: negative_journey(root, output / 'negative-runtime'))
+    attempt('failures', lambda: execute_block(root, output / 'journeys', 'failures'))
+    attempt('negative-runtime', lambda: read(root / '.apm/tutorial-failures/report.json'))
     attempt('current', lambda: read(root / '.apm/tutorial-current-validation/report.json'))
     attempt('pytest-coverage', lambda: pytest_coverage(root / '.apm/tutorial-current-validation/pytest.xml'))
     attempt('install', lambda: run(root, logs, 'pip-check', [sys.executable, '-m', 'pip', 'check']))
@@ -172,14 +181,15 @@ def execute_campaign(root, output, subject):
     obs = outcomes['observations']
     j = {
         1: (['discover', 'docs'], {'catalog_and_review': passed('discover') and passed('docs') and len(load_catalog(root).technologies) == 5}),
-        2: (['cold', 'environment'], {'cold_executed': passed('cold') and passed('environment')}),
+        2: (['cold', 'environment', 'cold-doctor'], {'cold_executed': passed('cold') and passed('environment'),
+                                                  'observed_cold_compiler': outcomes['cold-doctor'].get('reference_toolchain_status') == 'VERIFIED'}),
         3: (['warm', 'tools-before', 'tools-after', 'current'], {'warm_safe': passed('warm') and passed('current') and outcomes['tools-before'] == outcomes['tools-after']}),
         4: (['nominal', 'observations'], {'both_nominal_circuits': passed('nominal') and len(obs.get('nominal', {})) == 2
                                       and all(r['finite'] and r['points'] >= 100 for r in obs.get('nominal', {}).values())}),
         5: (['characterize', 'noise', 'observations'], {'commands': passed('characterize') and passed('noise'),
              'physical_interpretation': obs.get('electrical', {}).get('finite_difference_gm') is True
                 and obs.get('noise', {}).get('complex_transfer_identity') is True}),
-        6: (['benchmark', 'native', 'research', 'observations'], {'three_distinct_flows': all(passed(n) for n in ('benchmark', 'native', 'research'))
+        6: (['benchmark-example', 'native-example', 'research', 'observations'], {'three_distinct_flows': all(passed(n) for n in ('benchmark-example', 'native-example', 'research'))
                                                               and obs.get('variation', {}).get('research') == 'RESOLVED'}),
         7: (['observations', 'compatibility'], {'same_physical_device': obs.get('replay', {}).get('all_same_and_stable') is True
                                               and outcomes['compatibility'].get('replay_status') == 'PASS'}),
@@ -218,7 +228,10 @@ def execute_campaign(root, output, subject):
         cases = [c for c in coverage.get('cases', []) if c['classname'].endswith(module)]
         emit(identifier, {'no_skips_or_failures': passed('pytest-coverage'), 'executed_negative_suite': len(cases) >= 10,
                           'runtime_failures_observed': passed('negative-runtime')}, ['pytest-coverage', 'negative-runtime'])
-    emit('environment.cold', {'empty_prefix_actual_bootstrap': passed('cold') and passed('environment')}, ['cold', 'environment'])
+    emit('environment.cold', {'empty_prefix_actual_bootstrap': passed('cold') and passed('environment'),
+                              'fresh_compiler_verified': outcomes['cold-doctor'].get('reference_toolchain_status') == 'VERIFIED',
+                              'fresh_ngspice': str(root / '.apm/tutorial-cold/') in outcomes['cold-doctor'].get('ngspice_path', '')},
+         ['cold', 'environment', 'cold-doctor'])
     emit('environment.warm', {'actual_reuse': passed('warm'), 'unchanged_observed_compiler': outcomes['tools-before'] == outcomes['tools-after']}, ['warm', 'tools-before', 'tools-after'])
     emit('environment.tools', {'actual_smoke': passed('doctor') and passed('doctor-detail'),
                                'compiler_verified': outcomes['doctor-detail'].get('reference_toolchain_status') == 'VERIFIED'}, ['doctor', 'doctor-detail', 'tools-after'])
@@ -233,10 +246,16 @@ def execute_campaign(root, output, subject):
     # Bind raw execution evidence after all writers finish, excluding the exact
     # source copies/tool installations (separately hashed by history/build checks).
     manifests = []
-    for name in ('research', 'charge', 'regressions', 'journeys', 'executions', 'negative-runtime', 'traces'):
+    for name in ('research', 'charge', 'regressions', 'journeys', 'executions', 'negative-runtime', 'traces',
+                 'archive', 'original-execution', 'compatibility'):
         folder = output / name
         if folder.is_dir():
             path = output / ('raw-' + name + '.json')
+            inventory(folder, path)
+            manifests.append(path)
+    for folder in sorted((root / '.apm').glob('tutorial-*')):
+        if folder.is_dir() and folder.name not in ('tutorial-cold', 'tutorial-python'):
+            path = output / ('raw-' + folder.name + '.json')
             inventory(folder, path)
             manifests.append(path)
     raw_valid = bool(manifests) and all(verify_inventory(p) for p in manifests)

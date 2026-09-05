@@ -1,0 +1,193 @@
+{
+  "about_proposal": "Open compact models and ngspice tools for analog device, noise, and mismatch studies.",
+  "about_write": "UNAPPLIED",
+  "compatibility": {
+    "noise_terminal_states": {
+      "simulation_failed": 0,
+      "target_not_reachable": 40,
+      "validated": 290
+    },
+    "numerical_tolerance": {
+      "atol": 0,
+      "rtol": 0
+    },
+    "physical_files": 3242,
+    "records": [
+      {
+        "checks": {
+          "exact_physical_files": true,
+          "same_failure_classification": true
+        },
+        "compared_files": 124,
+        "mismatches": [],
+        "missing": [],
+        "stage": "electrical"
+      },
+      {
+        "checks": {
+          "benchmark_full_science_and_provenance": true,
+          "exact_physical_files": true,
+          "same_failure_classification": true
+        },
+        "compared_files": 0,
+        "mismatches": [],
+        "missing": [],
+        "stage": "benchmark"
+      },
+      {
+        "checks": {
+          "exact_physical_files": true,
+          "same_failure_classification": true
+        },
+        "compared_files": 8,
+        "mismatches": [],
+        "missing": [],
+        "stage": "native"
+      },
+      {
+        "checks": {
+          "exact_physical_files": true,
+          "same_failure_classification": true
+        },
+        "compared_files": 79,
+        "mismatches": [],
+        "missing": [],
+        "stage": "noise_method"
+      },
+      {
+        "checks": {
+          "exact_physical_files": true,
+          "same_failure_classification": true,
+          "same_family_model_and_tool_bindings": true,
+          "same_requests_models_methods_tools": true,
+          "same_terminal_status_counts": true
+        },
+        "compared_files": 3031,
+        "mismatches": [],
+        "missing": [],
+        "stage": "noise_catalog"
+      }
+    ],
+    "replay_checks": {
+      "65536_exact_latent_pairs": true,
+      "exact_legacy_file_reused": true,
+      "same_replay_physical_arrays": true,
+      "same_targets_and_raw": true,
+      "same_tools_methods_sources": true,
+      "three_successful_replays_each": true
+    },
+    "status": "PASS"
+  },
+  "evidence": [
+    {
+      "path": ".apm/v6/current-validation-3/report.json",
+      "sha256": "ebfa3471672a35e76c2d7723516f40657a8e62e6d0b3185b32ff562340d27129"
+    },
+    {
+      "path": ".apm/v6/history-migration-2/report.json",
+      "sha256": "ddf3347f8b3d3c35c411e0a4e10662671b0a8bc1d5dfc8c5dcc997d25873e84b"
+    },
+    {
+      "path": ".apm/v6/original-execution-dev-1/report.json",
+      "sha256": "0ace1e87ea83d2b146c3dbcdd25073cddf4b7eefd034772d5983c8e157535218"
+    },
+    {
+      "path": ".apm/v6/original-execution-dev-1/v6-baseline/execution/preflight-corrected-coverage.json",
+      "sha256": "b36c0411f34ccbde2d65f88effbf471c2a3a02b936f616b1327d6ea8dcaf52f5"
+    },
+    {
+      "path": ".apm/v6/tutorial-development/observations.json",
+      "sha256": "75de4bcaf1c84e3093fc1ef0068aadad797ee51cda3a5558836713188d89beb8"
+    },
+    {
+      "path": ".apm/v6/tutorial-development/snapshot.json",
+      "sha256": "f554e55d1693419b03f754cbd79d3e79e45b2bd51d2d8a563fa41b3477b2f7e9"
+    },
+    {
+      "path": ".apm/v6/tutorial-development/failures.json",
+      "sha256": "f5d51c0e870c994e31aa3d0d67e1725e1d484b6f5923c727eeed0605b3bdbb4c"
+    },
+    {
+      "path": ".apm/v6/negative-runtime-dev-2/report.json",
+      "sha256": "fb6afe297ded14b0ce607b8d7d7f5eb66809058c3ffb12b2506a6bc7b542df31"
+    },
+    {
+      "path": ".apm/v6/compatibility-dev-1/report.json",
+      "sha256": "ad9625d207ba0a71ca2a3fb90c4294ba91440e12a422e623aafd6b1e0b2cbee0"
+    },
+    {
+      "path": ".apm/v6/compatibility-dev-1-analysis-attempt-1.json",
+      "sha256": "306c630c19e01627cf3ac165d12f5b9d297e02d39aa318347505caacee6a53a4"
+    },
+    {
+      "path": ".apm/v6/cold-execution.json",
+      "sha256": "284b93618d44bc259d30fcf6e86a0c857e7f5bb5154df328732e6a3ed368378a"
+    },
+    {
+      "path": ".apm/v6/migration-audit-dev-4.json",
+      "sha256": "85d9a38230dc97b55495ddbd0b4323fea19513a2865a0ca6c2eed252b68f0819"
+    },
+    {
+      "path": ".apm/v6/pre-freeze-source-manifest.json",
+      "sha256": "93121377a8b3f06d328282c91f4b6a4199dba0f411e317abfdfa3f585ab7d228"
+    },
+    {
+      "path": ".apm/v6/pre-freeze-validation/report.json",
+      "sha256": "86cc5d7de0baba99b4b23067f465e5e45e677f65bfc88334a1209850f2c543d5"
+    }
+  ],
+  "migration": {
+    "bundle_restoration": "PASS",
+    "exact_exports": 13,
+    "mapped_original_test_functions": 202,
+    "protected_scopes": {
+      "preflight": 13,
+      "released_inputs": 161,
+      "v4": 52,
+      "v5": 30
+    },
+    "retired_live_files": 77
+  },
+  "original_execution": {
+    "claim": "Original packages and representative tests; no full old release requalification.",
+    "preflight_tests": 39,
+    "released_package_representative_tests": {
+      "v1.0.0": 14,
+      "v2.0.0": 15,
+      "v3.0.0": 15,
+      "v4.0.0": 15,
+      "v5.0.0": 15
+    },
+    "starting_main_tests": 224
+  },
+  "pre_freeze_validation": {
+    "scope": "Staged source snapshot before final STATUS/evidence-only updates, not a clean candidate commit.",
+    "skipped": 0,
+    "source_snapshot_tree": "dec2b3f8ce9fbd17f88f46cd2fe7eb8a6c404369",
+    "status": "PASS",
+    "tests_passed": 230
+  },
+  "retained_attempts": [
+    {
+      "issue": "Initial preflight test launcher omitted the original tools/v5_preflight import path.",
+      "resolution": "Corrected isolated PYTHONPATH, 39 original tests passed; old code unchanged."
+    },
+    {
+      "issue": "Negative-control launcher used the same filename for a failed sample destination and its execution receipt.",
+      "resolution": "Separate names; all six specific failure mechanisms and saved-file preservation passed."
+    },
+    {
+      "issue": "Comparison report helper received a list instead of a mapping; initial postprocessor also used excessive per-cell substitution work.",
+      "resolution": "Fixed report serialization and equivalent per-file/compiled identity normalization. All original simulator outputs retained and compared without tolerance or scope changes."
+    }
+  ],
+  "schema": "apm.v6-development-summary.v1",
+  "scope": "Development evidence only; not qualification of this later evidence commit or a candidate.",
+  "simulation_commit": "2c9255705d2c7ebdfbaaf9aa258a4bfead035365",
+  "simulation_tree": "69166de5f478a81d753c385a5abc207943afe075",
+  "source_algorithms_models_profiles": "unchanged; current helper coverage strengthens exact denominators and seed/index binding",
+  "starting_main": "25140f57c4c3714f6ab4c9c9df44698ad7732662",
+  "status": "DEVELOPMENT_CHECKS_PASSED_CANDIDATE_QUALIFICATION_PENDING",
+  "v6_release_published": false,
+  "v6_tag_created": false
+}

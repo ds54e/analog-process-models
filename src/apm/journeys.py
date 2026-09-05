@@ -24,6 +24,7 @@ BLOCKS = {
     'benchmark': 'docs/benchmark-variation.md', 'native': 'docs/native-variation.md',
     'research': 'docs/research-local.md', 'history': 'docs/history.md',
     'snapshot': 'docs/source-snapshot.md',
+    'failures': 'docs/getting-started.md',
 }
 
 
@@ -127,7 +128,7 @@ def negative_journey(root, output):
     run_args = ['research', 'run', '--request', 'examples/research/request.json']
     cases = [
         ('unsupported', sample_args + ['--request', str(output / 'unsupported-request.json'),
-                                      '--output', str(output / 'unsupported.json')], 'UNSUPPORTED_RESEARCH_DEVICE', {}),
+                                      '--output', str(output / 'unsupported-realization.json')], 'UNSUPPORTED_RESEARCH_DEVICE', {}),
         ('corrupt', run_args + ['--realization', str(output / 'corrupt-realization.json'),
                                 '--output', str(output / 'corrupt-runs')], 'CORRUPT_OR_UNVERSIONED_RECORD', {}),
         ('stale', ['research', 'run', '--request', str(cached.parent / 'request.json'),
@@ -149,7 +150,7 @@ def negative_journey(root, output):
                         'execution': str(output / (name + '.json'))})
     checks = {'six_specific_mechanisms': len(records) == 6 and all(r['mechanism_observed'] for r in records),
               'saved_physical_file_untouched': digest(original) == before,
-              'no_failed_realization_written': not (output / 'unsupported.json').exists(),
+              'no_failed_realization_written': not (output / 'unsupported-realization.json').exists(),
               'no_corrupt_simulation_started': not (output / 'corrupt-runs').exists()}
     return write_report(output / 'report.json', {'status': 'PASS' if all(checks.values()) else 'FAIL',
                                                 'checks': checks, 'records': records})
