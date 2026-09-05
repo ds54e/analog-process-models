@@ -7,12 +7,61 @@ Execution evidence, not this index alone, supports validation and release claims
 
 ## Current mission: v5 full implementation
 
-State: CANDIDATE FROZEN / INDEPENDENT QUALIFICATION PENDING.
+State: **V5_RELEASE_READY**.
 
-Current source/runtime/CLI identity is plain `5.0.0`, an untagged candidate. The first implementation
-change replaces obsolete maintenance-only assertions with the authorized v5
-mission and adds an immutable preflight snapshot audit. All 52 frozen v4 files,
-released compatibility checks and model inputs remain protected.
+Exact qualified candidate: `381517fda5107fabf98af7801d5a5103f38e230c`.
+Tree: `8751c3ed03dc31c87f52d3eb3c5c0b4da903ed65`.
+Source/runtime/CLI identity is plain `5.0.0`, untagged and unreleased. All 16
+candidate-required gates passed from an independent GitHub clone with a fresh
+environment and clean source before/after execution. The later documentation and
+evidence commit records this result; it is not a newly qualified candidate.
+
+See [candidate findings](validation/evidence/v5_release_candidate.md) and the
+[hash-linked summary](validation/evidence/v5_release_candidate.json). Raw reports,
+simulator runs, failure controls and cohort inventories remain ignored under
+`.apm/v5/fresh-candidate-1/.apm/v5/`. The frozen plan was executed without changing
+coefficients, seeds, sample counts or acceptance limits. Independent suites and
+later P cohorts ran concurrently in separate directories; the main evaluator
+revalidated those same candidate-bound runs and their hashes.
+
+| Required work | Executed result |
+| --- | --- |
+| Hierarchical application | N and P each passed 9 mechanism controls and untouched-twin checks. |
+| MG extraction / two-observable mapping | N and P each passed 11 geometries and 286 targets; all errors within declared budgets. |
+| Pure sampler | 65,536 artificial pairs passed; separate from source qualification. |
+| Source-profile SPICE statistics | N 45,056/45,056; P 45,056/45,056; zero failed pairs. All simultaneous sigma intervals inside 0.90–1.10. |
+| Circuits | N and P each passed six families at 1,024 realizations each; zero failures, including unit-bank scaling. |
+| Saved-realization replay | Eight N/P temperature cases passed DC/AC/transient, raw readback, terminal KCL and native charge conservation. |
+| IO transfer assessment | io18/io25 N/P execution passed; all four numerical outcomes UNRESOLVED_WITH_EVIDENCE. No IO beta/default profile. |
+| Repository quality | 194 current tests and 39 separate preflight tests passed, no skips; Ruff, REUSE, provenance and distribution checks passed. |
+| Legacy real-tool compatibility | Benchmark, native and electrical passed; noise method 10/10 and noise catalog 16/16 passed. |
+| Immutable inputs | 161 released inputs/modes plus all 52 frozen v4 files and the frozen preflight snapshot passed exact comparison. |
+
+The reference environment was EL9 x86_64/WSL2, ngspice 47. The actual controlled
+OpenVAF build at required pin `fdf2522b70f42793f64b1c72f0195c96dea0cc19`
+is VERIFIED with source/submodule, Rust/LLVM, binary and OSDI receipt bindings.
+The original system compiler and expected pin were preserved.
+
+The independent Hart/TSMC40 companion is approved as a quantitative transfer
+hypothesis; original Hart/ST40 beta remains **BLOCKED_NORMALIZATION_CONFLICT for
+N and P**. See [source decisions](validation/evidence/v5_source_decision.md).
+The explicit geometry inference and source-extraction transfer are recorded;
+source confidence/digitization bounds are separate from random variation, while
+process-transfer and log-L interpolation uncertainty remain unquantified.
+
+No v5 tag or release was created. Candidate approval, immutable tagging, fresh
+exact-tag requalification and publication require separate authorization. The
+post-tag gate is not executed and is not counted as a candidate pass. Spectre
+remains model-only experimental/unverified.
+
+Result-document maintenance validation also passed `apm validate` with 194 tests
+and no skips. The first README update accidentally omitted its `5.0.0.dev0`
+development-history statement: that check and one test failed (193 passed).
+Restoring the accurate statement passed the unchanged checks. Both reports and
+their source snapshots are hash-linked under `result_record_validation` in the
+candidate summary; these checks are separate from candidate qualification.
+
+## Bootstrap evidence (historical development stage)
 
 Executed bootstrap validation: `apm validate` passed, including 120 pytest tests
 (no skips), Ruff, REUSE, provenance, the 92-check v3 regression and structural
@@ -20,14 +69,10 @@ Spectre checks. This is current repository compatibility evidence, not v5
 candidate qualification. See `validation/evidence/v5_bootstrap.json` and its
 hash-bound raw report under `.apm/v5/bootstrap-validation/`.
 
-The independent Hart/TSMC40 companion reanalysis is approved as an explicit
-quantitative transfer hypothesis; the original ST40 beta remains blocked. See
-`validation/evidence/v5_source_decision.md`. Numerical release qualification is
-still pending. A controlled build at the required
-OpenVAF pin is now VERIFIED, with Rust/LLVM/source/submodule/binary/OSDI receipt
-bindings and four passing native/OSDI smoke tests. Nine targeted provenance
-regressions pass. See `validation/evidence/v5_toolchain_repair.json`.
-No v5 tag or release exists or is authorized by this implementation task.
+The toolchain repair has separate evidence in
+`validation/evidence/v5_toolchain_repair.json`, including four native/OSDI smoke
+tests and nine targeted provenance regressions. Those development checks remain
+distinct from the completed independent candidate qualification above.
 
 ## Completed preflight baseline
 
@@ -56,7 +101,7 @@ The former `src/apm/model_build.py` wrote the configured revision unconditionall
 The current implementation repairs that defect using observed build receipts,
 without changing the expected pin or the historical reports.
 
-## Current implementation progress
+## Runtime development evidence
 
 The source-aware sample/run/replay CLI, versioned MG mapper, UID-keyed sampler,
 hierarchy verification, cache rejection and qualification executors are implemented.
@@ -66,7 +111,8 @@ DC/AC/transient/temperature replay, and executed io18/io25 N/P capacitance asses
 The IO outcomes are UNRESOLVED_WITH_EVIDENCE, with no numeric mismatch profile.
 Small 8-pair and 4-circuit development cohorts are **not statistical passes**.
 
-Current repository tests: 166 passed, no skips; Ruff and REUSE passed. A public
+At that development stage, 166 repository tests passed without skips; Ruff and
+REUSE passed. A public
 summary initially contained generic workspace paths; the distribution check failed,
 and the live summary now uses relative paths while retaining unchanged raw hashes.
 `apm validate` also passed against the implementation snapshot; its hash and
@@ -74,12 +120,12 @@ development run references are in `validation/evidence/v5_runtime_development.js
 The initial committed confirmation passed the sampler, all 22 mapping cases
 and all 11 N statistics cases. It was deliberately interrupted to complete run
 context hardening before the exact candidate. Its P statistics and later suites
-are not passes. The full fixed plan will run at the independent fresh candidate.
+are not passes. The independent fresh candidate subsequently reran the full fixed
+plan; the incomplete earlier cohort is not candidate evidence.
 Raw development runs are under `.apm/v5/development/`.
 
-Required remaining work: execute the committed numerical plan, all independent
-legacy real-tool gates and the v5 evaluator, then qualify an exact clean candidate
-from an independent fresh clone. No tag/publication is authorized.
+The numerical plan, legacy real-tool gates and v5 evaluator have now completed
+at the exact candidate recorded above. No tag/publication is authorized.
 
 ## Preserved released history
 
@@ -118,7 +164,7 @@ legacy real-tool evidence are hash-linked in
 ## Frozen candidate scope
 
 Methods, profiles, source decisions, code and the full confirmation plan are
-frozen for independent qualification. Plain `5.0.0` denotes this untagged
-candidate, not a released version. The exact candidate will be the commit
-containing this state; all 16 candidate-required gates must still execute from
-a fresh clone. No tag or release publication is authorized.
+frozen at `381517fda5107fabf98af7801d5a5103f38e230c`. Plain `5.0.0` denotes
+this untagged candidate, not a released version. All 16 candidate-required gates
+passed from the independent fresh clone. Later result-only changes do not alter
+that candidate or certify another commit. No tag or publication is authorized.

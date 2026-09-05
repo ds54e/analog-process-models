@@ -8,7 +8,9 @@ The Hart/TSMC40 companion adaptation is a quantitative **transfer hypothesis**;
 it is not foundry correlation, silicon calibration or yield prediction. The
 original Hart/ST40 beta remains blocked. See the [source decision](../validation/evidence/v5_source_decision.md)
 for the geometry inference, units, extraction convention and uncertainty limits.
-The implementation is undergoing candidate qualification; v5 is not released.
+Candidate `381517fda5107fabf98af7801d5a5103f38e230c` passed all 16 required gates
+in an independent fresh clone. See the [qualification evidence](../validation/evidence/v5_release_candidate.md).
+This qualifies that exact source; v5 remains untagged and unreleased.
 
 From a configured repository checkout:
 

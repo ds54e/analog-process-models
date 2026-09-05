@@ -10,10 +10,14 @@ contracts and adds independently APM-authored `apm045/io18` and
 `apm045/io25` mixed-voltage research families. The live catalog contains 15
 electrical families and 30 public MOS devices across five technologies.
 
-Current `main` implements the authorized v5 Research Local Mismatch mission and
-used **5.0.0.dev0** during development. The current source is a frozen, untagged
-**5.0.0** candidate awaiting independent qualification. Tag creation and publication require
-separate approval after `V5_RELEASE_READY`; no v5 release is declared here.
+Current `main` implements the authorized v5 Research Local Mismatch mission.
+Development used **5.0.0.dev0** before the candidate was frozen.
+The untagged **5.0.0** candidate
+`381517fda5107fabf98af7801d5a5103f38e230c` reached **V5_RELEASE_READY** with
+16/16 candidate-required gates passing in an independent fresh clone. See the
+[candidate evidence](validation/evidence/v5_release_candidate.md). Later result-only
+commits record that qualification without certifying a different candidate.
+Tag creation and publication require separate approval; v5 is not released.
 The active contract is [`V5_RESEARCH_VARIATION.md`](V5_RESEARCH_VARIATION.md).
 Current validation records exact Git/worktree and input/tool identities. Source
 adoption, configured-statistics reproduction and generic-model transfer remain
@@ -30,10 +34,11 @@ The current APM045 portfolio and post-release claim boundary are summarized in
 release procedures, review records, and evidence remain frozen historical
 records rather than current implementation instructions.
 
-The v5 development line adds an optional [research local variation flow](docs/research-local.md)
-with persistent physical-device realizations. Its companion-source adaptation is
-an explicit transfer hypothesis; full numerical/candidate qualification is in
-progress. The original ambiguous Hart beta values remain blocked.
+The v5 implementation adds an optional [research local variation flow](docs/research-local.md)
+with persistent physical-device realizations. Its qualified companion-source
+adaptation remains an explicit transfer hypothesis. The original ambiguous Hart
+beta values remain blocked; io18/io25 have executed assessments with unresolved
+numerical transfer and no default mismatch profile.
 
 ## Scope
 

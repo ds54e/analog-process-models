@@ -3,7 +3,12 @@
 
 # APM v5.0.0: Research Local Mismatch
 
-Status: IMPLEMENTATION AUTHORIZED; SOURCE PROFILE NOT APPROVED; RELEASE NOT READY.
+Status: V5_RELEASE_READY at candidate
+`381517fda5107fabf98af7801d5a5103f38e230c`; 16/16 candidate-required gates passed.
+The independent companion profile is approved as a source-transfer hypothesis;
+original Hart/ST40 beta remains blocked. No v5 tag or publication is authorized.
+See [candidate evidence](validation/evidence/v5_release_candidate.md). This live
+status update does not qualify a later documentation/evidence commit.
 
 ## Current mission
 
