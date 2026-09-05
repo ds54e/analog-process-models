@@ -6,7 +6,11 @@
 Status: V5_RELEASE_READY at candidate
 `381517fda5107fabf98af7801d5a5103f38e230c`; 16/16 candidate-required gates passed.
 The independent companion profile is approved as a source-transfer hypothesis;
-original Hart/ST40 beta remains blocked. No v5 tag or publication is authorized.
+original Hart/ST40 beta remains blocked. The user has now explicitly approved
+immutable tagging of that exact candidate, fresh exact-tag requalification and
+publication only after 17/17 gates pass. See
+`validation/evidence/v5_release_authorization.json` and
+`docs/release-publication-v5.md`; the candidate itself must remain unchanged.
 See [candidate evidence](validation/evidence/v5_release_candidate.md). This live
 status update does not qualify a later documentation/evidence commit.
 

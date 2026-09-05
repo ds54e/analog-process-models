@@ -7,7 +7,20 @@ Execution evidence, not this index alone, supports validation and release claims
 
 ## Current mission: v5 full implementation
 
-State: **V5_RELEASE_READY**.
+State: **V5_RELEASE_READY / EXACT CANDIDATE RELEASE APPROVED**.
+
+The user has explicitly authorized one immutable annotated `v5.0.0` at the
+candidate below, fresh exact-tag requalification and publication only after
+17/17 gates pass. The separate procedure on `main` preserves the candidate's
+16-gate CLI and adds tag identity/clean-clone checks as the seventeenth gate.
+See `validation/evidence/v5_release_authorization.json` and
+`docs/release-publication-v5.md`. At this preparation stage no v5 tag or release
+has been created; exact-tag execution is not yet a pass.
+
+Pre-tag procedure validation passed `apm validate`: 216 tests, no skips, including
+22 tag/evidence fault cases, plus Ruff, REUSE and repository audits. Its report
+is hash-linked in the authorization record. This validates the new external
+procedure on `main`; it does not replace the required exact-tag numerical rerun.
 
 Exact qualified candidate: `381517fda5107fabf98af7801d5a5103f38e230c`.
 Tree: `8751c3ed03dc31c87f52d3eb3c5c0b4da903ed65`.
@@ -49,10 +62,10 @@ The explicit geometry inference and source-extraction transfer are recorded;
 source confidence/digitization bounds are separate from random variation, while
 process-transfer and log-L interpolation uncertainty remain unquantified.
 
-No v5 tag or release was created. Candidate approval, immutable tagging, fresh
-exact-tag requalification and publication require separate authorization. The
-post-tag gate is not executed and is not counted as a candidate pass. Spectre
-remains model-only experimental/unverified.
+The candidate-readiness task created no tag or release. The subsequent explicit
+approval above now authorizes the publication sequence. The post-tag gate is
+not yet executed and is not counted as a candidate pass. Spectre remains
+model-only experimental/unverified.
 
 Result-document maintenance validation also passed `apm validate` with 194 tests
 and no skips. The first README update accidentally omitted its `5.0.0.dev0`

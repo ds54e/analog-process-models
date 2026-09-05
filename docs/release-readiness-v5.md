@@ -73,3 +73,8 @@ A later compact result-only report under `validation/evidence/` may reference
 that result without certifying the later evidence commit. Preserve that distinction
 in `STATUS.md` and in the final release-readiness statement. Neither plain `5.0.0`
 nor a readiness report creates a release or authorizes a tag.
+
+The subsequently approved exact-tag procedure is documented separately in
+[release-publication-v5.md](release-publication-v5.md). It runs the unchanged
+candidate validator in a new detached tag clone and adds explicit tag/identity
+checks as the seventeenth gate; it does not change the qualified candidate.
