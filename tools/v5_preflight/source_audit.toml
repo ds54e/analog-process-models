@@ -8,11 +8,17 @@ id = "hart_jeds_2020"
 title = "Characterization and Modeling of Mismatch in Cryo-CMOS"
 doi = "10.1109/JEDS.2020.2976546"
 url = "https://pure.tudelft.nl/ws/portalfiles/portal/71537207/09015956.pdf"
-inspected = "PDF page index 5, printed p.267, Figure 8, Figures 9/10, Table 1; parsed extraction and modeling text"
+preparation_inspected = "PDF page index 5, printed p.267, Figure 8, Figures 9/10, Table 1; parsed extraction and modeling text"
+inspected = "2026-09-05: visually inspected PDF indices 2-5, printed pp.264-267; geometry, maximum-gm method, Eqs.1-4, Figures 8-10 and Table 1"
+pdf_sha256 = "de6e2c0a83a900d563369b34ca10de30b4ae79290f12deefd9c9dfff2e74a31b"
+retrieved_utc = "2026-09-05T01:20:21.298391+00:00"
+document_version = "Final published version; current version 2020-03-10; TU Delft repository cover included"
 source_kind = "primary_measured_device_paper"
-family_relation = "neighbor-process LVT core; not APM VTG measurements"
+family_relation = "STMicroelectronics 40-nm LVT 1.1-V core, identified in thesis pp.45-46; neighbor-process measurements, not APM VTG measurements"
 source_temperature_k = 300.0
 source_vds_magnitude_v = 0.05
+source_statistic = "Matched-pair difference; overbar denotes average; Eq.4 uses active W,L and sigma(Delta beta / beta_bar)=A_beta/sqrt(WL)"
+source_extraction = "Maximum-gm method from terminal ID-VG; author code and numerical grid not obtained"
 source_beta_runtime_adoption = "BLOCKED_NORMALIZATION_UNRESOLVED"
 source_vth_runtime_adoption = "REQUIRES_EXTRACTION_AND_GEOMETRY_TRANSFER_QUALIFICATION"
 
@@ -30,14 +36,52 @@ literal_predicted_pair_sigma_fraction = 0.8082903768654761
 approved_runtime_value_present = false
 state = "TABLE_FIGURE_NORMALIZATION_UNRESOLVED"
 policy = "Do not divide by 10 or 100, reinterpret percent, or use source-inconsistent value as a calibration target. Resolve using an authoritative correction, independently auditable source data, or a defensible new source profile."
+thesis_followup_result = "Table 2 on printed p.53 repeats 5.6 +/- 0.2 percent micrometre and Figure 6 on p.52 repeats the ambiguous percent axis; no correction established"
+
+[[unresolved_quantity]]
+id = "hart_table1_p40_beta_300k"
+source_id = "hart_jeds_2020"
+reported_value = 5.3
+reported_ci95_halfwidth = 0.3
+reported_unit = "percent micrometre"
+reported_statistic = "matched-pair relative current-factor mismatch coefficient"
+source_width_um = 0.12
+source_length_um = 0.04
+literal_fraction_um = 0.053
+literal_predicted_pair_sigma_fraction = 0.7649891066762541
+approved_runtime_value_present = false
+state = "TABLE_FIGURE_NORMALIZATION_UNRESOLVED"
+policy = "The N and P coefficients remain independently blocked. The thesis repeats the P coefficient too; no rescaling or runtime adoption is authorized by this audit."
 
 [[candidate_followup]]
 id = "hart_thesis_2022"
 title = "Cryogenic CMOS Characterization for Quantum Computer Applications"
 doi = "10.4233/uuid:0ab4ca6c-dc69-4207-970f-d3b9f0d9c5b4"
 url = "https://research.tudelft.nl/en/publications/cryogenic-cmos-characterization-for-quantum-computer-applications/"
-status = "METADATA_FOUND_FULLTEXT_NOT_RETRIEVED_IN_THIS_SESSION"
-allowed_claim = "A later thesis by the first author exists and is a targeted follow-up. No claim it corrects the beta coefficient."
+preparation_status = "METADATA_FOUND_FULLTEXT_NOT_RETRIEVED_IN_PREPARATION"
+status = "FULLTEXT_RETRIEVED_AND_VISUALLY_INSPECTED_NORMALIZATION_UNRESOLVED"
+pdf_url = "https://repository.tudelft.nl/file/File_44cb70b1-3c6f-47fb-b6b2-98de516f7514"
+pdf_sha256 = "71b760b1de42a0b5f86cfd611bc9d8ca6abe3a64ce2761bf9ddda816f4d4158c"
+retrieved_utc = "2026-09-05T01:20:39.250602+00:00"
+document_version = "Final published version, 2022; 143 PDF pages including repository cover and front matter"
+inspected = "Chapter 3: printed pp.46-55 (PDF indices 56-65), especially Figure 6 and Tables 1/2; pp.57-58 and p.67 distinguish the later study"
+allowed_claim = "The thesis repeats the unresolved beta table and plot. It identifies the first study as STMicroelectronics LVT and the later study as different-process TSMC standard-Vt; it supplies no auditable correction."
+redistribution = "PDF, extracted text and rendered pages remain ignored; repository file record states unknown license, so no third-party content is shipped"
+
+[[candidate_followup]]
+id = "hart_subthreshold_jeds_2020"
+title = "Subthreshold Mismatch in Nanometer CMOS at Cryogenic Temperatures"
+doi = "10.1109/JEDS.2020.2988730"
+url = "https://infoscience.epfl.ch/record/279657/files/09072133.pdf"
+pdf_url = "https://infoscience.epfl.ch/server/api/core/bitstreams/9cb2e29b-35ca-4052-ba6b-93ccbbde82e9/content"
+pdf_sha256 = "0f1a691225d51db40440d5e71081bda819a34fda8bda4b08099f5830418e7f5a"
+retrieved_utc = "2026-09-05T01:23:13.059212+00:00"
+document_version = "Final published version; current version 2020-08-07; 10 pages"
+status = "PRIMARY_PDF_INSPECTED_DIFFERENT_PROCESS_NO_COEFFICIENT_ADOPTED"
+inspected = "Printed p.799 (PDF index 2), measurement/extraction and explicit different-process statement; p.802 (index 5), Figures 8-11; thesis p.67 (index 77) reproduces plots"
+family_relation = "TSMC 40-nm thin-oxide standard-Vt 1.1-V devices identified in thesis p.57; different process and test structures from hart_jeds_2020"
+allowed_claim = "A separate primary-source lead with percent-labeled mismatch and coefficient plots; cannot correct or rescale the original STMicroelectronics table. A future source profile would require its own geometry, extraction, uncertainty and digitization audit."
+source_beta_runtime_adoption = "NOT_ADOPTED_SEPARATE_SOURCE_QUALIFICATION_REQUIRED"
 
 [[candidate_followup]]
 id = "graz_40nm_ro_2025"
@@ -51,3 +95,20 @@ kind = "ARTIFICIAL_NUMERICAL_FIXTURE_ONLY"
 beta_coefficients_are_source_data = false
 mapping_targets_vth_v = [-0.01, 0.01]
 mapping_targets_beta_fraction = [-0.02, 0.02]
+
+[execution_audit]
+date_utc = "2026-09-05"
+state = "UNRESOLVED"
+source_beta_normalization = "UNRESOLVED_N_AND_P"
+approved_runtime_beta_value_present = false
+report = "validation/evidence/v5_preflight_source_audit.md"
+raw_storage = ".apm/v5-preflight/source-audit/"
+raw_manifest = ".apm/v5-preflight/source-audit/manifest.json"
+raw_manifest_sha256 = "ad0092b950df15ffec82e65fd69f54e1280296910fae1193a63f0d8e8c37ef44"
+preparation_source_audit_sha256 = "b398bf31f821534600d8eb93124850f510646faa4c5840d1ca26936d7ccea97f"
+correction_search = "Targeted DOI/title searches and Crossref record found no correction; IEEE article detail required JavaScript verification; absence of a correction is not proven"
+crossref_record_url = "https://api.crossref.org/works/10.1109/JEDS.2020.2976546"
+crossref_record_sha256 = "64f0c80c5f740c86ddf0b5561e0de2a19cef63bdabae280a9492e85df84b2859"
+precursor_2018 = "10.1109/ESSDERC.2018.8486859: primary metadata inspected, full text not retrieved; no coefficient inference"
+author_contact = "NOT_PERFORMED"
+raw_pair_measurements = "NOT_OBTAINED"

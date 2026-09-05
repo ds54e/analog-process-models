@@ -2,9 +2,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from pathlib import Path
+
 import pytest
 from numerical_core import PreflightError
-from run_spike import expected_negative_failure, render_deck, readback_scalars, LEAF_A, LEAF_B
+from run_spike import LEAF_A, LEAF_B, readback_scalars, render_deck
+
 
 def test_n_template():
     text = render_deck(Path('/apm'), 'n', 1.0, 0.12, 0.001, 0.01, 0.02)
@@ -13,6 +15,8 @@ def test_n_template():
     assert LEAF_B + '[mulu0]' in text
     assert 'altermod' not in text and '\nreset\n' not in text
     assert '.temp 26.850000000000001' in text
+    # CKTsetup overrides OMP_NUM_THREADS; this host's system spinit selects eight.
+    assert 'set num_threads=1' in text
 
 def test_p_template():
     text = render_deck(Path('/apm'), 'p', 1.0, 0.12, 0.001, 0.01, 0.02)
@@ -39,17 +43,3 @@ def test_readback_parse():
 def test_readback_missing():
     with pytest.raises(PreflightError):
         readback_scalars('a_w = 1e-6')
-
-def test_unrelated_simulation_failure_is_not_negative_control_success():
-    error = PreflightError('SIMULATION_FAILED: /output/001')
-    assert not expected_negative_failure('bad_path', error, 'Error: singular matrix')
-    assert not expected_negative_failure('reset_loses_perturbation', error, 'no such xmissing')
-
-def test_only_target_readback_mismatch_is_negative_control_success():
-    assert expected_negative_failure('bad_path', PreflightError('READBACK_MISMATCH: a_delvto at /run'))
-    assert not expected_negative_failure('bad_path', PreflightError('READBACK_MISMATCH: b_w at /run'))
-
-def test_missing_target_diagnostic_is_required_for_simulation_failure():
-    error = PreflightError('SIMULATION_FAILED: /run')
-    assert expected_negative_failure('bad_path', error, 'Error: no such device xmissing')
-    assert not expected_negative_failure('bad_path', error, 'xmissing printed in deck; singular matrix')

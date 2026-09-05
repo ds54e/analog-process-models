@@ -7,16 +7,19 @@ All coefficients used by the tests are artificial numerical test inputs.
 A beta coefficient for a public measurement profile is deliberately absent.
 """
 from __future__ import annotations
+
 import hashlib
 import json
 import math
 from dataclasses import dataclass
 from typing import Callable
+
 import numpy as np
 from scipy.interpolate import CubicSpline
 from scipy.optimize import least_squares, minimize_scalar
 from scipy.signal import find_peaks
 from scipy.special import ndtr
+
 
 class PreflightError(ValueError):
     pass
@@ -48,7 +51,7 @@ def pair_coefficient_to_device_sigma(a_pair: float, w_um: float, l_um: float) ->
     Independent, identical devices are assumed. No percent-to-fraction guess.
     """
     values = (a_pair, w_um, l_um)
-    if not all((math.isfinite(x) for x in values)) or a_pair < 0 or min(w_um, l_um) <= 0:
+    if not all(math.isfinite(x) for x in values) or a_pair < 0 or min(w_um, l_um) <= 0:
         raise PreflightError('invalid coefficient or geometry')
     return a_pair / math.sqrt(2.0 * w_um * l_um)
 
@@ -138,7 +141,7 @@ def inverse_mapping(function: Callable[[np.ndarray], np.ndarray], target: np.nda
     if target[1] <= -1:
         raise PreflightError('LOCAL_BETA_LINEAR_MODEL_OUT_OF_SCOPE')
     x0 = np.zeros(2) if initial is None else np.asarray(initial, float)
-    lower, upper = map(lambda a: np.asarray(a, float), bounds)
+    lower, upper = (np.asarray(a, float) for a in bounds)
 
     def residual(x):
         return (np.asarray(function(x)) - target) / scales

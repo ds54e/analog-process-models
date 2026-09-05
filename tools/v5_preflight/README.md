@@ -3,46 +3,67 @@
 
 # APM v5 preflight tools
 
-Start with the repository [`GOAL.md`](../../GOAL.md) and
-[`V5_PREFLIGHT.md`](../../V5_PREFLIGHT.md). This directory is the repository-owned
-replacement for the earlier standalone handoff packet. No ZIP is needed.
+Follow [`GOAL.md`](../../GOAL.md), [`V5_PREFLIGHT.md`](../../V5_PREFLIGHT.md) and
+[`V5_MINIMUM_EXPERIMENT.md`](V5_MINIMUM_EXPERIMENT.md). These are bounded
+exploratory experiments, not a production variation API or release gate.
 
-- `V5_MINIMUM_EXPERIMENT.md`: numerical and ngspice experiment specification.
-- `source_audit.toml`: public-source leads, unresolved beta normalization, and
-  artificial test inputs. It is not an approved statistical profile.
-- `numerical_core.py`: experimental extraction, mapping, and sampling helpers.
-- `run_spike.py`: unqualified native-BSIM4 ngspice-47 scaffold. Review before use.
-- `tests/`: artificial numerical and deck-construction tests; no real-SPICE claim.
-- `CODEX_PROMPT.md`: short English launch prompt referring to repository authority.
+The executed findings are in
+[`v5_preflight_findings.json`](../../validation/evidence/v5_preflight_findings.json),
+with a separate [source audit](../../validation/evidence/v5_preflight_source_audit.md).
+Both VTG polarities passed application, MG extraction and artificial mapping at
+the initial point and all nine specified W/L combinations. This evidence covers
+300 K, 50 mV drain bias and the tested deterministic perturbations only. Hart beta
+normalization remains unresolved; no statistical profile is approved.
 
-From the repository root:
+- `numerical_core.py`: exploratory extraction, inversion and artificial sampling helpers.
+- `run_spike.py`: isolated native-BSIM4 experiments with independent N/P stage reporting.
+- `tests/`: analytic and synthetic regressions; no real-SPICE claim.
+- `source_audit.toml`: primary-source decisions and explicitly artificial inputs.
+- `CODEX_PROMPT.md`: the original repository handoff launch prompt.
+
+From the repository root, reuse an existing compatible Python environment and
+ngspice 47. Inspect the host before setup; the example binary path must be verified.
+The default pytest configuration excludes this separate suite:
 
 ```sh
 PYTHONPATH=tools/v5_preflight .venv/bin/python -m pytest -q tools/v5_preflight/tests
 .venv/bin/python tools/v5_preflight/run_spike.py \
-  --repo "$PWD" \
-  --ngspice /absolute/path/to/the/existing/ngspice \
-  --output "$PWD/.apm/v5-preflight/run-001"
+  --repo "$PWD" --ngspice /usr/local/bin/ngspice \
+  --output "$PWD/.apm/v5-preflight/new-minimum"
 ```
 
-Find the real binary in the existing project toolchain; the example path is a
-placeholder. The output directory must be new. The repository's default pytest
-configuration targets `tests/`; explicitly run this isolated suite as shown above.
-Use an ignored output directory, not this directory or `models/`.
+The output directory must be new and below `.apm/v5-preflight/`. First understand
+N/P at W=1 µm, L=0.12 µm. Only then repeat with the specified `--w-um` 1/2/4 and
+`--l-um` 0.12/0.24/0.40 combinations. Each output contains a compact stage report
+and hash inventory binding every request, deck, signed curve, log, readback and
+extraction. Failed stages and individual targets are retained; unavailable mapping
+is `BLOCKED`. A report-level `PASSED` covers only the numerical experiments in
+that run and is never a source-coefficient or release qualification.
 
-The input model Git blob identities are checked by the runner. Existing cards are
-read only. The script uses no approved measured beta coefficient and cannot qualify
-v5 on its own. Normalized controls, convergence tolerances, and raw bounds are
-preflight engineering choices, not process statistics or reliability ratings.
+The reviewed runner proves nonzero application and twin isolation before extracting
+MG. Bad-path controls require explicit missing-leaf diagnostics and nominal curves.
+Reset controls read the nonzero knobs before reset and their loss afterward.
+Unrelated solver errors, missing data and timeouts cannot pass either control.
+Timeouts retain the request and captured partial logs. Each uncached request uses
+a fresh `ngspice -n -b` process; identical requests may reuse their saved result.
 
-Known review points: the imported scaffold initially couples application and MG
-extraction, stops its combined run on the first failure, and requires
-review of real-tool failure diagnostics. The imported bad-path classification has been
-tightened to reject unrelated solver failures, but is not real-ngspice-qualified. The main
-contract requires independent reporting; fix the scaffold from real evidence without
-changing that requirement. A Python-only PASS is not a simulator PASS.
+The current host's system `spinit` selects eight ngspice threads. `CKTsetup` uses
+ngspice's `num_threads` variable, overriding `OMP_NUM_THREADS`. The first parallel
+expansion suffered severe contention and was interrupted with its partial evidence
+retained. The runner now explicitly sets `num_threads=1` before any analysis.
+All required experiments were rerun successfully, without changing numerical
+criteria, observables, model bytes or voltage limits.
 
-Preparation provenance and actually rerun checks are recorded in
+The cubic-interpolant MG method and finite physical differencing are preserved.
+Reports now include every refinement grid, peak/endpoint diagnostics, both raw and
+scaled Jacobians, a half-increment sensitivity check, cross terms, all four target
+residual vectors and independent 0.5 mV-grid remeasurement with twin checks.
+The bounds and tolerances remain preflight engineering choices, not manufacturing
+sigmas, qualified Monte Carlo support or device reliability limits.
+
+The original scaffold's 34-test preparation result is preserved in
 [`v5_preflight_preparation.json`](../../validation/evidence/v5_preflight_preparation.json).
-The experiment code was originally supplied in APM_V5_Preflight.zip and normalized
-for repository style during import. All preparation tests use artificial quantities.
+Its original real minimum run also remains recorded in the findings. The repaired
+suite has 39 tests, including stronger negative-control classification, timeout-log
+preservation and independent failure reporting. No paper or measured coefficient
+is shipped by this tooling.

@@ -3,10 +3,23 @@
 
 import math
 from concurrent.futures import ThreadPoolExecutor
+
 import numpy as np
 import pytest
+from numerical_core import (
+    PreflightError,
+    aggregate_tail_risk,
+    canonical_hash,
+    covariance_from_pair_coefficients,
+    extract_mg,
+    inverse_mapping,
+    local_jacobian,
+    normal_draw,
+    pair_coefficient_to_device_sigma,
+    pair_relative,
+)
 from scipy.special import erf
-from numerical_core import PreflightError, aggregate_tail_risk, canonical_hash, covariance_from_pair_coefficients, extract_mg, inverse_mapping, local_jacobian, normal_draw, pair_coefficient_to_device_sigma, pair_relative
+
 
 def analytic_curve(u, x0=0.55, width=0.08, amplitude=0.0001):
     return 1e-12 + amplitude * width * math.sqrt(math.pi) / 2 * (1 + erf((u - x0) / width))
@@ -18,7 +31,7 @@ def test_key_insertion_and_order():
     ids = ['ea.left', 'ea.right', 'bias.ref']
     expected = {i: normal_draw(53, 2, i, 'vth') for i in ids}
     actual = {i: normal_draw(53, 2, i, 'vth') for i in reversed(ids + ['unused'])}
-    assert all((expected[i] == actual[i] for i in ids))
+    assert all(expected[i] == actual[i] for i in ids)
 
 def test_key_workers():
     args = [(53, i, 'ea.left', 'vth') for i in range(64)]
@@ -92,7 +105,7 @@ def test_extraction_refinement():
     for n in (201, 501, 1001):
         u = np.linspace(0, 1, n)
         values.append(extract_mg(u, analytic_curve(u)))
-    assert max((x.vth_mg_v for x in values)) - min((x.vth_mg_v for x in values)) < 1e-05
+    assert max(x.vth_mg_v for x in values) - min(x.vth_mg_v for x in values) < 1e-05
 
 def test_extraction_endpoint():
     u = np.linspace(0, 1, 501)

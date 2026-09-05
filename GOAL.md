@@ -1,8 +1,17 @@
 # Post-v4 release maintenance
 
-## Active task: APM v5.0.0 preflight
+## Completed bounded task: APM v5.0.0 preflight
 
-Status: **READY FOR CODEX EXECUTION; REAL-NGSPICE PREFLIGHT NOT YET RUN HERE**.
+Status: **PREFLIGHT EXPERIMENTS COMPLETE; BETA SOURCE NORMALIZATION UNRESOLVED**.
+
+Execution findings are in `validation/evidence/v5_preflight_findings.json` and
+`validation/evidence/v5_preflight_source_audit.md`. Instance application, MG extraction
+and artificial mapping passed independently for N/P at the mandatory initial point
+and the specified nine-point geometry grid. The source audit retrieved the 2022
+thesis; its repeated beta inconsistency leaves both polarities blocked from adoption.
+`STATUS.md` records actual validation and environment limitations. The instructions
+below retain this task's boundary; full v5 implementation and release still require
+separate authorization.
 
 The user has explicitly authorized the bounded, offline v5 preflight described in
 [`V5_PREFLIGHT.md`](V5_PREFLIGHT.md). This is a limited addition to the maintenance
