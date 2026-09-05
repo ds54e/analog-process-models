@@ -1,0 +1,38 @@
+{
+  "candidate_qualified": false,
+  "checks": {
+    "baseline": {
+      "report": ".apm/v6/baseline/maintenance/report.json",
+      "repository_state": {
+        "repository_head": "25140f57c4c3714f6ab4c9c9df44698ad7732662",
+        "source_snapshot_sha256": "af99effbce0e9ab7e10f32b341f2a5311c7dca65d3d3ddcf5ade80a01cd18c68",
+        "tracked_path_count": 374,
+        "tracked_worktree_manifest_sha256": "71007c0a8d20a2c184592b5ac648667de2b3e274ec5773e34ce2299d32c8110c",
+        "untracked_nonignored_sha256": {},
+        "worktree_clean": true
+      },
+      "sha256": "5b1057aed0e3f40a930076c5b16bce3f342cb093a07e322a1131ac60a1649eae",
+      "status": "pass"
+    },
+    "transition": {
+      "report": ".apm/v6/transition-validation/report.json",
+      "repository_state": {
+        "repository_head": "25140f57c4c3714f6ab4c9c9df44698ad7732662",
+        "source_snapshot_sha256": "2bb5af2ab35ae5b254b2eaa9cb9af49e21590521c80f42f8351ca40e74b80083",
+        "tracked_path_count": 382,
+        "tracked_worktree_manifest_sha256": "6175391564da3dc7d5455cc2ac8fe5504fd0c42105a9eb8b8d22c630b7b94745",
+        "untracked_nonignored_sha256": {},
+        "worktree_clean": false
+      },
+      "sha256": "282c79cbbde2ec4705294455ea666a692691238fe77103286e6230eb5c4adf2a",
+      "status": "pass"
+    }
+  },
+  "history_migration": "Inventory captured; all old live copies still present",
+  "release_published": false,
+  "schema": "apm.v6-progress.v1",
+  "starting_main": "25140f57c4c3714f6ab4c9c9df44698ad7732662",
+  "state": "V6_IMPLEMENTING",
+  "tag_created": false,
+  "transition_current_tests": 246
+}

@@ -5,42 +5,18 @@ models and a terminal-characterization framework for cross-process and
 within-process analog device studies. This repository is the APM project;
 within it, APM always means Analog Process Models.
 
-Release **4.0.0** preserves the released v3 electrical and stationary-noise
-contracts and adds independently APM-authored `apm045/io18` and
-`apm045/io25` mixed-voltage research families. The live catalog contains 15
-electrical families and 30 public MOS devices across five technologies.
+Current `main` is implementing **APM v6**, a repository, validation and usability
+redesign that preserves the v5 scientific models and result semantics. Its package
+identity is **6.0.0.dev0** until candidate freeze. No v6 tag or release is published.
+The selected mission is in [GOAL.md](GOAL.md); current progress is in
+[STATUS.md](STATUS.md). Exact historical source and separate evidence identities
+are recorded in [the history index](releases/index.toml).
 
-Release **5.0.0** adds optional APM045 Research Local Mismatch for VTG N/P.
-The immutable annotated `v5.0.0` tag peels exactly to approved candidate
-`381517fda5107fabf98af7801d5a5103f38e230c`. Its independent candidate run passed
-16/16 gates; a separate fresh exact-tag run passed **17/17** before the
-[GitHub Release](https://github.com/ds54e/analog-process-models/releases/tag/v5.0.0)
-was published. See the [exact-tag evidence](validation/evidence/v5_post_release_requalification.md)
-and preserved [candidate evidence](validation/evidence/v5_release_candidate.md).
-
-Current `main` uses **5.0.0+main** for post-release maintenance. Development used
-**5.0.0.dev0** before the candidate was frozen. The released technical contract is
-[`V5_RESEARCH_VARIATION.md`](V5_RESEARCH_VARIATION.md). Current validation records
-exact Git/worktree and input/tool identities. Source adoption, configured-statistics
-reproduction and generic-model transfer remain separate; the original ambiguous
-Hart/ST40 beta coefficients remain blocked.
-
-The immutable annotated `v4.0.0` release is tagged at
-`d224f279921c7e1ae637fd867e00d450067766c6`. Its exact candidate passed 15/15
-pre-tag gates and a separate fresh clone of the exact tag passed 16/16 before
-the [GitHub Release](https://github.com/ds54e/analog-process-models/releases/tag/v4.0.0)
-was published. Earlier released tags remain unchanged.
-
-The current APM045 portfolio and post-release claim boundary are summarized in
-[`APM045_POSITIONING.md`](APM045_POSITIONING.md). Completed v4/v5 contracts,
-release procedures, review records, and evidence remain frozen historical
-records rather than current implementation instructions.
-
-The v5 release adds an optional [research local variation flow](docs/research-local.md)
-with persistent physical-device realizations. Its qualified companion-source
-adaptation remains an explicit transfer hypothesis. The original ambiguous Hart
-beta values remain blocked; io18/io25 have executed assessments with unresolved
-numerical transfer and no default mismatch profile.
+The catalog contains five technologies, fifteen electrical families and thirty
+public MOS devices. Research Local Mismatch supports APM045 VTG N/P as an explicit
+source-transfer hypothesis. The original Hart/ST40 beta remains blocked; IO18/25
+transfer is unresolved and has no default mismatch profile. See the
+[Research guide](docs/research-local.md) and [APM045 positioning](APM045_POSITIONING.md).
 
 ## Scope
 
@@ -327,7 +303,7 @@ For normal installation and current-tree confidence, users should run:
 .venv/bin/apm validate
 ```
 
-The unflagged command validates post-v5 maintenance and the preserved
+The unflagged command validates current v6 implementation and the preserved
 released baseline. It does not reinterpret or update a completed release
 review.
 

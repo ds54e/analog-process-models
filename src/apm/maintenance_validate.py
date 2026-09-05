@@ -211,141 +211,26 @@ def _documents_tsmc_taxonomy_only(text: str) -> bool:
 
 
 def audit_current_guidance(root: Path) -> dict[str, Any]:
-    """Audit mutable guidance without assigning it historical release meaning."""
-
-    required_paths = (
-        "AGENTS.md",
-        "APM045_POSITIONING.md",
-        "ENVIRONMENT.md",
-        "GOAL.md",
-        "README.md",
-        "SECURITY.md",
-        "models/apm045/README.md",
-        "V5_RESEARCH_VARIATION.md",
-        "validation/release_gates_v5.toml",
-        "variation/research/apm045/sources.toml",
-    )
-    agents = _read(root, "AGENTS.md")
-    positioning = _read(root, "APM045_POSITIONING.md")
-    environment = _read(root, "ENVIRONMENT.md")
-    goal = _read(root, "GOAL.md")
-    readme = _read(root, "README.md")
-    security = _read(root, "SECURITY.md")
-    apm045 = _read(root, "models/apm045/README.md")
-    normalized_agents = _normalized(agents)
-    normalized_positioning = _normalized(positioning)
-    normalized_environment = _normalized(environment)
-    normalized_goal = _normalized(goal)
-    normalized_readme = _normalized(readme)
-    normalized_security = _normalized(security)
-    normalized_apm045 = _normalized(apm045)
-    public_text = f"{readme}\n{positioning}\n{apm045}"
-    prohibited_patterns = [
-        pattern
-        for pattern in (
-            r"(?i)APM (?:is|provides) (?:a )?manufacturable PDK",
-            r"(?i)io(?:18|25) (?:is|are|was|were) (?:TSMC|UMC|foundry)[- ]correlated",
-            r"(?i)io(?:18|25) (?:has|have|provides?) (?:a )?safe voltage rating",
-            r"(?i)Spectre numerical validation (?:passed|is complete)",
-            r"(?i)epistemic ensemble (?:is|represents) process variation",
-        )
-        if re.search(pattern, public_text)
-    ]
+    """Current v6 routing; scientific/historical checks remain separately enforced."""
+    from .lifecycle import load_contract
     try:
-        contract = tomllib.loads(_read(root, "validation/release_gates_v5.toml"))
-    except (ValueError, OSError):
-        contract = {}
-    authorization = contract.get("authorization", {})
-    identity = contract.get("identity", {})
+        contract = load_contract(root)
+    except (OSError, ValueError):
+        contract = {"release": None, "create_tag_authorized": None, "publish_release_authorized": None}
     checks = {
-        "required_current_documents_present": all(
-            (root / relative).is_file() for relative in required_paths
-        ),
-        "goal_is_post_v5_maintenance": _matches(
-            normalized_goal,
-            r"# APM post-v5 maintenance",
-            r"Maintain the released APM v5\.0\.0 baseline",
-            r"5\.0\.0\+main",
-            r"separate explicit user authorization",
-        ),
-        "goal_preserves_released_semantics": _matches(
-            normalized_goal,
-            r"Do not modify Benchmark v2 distributions",
-            r"native variation semantics",
-            r"nominal model cards/wrappers/manifests",
-            r"frozen v1-v5 records",
-        ),
-        "historical_candidate_authorization_preserved": authorization.get("implementation") is True
-        and authorization.get("candidate_qualification") is True
-        and authorization.get("create_tag") is False
-        and authorization.get("publish_release") is False,
-        "policy_identifies_frozen_v4_authority":
-            V4_FROZEN_AUTHORITY_COMMIT in normalized_agents
-            and identity.get("frozen_v4_authority") == V4_FROZEN_AUTHORITY_COMMIT
-            and identity.get("frozen_v4_tag_object") == V4_TAG_OBJECT
-            and identity.get("frozen_v4_tagged_commit") == V4_TAGGED_COMMIT,
-        "policy_identifies_frozen_v5_authority": V5_FROZEN_AUTHORITY_COMMIT in normalized_agents,
-        "positioning_has_inline_spdx": positioning.startswith(
-            "<!-- SPDX-FileCopyrightText: APM contributors -->\n"
-            "<!-- SPDX-License-Identifier: Apache-2.0 -->\n"
-        ),
-        "positioning_preserves_technology_and_family_boundary": _matches(
-            normalized_positioning,
-            r"generic 40/45 nm-class planar bulk CMOS",
-            r"45 nm FreePDK45-based technology namespace",
-            r"VTL/VTG/VTH and legacy THKOX",
-            r"`io18` and `io25` mixed-voltage families",
-        ),
-        "positioning_preserves_claim_boundary": _matches(
-            normalized_positioning,
-            r"not as a TSMC40/45 model",
-            r"foundry design-rule minima",
-            r"reliability or safe-voltage ratings",
-            r"epistemic ensemble as process variation",
-            r"Model/release changes required: \*\*NONE\*\*",
-        ),
-        "positioning_tsmc_information_is_taxonomy_only": (
-            _documents_tsmc_taxonomy_only(normalized_positioning)
-        ),
-        "apm045_readme_tsmc_information_is_taxonomy_only": (
-            _documents_tsmc_taxonomy_only(normalized_apm045)
-        ),
-        "root_readme_tsmc_information_is_taxonomy_only": (
-            _documents_tsmc_taxonomy_only(normalized_readme)
-        ),
-        "apm045_readme_is_current_device_guidance": _matches(
-            normalized_apm045,
-            r"APM045_POSITIONING\.md",
-            r"released `?io18`?/`?io25`? cards|released io18/io25 cards",
-            r"current maintenance scope",
-        ),
-        "security_names_latest_release": _matches(
-            normalized_security,
-            r"APM v5\.0\.0 is the latest completed release",
-            r"post-release maintenance line",
-        ),
-        "environment_separates_current_and_historical_flows": _matches(
-            normalized_environment,
-            r"historical v4 release qualification boundary",
-            r"current v5 validation",
-            r"unflagged `apm validate` checks post-v5 maintenance",
-        ),
-        "readme_separates_current_and_historical_flows": _matches(
-            normalized_readme,
-            r"frozen historical records rather than current implementation instructions",
-            r"does not reinterpret or update a completed release review",
-            r"5\.0\.0\.dev0",
-        ),
-        "no_prohibited_public_claims": not prohibited_patterns,
+        "goal_is_selected_v6_mission": "APM v6" in _read(root, "GOAL.md")
+            and "docs/maintainers/v6-plan.md" in _read(root, "GOAL.md"),
+        "plan_and_acceptance_present": (root / "docs/maintainers/v6-plan.md").is_file()
+            and contract["release"] == "6.0.0",
+        "publication_requires_separate_approval": contract["create_tag_authorized"] is False
+            and contract["publish_release_authorized"] is False,
+        "current_policy_routes_history": "releases/index.toml" in _read(root, "AGENTS.md"),
+        "current_policy_preserves_sources": "BLOCKED_NORMALIZATION_CONFLICT" in _read(root, "AGENTS.md"),
+        "required_guides_present": all((root / p).is_file() for p in (
+            "README.md", "ENVIRONMENT.md", "THIRD_PARTY.md", "CONTRIBUTING.md",
+            "APM045_POSITIONING.md", "DEVICE_FAMILY_MODEL.md", "RESULT_CONTRACT.md")),
     }
-    result = _check_map(checks, context="post-v5 maintenance guidance and preserved released claims")
-    result.update(
-        {
-            "reviewed_paths": list(required_paths),
-            "prohibited_claim_patterns": prohibited_patterns,
-        }
-    )
-    return result
+    return _check_map(checks, context="explicitly selected v6 mission and approval boundary")
 
 
 def _tree_entries(root: Path, revision: str) -> dict[str, dict[str, str]]:
@@ -544,7 +429,7 @@ def audit_maintenance_package_identity(root: Path) -> dict[str, Any]:
         source_error = str(error)
     expected_release = V5_TAG.removeprefix("v")
     # Released 5.0.0 remains immutable; mutable main has a distinct local identity.
-    allowed_current = {"5.0.0+main"}
+    allowed_current = {"6.0.0.dev0", "6.0.0"}
     expected_main = current_project
 
     checks = {
@@ -568,7 +453,7 @@ def audit_maintenance_package_identity(root: Path) -> dict[str, Any]:
     result.update(
         {
             "policy": (
-                "5.0.0 is the released source; 5.0.0+main identifies mutable maintenance. "
+                "5.0.0 is immutable; 6.0.0.dev0 is v6 implementation; 6.0.0 is its candidate. "
                 "Exact identity is supplied by the recorded Git/worktree snapshot."
             ),
             "release_version": expected_release,

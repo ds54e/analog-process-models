@@ -1,0 +1,82 @@
+# SPDX-FileCopyrightText: 2026 APM contributors
+# SPDX-License-Identifier: Apache-2.0
+schema = "apm.history-index.v1"
+remote = "https://github.com/ds54e/analog-process-models.git"
+
+[baseline]
+commit = "25140f57c4c3714f6ab4c9c9df44698ad7732662"
+tree = "06889a3a7bbf648724b6e6fa39f388383c9d4e63"
+artifact_count = 374
+inventory_sha256_git = "14f64b9448fd8d0ee0cf14afec8ada7ee8b68d0574a8cf11f999f1aca6af137c"
+inventory_path = "releases/migration-v6.json"
+inventory_sha256 = "42cf23f8a1b9f2432aca0cdcc421d515b6b8b4c34148db7c1f9b33266f80db58"
+
+[[legacy]]
+tag = "v1.0.0"
+tag_object = "1633cc3b6d1b45ef4b77d778e95d069aaa03f513"
+[legacy.source]
+commit = "e7bba6aaba1487a1116459a6b7b2c3c5add93318"
+tree = "eaf86cc442460e864401c137830ddd3080322668"
+artifact_count = 142
+inventory_sha256_git = "dc883edf93eac6e38da4f92360d97717bac0e20f4ad623ab412f2133f257ffc5"
+[legacy.evidence]
+commit = "e7bba6aaba1487a1116459a6b7b2c3c5add93318"
+tree = "eaf86cc442460e864401c137830ddd3080322668"
+artifact_count = 142
+inventory_sha256_git = "dc883edf93eac6e38da4f92360d97717bac0e20f4ad623ab412f2133f257ffc5"
+
+[[legacy]]
+tag = "v2.0.0"
+tag_object = "89b9ce70cfa15e92ca6473f1916d50f77c7b95dc"
+[legacy.source]
+commit = "3cc6cfea4932cc40f2d693784d0a569926cdf399"
+tree = "dfe11a490b7e66d653fa72de39d3c3135c35137e"
+artifact_count = 230
+inventory_sha256_git = "4773375f658b358d9703aa2b0eb75450847033c796b8f795c2b559e1eb47e07e"
+[legacy.evidence]
+commit = "6ae43c02b77c4c6039df4632edef7d704aa88bcf"
+tree = "55f138cf1f7f02ab9fdba14551a67a8ef89d3490"
+artifact_count = 231
+inventory_sha256_git = "41146a31992ae32e860f0ce07d0c41bc7a850a4b8def8744a96eca072cb5fe61"
+
+[[legacy]]
+tag = "v3.0.0"
+tag_object = "afecec29ea6ed0703ef441d4839fd40a238bef0b"
+[legacy.source]
+commit = "995e0ce7cdd0c37ef9f3397008637f9d239c746e"
+tree = "73ec030346290b2269729a3227a26e4498449f77"
+artifact_count = 249
+inventory_sha256_git = "c838ca5fb9932fa66458479313d0e231df4e934e25a3cccfd8ad772cc8ba694f"
+[legacy.evidence]
+commit = "0d682982d989882af365f023b3d6b0bef5dcffda"
+tree = "d22727cc591be4fe6a7bf56cc515435365076b33"
+artifact_count = 251
+inventory_sha256_git = "2ae84815d1762b8ab3c4a61198d8b74e2936af0a513ad75f67decac7409c298d"
+
+[[legacy]]
+tag = "v4.0.0"
+tag_object = "797cdf9462db9dd634bff558802bcadaaeb70015"
+[legacy.source]
+commit = "d224f279921c7e1ae637fd867e00d450067766c6"
+tree = "cbc60548e27798dc456422a1d682a581bb7609b9"
+artifact_count = 306
+inventory_sha256_git = "674ba93b4c24eac31be86b58b643dd41f235c0834bbeccce95d7fe4c9b06e6c4"
+[legacy.evidence]
+commit = "02959d4a095062873fa2a3a53936af3cb4598ee3"
+tree = "6b4e21c59fe1b2c6b1caedcbc7cc1b7e193b063e"
+artifact_count = 308
+inventory_sha256_git = "0ff63ae05773465b30bd225df979ee6d8f0dcec1a21b5bd7fe99bcffe85441f3"
+
+[[legacy]]
+tag = "v5.0.0"
+tag_object = "b1a4246b9189fe33915d457e9d7f2938869b8fdf"
+[legacy.source]
+commit = "381517fda5107fabf98af7801d5a5103f38e230c"
+tree = "8751c3ed03dc31c87f52d3eb3c5c0b4da903ed65"
+artifact_count = 361
+inventory_sha256_git = "73635de22d025b446ea448623581baf0f026107ff434ac57c6026da9bfe9cad2"
+[legacy.evidence]
+commit = "150084368815f6a57eae9f3e707f685149e920d3"
+tree = "15f69ac8b71fa53a771076a3d139282d7be17d49"
+artifact_count = 371
+inventory_sha256_git = "30d0c2305c0126bd0e9c18942f3e58da9c66080dd761e0f1721af6a5397487d3"

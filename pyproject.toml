@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "analog-process-models"
-version = "5.0.0+main"
-description = "Open analog compact-model electrical families and terminal-characterization framework"
+version = "6.0.0.dev0"
+description = "Open compact models and ngspice tools for analog device, noise, and mismatch studies."
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "Apache-2.0" }

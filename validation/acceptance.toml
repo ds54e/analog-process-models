@@ -1,0 +1,95 @@
+# SPDX-FileCopyrightText: 2026 APM contributors
+# SPDX-License-Identifier: Apache-2.0
+schema = "apm.acceptance.v1"
+release = "6.0.0"
+phase = "implementation"
+implementation_version = "6.0.0.dev0"
+candidate_version = "6.0.0"
+maintenance_version = "6.0.0+main"
+ready_status = "V6_RELEASE_READY"
+remote = "https://github.com/ds54e/analog-process-models.git"
+create_tag_authorized = false
+publish_release_authorized = false
+
+[compatibility]
+baseline_commit = "25140f57c4c3714f6ab4c9c9df44698ad7732662"
+research_plan = "validation/v5_confirmation_plan.toml"
+research_methodology_authority = "381517fda5107fabf98af7801d5a5103f38e230c"
+pure_pairs = 65536
+mapping_geometries = 22
+mapping_targets = 572
+spice_pairs = 90112
+circuit_realizations = 12288
+physical_array_rtol = 0.0
+physical_array_atol = 0.0
+latent_target_raw_rtol = 0.0
+latent_target_raw_atol = 0.0
+identity_changes = ["package version", "source commit/tree/module hashes", "absolute checkout/output paths", "timestamps/durations", "run/cache IDs derived from those inputs"]
+preserve = ["models/", "variation/", "passives/", "LICENSES/", "source decisions", "method IDs", "seeds", "observed tool binary/source hashes", "numerical algorithms and all published result schemas"]
+allowed_production_changes = ["paths.py: project identity discovery", "cli.py: current/history routing", "maintenance_validate.py: current scope and promoted helpers", "provenance_validate.py: current policy routing", "research_qualification.py: current coordinator binding only", "research_cli.py: sample destination collision diagnostic", "new history/lifecycle/qualification/validation modules"]
+
+[[gate]]
+id = "identity.lifecycle"
+phase = "candidate"
+required = true
+checks = ["identity.package", "identity.phase", "identity.source"]
+
+[[gate]]
+id = "preservation.history"
+phase = "candidate"
+required = true
+checks = ["history.remote", "history.objects", "history.selector_coverage", "history.exports", "history.bundle", "history.original_execution"]
+
+[[gate]]
+id = "preservation.current_assets"
+phase = "candidate"
+required = true
+checks = ["assets.bytes_modes", "assets.provenance", "assets.notice_closure"]
+
+[[gate]]
+id = "architecture.dependencies"
+phase = "candidate"
+required = true
+checks = ["architecture.imports", "architecture.discovery", "architecture.io_closure", "architecture.check_mapping"]
+
+[[gate]]
+id = "docs.usability"
+phase = "candidate"
+required = true
+checks = ["docs.links_claims", "journey.J1", "journey.J2", "journey.J3", "journey.J4", "journey.J5", "journey.J6", "journey.J7", "journey.J8", "journey.J9", "journey.J10"]
+
+[[gate]]
+id = "compatibility.science"
+phase = "candidate"
+required = true
+checks = ["compat.baseline_physical", "compat.latents_replay", "electrical.all_families", "variation.benchmark", "variation.native", "noise.method", "noise.catalog", "research.plan", "research.sampler", "research.mapping", "research.statistics", "research.circuits", "research.replay_charge", "research.io"]
+
+[[gate]]
+id = "validation.fail_closed"
+phase = "candidate"
+required = true
+checks = ["negative.history", "negative.reconstruction", "negative.lifecycle", "negative.evidence", "negative.runtime"]
+
+[[gate]]
+id = "environment.reproducibility"
+phase = "candidate"
+required = true
+checks = ["environment.cold", "environment.warm", "environment.tools"]
+
+[[gate]]
+id = "quality.current"
+phase = "candidate"
+required = true
+checks = ["quality.pytest", "quality.ruff", "quality.reuse", "quality.public_hygiene", "quality.install"]
+
+[[gate]]
+id = "release.clean_candidate"
+phase = "candidate"
+required = true
+checks = ["release.clone", "release.clean_tree", "release.evidence_binding"]
+
+[[gate]]
+id = "release.exact_tag_requalification"
+phase = "exact-tag"
+required = true
+checks = ["tag.annotated_identity", "tag.approved_candidate", "tag.fresh_full_rerun"]

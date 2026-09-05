@@ -52,66 +52,19 @@ EXPECTED_FAMILIES = {
 }
 
 
-def test_post_v5_goal_and_historical_document_status_are_explicit() -> None:
-    agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
-    goal = (ROOT / "GOAL.md").read_text(encoding="utf-8")
-    normalized_goal = " ".join(goal.split())
-    assert (
-        "APM v1.0.0, v2.0.0, v3.0.0, v4.0.0, and v5.0.0 are released and immutable"
-        in agents
-    )
-    assert "afecec29ea6ed0703ef441d4839fd40a238bef0b" in agents
-    assert "797cdf9462db9dd634bff558802bcadaaeb70015" in agents
-    assert "d224f279921c7e1ae637fd867e00d450067766c6" in agents
-    assert "v4.0.0 exact-tag requalification: 16/16 required gates passed" in agents
-    assert "The repository is public" in agents
-    assert maintenance_validate.V5_TAG_OBJECT in agents
-    assert maintenance_validate.V5_TAGGED_COMMIT in agents
-    assert "v5.0.0 exact-tag requalification: 17/17 required gates passed" in agents
-    assert "# APM post-v5 maintenance" in goal
-    assert "Maintain the released APM v5.0.0 baseline" in normalized_goal
-    assert "separate explicit user authorization" in normalized_goal
-    assert "5.0.0+main" in normalized_goal
-    assert "Do not modify Benchmark v2 distributions" in normalized_goal
-    assert "native variation semantics" in normalized_goal
-    assert "frozen v1-v5 records" in normalized_goal
-
-    for frozen in (
-        "V4_MIXED_VOLTAGE.md",
-        "RELEASE_V4.md",
-        "validation/release_gates_v4.toml",
-        "validation/release_review_v4.toml",
-        "validation/evidence/v4_*.json",
-    ):
-        assert frozen in agents
-    assert "phase-specific wording is historical, not current instruction" in " ".join(agents.split())
-
-    historical_markers = {
-        "RELEASE_V3.md": "Historical record — frozen V3-N3 candidate contract",
-        "UNATTENDED_EXECUTION.md": "Historical record — preserved V3-N3 procedure",
-        "PROJECT_CONTEXT.md": "Historical record — v2 design rationale",
-        "RESEARCH_BASELINE.md": "Historical record — dated v2 research baseline",
-        "NOISE_N1.md": "Historical/frozen milestone contract",
-        "NOISE_N2.md": "Historical/frozen milestone contract",
-    }
-    for relative, marker in historical_markers.items():
-        assert marker in (ROOT / relative).read_text(encoding="utf-8")
-
-    assert (ROOT / "SECURITY.md").is_file()
-    assert (ROOT / "CONTRIBUTING.md").is_file()
-    security = (ROOT / "SECURITY.md").read_text(encoding="utf-8")
-    normalized_security = " ".join(security.split())
-    assert "Report a vulnerability" in normalized_security
-    assert "Private Vulnerability Reporting is enabled" in normalized_security
-    assert "APM v5.0.0 is the latest completed release" in normalized_security
-
-    positioning = (ROOT / "APM045_POSITIONING.md").read_text(encoding="utf-8")
-    assert positioning.startswith(
-        "<!-- SPDX-FileCopyrightText: APM contributors -->\n"
-        "<!-- SPDX-License-Identifier: Apache-2.0 -->\n"
-    )
-    assert "GENERIC 40/45 NM-CLASS" in positioning
-    assert "Model/release changes required: **NONE**" in positioning
+def test_selected_v6_mission_preserves_v5_history_and_approval_boundary() -> None:
+    from apm.history import load_index
+    from apm.lifecycle import load_contract
+    contract = load_contract(ROOT)
+    assert contract["release"] == "6.0.0"
+    assert contract["phase"] in ("implementation", "candidate")
+    assert contract["create_tag_authorized"] is False
+    assert contract["publish_release_authorized"] is False
+    v5 = next(x for x in load_index(ROOT)["legacy"] if x["tag"] == "v5.0.0")
+    assert v5["source"]["commit"] == maintenance_validate.V5_TAGGED_COMMIT
+    assert v5["tag_object"] == maintenance_validate.V5_TAG_OBJECT
+    assert "docs/maintainers/v6-plan.md" in (ROOT / "GOAL.md").read_text()
+    assert "releases/index.toml" in (ROOT / "AGENTS.md").read_text()
 
 
 def test_current_guidance_and_frozen_v4_artifact_audits_pass() -> None:
@@ -158,7 +111,7 @@ def test_current_guidance_audit_fails_closed_on_completed_goal(tmp_path: Path) -
     )
     result = audit_current_guidance(tmp_path)
     assert result["status"] == "fail"
-    assert "goal_is_post_v5_maintenance" in result["failed_checks"]
+    assert "goal_is_selected_v6_mission" in result["failed_checks"]
 
 
 def test_frozen_v4_audit_fails_closed_on_byte_drift(
@@ -572,7 +525,7 @@ def test_frozen_v5_audit_and_released_package_identity() -> None:
     assert result["tag_object"] == "b1a4246b9189fe33915d457e9d7f2938869b8fdf"
     identity = audit_maintenance_package_identity(ROOT)
     assert identity["status"] == "pass", identity
-    assert identity["main_version"] == "5.0.0+main"
+    assert identity["main_version"] in {"6.0.0.dev0", "6.0.0"}
     assert set(identity["tagged_source_versions"].values()) == {"5.0.0"}
 
 

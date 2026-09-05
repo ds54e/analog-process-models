@@ -78,7 +78,7 @@ When code/model bindings change, rebuild only affected generated artifacts as re
 
 If an existing artifact's source/binding/revision changes, do not assume its v1 binary remains valid; rebuild and record the new dependency chain.
 
-## Current v5 validation
+## Current v6 validation
 
 Use the reusable project-local environment for ordinary current-tree work:
 
@@ -87,8 +87,8 @@ Use the reusable project-local environment for ordinary current-tree work:
 .venv/bin/apm validate
 ```
 
-Unflagged `apm validate` checks post-v5 maintenance and preserved release baselines.
-Current main uses `5.0.0+main`; the immutable v5 release source uses `5.0.0`.
+Unflagged `apm validate` checks current v6 implementation and preserved release baselines.
+Current main uses `6.0.0.dev0`; the immutable v5 release source uses `5.0.0`.
 Historical `--release`, `--release-v4` and v5 qualification procedures preserve
 their completed release-era meaning and are not ordinary maintenance gates.
 

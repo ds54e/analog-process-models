@@ -1,286 +1,137 @@
 # AGENTS.md
 
-This file is mandatory repository policy for implementation and maintenance
-agents.
+Mandatory policy for agents working in **Analog Process Models (APM)**,
+`https://github.com/ds54e/analog-process-models`. APM always means this project.
+Work in this existing repository.
 
-## Repository identity
+## Current mission and authority
 
-This repository is **Analog Process Models (APM)**:
+The user explicitly selected the APM v6 implementation and qualification mission.
+Read `GOAL.md`, `docs/maintainers/v6-plan.md` in full and `validation/acceptance.toml`
+before substantive work. Read `STATUS.md`, current user/maintainer guides and the
+relevant scientific contracts before modifying their consumers. APM045 work also
+requires `APM045_POSITIONING.md`; model/provenance work requires `THIRD_PARTY.md`
+and `CONTRIBUTING.md`; real-tool work requires `ENVIRONMENT.md`.
 
-- repository: `https://github.com/ds54e/analog-process-models`;
-- acronym: **APM = Analog Process Models**.
+Authority: explicit user instructions and safety/security requirements, this file,
+GOAL and its acceptance plan, APM045 positioning, preserved scientific contracts,
+then current user documentation. Record material conflicts and departures in STATUS;
+never silently drop a harder requirement.
 
-Within this repository, APM always means this project. Work in this existing
-repository; do not create or substitute another project authority.
+This is implementation and qualification, not preflight or documentation-only work.
+Continue through independent tasks and feasible gates to `V6_RELEASE_READY`, or a
+precise evidenced blocker after independent work completes. Use `6.0.0.dev0` during
+implementation, `6.0.0` for the exact frozen candidate. `6.0.0+main` is reserved for
+maintenance after actual publication. Version labels alone are not source identity:
+record exact commit/tree, clean or snapshot identity, inputs and observed tools.
 
-## Released baseline and current line
+## Immutable history and authorized migration
 
-APM v1.0.0, v2.0.0, v3.0.0, v4.0.0, and v5.0.0 are released and immutable.
+APM v1.0.0 through v5.0.0 are released and immutable. Read `releases/index.toml`
+for exact annotated tags, peeled source commits/trees and separate evidence
+commits. `releases/migration-v6.json` captures the pre-migration tree, old frozen
+selectors, modes/blobs/hashes, roles and references. Its baseline is
+`25140f57c4c3714f6ab4c9c9df44698ad7732662`; the reviewed maintenance predecessor is
+`4cd57d98a54ad1cfe8deedf38de39a0b81a22d52`.
 
-- v2.0.0 commit: `3cc6cfea4932cc40f2d693784d0a569926cdf399`;
-- v3.0.0 annotated-tag object:
-  `afecec29ea6ed0703ef441d4839fd40a238bef0b`;
-- v3.0.0 tagged commit:
-  `995e0ce7cdd0c37ef9f3397008637f9d239c746e`;
-- v3.0.0 exact-tag requalification: 18/18 required gates passed;
-- GitHub Release: `Analog Process Models v3.0.0`;
-- post-tag evidence:
-  `validation/evidence/v3_post_release_requalification.json`.
-- v4.0.0 annotated-tag object:
-  `797cdf9462db9dd634bff558802bcadaaeb70015`;
-- v4.0.0 tagged commit:
-  `d224f279921c7e1ae637fd867e00d450067766c6`;
-- v4.0.0 exact-tag requalification: 16/16 required gates passed;
-- GitHub Release: `Analog Process Models v4.0.0`;
-- v4 candidate and post-tag evidence:
-  `validation/evidence/v4_release_candidate.json` and
-  `validation/evidence/v4_post_release_requalification.json`.
+The selected v6 mission authorizes changing current-main policy and retiring
+classified historical live copies **only after exact reconstruction/export and
+closure verification**. Historical Git objects, scientific source decisions,
+acceptance criteria and evidence statements cannot change. Retained runtime and
+normative assets remain byte/mode exact at their public paths. A source tag and a
+later evidence authority are distinct; preserve both. Do not keep a second entire
+archive tree. Verify a self-contained Git bundle and restoration before retirement.
+Missing/shallow history must fail strict checks, without becoming a runtime fetch.
 
-- v5.0.0 annotated-tag object:
-  `b1a4246b9189fe33915d457e9d7f2938869b8fdf`;
-- v5.0.0 tagged commit (the separately approved candidate):
-  `381517fda5107fabf98af7801d5a5103f38e230c`;
-- v5.0.0 exact-tag requalification: 17/17 required gates passed;
-- GitHub Release: `Analog Process Models v5.0.0`;
-- v5 candidate and post-tag evidence:
-  `validation/evidence/v5_release_candidate.json` and
-  `validation/evidence/v5_post_release_requalification.json`.
+Completed preflight, v3/v4/v5 contracts, release procedures, failed runs and evidence
+are historical records. Their old phase language is neither current authorization
+nor a reason to undo a completed release. Old qualification belongs to its exact
+source. Do not import historical release implementations into current runtime or
+relabel their validation as current. Keep a visible old-to-new check disposition;
+replace obsolete mission/prose assertions with lifecycle tests, never bypass valid
+scientific, licensing, provenance or corruption checks.
 
-Do not modify, move, recreate, or delete a released tag. Do not amend tagged
-commits, rewrite published history, or force-push. Current `main` is the post-v5
-maintenance line under `GOAL.md`. Packages from mutable main use `5.0.0+main`;
-plain `5.0.0` belongs to the immutable released source. Development previously
-used `5.0.0.dev0`. Exact source identity requires a Git commit, clean-tree or
-snapshot identity and input/tool hashes, not a version label alone.
-The separately approved v5 publication is completed. Future version/release
-operations require separate explicit user authorization.
+## Scientific invariants
 
-The repository is public. Publication followed a passing pre-publication audit
-and is recorded in `validation/evidence/publication_v3.json`. Do not change the
-repository owner, name, default branch, visibility, or security settings
-without explicit authorization for that exact action.
+Preserve `Technology -> Electrical Family -> Device`. Operating Profile, Backend
+Binding, Variation and Comparison Set are orthogonal. Discovery is manifest-driven;
+no technology-specific normal-family loaders or universal parameter abstraction.
+The catalog remains five technologies, fifteen families and thirty public MOS.
+Public planar geometry is `w,l`; FinFET is `l,nfin` with integer NFIN. Preserve
+public names, terminals, includes, model/provenance manifests and support ranges.
 
-## Current mission and instruction hierarchy
+Read `DEVICE_FAMILY_MODEL.md`, `RESULT_CONTRACT.md`, `NOISE_CHARACTERIZATION.md`
+and the applicable frozen methodology. Preserve electrical v2, stationary-noise v1,
+noise-comparison v1, contiguous-regions@1.0.0, bounded-white-search@1.0.0 and all
+released Research/build-provenance schemas with explicit legacy-cache handling.
+Canonical gm/gds are terminal finite differences; capacitances derive from raw
+complex terminal Y. Preserve signed terminal quantities separately from magnitudes.
 
-Follow current `GOAL.md` for post-v5 maintenance. Read
-`V5_RESEARCH_VARIATION.md`, `validation/release_gates_v5.toml` and
-`variation/research/apm045/sources.toml` when maintaining the released research
-flow. These preserve its qualified methods and source boundaries. No released
-nominal model, Benchmark/native semantics or historical evidence may be changed
-through routine maintenance. Completed preflight and implementation missions
-remain historical records.
+Preserve the 1-ohm CCVS drain-current probe, actual complex gate-to-drain transfer,
+canonical drain-current/gate-equivalent PSDs, effective parameter provenance and
+raw backend source names. Required `.noise` uses normal Sparse/no-KLU. Preserve
+native planar-W and FinFET-NFIN bases. No fabricated fits, clipped gm/Id requests,
+noise calibration or inference of silicon accuracy from simulator success.
 
-Read before substantive work:
+Benchmark v2, APM130 native and APM045 VTG Research Local remain distinct. Read
+`V5_RESEARCH_VARIATION.md`, `validation/v5_confirmation_plan.toml`,
+`variation/research/apm045/sources.toml` and its hashed decision before research
+maintenance. Preserve draws, raw realizations, profiles, coefficients, distributions,
+methods, seeds, tolerances and denominators. No clipping, redraw, discarded samples,
+post-hoc tolerance relaxation, new covariance or silent stale-cache acceptance.
+Legacy realization replay retains its previously supported identical input/path
+context; arbitrary relocation is not promised.
 
-1. `AGENTS.md`;
-2. `GOAL.md` and its active technical/gate/source contracts;
-3. `APM045_POSITIONING.md` when APM045 scope or claims are involved;
-4. `README.md`;
-5. `STATUS.md` and the completed preflight findings/source audit;
-6. the preserved contracts relevant to the change;
-7. `THIRD_PARTY.md` and `CONTRIBUTING.md` when models, provenance or shipped
-   assets are involved;
-8. `ENVIRONMENT.md` and applicable validation documentation for real-tool work.
+VTG N/P Research Local remains W=1–4 um, L=0.12–0.40 um, 300 K statistical anchor,
+|VDS|=50 mV, VBS=0. Temperature replay is uncalibrated. Hart/TSMC40 is a transfer
+hypothesis; original Hart/ST40 beta remains `BLOCKED_NORMALIZATION_CONFLICT` for
+N/P. IO18/25 remains `UNRESOLVED_WITH_EVIDENCE`, without numeric default profiles.
+Unknown beta is not zero. Source uncertainty and model-construction ensembles are
+not physical device/process draws. Research Global/All remains unsupported.
 
-Authority on conflict:
+APM022/APM016F are independently authored generic models. Official PTM/PTM-MG
+cards must not be copied, transcribed, interpolated, optimized against as numeric
+fitting targets or used as numeric source material for their decks/variants.
 
-1. applicable safety/security requirements and explicit user instructions;
-2. `AGENTS.md`;
-3. current `GOAL.md` and its named active technical/gate contracts;
-4. `APM045_POSITIONING.md` for current APM045 positioning;
-5. preserved technical contracts, including `DEVICE_FAMILY_MODEL.md`,
-   `RESULT_CONTRACT.md` and `NOISE_CHARACTERIZATION.md`;
-6. current user and validation documentation.
+## Tools, scope, licensing and public hygiene
 
-Active goal changes may require updating mutable current validators and tests
-that hardcode the old maintenance mission. Replace those assertions with explicit
-v5 lifecycle tests, not blanket bypasses. Never weaken legitimate legacy integrity,
-numerical or provenance tests merely to produce a pass.
+Reference: EL9 x86_64/WSL2, Linux filesystem, ngspice 47, pinned PSP103/BSIM-CMG,
+OpenVAF-Re-Loaded `fdf2522b70f42793f64b1c72f0195c96dea0cc19`. Preserve the pin;
+observe actual clean source/build receipts, compiler and OSDI binary hashes.
+Configured identity is not observed identity. Local toolchain repairs/new ignored
+prefixes are authorized; preserve valid existing state and system tools. Distinguish
+cold bootstrap, verified reuse, native-BSIM4 and OSDI-dependent evidence.
 
-`RELEASE_V3.md`, `UNATTENDED_EXECUTION.md`, `PROJECT_CONTEXT.md`,
-`RESEARCH_BASELINE.md`, `NOISE_N1.md`, and `NOISE_N2.md` are retained
-historical/frozen milestone records. They provide design rationale and
-reproducibility, but they are not current goals and do not prohibit or undo an
-already-completed release.
+APM is not a manufacturable PDK. No new physics, nominal models, statistical
+coefficients, IO statistics, LDO/OTA optimization, agent/plugin frameworks, cloud
+services, platform expansion, layout/PCells/DRC/LVS/PEX, standard cells, signoff,
+reliability/yield, RTS/RTN, noise MC, transient noise, PSS/PNoise, phase noise or
+full terminal noise correlation. Spectre remains model-only experimental/unverified;
+no real parsing, simulation, equivalence or Virtuoso/ADE/OA automation claim.
 
-Completed v4 artifacts are also frozen historical/release records. This
-includes `V4_MIXED_VOLTAGE.md`, `RELEASE_V4.md`,
-`validation/release_gates_v4.toml`, `validation/release_review_v4.toml`,
-`validation/evidence/v4_*.json` and completed v4 model-generation contracts and
-evidence. Their phase-specific wording is historical, not current instruction.
-Do not rewrite it to remove candidate, pre-release or completion language.
+Before adding third-party assets: identify authoritative upstream, pin exact bytes
+or revision/path, inspect file-level rights, retain notices/acknowledgements/license,
+and record source/output hashes and modifications. Never infer rights from a root
+license or relicense third-party material. Derived figure data needs source/adaptation
+credit and its appropriate license. Keep legitimate local outputs under ignored
+project paths; never commit papers without reviewed rights, proprietary PDK/models,
+private oracle decks, credentials, personal/private data, OSDI binaries, environments,
+caches or large raw results. Preserve the completed public-hygiene audit boundary.
+Stop and report a credential/proprietary/private-history artifact, ambiguous rights
+or a required history rewrite; deleting only its live copy does not resolve it.
 
-The single byte authority for the completed v4 frozen scope is post-tag
-commit `02959d4a095062873fa2a3a53936af3cb4598ee3`. It contains final candidate
-and exact-tag evidence. The compared scope comprises release documents and
-procedure, gate/review/comparison contracts, every `validation/evidence/v4_*.json`,
-the full `tools/modelgen/apm045_mixed_voltage/` history, v4 clean-clone and
-release-validator implementations, `models/apm045/families/io18/` and
-`models/apm045/families/io25/` trees and their technology, provenance and evidence
-manifests. This authority does not supersede the immutable tagged source.
+## Validation and Git
 
-Completed v5 contracts and evidence are frozen against post-publication commit
-`150084368815f6a57eae9f3e707f685149e920d3`. The exact scope is
-`FROZEN_V5_PATHS` in `src/apm/maintenance_validate.py`: the v5 technical contract,
-release notes, gate and confirmation plans, reference dependency constraints,
-all `validation/evidence/v5_*` files, `variation/research/apm045/`, `tools/v5/`,
-v5 clean-clone and release-validator implementations, the external exact-tag
-procedure and its tests, and v5 release-readiness/publication procedures. Preserve
-their bytes, modes and inventory. Phase-specific authorization flags and wording
-record their historical state; the separate approval/publication evidence records
-the completed release. This evidence authority is not the release source.
-New maintenance summaries use distinct paths such as
-`validation/evidence/post_v5_maintenance.json`.
+Unflagged `apm validate` is the current maintainer check. Report scope and unavailable
+checks explicitly. A bounded product check may work without Git; it cannot imply
+history or release qualification. Missing, skipped, stale, static-only or unavailable
+required real-tool evidence is never a pass. Avoid recursive pytest/release runners.
+Retain exact negative mechanisms and failures; raw runs stay ignored and compact
+summaries under `validation/evidence/` are hash-linked to their subject source.
 
-The completed v5 preflight snapshot is
-`bbb585306f13614b7649c36dd5b7510c845daed9`: preserve `V5_PREFLIGHT.md`,
-`tools/v5_preflight/`, `validation/evidence/v5_preflight_preparation.json`,
-`validation/evidence/v5_preflight_findings.json` and
-`validation/evidence/v5_preflight_source_audit.md`. Production code may adapt a
-copy of the exploratory algorithms; do not relabel or overwrite these records.
-
-Do not resolve a material conflict by silently dropping the harder requirement.
-Record material departures and evidence in `STATUS.md`.
-
-## Preserved architecture and result contracts
-
-Preserve the manifest-driven domain model:
-
-`Technology -> Electrical Family -> Device`
-
-Operating Profile, Backend Binding, Variation and Comparison Set remain
-orthogonal. Do not reintroduce technology-specific normal-family loaders or
-collapse family, voltage profile, gate stack, threshold class, backend and usage
-labels into one type string.
-
-Public geometry remains native:
-
-- planar devices: `w`, `l`;
-- FinFET devices: `l`, integer `nfin`.
-
-Do not invent a universal planar/FinFET effective width or fake common compact-model
-parameter API. Preserve these released schemas and semantics:
-
-- `apm.characterization.v2`;
-- `apm.noise-characterization.v1`;
-- `apm.noise-comparison.v1`;
-- `apm.noise-fit.contiguous-regions@1.0.0`;
-- `apm.noise-acquisition.bounded-white-search@1.0.0`.
-
-Preserve the released v5 research schemas and observed build-provenance metadata
-with their explicit legacy-cache handling. Do not silently reinterpret an old
-result format or statistical profile. New versioned capabilities require an
-explicit later goal.
-
-Canonical gm/gds remain terminal finite differences. Canonical capacitance remains
-derived from the raw complex terminal Y matrix. Preserve signed terminal data
-separately from positive-magnitude comparison quantities.
-
-## Noise and model-fidelity policy
-
-Released v3/v4 stationary-noise results characterize existing compact-model
-predictions. They are not silicon/foundry calibration, reliability qualification,
-or a manufacturable-PDK claim.
-
-Preserve:
-
-- the 1-ohm CCVS external drain-current probe and analytic harness evidence;
-- canonical `s_idrain_terminal_a2_per_hz` and
-  `s_vgate_equivalent_v2_per_hz` semantics;
-- actual complex external gate-to-drain transfer;
-- parameter-level effective noise provenance;
-- raw backend source names without false cross-engine equivalence;
-- fail-closed bias, acquisition and fit semantics;
-- normal Sparse/no-KLU required `.noise` execution;
-- native planar-W and FinFET-NFIN comparison bases.
-
-Do not infer calibration from successful simulator execution. Do not silently
-fill unavailable fit metrics or clip unreachable gm/Id requests. Do not tune or
-add process-noise coefficients for APM350, APM022 or APM016F without a later
-explicit calibration goal. v5 local mismatch does not authorize noise calibration.
-
-APM022 and APM016F remain independently authored generic models. Official
-PTM/PTM-MG parameter cards must not be copied, transcribed, interpolated,
-optimized against as a numeric fitting target, or used as numeric source
-material for their decks or variants.
-
-v5 preserves Benchmark v2 and native variation independently. Source coefficient
-uncertainty and the v4 model-construction ensemble are not device/process draws.
-Unknown beta is not zero. Unapproved sources, excluded effects and transfer
-hypotheses must not acquire a calibrated statistical label through a passing test.
-
-## Reference backend and Spectre boundary
-
-ngspice 47 remains the reference simulator. The reference environment is WSL2
-with RHEL-compatible EL9 Linux on x86_64, using project-local OpenVAF-Re-Loaded
-and pinned PSP103/BSIM-CMG sources. Keep normal build/run state on a Linux
-filesystem and below ignored project-local paths.
-
-Maintenance permits repairing observed compiler provenance and building
-the existing pinned compiler in an ignored local prefix. Never report a configured
-revision as observed, change the pin to fit a host, replace a system tool without
-permission, or overwrite historical evidence. Bind source/build receipts to actual
-binaries. Native-BSIM4 and OSDI-dependent evidence must be distinguished.
-
-Spectre remains model-only **experimental/unverified**. Do not claim real Spectre
-parsing, simulation or numerical equivalence without a real Spectre environment.
-Do not add Virtuoso/ADE/OA automation for this goal.
-
-## Licensing, provenance and public hygiene
-
-License correctness is mandatory. Before adding a third-party asset:
-
-1. identify the authoritative upstream source;
-2. pin exact revision/imported path or exact document bytes;
-3. inspect file-level licensing and redistribution terms;
-4. preserve notices, acknowledgements and license text;
-5. record source/output hashes and modifications;
-6. only then ship the asset.
-
-Do not infer rights from a root license when file-specific terms differ. Do not
-relicense third-party material. If rights are ambiguous, do not ship the file.
-Derived figure datasets require source/adaptation credit and appropriate licensing,
-not automatic relicensing as APM-authored code.
-
-Never commit proprietary PDK/model content, private comparison/oracle decks,
-credentials, tokens, passwords, personal/private data, generated OSDI binaries,
-virtual environments, caches or large simulator output. Keep legitimate local
-artifacts below ignored paths. Preserve the completed public-hygiene audit boundary;
-no history rewrite is authorized. No author contact, external messages or paid data
-purchase is authorized by routine maintenance.
-
-## Scope discipline
-
-APM is not a manufacturable PDK. Unless a later goal explicitly expands scope,
-do not add layout/PCells/DRC/LVS/PEX, standard cells, reliability/signoff claims,
-noise Monte Carlo, RTS/RTN, transient noise, PSS/PNoise, oscillator phase noise,
-full terminal noise-correlation matrices, real Spectre claims or Virtuoso automation.
-
-Keep the repository small and explicit. Avoid speculative plugin systems, generic
-factories and premature abstraction. Prefer straightforward Python, TOML,
-SPICE/Spectre model files and small shell helpers.
-
-## Tests, evidence and Git discipline
-
-Prefer property/regression/analytic-reference tests over fragile exact snapshots.
-Missing, skipped, static-only, stale or unavailable required real-tool evidence is
-not a pass. Do not clip/redraw/discard bad samples, reinterpret statistical
-unknowns as zeros, or silently shrink the promised domain. Continue independent
-work when one scientific dependency is blocked; retain precise negative findings.
-
-Write compact summaries under `validation/evidence/`; keep raw data ignored and
-reproducible. Unflagged `apm validate` checks post-v5 maintenance, package identity
-and frozen release evidence. Historical `--release`, `--release-v4` and v5
-qualification procedures retain their original meaning; do not edit them to
-accept new live guidance. The completed exact-tag procedure binds a full fresh
-16-gate candidate rerun and the seventeenth tag/freshness/identity gate.
-
-High autonomy is authorized for in-scope maintenance, local toolchain repair,
-tests, documentation, coherent commits and normal pushes. Do not force-push,
-rewrite history, alter released tags/releases or change repository security
-settings. Future version/tag/publication operations need separate authorization.
-A genuine required-source or toolchain blocker must not be disguised as completion.
-
-Stop and report a credential, proprietary model, ambiguous redistribution right,
-personal/private history artifact or issue requiring released-history rewriting.
-Do not hide such a finding by deleting only the current-tree copy.
+Autonomous in-scope implementation, local repairs, tests, documentation, coherent
+commits and normal fast-forward pushes are authorized. Never force-push, rewrite
+published history, amend tagged commits, move/recreate/delete released tags, or
+change owner/name/default branch/visibility/security settings. No external messages,
+author contact, paid data, GitHub About update, tag/release creation or release edits
+are authorized. Stop before `v6.0.0` creation/publication; both need separate approval.
