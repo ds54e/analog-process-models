@@ -1,0 +1,10 @@
+{
+  "schema": "apm.research-request.v1",
+  "circuit": "mirror.cir",
+  "devices": [
+    {"uid":"mirror/reference", "path":["xtop","xreference"], "family":"apm045/vtg", "polarity":"n", "w_m":2e-6, "l_m":2.4e-7},
+    {"uid":"mirror/output", "path":["xtop","xoutput"], "family":"apm045/vtg", "polarity":"n", "w_m":2e-6, "l_m":2.4e-7}
+  ],
+  "other_variation_leaves": [],
+  "analyses": [{"kind":"dc", "source":"Vout", "start":0.3, "stop":0.8, "step":0.01, "vectors":["v(ref)","i(Vout)"]}]
+}

@@ -114,3 +114,15 @@ The release validator also rejects missing local includes, remote model
 dependencies, generated binaries or raw results in Git, undeclared shipped
 model files, oversized artifacts, credential signatures, or a provenance
 manifest whose filesystem inventory differs from its declarations.
+
+## V5 research source adaptation
+
+`variation/research/apm045/derived/` contains APM vector-derived coefficient
+estimates and a runtime transfer profile adapted from P. A. R. 't Hart et al.,
+*Subthreshold Mismatch in Nanometer CMOS at Cryogenic Temperatures*, JEDS 8
+(2020), DOI 10.1109/JEDS.2020.2988730. The exact EPFL PDF hash and adaptation
+method are recorded in `validation/evidence/v5_source_decision.md` and the
+source registry. The article's first page states CC BY 4.0; these adaptations
+retain that license, credit and change notice under an explicit REUSE override.
+`LICENSES/CC-BY-4.0.txt` preserves the terms. Full papers, images and thesis are
+not shipped. No original ST-process Hart beta coefficient is adopted.

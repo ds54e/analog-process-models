@@ -16,10 +16,11 @@ def receipt_fixture(tmp_path,monkeypatch):
     binary=tmp_path/'bin/openvaf-r';binary.parent.mkdir();binary.write_bytes(b'controlled compiler')
     state={'commit':cp.EXPECTED_COMMIT,'tree':'test-tree','dirty':'','submodules':''}
     monkeypatch.setattr(cp,'source_state',lambda source:state.copy())
-    (tmp_path/'configuration.json').write_text('{}')
+    (tmp_path/'configuration.json').write_text('{"tools":{}}')
+    monkeypatch.setattr(cp,'dynamic_libraries',lambda binary,env:{'fixture-library':'fixture-sha'})
     (tmp_path/'build.log').write_text('controlled successful build')
     receipt={'schema':cp.SCHEMA,'before':state,'after':state,'source_path':str(tmp_path/'source'),
-        'binary_sha256':cp.digest(binary),'configuration':{},
+        'binary_sha256':cp.digest(binary),'configuration':{'tools':{}},'dynamic_libraries':{'fixture-library':'fixture-sha'},
         'configuration_sha256':cp.digest(tmp_path/'configuration.json'),
         'build_log_sha256':cp.digest(tmp_path/'build.log'),'returncode':0}
     path=tmp_path/'receipt.json'

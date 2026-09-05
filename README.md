@@ -30,6 +30,11 @@ The current APM045 portfolio and post-release claim boundary are summarized in
 release procedures, review records, and evidence remain frozen historical
 records rather than current implementation instructions.
 
+The v5 development line adds an optional [research local variation flow](docs/research-local.md)
+with persistent physical-device realizations. Its companion-source adaptation is
+an explicit transfer hypothesis; full numerical/candidate qualification is in
+progress. The original ambiguous Hart beta values remain blocked.
+
 ## Scope
 
 APM supplies family-qualified MOS model wrappers, manifest-driven discovery,

@@ -22,7 +22,7 @@ if __name__ == '__main__':
     p.add_argument('--jobs',type=int,default=4)
     a=p.parse_args()
     if a.destination.exists():
-        observed=observe_compiler(a.destination/'bin/openvaf-r',a.destination/'receipt.json')
+        observed=observe_compiler(a.destination/'bin/openvaf-r',a.destination/'receipt.json',environment=dict(os.environ))
         if observed['status']!='VERIFIED':
             p.error('Existing prefix is unverified. Preserve it and select a new APM_TOOLCHAIN_DIR.')
         print(json.dumps(observed,indent=2))

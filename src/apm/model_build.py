@@ -45,7 +45,7 @@ def _cached_build(toolchain: Toolchain) -> dict[str, Any] | None:
             return None
         if metadata.get("openvaf_sha256") != sha256_file(toolchain.openvaf):
             return None
-        observation = observe_compiler(toolchain.openvaf)
+        observation = observe_compiler(toolchain.openvaf, environment=toolchain.environment())
         if observation["status"] != "VERIFIED" or metadata.get("compiler_provenance") != observation:
             return None
         artifacts = {item["model_id"]: item for item in metadata["artifacts"]}
@@ -109,7 +109,7 @@ def build_models(toolchain: Toolchain | None = None, *, force: bool = True) -> d
             }
         )
 
-    observation = observe_compiler(selected.openvaf)
+    observation = observe_compiler(selected.openvaf, environment=selected.environment())
     metadata: dict[str, Any] = {
         "schema": "apm.model-build.v3",
         "created_utc": datetime.now(timezone.utc).isoformat(),

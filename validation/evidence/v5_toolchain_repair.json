@@ -9,14 +9,15 @@
     "dirty": "",
     "submodules": "c38e0dc464548332ba0768d855f5f8e02254a367 external/vacask (_0.2.0-469-gc38e0dc)"
   },
-  "compiler_binary_sha256": "d66e2328d0773ddfbc13a53fab0332fdaa4dc3c4a648b0fe2d43bfd81eb54579",
+  "compiler_binary_sha256": "43faf8f789b19ddf687570b70f5e25ded3c2c09f6065fd0f92f3d56ea9e0811c",
   "receipt": {
-    "path": ".apm/v5/toolchain/controlled-openvaf-2/receipt.json",
-    "sha256": "46e389308b5e096a671813111c81b16dbe699bb1b0df4297dea75da7f36cae1f"
+    "path": ".apm/v5/toolchain/controlled-openvaf-3/receipt.json",
+    "sha256": "0c92b160dca2ef4964b122a2e05d9180b409f7b89460ed9d0db70dc445a7582b",
+    "schema": "apm.compiler-build-receipt.v2"
   },
   "doctor": {
-    "path": ".apm/v5/qualified-toolchain-2/doctor/report.json",
-    "sha256": "5f03693fe6b5b279079533ebeda3c014da23f6cc3f2689cb7d4f9d08c987824c",
+    "path": ".apm/v5/qualified-toolchain-3/doctor/report.json",
+    "sha256": "0f8162fd71806a8ab4bf50135f6f09fd56645b6cf37b82c20d5cf6fc534ffde0",
     "smokes": [
       {
         "id": "native-bsim3",
@@ -38,18 +39,24 @@
   },
   "rust_llvm": {
     "cargo": {
-      "path": "/home/admin/projects/analog-process-models/.apm/v5/bootstrap/toolchain/cargo/bin/rustup",
-      "sha256": "dda7234360b7f578ca8b0ddcb80145646fa61a67c1720a5abc7051b35c9fcb71",
+      "path": ".apm/v5/bootstrap/toolchain/rustup/toolchains/1.98.0-x86_64-unknown-linux-gnu/bin/cargo",
+      "sha256": "ff3022fcbd13b08434ea7afde9a0ef9d5b3f5c17b5fc7a40031be3ee000a6a24",
+      "launcher": ".apm/v5/bootstrap/toolchain/cargo/bin/cargo",
+      "launcher_sha256": "dda7234360b7f578ca8b0ddcb80145646fa61a67c1720a5abc7051b35c9fcb71",
       "version": "cargo 1.98.0 (797e8a9bc 2026-08-05)"
     },
     "rustc": {
-      "path": "/home/admin/projects/analog-process-models/.apm/v5/bootstrap/toolchain/cargo/bin/rustup",
-      "sha256": "dda7234360b7f578ca8b0ddcb80145646fa61a67c1720a5abc7051b35c9fcb71",
+      "path": ".apm/v5/bootstrap/toolchain/rustup/toolchains/1.98.0-x86_64-unknown-linux-gnu/bin/rustc",
+      "sha256": "3690cc576ede140504698405d5d8fa3826aaadbe71699c6c4ed0a565d6f493e2",
+      "launcher": ".apm/v5/bootstrap/toolchain/cargo/bin/rustc",
+      "launcher_sha256": "dda7234360b7f578ca8b0ddcb80145646fa61a67c1720a5abc7051b35c9fcb71",
       "version": "rustc 1.98.0 (88d9e12ae 2026-08-18)\nbinary: rustc\ncommit-hash: 88d9e12ae178fab0fb5cc050a94da85685d449ea\ncommit-date: 2026-08-18\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.0\nLLVM version: 22.1.8"
     },
     "llvm": {
-      "path": "/home/admin/projects/analog-process-models/.apm/v5/bootstrap/toolchain/llvm20-root/usr/lib64/llvm20/bin/llvm-config",
+      "path": ".apm/v5/bootstrap/toolchain/llvm20-root/usr/lib64/llvm20/bin/llvm-config",
       "sha256": "d877747be2cc6ebb217e73cca77241a56919ffddb91bb02e58de235e54a983c2",
+      "launcher": ".apm/v5/bootstrap/toolchain/llvm20-root/usr/lib64/llvm20/bin/llvm-config",
+      "launcher_sha256": "d877747be2cc6ebb217e73cca77241a56919ffddb91bb02e58de235e54a983c2",
       "version": "20.1.8"
     }
   },
@@ -78,5 +85,24 @@
       "failure": "uninitialized pinned submodule; initialized before fresh build"
     }
   ],
-  "legacy_provenance": "Not retrospectively qualified; old v2 asserted caches invalidated."
+  "legacy_provenance": "Not retrospectively qualified; old v2 asserted caches invalidated.",
+  "initial_receipt_v1": {
+    "path": ".apm/v5/toolchain/controlled-openvaf-2/receipt.json",
+    "sha256": "46e389308b5e096a671813111c81b16dbe699bb1b0df4297dea75da7f36cae1f"
+  },
+  "dynamic_libraries": {
+    ".apm/v5/bootstrap/toolchain/llvm20-root/usr/lib64/libLLVM.so.20.1": "4c23330eb21fe9d324b8a49243ca4fcef91142ce55b816427627fef65ee43447",
+    "/usr/lib64/libgcc_s-11-20240719.so.1": "7074679107af381bb9cd0915e835668eb94f238df649f508f32199285eb38823",
+    "/usr/lib64/libm.so.6": "f0734a09a0602ccde6b98ea7fbb3c9cfc62b3a4cf4a7b17ccd36d774ca22b8df",
+    "/usr/lib64/libc.so.6": "c6b12761834ea9a2fde7a17682ebfaf37982a0df6e9345e5b9d298ac1ca3c746",
+    "/usr/lib64/libffi.so.8.1.0": "acf6d142deb5901b01b9e932da445934af60d3b62b4fb001f84daf320053ca8e",
+    "/usr/lib64/libedit.so.0.0.64": "46faf6fad126245ada3cff8def4025f6722c5254ebe85e093b1dd1872eb5c4ba",
+    "/usr/lib64/libz.so.1.2.11": "4d3dac7a48e8f147507f818eda0c5afafd0846d163b997ad24b3e2e4c791f039",
+    "/usr/lib64/libzstd.so.1.5.5": "82d8f7e09de63bfc2a31b76483ab91ec66a58974ed2f81dd604769a8e6ab76f0",
+    "/usr/lib64/libxml2.so.2.9.13": "f2cffc548d48ce5415c97b7fe4ac7ae117904157d1e97c201cc2861672fc36f2",
+    "/usr/lib64/libstdc++.so.6.0.29": "95d70798b44b492fb46402ab43aed570558480a21cbc04449da1a15467daf603",
+    "/usr/lib64/libtinfo.so.6.2": "894d4809e46d2ece1be6b399ba2f8dbdc0dfa16cfb54b2b51a4919a5d2d71233",
+    "/usr/lib64/liblzma.so.5.2.5": "270e41f36ee8a00b56887c8c17472c69ae2de54a325eae4e91e58a70d45474fa"
+  },
+  "repair_extension": "Receipt v2 additionally resolves rustup launchers to actual Rust/Cargo binaries and binds dynamically linked compiler libraries. The original v1 build and logs remain intact."
 }

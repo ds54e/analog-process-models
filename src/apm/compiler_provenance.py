@@ -7,12 +7,13 @@ import hashlib
 import json
 import os
 import platform
+import re
 import shutil
 import subprocess
 from pathlib import Path
 
 EXPECTED_COMMIT = 'fdf2522b70f42793f64b1c72f0195c96dea0cc19'
-SCHEMA = 'apm.compiler-build-receipt.v1'
+SCHEMA = 'apm.compiler-build-receipt.v2'
 
 
 def digest(path: Path) -> str:
@@ -47,7 +48,11 @@ def build_compiler(source: Path, destination: Path, cargo: Path, llvm: Path,
     for name, executable, flag in [('cargo', cargo, '-V'),
                                   ('rustc', Path(shutil.which('rustc', path=env['PATH'])), '-Vv'),
                                   ('llvm', llvm, '--version')]:
+        launcher=executable
+        if name in ('cargo','rustc') and executable.resolve().name=='rustup':
+            executable=Path(subprocess.check_output([str(cargo.parent/'rustup'),'which',name],env=env,text=True).strip())
         observed_tools[name] = {'path': str(executable.resolve()), 'sha256': digest(executable),
+            'launcher':str(launcher), 'launcher_sha256':digest(launcher),
             'version': subprocess.check_output([str(executable), flag], env=env, text=True).strip()}
     configuration = {'command': command, 'cwd': str(source.resolve()), 'tools': observed_tools,
         'environment': {k: env.get(k) for k in ('RUSTUP_HOME', 'CARGO_HOME', 'RUSTFLAGS',
@@ -65,13 +70,22 @@ def build_compiler(source: Path, destination: Path, cargo: Path, llvm: Path,
     receipt = {'schema': SCHEMA, 'source_path': str(source.resolve()), 'before': before,
                'after': after, 'binary_sha256': digest(binary), 'configuration': configuration,
                'configuration_sha256': digest(destination/'configuration.json'),
-               'build_log_sha256': digest(destination/'build.log'), 'returncode': 0}
+               'build_log_sha256': digest(destination/'build.log'), 'returncode': 0,
+               'dynamic_libraries': dynamic_libraries(binary,env)}
     receipt['receipt_id'] = identity(receipt)
     (destination/'receipt.json').write_text(json.dumps(receipt, indent=2)+'\n')
     return receipt
 
 
-def observe_compiler(binary: Path, receipt_path: Path | None = None) -> dict:
+def dynamic_libraries(binary: Path, environment: dict) -> dict:
+    result=subprocess.check_output(['ldd',str(binary)],env=environment,text=True)
+    if 'not found' in result:raise ValueError('COMPILER_DYNAMIC_LIBRARY_MISSING')
+    paths=re.findall(r'=> (/\S+)',result)
+    return {str(Path(p).resolve()):digest(Path(p)) for p in paths}
+
+
+def observe_compiler(binary: Path, receipt_path: Path | None = None,
+                     environment: dict | None = None) -> dict:
     configured = os.environ.get('APM_OPENVAF_RECEIPT')
     path = receipt_path or (Path(configured) if configured else binary.parent.parent/'receipt.json')
     result = {'expected_commit': EXPECTED_COMMIT, 'binary_sha256': digest(binary),
@@ -87,7 +101,10 @@ def observe_compiler(binary: Path, receipt_path: Path | None = None) -> dict:
                     == source_state(Path(receipt['source_path'])),
                   'configuration': digest(path.parent/'configuration.json') == receipt['configuration_sha256'],
                   'log': digest(path.parent/'build.log') == receipt['build_log_sha256'],
-                  'build_succeeded': receipt['returncode'] == 0}
+                  'build_succeeded': receipt['returncode'] == 0,
+                  'observed_build_tools': all(digest(Path(t['path']))==t['sha256']
+                     and digest(Path(t['launcher']))==t['launcher_sha256'] for t in receipt['configuration']['tools'].values()),
+                  'dynamic_libraries': bool(receipt['dynamic_libraries']) and receipt['dynamic_libraries']==dynamic_libraries(binary,environment or dict(os.environ))}
         result.update(receipt_sha256=digest(path), observed_commit=receipt['before']['commit'],
                       checks=checks)
         result['errors'] = [k for k, v in checks.items() if not v]

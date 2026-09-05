@@ -20,7 +20,10 @@ Spectre checks. This is current repository compatibility evidence, not v5
 candidate qualification. See `validation/evidence/v5_bootstrap.json` and its
 hash-bound raw report under `.apm/v5/bootstrap-validation/`.
 
-No measured research profile is approved. A controlled build at the required
+The independent Hart/TSMC40 companion reanalysis is approved as an explicit
+quantitative transfer hypothesis; the original ST40 beta remains blocked. See
+`validation/evidence/v5_source_decision.md`. Numerical release qualification is
+still pending. A controlled build at the required
 OpenVAF pin is now VERIFIED, with Rust/LLVM/source/submodule/binary/OSDI receipt
 bindings and four passing native/OSDI smoke tests. Nine targeted provenance
 regressions pass. See `validation/evidence/v5_toolchain_repair.json`.
@@ -53,18 +56,28 @@ versus expected `fdf2522b70f42793f64b1c72f0195c96dea0cc19`.
 implementation may now repair this defect, but must preserve historical reports
 and inspect the next host rather than assuming the old environment persists.
 
-## Next actionable work
+## Current implementation progress
 
-Bootstrap v5 mission/version validation; fix observed toolchain identity; audit a
-coherent Vth/beta source set while implementing the core path with artificial tests.
-Then approve a source profile, freeze its numerical plan, qualify tails/statistics/
-circuits, assess IO transfer and qualify a clean release candidate. Do not re-run
-only the completed preflight and declare v5 complete.
+The source-aware sample/run/replay CLI, versioned MG mapper, UID-keyed sampler,
+hierarchy verification, cache rejection and qualification executors are implemented.
+The mirror example resolves through the public CLI. Development execution includes
+18 successful mechanism-specific negative controls (both polarities), same-raw
+DC/AC/transient/temperature replay, and executed io18/io25 N/P capacitance assessments.
+The IO outcomes are UNRESOLVED_WITH_EVIDENCE, with no numeric mismatch profile.
+Small 8-pair and 4-circuit development cohorts are **not statistical passes**.
 
-Required release blockers currently unresolved:
+Current repository tests: 166 passed, no skips; Ruff and REUSE passed. A public
+summary initially contained generic workspace paths; the distribution check failed,
+and the live summary now uses relative paths while retaining unchanged raw hashes.
+`apm validate` also passed against the implementation snapshot; its hash and
+development run references are in `validation/evidence/v5_runtime_development.json`.
+The source tree and full confirmation plan are frozen together for confirmation;
+full source-qualified statistical/circuit/tail and candidate gates remain NOT_RUN.
+Raw development runs are under `.apm/v5/development/`.
 
-- no approved coherent quantitative VTG N/P Vth+beta profile;
-- production research-local API, stochastic/circuit/tail evidence not implemented.
+Required remaining work: execute the committed numerical plan, all independent
+legacy real-tool gates and the v5 evaluator, then qualify an exact clean candidate
+from an independent fresh clone. No tag/publication is authorized.
 
 ## Preserved released history
 

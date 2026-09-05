@@ -78,3 +78,9 @@ SPDX-License-Identifier = "Apache-2.0"
 
 # Future vendored model/source files under models/** remain intentionally
 # uncovered until exact file-level terms and provenance have been audited.
+
+[[annotations]]
+path = ["variation/research/apm045/derived/**"]
+precedence = "override"
+SPDX-FileCopyrightText = ["2020 P. A. R. 't Hart and coauthors", "2026 APM contributors (adaptation)"]
+SPDX-License-Identifier = "CC-BY-4.0"

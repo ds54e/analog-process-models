@@ -1,0 +1,927 @@
+{
+  "independent_current_checks": [
+    {
+      "polarity": "n",
+      "size": "S",
+      "vg_v": 0.75,
+      "gm_over_id_per_v": [
+        5.402132468271119,
+        5.440320408895665
+      ],
+      "predicted_sigma_log10_i": 0.1134504154642037,
+      "observed_sigma_log10_i": 0.11878384338443199,
+      "ratio": 0.9550997192188235,
+      "display_bound_decades": 0.004837461300309597,
+      "development_or_confirmation": "source-audit development; observed before numerical confirmation plan",
+      "predicted_parameter_interval": [
+        0.10065082612346632,
+        0.12633162640511864
+      ],
+      "observed_interval": [
+        0.0973166440103019,
+        0.14737807336162798
+      ]
+    },
+    {
+      "polarity": "n",
+      "size": "S",
+      "vg_v": 0.8,
+      "gm_over_id_per_v": [
+        4.319970790792402,
+        4.344543742975323
+      ],
+      "predicted_sigma_log10_i": 0.09328135149720383,
+      "observed_sigma_log10_i": 0.09908505096669895,
+      "ratio": 0.9414270930592178,
+      "display_bound_decades": 0.004837461300309597,
+      "development_or_confirmation": "source-audit development; observed before numerical confirmation plan",
+      "predicted_parameter_interval": [
+        0.08270894736348797,
+        0.10390756170874703
+      ],
+      "observed_interval": [
+        0.0803756825310515,
+        0.12373952246034833
+      ]
+    },
+    {
+      "polarity": "n",
+      "size": "S",
+      "vg_v": 0.9,
+      "gm_over_id_per_v": [
+        2.8306287053974852,
+        2.8369390709808076
+      ],
+      "predicted_sigma_log10_i": 0.06697716872121662,
+      "observed_sigma_log10_i": 0.07129157626621485,
+      "ratio": 0.9394822253769856,
+      "display_bound_decades": 0.004837461300309597,
+      "development_or_confirmation": "source-audit development; observed before numerical confirmation plan",
+      "predicted_parameter_interval": [
+        0.05925095596753214,
+        0.0747222453474018
+      ],
+      "observed_interval": [
+        0.05647329428863517,
+        0.09038735281976741
+      ]
+    },
+    {
+      "polarity": "n",
+      "size": "S",
+      "vg_v": 0.95,
+      "gm_over_id_per_v": [
+        2.3041398986444515,
+        2.3384625192041693
+      ],
+      "predicted_sigma_log10_i": 0.058726590685349266,
+      "observed_sigma_log10_i": 0.06145367724376645,
+      "ratio": 0.9556237042154576,
+      "display_bound_decades": 0.004837461300309597,
+      "development_or_confirmation": "source-audit development; observed before numerical confirmation plan",
+      "predicted_parameter_interval": [
+        0.05162692401433668,
+        0.06588758540167242
+      ],
+      "observed_interval": [
+        0.048012701129329545,
+        0.07858187399282933
+      ]
+    },
+    {
+      "polarity": "n",
+      "size": "S",
+      "vg_v": 1.0,
+      "gm_over_id_per_v": [
+        1.9452718732068686,
+        1.9443495395749681
+      ],
+      "predicted_sigma_log10_i": 0.05308752370666294,
+      "observed_sigma_log10_i": 0.05394186894387576,
+      "ratio": 0.9841617420022705,
+      "display_bound_decades": 0.004837461300309597,
+      "development_or_confirmation": "source-audit development; observed before numerical confirmation plan",
+      "predicted_parameter_interval": [
+        0.04678127563183797,
+        0.05940038813604116
+      ],
+      "observed_interval": [
+        0.04155254599142356,
+        0.0695677040329605
+      ]
+    },
+    {
+      "polarity": "n",
+      "size": "M",
+      "vg_v": 0.75,
+      "gm_over_id_per_v": [
+        3.933214606824171,
+        3.9665081444340373
+      ],
+      "predicted_sigma_log10_i": 0.03138352275932353,
+      "observed_sigma_log10_i": 0.0378190452840843,
+      "ratio": 0.8298338184790434,
+      "display_bound_decades": 0.004837461300309597,
+      "development_or_confirmation": "source-audit development; observed before numerical confirmation plan",
+      "predicted_parameter_interval": [
+        0.027137353980402918,
+        0.03565516377570309
+      ],
+      "observed_interval": [
+        0.027686917644002898,
+        0.05022031564121076
+      ]
+    },
+    {
+      "polarity": "n",
+      "size": "M",
+      "vg_v": 0.8,
+      "gm_over_id_per_v": [
+        3.2118848423044932,
+        3.228929974820259
+      ],
+      "predicted_sigma_log10_i": 0.027071750873179166,
+      "observed_sigma_log10_i": 0.03173817287091721,
+      "ratio": 0.8529713094475565,
+      "display_bound_decades": 0.004837461300309597,
+      "development_or_confirmation": "source-audit development; observed before numerical confirmation plan",
+      "predicted_parameter_interval": [
+        0.023426109891074767,
+        0.03072953955691353
+      ],
+      "observed_interval": [
+        0.0224573673686792,
+        0.04292326874541025
+      ]
+    },
+    {
+      "polarity": "n",
+      "size": "M",
+      "vg_v": 0.9,
+      "gm_over_id_per_v": [
+        2.2021655841697823,
+        2.2108142135267412
+      ],
+      "predicted_sigma_log10_i": 0.021626935921717137,
+      "observed_sigma_log10_i": 0.02343469736543897,
+      "ratio": 0.9228596206926962,
+      "display_bound_decades": 0.004837461300309597,
+      "development_or_confirmation": "source-audit development; observed before numerical confirmation plan",
+      "predicted_parameter_interval": [
+        0.018701446492492856,
+        0.02455769837901502
+      ],
+      "observed_interval": [
+        0.015316378433967916,
+        0.03295909813883636
+      ]
+    },
+    {
+      "polarity": "n",
+      "size": "M",
+      "vg_v": 0.95,
+      "gm_over_id_per_v": [
+        1.843023262749394,
+        1.8536640017953403
+      ],
+      "predicted_sigma_log10_i": 0.01994350631572985,
+      "observed_sigma_log10_i": 0.02054600434599278,
+      "ratio": 0.9706756593585343,
+      "display_bound_decades": 0.004837461300309597,
+      "development_or_confirmation": "source-audit development; observed before numerical confirmation plan",
+      "predicted_parameter_interval": [
+        0.017229291786368204,
+        0.022663694260847207
+      ],
+      "observed_interval": [
+        0.012832102437244194,
+        0.02949266651550093
+      ]
+    },
+    {
+      "polarity": "n",
+      "size": "M",
+      "vg_v": 1.0,
+      "gm_over_id_per_v": [
+        1.56305070229002,
+        1.567796735178584
+      ],
+      "predicted_sigma_log10_i": 0.018740373536263167,
+      "observed_sigma_log10_i": 0.018262391978758504,
+      "ratio": 1.026172998480189,
+      "display_bound_decades": 0.004837461300309597,
+      "development_or_confirmation": "source-audit development; observed before numerical confirmation plan",
+      "predicted_parameter_interval": [
+        0.016190372850131075,
+        0.02129275770376952
+      ],
+      "observed_interval": [
+        0.010868195801422717,
+        0.0267523316748198
+      ]
+    },
+    {
+      "polarity": "n",
+      "size": "L",
+      "vg_v": 0.75,
+      "gm_over_id_per_v": [
+        3.472732637126599,
+        3.500431817517826
+      ],
+      "predicted_sigma_log10_i": 0.015912161891875505,
+      "observed_sigma_log10_i": 0.013080806154673422,
+      "ratio": 1.216451165449808,
+      "display_bound_decades": 0.004837461300309597,
+      "development_or_confirmation": "source-audit development; observed before numerical confirmation plan",
+      "predicted_parameter_interval": [
+        0.01392377903571394,
+        0.017913515719544033
+      ],
+      "observed_interval": [
+        0.006412031992709546,
+        0.020534428685917705
+      ]
+    },
+    {
+      "polarity": "n",
+      "size": "L",
+      "vg_v": 0.8,
+      "gm_over_id_per_v": [
+        2.870142638518088,
+        2.8850681121442774
+      ],
+      "predicted_sigma_log10_i": 0.013592748516850568,
+      "observed_sigma_log10_i": 0.011128104994068109,
+      "ratio": 1.2214791758431691,
+      "display_bound_decades": 0.004837461300309597,
+      "development_or_confirmation": "source-audit development; observed before numerical confirmation plan",
+      "predicted_parameter_interval": [
+        0.011909769089674522,
+        0.015282393018234879
+      ],
+      "observed_interval": [
+        0.004732708994588977,
+        0.018191187293191326
+      ]
+    },
+    {
+      "polarity": "n",
+      "size": "L",
+      "vg_v": 0.9,
+      "gm_over_id_per_v": [
+        2.0217571321676964,
+        2.0291562687769855
+      ],
+      "predicted_sigma_log10_i": 0.010535057224402294,
+      "observed_sigma_log10_i": 0.008535455033495712,
+      "ratio": 1.2342701335850914,
+      "display_bound_decades": 0.004837461300309597,
+      "development_or_confirmation": "source-audit development; observed before numerical confirmation plan",
+      "predicted_parameter_interval": [
+        0.00923838803873804,
+        0.011834598322390156
+      ],
+      "observed_interval": [
+        0.0025030300284967152,
+        0.01508000734050445
+      ]
+    },
+    {
+      "polarity": "n",
+      "size": "L",
+      "vg_v": 0.95,
+      "gm_over_id_per_v": [
+        1.7149627539823797,
+        1.723724424110097
+      ],
+      "predicted_sigma_log10_i": 0.009526074175152818,
+      "observed_sigma_log10_i": 0.007634626104168293,
+      "ratio": 1.2477459989758828,
+      "display_bound_decades": 0.004837461300309597,
+      "development_or_confirmation": "source-audit development; observed before numerical confirmation plan",
+      "predicted_parameter_interval": [
+        0.008351191021972192,
+        0.01070415699625628
+      ],
+      "observed_interval": [
+        0.0017283171492751348,
+        0.013999012625311547
+      ]
+    },
+    {
+      "polarity": "n",
+      "size": "L",
+      "vg_v": 1.0,
+      "gm_over_id_per_v": [
+        1.4691264827236419,
+        1.4731548932281218
+      ],
+      "predicted_sigma_log10_i": 0.008761469801413057,
+      "observed_sigma_log10_i": 0.006912279159618028,
+      "ratio": 1.2675225637005687,
+      "display_bound_decades": 0.004837461300309597,
+      "development_or_confirmation": "source-audit development; observed before numerical confirmation plan",
+      "predicted_parameter_interval": [
+        0.007686807902329204,
+        0.00983735276399178
+      ],
+      "observed_interval": [
+        0.001107098776961907,
+        0.01313219629185123
+      ]
+    },
+    {
+      "polarity": "p",
+      "size": "S",
+      "vg_v": 0.1,
+      "gm_over_id_per_v": [
+        1.876132989900961,
+        1.8891286760831167
+      ],
+      "predicted_sigma_log10_i": 0.0534752269996464,
+      "observed_sigma_log10_i": 0.052079118630203404,
+      "ratio": 1.0268074500138202,
+      "display_bound_decades": 0.004146395400265369,
+      "development_or_confirmation": "source-audit development; observed before numerical confirmation plan",
+      "predicted_parameter_interval": [
+        0.04744027007499884,
+        0.05952433320840533
+      ],
+      "observed_interval": [
+        0.04064164662170956,
+        0.06664133775650945
+      ]
+    },
+    {
+      "polarity": "p",
+      "size": "S",
+      "vg_v": 0.15,
+      "gm_over_id_per_v": [
+        2.2291338984428113,
+        2.2443980358194766
+      ],
+      "predicted_sigma_log10_i": 0.057839597944844556,
+      "observed_sigma_log10_i": 0.0576453734428531,
+      "ratio": 1.0033692990502352,
+      "display_bound_decades": 0.004146395400265369,
+      "development_or_confirmation": "source-audit development; observed before numerical confirmation plan",
+      "predicted_parameter_interval": [
+        0.051380384488625995,
+        0.06431763554814296
+      ],
+      "observed_interval": [
+        0.0454286257605883,
+        0.07332084353168909
+      ]
+    },
+    {
+      "polarity": "p",
+      "size": "S",
+      "vg_v": 0.25,
+      "gm_over_id_per_v": [
+        3.25129785752404,
+        3.264072525885225
+      ],
+      "predicted_sigma_log10_i": 0.07220433331743226,
+      "observed_sigma_log10_i": 0.07511859995182155,
+      "ratio": 0.9612044601968301,
+      "display_bound_decades": 0.004146395400265369,
+      "development_or_confirmation": "source-audit development; observed before numerical confirmation plan",
+      "predicted_parameter_interval": [
+        0.06438226632739762,
+        0.08004519603834026
+      ],
+      "observed_interval": [
+        0.06045560055830116,
+        0.09428871534245123
+      ]
+    },
+    {
+      "polarity": "p",
+      "size": "S",
+      "vg_v": 0.3,
+      "gm_over_id_per_v": [
+        4.023870131927355,
+        4.054388726867453
+      ],
+      "predicted_sigma_log10_i": 0.08433487497343962,
+      "observed_sigma_log10_i": 0.08782645553056238,
+      "ratio": 0.9602445466342686,
+      "display_bound_decades": 0.004146395400265369,
+      "development_or_confirmation": "source-audit development; observed before numerical confirmation plan",
+      "predicted_parameter_interval": [
+        0.07520127044024737,
+        0.09351596204248785
+      ],
+      "observed_interval": [
+        0.07138435635601828,
+        0.10953814203694023
+      ]
+    },
+    {
+      "polarity": "p",
+      "size": "S",
+      "vg_v": 0.4,
+      "gm_over_id_per_v": [
+        6.546984370011952,
+        6.5962461262046315
+      ],
+      "predicted_sigma_log10_i": 0.12673268442248115,
+      "observed_sigma_log10_i": 0.12913122485380724,
+      "ratio": 0.981425558117012,
+      "display_bound_decades": 0.004146395400265369,
+      "development_or_confirmation": "source-audit development; observed before numerical confirmation plan",
+      "predicted_parameter_interval": [
+        0.1132315706053006,
+        0.14031606895387008
+      ],
+      "observed_interval": [
+        0.10690645797400884,
+        0.15910386522483405
+      ]
+    },
+    {
+      "polarity": "p",
+      "size": "M",
+      "vg_v": 0.1,
+      "gm_over_id_per_v": [
+        1.677672527729816,
+        1.6790762096362557
+      ],
+      "predicted_sigma_log10_i": 0.02138717290992696,
+      "observed_sigma_log10_i": 0.015240456232995058,
+      "ratio": 1.4033157920577517,
+      "display_bound_decades": 0.004146395400265369,
+      "development_or_confirmation": "source-audit development; observed before numerical confirmation plan",
+      "predicted_parameter_interval": [
+        0.01842053727690727,
+        0.024357466552739043
+      ],
+      "observed_interval": [
+        0.008960396960110383,
+        0.022434942879859438
+      ]
+    },
+    {
+      "polarity": "p",
+      "size": "M",
+      "vg_v": 0.15,
+      "gm_over_id_per_v": [
+        1.9404917063782532,
+        1.9551678225231435
+      ],
+      "predicted_sigma_log10_i": 0.02259464194700053,
+      "observed_sigma_log10_i": 0.01656064687434138,
+      "ratio": 1.3643574504331748,
+      "display_bound_decades": 0.004146395400265369,
+      "development_or_confirmation": "source-audit development; observed before numerical confirmation plan",
+      "predicted_parameter_interval": [
+        0.01946498944377018,
+        0.025735355765672718
+      ],
+      "observed_interval": [
+        0.010095760911668215,
+        0.024019171649475025
+      ]
+    },
+    {
+      "polarity": "p",
+      "size": "M",
+      "vg_v": 0.25,
+      "gm_over_id_per_v": [
+        2.7344285056124975,
+        2.756406763167395
+      ],
+      "predicted_sigma_log10_i": 0.026720214517874614,
+      "observed_sigma_log10_i": 0.020652214201045644,
+      "ratio": 1.2938183895323796,
+      "display_bound_decades": 0.004146395400265369,
+      "development_or_confirmation": "source-audit development; observed before numerical confirmation plan",
+      "predicted_parameter_interval": [
+        0.0230939780667199,
+        0.03036438344779256
+      ],
+      "observed_interval": [
+        0.013614508812633885,
+        0.028929052441520144
+      ]
+    },
+    {
+      "polarity": "p",
+      "size": "M",
+      "vg_v": 0.3,
+      "gm_over_id_per_v": [
+        3.3176046873634166,
+        3.3360563046693508
+      ],
+      "predicted_sigma_log10_i": 0.030097445880869947,
+      "observed_sigma_log10_i": 0.02357686094016819,
+      "ratio": 1.2765671374679295,
+      "display_bound_decades": 0.004146395400265369,
+      "development_or_confirmation": "source-audit development; observed before numerical confirmation plan",
+      "predicted_parameter_interval": [
+        0.02608057887676182,
+        0.03413100707905431
+      ],
+      "observed_interval": [
+        0.016129705008279274,
+        0.0324386285284672
+      ]
+    },
+    {
+      "polarity": "p",
+      "size": "M",
+      "vg_v": 0.4,
+      "gm_over_id_per_v": [
+        5.127888593507775,
+        5.174362324186275
+      ],
+      "predicted_sigma_log10_i": 0.0417907824496438,
+      "observed_sigma_log10_i": 0.033032417644805113,
+      "ratio": 1.265144528596625,
+      "display_bound_decades": 0.004146395400265369,
+      "development_or_confirmation": "source-audit development; observed before numerical confirmation plan",
+      "predicted_parameter_interval": [
+        0.03628207113658039,
+        0.04734048267624798
+      ],
+      "observed_interval": [
+        0.024261483774267026,
+        0.043785296574031504
+      ]
+    },
+    {
+      "polarity": "p",
+      "size": "L",
+      "vg_v": 0.1,
+      "gm_over_id_per_v": [
+        1.5557374676635474,
+        1.5612634150041105
+      ],
+      "predicted_sigma_log10_i": 0.006745539873790843,
+      "observed_sigma_log10_i": 0.004360853697051069,
+      "ratio": 1.5468392985420183,
+      "display_bound_decades": 0.004146395400265369,
+      "development_or_confirmation": "source-audit development; observed before numerical confirmation plan",
+      "predicted_parameter_interval": [
+        0.005880463724694065,
+        0.007613138640316143
+      ],
+      "observed_interval": [
+        0,
+        0.009379419836726653
+      ]
+    },
+    {
+      "polarity": "p",
+      "size": "L",
+      "vg_v": 0.15,
+      "gm_over_id_per_v": [
+        1.7809536973101077,
+        1.7879556876081069
+      ],
+      "predicted_sigma_log10_i": 0.007195608187532076,
+      "observed_sigma_log10_i": 0.004809410017573099,
+      "ratio": 1.496151952368388,
+      "display_bound_decades": 0.004146395400265369,
+      "development_or_confirmation": "source-audit development; observed before numerical confirmation plan",
+      "predicted_parameter_interval": [
+        0.006286402890860009,
+        0.008107833032987625
+      ],
+      "observed_interval": [
+        0,
+        0.00991768742135309
+      ]
+    },
+    {
+      "polarity": "p",
+      "size": "L",
+      "vg_v": 0.25,
+      "gm_over_id_per_v": [
+        2.4105126841395133,
+        2.426553048962006
+      ],
+      "predicted_sigma_log10_i": 0.008597336092444261,
+      "observed_sigma_log10_i": 0.006181949490668633,
+      "ratio": 1.390716003976018,
+      "display_bound_decades": 0.004146395400265369,
+      "development_or_confirmation": "source-audit development; observed before numerical confirmation plan",
+      "predicted_parameter_interval": [
+        0.007540686247412523,
+        0.009659465227825615
+      ],
+      "observed_interval": [
+        0.0011700811617096551,
+        0.011564734789067728
+      ]
+    },
+    {
+      "polarity": "p",
+      "size": "L",
+      "vg_v": 0.3,
+      "gm_over_id_per_v": [
+        2.8758114455794384,
+        2.890893619843168
+      ],
+      "predicted_sigma_log10_i": 0.009715208044367681,
+      "observed_sigma_log10_i": 0.007194375733474813,
+      "ratio": 1.3503893046847208,
+      "display_bound_decades": 0.004146395400265369,
+      "development_or_confirmation": "source-audit development; observed before numerical confirmation plan",
+      "predicted_parameter_interval": [
+        0.008545654686632183,
+        0.01089021777672003
+      ],
+      "observed_interval": [
+        0.00204076773052297,
+        0.012779646280435146
+      ]
+    },
+    {
+      "polarity": "p",
+      "size": "L",
+      "vg_v": 0.4,
+      "gm_over_id_per_v": [
+        4.328500939454352,
+        4.367447115183808
+      ],
+      "predicted_sigma_log10_i": 0.013504158479865287,
+      "observed_sigma_log10_i": 0.010868025288111963,
+      "ratio": 1.2425586177681118,
+      "display_bound_decades": 0.004146395400265369,
+      "development_or_confirmation": "source-audit development; observed before numerical confirmation plan",
+      "predicted_parameter_interval": [
+        0.011908506064472994,
+        0.015112137296603231
+      ],
+      "observed_interval": [
+        0.005200106347510918,
+        0.017188025745999723
+      ]
+    }
+  ],
+  "pdf_sha256": "0f1a691225d51db40440d5e71081bda819a34fda8bda4b08099f5830418e7f5a",
+  "coefficients": [
+    {
+      "polarity": "p",
+      "length_nm": 40,
+      "vth_mV_um": 2.9112018438809573,
+      "vth_95ci": [
+        2.681072112269797,
+        3.1411983050803673
+      ],
+      "beta_percent_um": 0.6537277834185125,
+      "beta_95ci": [
+        0.6038271008370791,
+        0.7035729366617166
+      ],
+      "pdf_vector_indices": [
+        1037,
+        1039,
+        1169,
+        1171
+      ],
+      "axes_pdf_points": {
+        "y0": 383.05,
+        "y1": 473.73,
+        "vth_range": [
+          0,
+          12
+        ],
+        "beta_range": [
+          0,
+          5
+        ]
+      },
+      "digitization_absolute_bound": {
+        "vth_mV_um": 0.06616674018526687,
+        "beta_percent_um": 0.027569475077194528
+      },
+      "long_length_decision": "unambiguous"
+    },
+    {
+      "polarity": "p",
+      "length_nm": 120,
+      "vth_mV_um": 3.528276158262574,
+      "vth_95ci": [
+        3.1533743745175364,
+        3.903177942007611
+      ],
+      "beta_percent_um": 0.8348594366005468,
+      "beta_95ci": [
+        0.7409576429477293,
+        0.9288167595915936
+      ],
+      "pdf_vector_indices": [
+        1041,
+        1043,
+        1173,
+        1175
+      ],
+      "axes_pdf_points": {
+        "y0": 383.05,
+        "y1": 473.73,
+        "vth_range": [
+          0,
+          12
+        ],
+        "beta_range": [
+          0,
+          5
+        ]
+      },
+      "digitization_absolute_bound": {
+        "vth_mV_um": 0.06616674018526687,
+        "beta_percent_um": 0.027569475077194528
+      },
+      "long_length_decision": "unambiguous"
+    },
+    {
+      "polarity": "p",
+      "length_nm": 400,
+      "vth_mV_um": 4.5977914050438375,
+      "vth_95ci": [
+        4.155931335637684,
+        5.039522242535567
+      ],
+      "beta_percent_um": 0.8028240565639483,
+      "beta_95ci": [
+        0.7169168049089183,
+        0.8887313082189784
+      ],
+      "pdf_vector_indices": [
+        1045,
+        1047,
+        1177,
+        1179
+      ],
+      "axes_pdf_points": {
+        "y0": 383.05,
+        "y1": 473.73,
+        "vth_range": [
+          0,
+          12
+        ],
+        "beta_range": [
+          0,
+          5
+        ]
+      },
+      "digitization_absolute_bound": {
+        "vth_mV_um": 0.06616674018526687,
+        "beta_percent_um": 0.027569475077194528
+      },
+      "long_length_decision": "400nm is inferred from Fig2 and Figs5/7/12 inventories and p802-803 prose; printed legend says 1.2um, which is the large-device width"
+    },
+    {
+      "polarity": "n",
+      "length_nm": 40,
+      "vth_mV_um": 3.160786147889562,
+      "vth_95ci": [
+        2.887121415106699,
+        3.434450880672424
+      ],
+      "beta_percent_um": 0.582543008381123,
+      "beta_95ci": [
+        0.5333574763677932,
+        0.6317285403944528
+      ],
+      "pdf_vector_indices": [
+        1445,
+        1447,
+        1577,
+        1579
+      ],
+      "axes_pdf_points": {
+        "y0": 534.385,
+        "y1": 625.065,
+        "vth_range": [
+          0,
+          12
+        ],
+        "beta_range": [
+          0,
+          5
+        ]
+      },
+      "digitization_absolute_bound": {
+        "vth_mV_um": 0.06616674018526683,
+        "beta_percent_um": 0.02756947507719451
+      },
+      "long_length_decision": "unambiguous"
+    },
+    {
+      "polarity": "n",
+      "length_nm": 120,
+      "vth_mV_um": 3.3222371939788315,
+      "vth_95ci": [
+        2.9539504688533906,
+        3.6903866101951963
+      ],
+      "beta_percent_um": 0.7307020136055384,
+      "beta_95ci": [
+        0.6573662675841584,
+        0.8040377596269186
+      ],
+      "pdf_vector_indices": [
+        1449,
+        1451,
+        1581,
+        1583
+      ],
+      "axes_pdf_points": {
+        "y0": 534.385,
+        "y1": 625.065,
+        "vth_range": [
+          0,
+          12
+        ],
+        "beta_range": [
+          0,
+          5
+        ]
+      },
+      "digitization_absolute_bound": {
+        "vth_mV_um": 0.06616674018526683,
+        "beta_percent_um": 0.02756947507719451
+      },
+      "long_length_decision": "unambiguous"
+    },
+    {
+      "polarity": "n",
+      "length_nm": 400,
+      "vth_mV_um": 6.703485233961461,
+      "vth_95ci": [
+        5.951961266610612,
+        7.4550092013123095
+      ],
+      "beta_percent_um": 0.9904615270129186,
+      "beta_95ci": [
+        0.8970578146969449,
+        1.0838113926978823
+      ],
+      "pdf_vector_indices": [
+        1453,
+        1455,
+        1585,
+        1587
+      ],
+      "axes_pdf_points": {
+        "y0": 534.385,
+        "y1": 625.065,
+        "vth_range": [
+          0,
+          12
+        ],
+        "beta_range": [
+          0,
+          5
+        ]
+      },
+      "digitization_absolute_bound": {
+        "vth_mV_um": 0.06616674018526683,
+        "beta_percent_um": 0.02756947507719451
+      },
+      "long_length_decision": "400nm is inferred from Fig2 and Figs5/7/12 inventories and p802-803 prose; printed legend says 1.2um, which is the large-device width"
+    }
+  ],
+  "method": "PDF vector path/errorbar reanalysis; manual visual axes verification required",
+  "status": "ADOPTED_WITH_EXPLICIT_GEOMETRY_AND_METHOD_TRANSFER",
+  "normalization": "Companion p800 overline is population average over matched pairs; do not import original-ST pair-mean convention",
+  "rho": "Zero is a named independent-Croon approximation justified by companion Eq7, not a measured covariance",
+  "extraction": "2002 review Sec2.2 adds D/2; APM subtracts D/2. Common offset D cancels equal-bias pair differences. Author smoothing and beta-code unavailable.",
+  "licensing": {
+    "source": "Hart et al., Subthreshold Mismatch in Nanometer CMOS at Cryogenic Temperatures, JEDS 8 (2020), 797\u2013806, DOI 10.1109/JEDS.2020.2988730",
+    "license": "CC-BY-4.0",
+    "adaptation": "APM vector reanalysis; rounded derived estimates, uncertainty bounds and independent current checks. No author correction or raw-measurement claim."
+  },
+  "fixed_length_slope_checks": [
+    {
+      "polarity": "p",
+      "pdf_vector_indices": [
+        95,
+        257
+      ],
+      "vth_mV_um": 2.9146127403716715,
+      "beta_percent_um": 0.6516544505845512,
+      "relative_difference": [
+        0.0011716454830790202,
+        -0.0031715537973914243
+      ]
+    },
+    {
+      "polarity": "n",
+      "pdf_vector_indices": [
+        571,
+        733
+      ],
+      "vth_mV_um": 3.161179552462975,
+      "beta_percent_um": 0.584832803867404,
+      "relative_difference": [
+        0.0001244641538549196,
+        0.0039306891565726865
+      ]
+    }
+  ]
+}

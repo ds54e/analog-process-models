@@ -1,0 +1,50 @@
+{
+  "schema": "apm.research-profile.v1",
+  "id": "hart-tsmc40-300k-v1",
+  "tier": "SOURCE_TRANSFER_HYPOTHESIS",
+  "rho": 0,
+  "rho_assumption": "independent-Croon",
+  "interpolation": "linear-log-L@1",
+  "source": "Coherent companion TSMC40 standard-Vt; no original ST beta or ST Vth.",
+  "source_dataset_sha256": "b3e3eb860dd5548d6428fdee10e46d23b5de116409478dbc66176bb9af06fd23",
+  "source_decision": "validation/evidence/v5_source_decision.md",
+  "normalization": "Equal-geometry independent-pair sigma normalized by population mean; per-device sqrt(2) conversion. Pair-average ratios additionally checked.",
+  "geometry_transfer": "Source drawn W/L area law; APM public drawn W/L. L interpolation in log L. W=1\u20134um,L=.12\u2013.40um are model-transfer hypotheses, not a measured APM rectangle.",
+  "uncertainty": "Source 95% intervals and PDF digitization bounds in pinned dataset; between-process and L-interpolation errors unquantified, not sampled per device.",
+  "coefficients": {
+    "n": [
+      {
+        "l_m": 4e-08,
+        "a_vt_v_m": 3.160786147889562e-09,
+        "a_beta_m": 5.825430083811231e-09
+      },
+      {
+        "l_m": 1.2e-07,
+        "a_vt_v_m": 3.322237193978832e-09,
+        "a_beta_m": 7.307020136055385e-09
+      },
+      {
+        "l_m": 4e-07,
+        "a_vt_v_m": 6.703485233961461e-09,
+        "a_beta_m": 9.904615270129186e-09
+      }
+    ],
+    "p": [
+      {
+        "l_m": 4e-08,
+        "a_vt_v_m": 2.9112018438809573e-09,
+        "a_beta_m": 6.537277834185125e-09
+      },
+      {
+        "l_m": 1.2e-07,
+        "a_vt_v_m": 3.5282761582625745e-09,
+        "a_beta_m": 8.348594366005468e-09
+      },
+      {
+        "l_m": 4e-07,
+        "a_vt_v_m": 4.597791405043838e-09,
+        "a_beta_m": 8.028240565639483e-09
+      }
+    ]
+  }
+}

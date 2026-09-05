@@ -37,6 +37,7 @@ from .paths import repository_root
 from .provenance_validate import ProvenanceValidationError, validate_provenance
 from .release_validate import ReleaseValidationError, validate_release
 from .release_validate_v4 import validate_release_v4
+from .research_numerics import ResearchError
 from .spectre_validate import SpectreStructureError, validate_spectre
 from .toolchain import ToolchainError
 
@@ -63,6 +64,26 @@ def build_parser() -> argparse.ArgumentParser:
 
     sub.add_parser("doctor", help="Run reference-runtime and compact-model smoke tests")
     sub.add_parser("build-models", help="Build local generated compact-model artifacts")
+
+    p_research = sub.add_parser("research", help="Source-aware local research variation")
+    research_sub = p_research.add_subparsers(dest="research_command", required=True)
+    research_sub.add_parser("describe", help="Show approved profiles and support boundaries")
+    rp = research_sub.add_parser("sample", help="Persist a UID-keyed reference realization")
+    rp.add_argument("--profile", type=Path, required=True)
+    rp.add_argument("--request", type=Path, required=True)
+    rp.add_argument("--seed", type=int, required=True)
+    rp.add_argument("--index", type=int, required=True)
+    rp.add_argument("--state", type=Path, required=True)
+    rp.add_argument("--output", type=Path, required=True)
+    rp.add_argument("--allow-artificial", action="store_true")
+    rr = research_sub.add_parser("run", help="Run or replay a saved realization")
+    rr.add_argument("--request", type=Path, required=True)
+    rr.add_argument("--realization", type=Path, required=True)
+    rr.add_argument("--output", type=Path, required=True)
+    rr.add_argument("--temperature-c", type=float, default=26.85)
+    rc = research_sub.add_parser("check", help="Execute the frozen v5 engineering plan")
+    rc.add_argument("--output", type=Path, required=True)
+    rc.add_argument("--suite", choices=("sampler", "mapping", "statistics", "circuits", "replay", "io", "all"), default="all")
 
     p_list = sub.add_parser("list", help="List manifest-discovered catalog entities")
     p_list.add_argument("kind", choices=("technologies", "families", "devices"))
@@ -243,6 +264,11 @@ def main() -> int:
             result = build_models()
             print(json.dumps(result, indent=2, sort_keys=True))
             return 0
+        if args.command == "research":
+            from .research_cli import research_command
+            result = research_command(args)
+            print(json.dumps(result, indent=2, sort_keys=True))
+            return 0 if result.get("status") not in ("FAIL", "FAILED", "BLOCKED") else 1
         if args.command == "doctor":
             result = run_doctor()
             print(json.dumps(result, indent=2, sort_keys=True))
@@ -480,6 +506,7 @@ def main() -> int:
         RuntimeError,
         SpectreStructureError,
         ToolchainError,
+        ResearchError,
     ) as error:
         print(f"apm {args.command}: {error}", file=sys.stderr)
         return 1
