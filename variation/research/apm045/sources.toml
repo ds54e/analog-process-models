@@ -1,0 +1,88 @@
+# SPDX-FileCopyrightText: 2026 APM contributors
+# SPDX-License-Identifier: Apache-2.0
+
+schema = "apm.research-source-registry.v1"
+status = "IMPLEMENTATION_INPUT_AUDIT_PENDING"
+approved_runtime_profiles = []
+base_commit = "bbb585306f13614b7649c36dd5b7510c845daed9"
+preflight_audit = "validation/evidence/v5_preflight_source_audit.md"
+
+[adoption]
+require_coherent_vth_beta_source = true
+require_both_polarities = true
+require_explicit_pair_normalization = true
+require_extraction_transfer_decision = true
+require_geometry_resolution = true
+require_uncertainty_budget = true
+require_independent_current_mismatch_check = true
+source_success_is_not_foundry_correlation = true
+implicit_rescaling_allowed = false
+implicit_cross_process_splicing_allowed = false
+implicit_source_download_at_runtime = false
+allow_auditable_figure_reanalysis = true
+allow_author_contact = false
+allow_paid_data_purchase = false
+
+[[source]]
+id = "hart2020_st40_original"
+doi = "10.1109/JEDS.2020.2976546"
+url = "https://pure.tudelft.nl/ws/portalfiles/portal/71537207/09015956.pdf"
+pdf_sha256 = "de6e2c0a83a900d563369b34ca10de30b4ae79290f12deefd9c9dfff2e74a31b"
+process = "STMicroelectronics 40 nm LVT; identity attributed by the thesis audit"
+reference_temperature_k = 300.0
+reference_vds_magnitude_v = 0.05
+reported_extraction = "maximum-gm"
+beta_status_n = "BLOCKED_NORMALIZATION_CONFLICT"
+beta_status_p = "BLOCKED_NORMALIZATION_CONFLICT"
+vth_status = "CANDIDATE_REQUIRES_TRANSFER_AUDIT"
+issue = "Printed beta table, beta-axis representation and current-mismatch bounds are not jointly resolved. No factor-of-ten or percent/fraction correction is authorized by this record."
+allowed_use = ["source investigation", "method context", "audited Vth evidence kept separate"]
+forbidden_use = ["approved beta runtime input", "silent beta rescaling", "ST Vth plus TSMC beta as a coherent measured profile"]
+
+[[source]]
+id = "hart2022_thesis"
+doi = "10.4233/uuid:0ab4ca6c-dc69-4207-970f-d3b9f0d9c5b4"
+url = "https://repository.tudelft.nl/file/File_44cb70b1-3c6f-47fb-b6b2-98de516f7514"
+pdf_sha256 = "71b760b1de42a0b5f86cfd611bc9d8ca6abe3a64ce2761bf9ddda816f4d4158c"
+status = "AUDITED_CONTEXT_NOT_A_BETA_CORRECTION"
+references = ["Chapter 3 pp.45-55", "pp.57-58 process distinction", "p.67 and figure geometry context"]
+redistribution = "Do not redistribute full thesis without explicit file-level rights; use existing ignored download."
+
+[[source]]
+id = "hart2020_tsmc40_companion"
+doi = "10.1109/JEDS.2020.2988730"
+url = "https://infoscience.epfl.ch/server/api/core/bitstreams/9cb2e29b-35ca-4052-ba6b-93ccbbde82e9/content"
+pdf_sha256 = "0f1a691225d51db40440d5e71081bda819a34fda8bda4b08099f5830418e7f5a"
+process = "TSMC 40 nm standard-Vt; thesis attribution; article explicitly says different process from original"
+voltage_class_v = 1.1
+reference_temperature_k = 300.0
+reference_vds_magnitude_v = 0.05
+reported_extraction = "ELR, reference 27; verify algorithmic relation to APM MG"
+matched_pairs_per_geometry = 72
+status = "PRIORITY_INDEPENDENT_CANDIDATE_NOT_APPROVED"
+references = ["Sec.II pp.798-800", "Fig.2 geometry", "Figs.8-9 fixed-L slopes p.802", "Figs.10-11 A factors p.802", "Figs.12-14 current-mismatch checks"]
+open_issues = [
+  "Reconcile long-L legend L=1.2um with 400nm prose/geometry; do not guess.",
+  "Digitize both Vth and beta from a coherent source subset; no numeric values approved here.",
+  "Audit pair/population denominator, percent units and extraction convention.",
+  "Do not claim MG differs from or equals ELR based only on method names.",
+  "Respect minimum-size PMOS subthreshold leakage exclusion; it is not a blanket strong-inversion exclusion.",
+  "1.1V source data do not authorize 1.1V simulation of the 1.0V APM VTG profile."
+]
+file_license_observation = "Article p.797 states CC BY 4.0; preserve source credit and adaptation notice for any shipped derived dataset."
+
+[[source]]
+id = "ortiz_conde_2002_extraction_review"
+doi = "10.1016/S0026-2714(02)00027-6"
+url = "https://doi.org/10.1016/S0026-2714(02)00027-6"
+status = "EXTRACTION_DEFINITION_LEAD_FULL_TEXT_NOT_INSPECTED_IN_HANDOFF"
+allowed_use = ["resolve algorithm and normalization of ELR"]
+forbidden_use = ["statistical coefficient source", "assert author-code identity"]
+
+[registry_rules]
+empty_approval_list_means_unavailable = true
+approval_requires_new_hashed_decision_record = true
+source_ci_is_not_device_randomness = true
+keep_source_reanalysis_and_transfer_errors_separate = true
+unknown_is_not_zero = true
+papers_remain_ignored_unless_redistribution_is_explicitly_reviewed = true

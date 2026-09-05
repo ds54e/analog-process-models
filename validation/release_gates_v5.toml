@@ -1,0 +1,182 @@
+# SPDX-FileCopyrightText: 2026 APM contributors
+# SPDX-License-Identifier: Apache-2.0
+
+schema = "apm.release-gates.v5"
+target = "v5.0.0"
+contract_status = "ACTIVE_IMPLEMENTATION_SPECIFICATION"
+evaluator_status = "NOT_IMPLEMENTED_BY_THIS_HANDOFF"
+technical_contract = "V5_RESEARCH_VARIATION.md"
+source_registry = "variation/research/apm045/sources.toml"
+
+[authorization]
+implementation = true
+candidate_qualification = true
+create_tag = false
+publish_release = false
+autonomous_finish_state = "V5_RELEASE_READY"
+
+[identity]
+preflight_commit = "bbb585306f13614b7649c36dd5b7510c845daed9"
+frozen_v4_authority = "02959d4a095062873fa2a3a53936af3cb4598ee3"
+frozen_v4_tag_object = "797cdf9462db9dd634bff558802bcadaaeb70015"
+frozen_v4_tagged_commit = "d224f279921c7e1ae637fd867e00d450067766c6"
+handoff_package_version = "4.0.0+main"
+development_version = "5.0.0.dev0"
+candidate_version = "5.0.0"
+
+[catalog]
+nominal_family_count = 15
+nominal_public_device_count = 30
+required_quantitative_families = ["apm045/vtg"]
+required_polarities = ["n", "p"]
+assessment_only_families = ["apm045/io18", "apm045/io25"]
+research_global_supported = false
+research_all_supported = false
+nominal_model_changes_allowed = false
+
+[reference]
+ngspice_major = 47
+platform = "RHEL-compatible EL9 x86_64; WSL2 supported"
+openvaf_expected_source_commit = "fdf2522b70f42793f64b1c72f0195c96dea0cc19"
+observed_compiler_receipt_required = true
+ngspice_num_threads = 1
+statistical_reference_temperature_k = 300.0
+mapping_vds_magnitude_v = 0.05
+mapping_vbs_v = 0.0
+maximum_vtg_control_magnitude_v = 1.0
+
+[minimum_domain]
+w_um = [1.0, 2.0, 4.0]
+l_um = [0.12, 0.24, 0.40]
+intermediate_geometry_holdouts_required = true
+pure_sampler_minimum_pairs = 65536
+spice_minimum_pairs_per_anchor_polarity = 1024
+circuit_minimum_realizations_per_family = 1024
+campaign_devices = 100
+campaign_coordinates_per_device = 2
+campaign_samples = 1024
+campaign_max_estimated_domain_exhaustion_probability = 1.0e-3
+
+[starting_engineering_budgets]
+scaled_jacobian_condition_max = 100.0
+half_increment_relative_jacobian_change_max = 0.02
+extraction_error_over_sigma_max = 0.005
+mapping_error_over_sigma_max = 0.02
+spice_sigma_equivalence_relative_half_width = 0.10
+pure_sigma_equivalence_relative_half_width = 0.02
+confirmation_plan_required_before_run = true
+revision_policy = "Record a justified development-plan revision before a new confirmation cohort; never edit failures, choose lucky seeds or silently weaken required scope."
+
+[evaluation]
+all_candidate_required_gates_must_pass = true
+empty_evidence_is_pass = false
+unknown_missing_skipped_or_not_run_is_pass = false
+validate_evidence_hashes_and_subject_commit = true
+require_independent_fresh_clone = true
+post_tag_is_candidate_dependency = false
+assessment_numeric_success_is_not_required = true
+assessment_execution_and_honest_outcome_are_required = true
+
+[[gate]]
+id = "legacy.immutable_baseline"
+phase = "candidate"
+required = true
+acceptance = "Released model/config/generator/tag identities and completed preflight snapshot preserved; exact inventories, hashes and modes checked."
+
+[[gate]]
+id = "source.quantitative_vtg_profile"
+phase = "candidate"
+required = true
+acceptance = "Coherent approved N/P Vth AND beta sources, units, geometry, extraction, normalization, uncertainty and independent current-mismatch check. Unresolved beta cannot pass."
+
+[[gate]]
+id = "toolchain.observed_provenance"
+phase = "candidate"
+required = true
+acceptance = "Actual executable/source/build-receipt identities agree with reference pin; unknown or mismatched provenance and stale caches fail. Native BSIM4 is reported separately."
+
+[[gate]]
+id = "methods.extraction"
+phase = "candidate"
+required = true
+acceptance = "Versioned MG coordinate, source-extraction transfer decision, analytic tests, N/P grid convergence, endpoint/ambiguity rejection and stable zero-effect baseline."
+
+[[gate]]
+id = "mapping.reference_geometry"
+phase = "candidate"
+required = true
+acceptance = "Full N/P cross-term mapping, scaled conditioning, finite-step checks, all nine anchors, unseen geometry/target holdouts and fine-grid re-extraction."
+
+[[gate]]
+id = "sampling.identity_statistics"
+phase = "candidate"
+required = true
+acceptance = "Pair/individual and unequal-geometry semantics, A(L), normal sampling, source uncertainty separation, UID-keyed parallel/reorder/add-device invariance and serialized replay."
+
+[[gate]]
+id = "mapping.tail_domain"
+phase = "candidate"
+required = true
+acceptance = "Joint support verified for adopted coefficients and campaign risk budget; no clipping/redraw/drop; nonpositive or out-of-domain realizations retained as failures."
+
+[[gate]]
+id = "application.hierarchy_isolation"
+phase = "candidate"
+required = true
+acceptance = "Verified leaf/family/W/L/readback, untouched twin, duplicate and bad-path errors, reset-loss mechanism and unit independence. Exit code alone cannot pass."
+
+[[gate]]
+id = "execution.replay_fail_closed"
+phase = "candidate"
+required = true
+acceptance = "Fresh-process controlled runs, bound netlist/includes/tools/recipe, corrupt/incomplete cache refusal, timeout logs and same realization across DC/AC/tran and temperature."
+
+[[gate]]
+id = "statistics.spice_recovery"
+phase = "candidate"
+required = true
+acceptance = "Predeclared real-SPICE cohorts recover configured statistics under simultaneous/equivalence tests; actual sensitivity and Croon comparisons distinguished from silicon calibration."
+
+[[gate]]
+id = "circuits.local_mismatch"
+phase = "candidate"
+required = true
+acceptance = "N/P 1:1 and 1:4 mirrors, differential-pair offset, N=1/4/16 unit banks; declared exclusions and no per-sample bias retuning that erases the observed variation."
+
+[[gate]]
+id = "transfer.io_assessment"
+phase = "candidate"
+required = true
+allowed_outcomes = ["SUPPORTED_HYPOTHESIS", "UNRESOLVED_WITH_EVIDENCE"]
+acceptance = "Executed io18/io25 N/P assessment with bounded Tcap proxy or supported negative evidence; no implicit beta-zero or complete-IO-statistics claim. Numeric scenario optional."
+
+[[gate]]
+id = "capabilities.claim_boundaries"
+phase = "candidate"
+required = true
+acceptance = "Working describe/sample/run/check flow and hierarchy example; unsupported modes/effects explicit, no hybrid double-counting, no foundry/yield/temperature/weak-inversion overclaim."
+
+[[gate]]
+id = "compatibility.legacy_flows"
+phase = "candidate"
+required = true
+acceptance = "Legacy Benchmark/native/electrical/noise regressions including real-tool coverage pass unchanged; new provenance metadata truthfulness tested independently."
+
+[[gate]]
+id = "quality.public_hygiene"
+phase = "candidate"
+required = true
+acceptance = "Full current pytest, required separate tests, Ruff, REUSE, provenance/security audit; approved derived-source licensing; no private PDK/raw secret data or hidden required skips."
+
+[[gate]]
+id = "release.clean_candidate"
+phase = "candidate"
+required = true
+acceptance = "Exact clean 5.0.0 candidate independently validated from fresh clone; all candidate reports bind code/model/method/source/tool identity and no self-certifying edited report."
+
+[[gate]]
+id = "release.exact_tag_requalification"
+phase = "post_tag"
+required = true
+requires_separate_user_authorization = true
+acceptance = "After candidate approval only: immutable annotated v5.0.0 peels to qualified candidate; independent exact-tag run passes before publishing release. Never move a failing tag."
