@@ -32,7 +32,9 @@ block, model includes and final `.end`. Local includes are recursively resolved
 and hashed. Known nominal VTG model redefinition is rejected. Analysis recipes
 contain typed DC, AC, transient or operating-point settings and terminal vectors;
 `set_sources` declares finite voltage/current source settings before an analysis.
-A source setting does not change a saved MOS realization. The user remains
+Analysis recipes can change between runs while the circuit, model includes and
+instance map stay bound to the saved physical realization. Each recipe has a
+distinct run identity. A source setting does not change a saved MOS realization. The user remains
 responsible for the operating domain of an authored circuit.
 
 Every physical MOS gets a unique `uid`, wrapper hierarchy `path`, family,
@@ -60,7 +62,9 @@ nonpositive beta, missing peaks and failed inversions are explicit failures.
 They are never clipped, redrawn or removed from a campaign denominator.
 
 Each uncached run is a fresh ngspice 47 process with one thread, normal Sparse,
-model/geometry/raw readback and a separate output directory. Readback is repeated
+model/geometry/raw readback and a separate output directory. The runner explicitly
+selects the binary-prefix system startup directory and hashes its spinit; -n
+disables user initialization only. Readback is repeated
 around every analysis. A zero exit code is insufficient. Caches require bound
 input and output hashes; changed or incomplete data fail. To retry a failed
 sample, retain it and select another output directory with the **same** saved
@@ -76,7 +80,9 @@ other families are unsupported. IO18/25 have an assessment only; unknown beta is
 not zero. No default IO mismatch profile is supplied.
 
 Artificial fixtures require `--allow-artificial` and retain that tier in every
-realization. They cannot satisfy the quantitative-source release gate.
+realization. They cannot satisfy the quantitative-source release gate. Development records
+created before the separate sample-context binding was introduced are rejected
+explicitly; they are retained as historical development evidence.
 The committed confirmation plan separates small development cohorts from the
 full cohorts beginning at sample index 1000000, and declares confidence,
 equivalence and failure policies before execution. Source reanalysis additionally

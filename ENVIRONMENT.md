@@ -141,3 +141,23 @@ with unknown or different provenance cannot qualify the release toolchain.
 Native-BSIM4 research execution is independent of OpenVAF; report that boundary.
 Build repairs belong in ignored project-local prefixes; retain the user's system
 compiler and all prior evidence.
+
+`tools/bootstrap-el9.sh` now initializes the pinned source submodules and invokes
+`tools/build_pinned_openvaf.py` into a fresh local prefix. The sealed v2 receipt
+binds clean before/after source and submodule commits, actual Rust/Cargo binaries
+behind launchers, LLVM configuration, linked libraries, build log and compiler
+binary. Observation rechecks these hashes; matching a version banner alone is
+insufficient. Preserve an existing unverified prefix and select a new one.
+
+Model-build metadata `apm.model-build.v3` binds that observed receipt to every OSDI
+output. Unverified and old asserted-pin cache metadata cannot be reused as verified
+build evidence. `apm.doctor.v3` reports smoke execution separately from reference
+provenance. The current repair and retained failed attempts are documented in
+`validation/evidence/v5_toolchain_repair.json`.
+
+For candidate qualification, see `docs/release-readiness-v5.md`. A fresh clone
+may read the qualified compiler, its clean source/build receipt and the hash-pinned
+primary PDF from existing local storage, while generating its own environment,
+OSDI outputs and numerical runs. Native BSIM4 experiments do not use OpenVAF.
+Research runs explicitly select and hash system spinit, set num_threads=1 and
+use normal Sparse; they retain the user's system compiler and startup files.

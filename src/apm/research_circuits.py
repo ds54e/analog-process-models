@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import subprocess
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -15,7 +16,7 @@ from scipy.interpolate import CubicSpline
 from .compiler_provenance import digest
 from .research import SCHEMAS, sample, save, sigma
 from .research_numerics import ResearchError, extract_mg, pair_relative
-from .research_spice import DIAGNOSTIC, curve, execute, pair_request, raw_realization
+from .research_spice import DIAGNOSTIC, curve, execute, pair_request, raw_realization, spice_context
 
 
 def circuit_request(folder,pol,kind,gate,current):
@@ -74,7 +75,11 @@ def circuit_family(root,binary,plan,profile,mapper,folder,pol,kind,gate,current)
     raw=np.zeros((len(devices),2))
     def observed(x,realization=None):
         report=execute(root,binary,folder/'runs',req,realization or raw_realization(req,x))
-        return circuit_observable(report,kind,current),report
+        try:
+            return circuit_observable(report,kind,current),report
+        except (ResearchError,OSError,ValueError) as error:
+            error.run_report=report
+            raise
     nominal,_=observed(raw);scale=nominal if kind.startswith('mirror') else 1
     predicted_variance=0
     # Units of the same bank have identical topology. Verify one unit in each
@@ -102,12 +107,16 @@ def circuit_family(root,binary,plan,profile,mapper,folder,pol,kind,gate,current)
             return {'index':index,'status':'PASS','value':(value-nominal)/scale,
                     'run':report['run_id'],'report_sha256':digest(Path(report['directory'])/'run.json')}
         except (ResearchError,OSError,ValueError) as error:
-            return {'index':index,'status':'FAIL','error':str(error)}
+            failed_report=getattr(error,'run_report',None)
+            binding={'run':failed_report['run_id'],
+                     'report_sha256':digest(Path(failed_report['directory'])/'run.json')} if failed_report else {}
+            return {'index':index,'status':'FAIL','error':str(error),**binding}
     n=plan['circuit_realizations_per_family']
     with ThreadPoolExecutor(plan['workers']) as pool:rows=list(pool.map(run,range(n)))
     save(folder/'cohort.json',{'requested':n,'rows':rows})
     failures=[r for r in rows if r['status']!='PASS']
-    result={'polarity':pol,'family':kind,'requested':n,'executed':len(rows),'failed':len(failures),
+    result={'polarity':pol,'family':kind,'requested':n,'attempted':len(rows),
+            'executed':sum('run' in r for r in rows),'failed':len(failures),
             'physical_units':len(devices),'nominal_observable':nominal,'sensitivity_q':sensitivities,
             'cohort_sha256':digest(folder/'cohort.json'),'exclusions':['ideal supply','ideal output clamps','ideal reference/tail currents','global mismatch']}
     if failures:return {**result,'status':'FAIL','failures':failures[:10]}
@@ -145,17 +154,19 @@ def circuit_checks(root,binary,plan,profile,mapper,output):
 
 
 def logged_deck(binary,folder,deck):
+    tool=spice_context(binary)
     if folder.exists():
         try:
             record=json.loads((folder/'run.json').read_text())
-            if (folder/'input.cir').read_text()!=deck or record['binary_sha256']!=digest(binary) or any(digest(folder/p)!=h for p,h in record['files'].items()):
+            if (folder/'input.cir').read_text()!=deck or record.get('tool')!=tool or record['binary_sha256']!=digest(binary) or any(digest(folder/p)!=h for p,h in record['files'].items()):
                 raise ResearchError('ASSESSMENT_CACHE_TAMPER')
             return record
         except (OSError,KeyError,ValueError) as error:
             raise ResearchError(f'ASSESSMENT_CACHE_REJECTED: {error}') from error
     folder.mkdir(parents=True,exist_ok=False);(folder/'input.cir').write_text(deck)
     try:
-        r=subprocess.run([str(binary),'-n','-b','input.cir'],cwd=folder,text=True,capture_output=True,timeout=60,check=False)
+        r=subprocess.run([str(binary),'-n','-b','input.cir'],cwd=folder,text=True,capture_output=True,
+                         timeout=60,check=False,env={**os.environ,**tool['environment']})
         stdout,stderr,code=r.stdout,r.stderr,r.returncode
     except subprocess.TimeoutExpired as error:
         stdout=error.stdout or b'';stderr=error.stderr or b'';code=None
@@ -163,7 +174,7 @@ def logged_deck(binary,folder,deck):
         stderr=stderr.decode(errors='replace') if isinstance(stderr,bytes) else stderr
     (folder/'stdout.txt').write_text(stdout);(folder/'stderr.txt').write_text(stderr)
     valid=code==0 and not DIAGNOSTIC.search(stdout+'\n'+stderr) and 'Using SPARSE 1.3' in stdout+stderr
-    result={'status':'PASS' if valid else 'FAIL','returncode':code,'binary_sha256':digest(binary),
+    result={'status':'PASS' if valid else 'FAIL','returncode':code,'binary_sha256':digest(binary),'tool':tool,
             'files':{p.name:digest(p) for p in folder.iterdir() if p.is_file()}}
     save(folder/'run.json',result)
     return result

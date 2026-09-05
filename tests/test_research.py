@@ -89,3 +89,44 @@ def test_bad_path_zero_exit_is_not_success(tmp_path):
     assert report['returncode']==0
     assert report['status']=='FAIL' and 'MODEL_IDENTITY/0' in report['errors']
     assert any('no such' in e.lower() for e in report['errors'])
+
+
+def test_replay_changes_recipe_but_preserves_physical_binding(tmp_path):
+    q=pair_request(tmp_path/'pair.cir','n',1e-6,1.2e-7,.02)
+    v=r.sample(fixture(),q,1,0,lambda device,target:([.01,.02],'artificial-test-map'))
+    original=v['content_id']
+    a=execute(ROOT,Path('/usr/local/bin/ngspice'),tmp_path/'runs',q,v)
+    q2=copy.deepcopy(q);q2['analyses'][0]['step']=.01
+    q2['analyses'][0]['set_sources']={'Vda':.5,'Vdb':.5}
+    b=execute(ROOT,Path('/usr/local/bin/ngspice'),tmp_path/'runs',q2,v)
+    assert a['status']==b['status']=='PASS' and a['run_id']!=b['run_id']
+    assert v['content_id']==original
+    Path(q['circuit']).write_text(Path(q['circuit']).read_text()+'\n* changed physical input\n')
+    with pytest.raises(r.ResearchError,match='CHANGED_SINCE_SAMPLING'):
+        execute(ROOT,Path('/usr/local/bin/ngspice'),tmp_path/'runs',q2,v)
+
+
+def test_controlled_startup_overrides_unbound_host_setting(tmp_path,monkeypatch):
+    monkeypatch.setenv('SPICE_SCRIPTS',str(tmp_path/'unbound-host-startup'))
+    q=pair_request(tmp_path/'pair.cir','n',1e-6,1.2e-7,.02)
+    report=execute(ROOT,Path('/usr/local/bin/ngspice'),tmp_path/'runs',q,raw_realization(q,[[0,0],[0,0]]))
+    assert report['status']=='PASS'
+    tool=report['subject']['tool']
+    assert tool['environment']['SPICE_SCRIPTS']==str(Path(tool['system_spinit']['path']).parent)
+    assert tool['system_spinit']['sha256'] and tool['num_threads']==1
+
+
+def test_failed_measurement_keeps_executed_run_receipt(tmp_path):
+    from apm.research_spice import measure
+    q=pair_request(tmp_path/'pair.cir','p',1e-6,1.2e-7,.02)
+    q['devices'][0]['path']=['xtop','xmissing']
+    with pytest.raises(r.ResearchError) as caught:
+        measure(ROOT,Path('/usr/local/bin/ngspice'),tmp_path/'runs',q,[[0,0],[0,0]])
+    report=caught.value.run_report
+    assert report['status']=='FAIL' and (Path(report['directory'])/'run.json').is_file()
+
+
+def test_unsupported_variation_mode_is_an_error():
+    q={'schema':r.SCHEMAS['request'],'devices':[device()],'mode':'global'}
+    with pytest.raises(r.ResearchError,match='UNSUPPORTED_REQUEST'):
+        r.sample(fixture(),q,1,0,None)

@@ -89,11 +89,10 @@ v5 complete with only artificial profiles.
 
 ## Bootstrap and version identity
 
-This handoff changes instructions, not installed software. Source metadata is
-still `4.0.0+main` until Codex's first coherent implementation commit.
-That commit shall migrate current mission/version checks and mutable guidance to
-v5, set project/runtime/CLI identity to `5.0.0.dev0`, and restore ordinary current
-validation without weakening legacy integrity or numerical tests. Tests that
+The instruction handoff began with `4.0.0+main` source metadata. The completed
+bootstrap migrated mission/version checks and mutable guidance to v5, set
+project/runtime/CLI identity to `5.0.0.dev0`, and restored current validation
+without weakening legacy integrity or numerical tests. Tests that
 assert the old maintenance mission are not perpetual requirements; migrate those
 specific assertions with explicit replacement tests. Do not run old release
 workflows against new live guidance and then edit frozen records to make them pass.

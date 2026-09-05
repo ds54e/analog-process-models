@@ -17,7 +17,7 @@ from .research_numerics import (
     canonical_hash,
     local_jacobian,
 )
-from .research_spice import MODELS, measure, pair_request
+from .research_spice import MODELS, measure, pair_request, spice_context
 
 POWERS = [(i,j) for i in range(6) for j in range(6-i)]
 
@@ -34,14 +34,17 @@ class ReferenceMapper:
     def __init__(self, root: Path, binary: Path, output: Path, profile: dict):
         self.root,self.binary,self.output,self.profile=root,binary,output,profile
         self.maps={}
+        self.tool=spice_context(binary)
 
     def calibrate(self, device):
         geometry={k:device[k] for k in ('polarity','w_m','l_m','family')}
+        if str(self.binary.resolve())!=self.tool['binary'] or digest(self.binary)!=self.tool['sha256'] or digest(Path(self.tool['system_spinit']['path']))!=self.tool['system_spinit']['sha256']:
+            raise ResearchError('SIMULATOR_CHANGED_DURING_MAPPING')
         subject={'geometry':geometry,'profile':self.profile,'method':MAPPING_METHOD,
-            'extractor':MG_METHOD,'binary_sha256':digest(self.binary),
+            'extractor':MG_METHOD,'tool':self.tool,
             'model_hashes':{p:digest(self.root/p) for p in MODELS},
             'implementation':{p:digest(Path(__file__).parent/p) for p in
-                              ('research_mapping.py','research_numerics.py','research_spice.py')}}
+                              ('research.py','research_mapping.py','research_numerics.py','research_spice.py')}}
         key=canonical_hash(subject)
         if key in self.maps:
             return self.maps[key]

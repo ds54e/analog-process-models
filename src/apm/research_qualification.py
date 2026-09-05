@@ -160,7 +160,10 @@ def statistics_geometry(root,binary,plan,profile,mapper,output,pol,w,l):
                     'q':q.tolist(),'target':target.tolist(),'currents':currents,'run':report['run_id'],
                     'report_sha256':digest(Path(report['directory'])/'run.json')}
         except (ResearchError,OSError,ValueError) as error:
-            return {'index':index,'status':'FAIL','error':str(error)}
+            failed_report=getattr(error,'run_report',None)
+            binding={'run':failed_report['run_id'],
+                     'report_sha256':digest(Path(failed_report['directory'])/'run.json')} if failed_report else {}
+            return {'index':index,'status':'FAIL','error':str(error),**binding}
     with ThreadPoolExecutor(plan['workers']) as pool:rows=list(pool.map(run,range(n)))
     save(output/'cohort.json',{'requested':n,'rows':rows})
     failed=[x for x in rows if x['status']!='PASS']

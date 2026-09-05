@@ -39,8 +39,8 @@ APM v1.0.0, v2.0.0, v3.0.0, and v4.0.0 are released and immutable.
 Do not modify, move, recreate, or delete a released tag. Do not amend tagged
 commits, rewrite published history, or force-push. Current `main` is the active
 v5 implementation line under `GOAL.md`, not the immutable v4 release source.
-The instruction handoff still has `4.0.0+main` software; the first coherent v5
-implementation change must migrate current checks and metadata to `5.0.0.dev0`.
+The v5 bootstrap migrated the handoff identity `4.0.0+main` and current checks
+to `5.0.0.dev0`; implementation now uses the authorized v5 lifecycle.
 Use plain `5.0.0` only for a frozen candidate. Exact source identity is a Git
 commit plus clean-tree/snapshot and input hashes, not a version label alone.
 Creating or publishing v5 requires the separate candidate approval specified in

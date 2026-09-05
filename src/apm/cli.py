@@ -123,6 +123,12 @@ def build_parser() -> argparse.ArgumentParser:
             "from an attested fresh clone"
         ),
     )
+    release_mode.add_argument(
+        "--release-v5",
+        choices=("candidate",),
+        metavar="PHASE",
+        help="Qualify an exact fresh v5 candidate; never create a tag or publish",
+    )
     p_validate.add_argument(
         "--output",
         type=Path,
@@ -278,6 +284,9 @@ def main() -> int:
                 result = validate_release(args.output)
             elif args.release_v4:
                 result = validate_release_v4(args.output, phase=args.release_v4)
+            elif args.release_v5:
+                from .release_validate_v5 import validate_release_v5
+                result = validate_release_v5(args.output)
             else:
                 result = validate_maintenance_repository(args.output)
             print(

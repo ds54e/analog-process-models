@@ -131,10 +131,19 @@ def draw_device(profile: dict, device: dict, seed: int, index: int) -> dict:
         'status': 'OUT_OF_SCOPE' if np.max(np.abs(z)) > 6 or q[1] <= -1 else 'DRAWN'}
 
 
+def sample_context(request: dict) -> str:
+    """Bind physical inputs separately from the independently hashed run recipe."""
+    allowed = {'schema', 'circuit', 'devices', 'analyses', 'other_variation_leaves'}
+    if set(request) - allowed:
+        raise ResearchError('UNSUPPORTED_REQUEST_FIELDS_OR_VARIATION_MODE')
+    return canonical_hash({k:v for k,v in request.items() if k != 'analyses'})
+
+
 def sample(profile: dict, request: dict, seed: int, index: int, mapper) -> dict:
     if request.get('schema') != SCHEMAS['request']:
         raise ResearchError('REQUEST_SCHEMA_INVALID')
     devices = validate_devices(request['devices'])
+    context_id = sample_context(request)
     assigned = {'.'.join(d['path']).lower() for d in devices}
     for other in request.get('other_variation_leaves', []):
         if other.lower() in assigned:
@@ -159,5 +168,6 @@ def sample(profile: dict, request: dict, seed: int, index: int, mapper) -> dict:
         realized.append(item)
     return seal({'schema':SCHEMAS['realization'], 'profile_id':canonical_hash(profile),
         'profile_tier':profile['tier'],'origin':'research','excluded_effects':EXCLUDED,
-        'request_id':canonical_hash(request),'input_binding':binding,'seed':seed,'sample_index':index,
+        'request_id':canonical_hash(request),'sample_context_id':context_id,
+        'input_binding':binding,'seed':seed,'sample_index':index,
         'devices':realized,'status':'RESOLVED' if all(d['status']=='RESOLVED' for d in realized) else 'FAILED'})

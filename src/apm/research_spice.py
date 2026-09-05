@@ -13,7 +13,7 @@ from pathlib import Path
 import numpy as np
 
 from .compiler_provenance import digest
-from .research import SCHEMAS, save, seal, validate_devices, verify
+from .research import SCHEMAS, sample_context, save, seal, validate_devices, verify
 from .research_numerics import ResearchError, canonical_hash, extract_mg
 
 MODELS = ('models/apm045/vendor/freepdk45/NMOS_VTG.inc',
@@ -23,6 +23,25 @@ IDENT = r'[a-zA-Z][a-zA-Z0-9_]*'
 VECTOR = re.compile(r'(?:i\('+IDENT+r'\)|v\('+IDENT+r'(?:,'+IDENT+r')?\))', re.IGNORECASE)
 DIAGNOSTIC = re.compile(r'^\s*(?:error\b|fatal\b|warning:|.*simulation interrupted)[^\n]*', re.IGNORECASE|re.MULTILINE)
 PARAMS = ('w','l','delvto','mulu0','m','nf')
+
+
+def spice_context(binary: Path) -> dict:
+    """Explicitly select and observe system startup; -n only disables user init."""
+    data = binary.resolve().parent.parent/'share/ngspice'
+    spinit = data/'scripts/spinit'
+    if not spinit.is_file():
+        raise ResearchError('REFERENCE_SYSTEM_SPINIT_UNAVAILABLE')
+    context = {'binary':str(binary.resolve()),'sha256':digest(binary),
+        'version':subprocess.check_output([str(binary),'--version'],text=True).strip(),
+        'system_spinit':{'path':str(spinit),'sha256':digest(spinit)},
+        'num_threads':1,'environment':{'LC_ALL':'C','OMP_NUM_THREADS':'1',
+            'SPICE_SCRIPTS':str(data/'scripts'),'SPICE_LIB_DIR':str(data),
+            'NGSPICE_INPUT_DIR':str(data)},
+        'startup_policy':'Known binary-prefix system startup; user init disabled by -n',
+        'openvaf':'NOT_USED_NATIVE_BSIM4'}
+    if not re.search(r'ngspice-47\b',context['version']):
+        raise ResearchError('REFERENCE_NGSPICE_47_REQUIRED')
+    return context
 
 
 def leaf(device: dict) -> str:
@@ -98,7 +117,7 @@ def read_values(log,devices,prefix,raws):
 def execute(root: Path, binary: Path, output: Path, request: dict, realization: dict,
             *, temperature_c: float = 26.85, timeout: float = 60) -> dict:
     verify(realization,SCHEMAS['realization'])
-    if realization['request_id'] != canonical_hash(request) or realization['status'] != 'RESOLVED':
+    if realization.get('sample_context_id') != sample_context(request) or realization['status'] != 'RESOLVED':
         raise ResearchError('REALIZATION_REQUEST_MISMATCH_OR_FAILED')
     devices=validate_devices(request['devices'])
     if len(devices)!=len(realization['devices']):
@@ -145,17 +164,11 @@ def execute(root: Path, binary: Path, output: Path, request: dict, realization: 
     deck='\n'.join(['* APM research-local typed recipe',model_text,body,
          f'.temp {temperature_c:.17g}', '.options reltol=1e-7 abstol=1e-15 vntol=1e-9',
          '.control',*commands,'quit','.endc','.end',''])
-    spinit=binary.resolve().parent.parent/'share/ngspice/scripts/spinit'
-    tool={'binary':str(binary.resolve()),'sha256':digest(binary),
-          'version':subprocess.check_output([str(binary),'--version'],text=True).strip(),
-          'system_spinit':{'path':str(spinit),'sha256':digest(spinit) if spinit.is_file() else None},
-          'num_threads':1,'environment':{'LC_ALL':'C','OMP_NUM_THREADS':'1'},
-          'openvaf':'NOT_USED_NATIVE_BSIM4'}
-    if not re.search(r'ngspice-47\b',tool['version']):
-        raise ResearchError('REFERENCE_NGSPICE_47_REQUIRED')
+    tool=spice_context(binary)
     subject={'realization_id':realization['content_id'],'request':request,'input_files':manifest,
              'tool':tool,'temperature_c':temperature_c,'deck_sha256':canonical_hash(deck),
-             'runner_sha256':digest(Path(__file__)), 'timeout_seconds':timeout}
+             'runner_sha256':digest(Path(__file__)), 'timeout_seconds':timeout,
+             'support_code_sha256':{p:digest(Path(__file__).parent/p) for p in ('research.py','research_numerics.py')}}
     run_id=canonical_hash(subject); path=output/run_id
     if path.exists():
         try:
@@ -249,12 +262,17 @@ Xb db g s s apm045_vtg_{'nmos' if polarity=='n' else 'pmos'} w={w:.17g} l={l:.17
 
 def raw_realization(request: dict, raws) -> dict:
     return seal({'schema':SCHEMAS['realization'],'request_id':canonical_hash(request),
+                 'sample_context_id':sample_context(request),
                  'status':'RESOLVED','origin':'research','profile_tier':'ARTIFICIAL',
                  'devices':[{**d,'raw':list(map(float,x))} for d,x in zip(request['devices'],raws)]})
 
 
 def measure(root, binary, output, request, raws, *, realization=None):
     report=execute(root,binary,output,request,realization or raw_realization(request,raws))
-    u,a,b=curve(report)
-    return np.array([[m.vth_mg_v,m.beta_mg_a_per_v2]
-                     for m in (extract_mg(u,a),extract_mg(u,b))]),report
+    try:
+        u,a,b=curve(report)
+        return np.array([[m.vth_mg_v,m.beta_mg_a_per_v2]
+                         for m in (extract_mg(u,a),extract_mg(u,b))]),report
+    except (ResearchError,OSError,ValueError) as error:
+        error.run_report=report
+        raise

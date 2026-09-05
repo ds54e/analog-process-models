@@ -4,7 +4,7 @@
 schema = "apm.release-gates.v5"
 target = "v5.0.0"
 contract_status = "ACTIVE_IMPLEMENTATION_SPECIFICATION"
-evaluator_status = "NOT_IMPLEMENTED_BY_THIS_HANDOFF"
+evaluator_status = "IMPLEMENTED_FAIL_CLOSED_CANDIDATE_EVALUATOR"
 technical_contract = "V5_RESEARCH_VARIATION.md"
 source_registry = "variation/research/apm045/sources.toml"
 

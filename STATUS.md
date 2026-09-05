@@ -45,16 +45,16 @@ Reports: `validation/evidence/v5_preflight_findings.json` and
 | OpenVAF source-pin check | FAILED | Actual source differed from expected; native VTG experiments did not use it. |
 
 The source audit retrieved the 2022 thesis and distinguished ST40 LVT data from
-the companion TSMC40 standard-Vt data. The companion is the next independent
-candidate, not a correction. Its numeric profile remains unapproved, including
-geometry and extraction-transfer checks. Source uncertainty must remain separate
-from artificial implementation tests.
+the companion TSMC40 standard-Vt data. At preflight completion the companion was an unapproved independent candidate.
+The current independent adoption decision is linked above; it does not correct
+or unblock the original ST40 data. Source uncertainty remains separate from
+artificial implementation tests.
 
 The prior host used source `6a93e9500c07830d1e8a19abdeda8f447f935556`
 versus expected `fdf2522b70f42793f64b1c72f0195c96dea0cc19`.
-`src/apm/model_build.py` writes the configured revision unconditionally. The live
-implementation may now repair this defect, but must preserve historical reports
-and inspect the next host rather than assuming the old environment persists.
+The former `src/apm/model_build.py` wrote the configured revision unconditionally.
+The current implementation repairs that defect using observed build receipts,
+without changing the expected pin or the historical reports.
 
 ## Current implementation progress
 
@@ -71,8 +71,10 @@ summary initially contained generic workspace paths; the distribution check fail
 and the live summary now uses relative paths while retaining unchanged raw hashes.
 `apm validate` also passed against the implementation snapshot; its hash and
 development run references are in `validation/evidence/v5_runtime_development.json`.
-The source tree and full confirmation plan are frozen together for confirmation;
-full source-qualified statistical/circuit/tail and candidate gates remain NOT_RUN.
+The initial committed confirmation passed the sampler, all 22 mapping cases
+and all 11 N statistics cases. It was deliberately interrupted to complete run
+context hardening before the exact candidate. Its P statistics and later suites
+are not passes. The full fixed plan will run at the independent fresh candidate.
 Raw development runs are under `.apm/v5/development/`.
 
 Required remaining work: execute the committed numerical plan, all independent
@@ -94,3 +96,21 @@ The complete previous status and phase-specific restrictions remain in Git at
 `bbb585306f13614b7649c36dd5b7510c845daed9:STATUS.md` and `GOAL.md`.
 This new mission does not retroactively change their evidence or authorize any
 rewrite of v4 model-generation or release history.
+
+## Candidate evaluator development
+
+The v5 evaluator and fresh-clone attestation helper are implemented. Twenty
+focused acceptance tests reject missing, duplicate, stale, corrupt and non-PASS
+evidence; post-tag approval is not a candidate dependency. A charge-conservation
+regression includes a deliberately nonconserving negative control. Eight local
+N/P temperature replays passed native terminal-charge conservation and unchanged
+raw readbacks. These are development checks, not fresh-candidate qualification.
+The procedure is `docs/release-readiness-v5.md`.
+
+The tightened runtime has 194 passing repository tests and 39 separate preflight
+tests, with no skips. The first separate-suite evaluator invocation failed
+collection because its import path was omitted; the corrected documented path
+passes. Same-raw N/P replay and charge checks and all four IO assessments passed
+execution after startup binding changes. Initial confirmation/interruption and
+legacy real-tool evidence are hash-linked in
+`validation/evidence/v5_evaluator_development.json`.
