@@ -4,7 +4,7 @@
 
 Security and provenance maintenance targets the latest released line and
 current `main`. APM v4.0.0 is the latest completed release, and `main` is its
-post-release public-maintenance line. All released tags are immutable and
+active v5 implementation line. All released tags are immutable and
 retained for reproducibility; fixes are normally made on `main` rather than by
 moving a released tag or rewriting published history.
 

@@ -1,0 +1,23 @@
+{
+  "schema": "apm.v5-development-evidence.v1",
+  "stage": "mission-bootstrap",
+  "base_commit": "73ee51cc19586a5a30b1fb03edec0cf3ae045c89",
+  "version": "5.0.0.dev0",
+  "status": "pass",
+  "validation": {
+    "path": ".apm/v5/bootstrap-validation/report.json",
+    "sha256": "04894db873fdaf06192e17e14cee034f06dc3a40dbeafabd6dd39dfe68da97d2",
+    "checks": {
+      "current_regression_commands": true,
+      "repository_audits": true,
+      "spectre_structural": true,
+      "v3_regression": true
+    }
+  },
+  "pytest": "120 passed; no skips",
+  "legacy_v4_frozen_files": 52,
+  "preflight_frozen_files": 13,
+  "candidate_status": "NOT_READY",
+  "source_profile": "UNAPPROVED",
+  "toolchain": "Controlled pinned checkout obtained; build pending. Host provenance is not qualified."
+}

@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: APM contributors
 # SPDX-License-Identifier: Apache-2.0
 
-"""Fail-closed validation for the live post-v4 maintenance tree."""
+"""Fail-closed current-mission validation preserving immutable release baselines."""
 
 from __future__ import annotations
 
@@ -221,6 +221,9 @@ def audit_current_guidance(root: Path) -> dict[str, Any]:
         "README.md",
         "SECURITY.md",
         "models/apm045/README.md",
+        "V5_RESEARCH_VARIATION.md",
+        "validation/release_gates_v5.toml",
+        "variation/research/apm045/sources.toml",
     )
     agents = _read(root, "AGENTS.md")
     positioning = _read(root, "APM045_POSITIONING.md")
@@ -248,32 +251,39 @@ def audit_current_guidance(root: Path) -> dict[str, Any]:
         )
         if re.search(pattern, public_text)
     ]
+    try:
+        contract = tomllib.loads(_read(root, "validation/release_gates_v5.toml"))
+    except (ValueError, OSError):
+        contract = {}
+    authorization = contract.get("authorization", {})
+    identity = contract.get("identity", {})
     checks = {
         "required_current_documents_present": all(
             (root / relative).is_file() for relative in required_paths
         ),
-        "goal_is_post_v4_maintenance": _matches(
+        "goal_is_active_v5": _matches(
             normalized_goal,
-            r"^# post-v4 release maintenance\b",
-            r"current `main` is the post-v4 .*maintenance line",
-        )
-        and not re.search(r"complete and release \*\*APM v4\.0\.0\*\*", normalized_goal),
+            r"# APM v5\.0\.0: Research Local Mismatch",
+            r"Implement and qualify APM v5\.0\.0",
+            r"V5_RELEASE_READY",
+            r"separate explicit user approval",
+        ),
         "goal_preserves_released_semantics": _matches(
             normalized_goal,
-            r"preserv\w* .*model bytes",
-            r"changing released model/evidence semantics",
-            r"must not update a historical release review",
+            r"Do not modify Benchmark v2 distributions",
+            r"native variation semantics",
+            r"nominal model cards/wrappers/manifests",
+            r"frozen v1-v4 records",
         ),
-        "policy_identifies_frozen_v4_authority": all(
-            _matches(
-                document,
-                re.escape(V4_FROZEN_AUTHORITY_COMMIT),
-                r"tools/modelgen/apm045_mixed_voltage/",
-                r"models/apm045/families/io18/.*models/apm045/families/io25/",
-            )
-            for document in (normalized_agents, normalized_goal)
-        )
-        and _matches(normalized_agents, r"historical/release records"),
+        "candidate_publication_boundary": authorization.get("implementation") is True
+        and authorization.get("candidate_qualification") is True
+        and authorization.get("create_tag") is False
+        and authorization.get("publish_release") is False,
+        "policy_identifies_frozen_v4_authority":
+            V4_FROZEN_AUTHORITY_COMMIT in normalized_agents
+            and identity.get("frozen_v4_authority") == V4_FROZEN_AUTHORITY_COMMIT
+            and identity.get("frozen_v4_tag_object") == V4_TAG_OBJECT
+            and identity.get("frozen_v4_tagged_commit") == V4_TAGGED_COMMIT,
         "positioning_has_inline_spdx": positioning.startswith(
             "<!-- SPDX-FileCopyrightText: APM contributors -->\n"
             "<!-- SPDX-License-Identifier: Apache-2.0 -->\n"
@@ -311,23 +321,23 @@ def audit_current_guidance(root: Path) -> dict[str, Any]:
         "security_names_latest_release": _matches(
             normalized_security,
             r"APM v4\.0\.0 is the latest completed release",
-            r"post-release public-maintenance line",
+            r"active v5 implementation line",
         ),
         "environment_separates_current_and_historical_flows": _matches(
             normalized_environment,
             r"historical v4 release qualification boundary",
-            r"current maintenance validation",
-            r"unflagged `apm validate` checks the live post-v4 maintenance tree",
+            r"current v5 validation",
+            r"unflagged `apm validate` checks the active v5 mission",
         ),
         "readme_separates_current_and_historical_flows": _matches(
             normalized_readme,
             r"frozen historical records rather than current implementation instructions",
             r"does not reinterpret or update a completed release review",
-            r"4\.0\.0\+main",
+            r"5\.0\.0\.dev0",
         ),
         "no_prohibited_public_claims": not prohibited_patterns,
     }
-    result = _check_map(checks, context="live post-v4 maintenance guidance")
+    result = _check_map(checks, context="active v5 guidance and preserved released claims")
     result.update(
         {
             "reviewed_paths": list(required_paths),
@@ -529,13 +539,16 @@ def audit_maintenance_package_identity(root: Path) -> dict[str, Any]:
         tagged_project = tagged_runtime = tagged_cli = "missing"
         source_error = str(error)
     expected_release = V4_TAG.removeprefix("v")
-    expected_main = f"{expected_release}+main"
+    # Lifecycle configuration is explicit: arbitrary versions and v4 +main fail.
+    allowed_current = {"5.0.0.dev0", "5.0.0"}
+    expected_main = current_project
+
     checks = {
         "tagged_source_retains_release_identity": tagged_project
         == tagged_runtime
         == tagged_cli
         == expected_release,
-        "main_has_explicit_nonrelease_identity": current_project == expected_main,
+        "main_has_explicit_v5_lifecycle_identity": current_project in allowed_current,
         "runtime_version_matches_main_identity": __version__ == expected_main,
         "installed_distribution_matches_main_identity": installed == expected_main,
         "executed_cli_matches_main_identity": cli_returncode == 0
@@ -547,12 +560,12 @@ def audit_maintenance_package_identity(root: Path) -> dict[str, Any]:
         "validator_source_is_selected_repository": Path(__file__).resolve()
         == (root / "src/apm/maintenance_validate.py").resolve(),
     }
-    result = _check_map(checks, context="post-release main package/version identity")
+    result = _check_map(checks, context="v5 development/candidate package identity and frozen v4 identity")
     result.update(
         {
             "policy": (
-                "PEP 440 local +main distinguishes post-release source from the "
-                "immutable public release; the reported source snapshot supplies exact identity"
+                "5.0.0.dev0 identifies development; 5.0.0 identifies an untagged candidate. "
+                "Exact identity is supplied by the recorded Git/worktree snapshot."
             ),
             "release_version": expected_release,
             "main_version": expected_main,
@@ -683,6 +696,45 @@ def audit_frozen_v4_artifacts(root: Path) -> dict[str, Any]:
     return result
 
 
+PREFLIGHT_COMMIT = "bbb585306f13614b7649c36dd5b7510c845daed9"
+PREFLIGHT_PATHS = (
+    "V5_PREFLIGHT.md", "tools/v5_preflight",
+    "validation/evidence/v5_preflight_preparation.json",
+    "validation/evidence/v5_preflight_findings.json",
+    "validation/evidence/v5_preflight_source_audit.md",
+)
+
+
+def audit_frozen_preflight(root: Path) -> dict[str, Any]:
+    """Preserve the completed exploratory snapshot, including inventories/modes."""
+    raw = _git(root, "ls-tree", "-r", PREFLIGHT_COMMIT, "--", *PREFLIGHT_PATHS)
+    expected = {}
+    for line in raw.splitlines():
+        metadata, path = line.split("\t", 1)
+        mode, kind, blob = metadata.split()
+        expected[path] = {"mode": mode, "blob": blob, "kind": kind}
+    current = {}
+    for line in _git(root, "ls-files", "--stage", "--", *PREFLIGHT_PATHS).splitlines():
+        metadata, path = line.split("\t", 1)
+        mode, _, stage = metadata.split()
+        current[path] = {"mode": mode, "stage": stage}
+    mismatched = []
+    for path, entry in expected.items():
+        content = _worktree_bytes(root/path)
+        if (content is None or content != _git_object_bytes(root, PREFLIGHT_COMMIT, path)
+                or current.get(path) != {"mode": entry["mode"], "stage": "0"}):
+            mismatched.append(path)
+    paths = set(_git(root, "ls-files", "--cached", "--others", "--exclude-standard",
+                     "--", *PREFLIGHT_PATHS).splitlines())
+    checks = {"inventory_exact": bool(expected) and set(expected) == set(current) == paths,
+              "bytes_modes_exact": not mismatched,
+              "preflight_in_history": _is_ancestor(root, PREFLIGHT_COMMIT, "HEAD")}
+    result = _check_map(checks, context="immutable completed preflight snapshot")
+    result.update(authority_commit=PREFLIGHT_COMMIT, artifact_count=len(expected),
+                  mismatches=mismatched)
+    return result
+
+
 def run_maintenance_static_audits(root: Path, output: Path) -> dict[str, Any]:
     """Run the ordinary static/regression suite against current maintenance guidance."""
 
@@ -733,6 +785,7 @@ def run_maintenance_static_audits(root: Path, output: Path) -> dict[str, Any]:
         "distribution": audit_distribution(root),
         "current_guidance": audit_current_guidance(root),
         "frozen_v4_artifacts": frozen_v4,
+        "frozen_preflight": audit_frozen_preflight(root),
         "released_public_evidence_integrity": audit_public_evidence(
             root, released_contract
         ),

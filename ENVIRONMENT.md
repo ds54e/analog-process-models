@@ -78,7 +78,7 @@ When code/model bindings change, rebuild only affected generated artifacts as re
 
 If an existing artifact's source/binding/revision changes, do not assume its v1 binary remains valid; rebuild and record the new dependency chain.
 
-## Current maintenance validation
+## Current v5 validation
 
 Use the reusable project-local environment for ordinary current-tree work:
 
@@ -87,7 +87,7 @@ Use the reusable project-local environment for ordinary current-tree work:
 .venv/bin/apm validate
 ```
 
-Unflagged `apm validate` checks the live post-v4 maintenance tree. The
+Unflagged `apm validate` checks the active v5 mission and preserved release baselines. The
 `--release` and `--release-v4` modes preserve their completed release-era
 meaning and are not ordinary maintenance gates.
 
@@ -130,3 +130,14 @@ assumed for post-release maintenance.
 Spectre remains model-only experimental/unverified unless real Spectre access is actually available and intentionally used.
 
 Virtuoso integration remains out of scope.
+
+## V5 observed compiler provenance
+
+The required OpenVAF source pin remains
+`fdf2522b70f42793f64b1c72f0195c96dea0cc19`. Expected configuration is not proof of
+an observed build. V5 requires a controlled build receipt binding clean source,
+compiler binary, Rust/LLVM configuration and OSDI outputs. An installed compiler
+with unknown or different provenance cannot qualify the release toolchain.
+Native-BSIM4 research execution is independent of OpenVAF; report that boundary.
+Build repairs belong in ignored project-local prefixes; retain the user's system
+compiler and all prior evidence.

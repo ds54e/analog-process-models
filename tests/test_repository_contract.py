@@ -52,7 +52,7 @@ EXPECTED_FAMILIES = {
 }
 
 
-def test_post_v4_goal_and_historical_document_status_are_explicit() -> None:
+def test_v5_goal_and_historical_document_status_are_explicit() -> None:
     agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
     goal = (ROOT / "GOAL.md").read_text(encoding="utf-8")
     normalized_goal = " ".join(goal.split())
@@ -65,17 +65,13 @@ def test_post_v4_goal_and_historical_document_status_are_explicit() -> None:
     assert "d224f279921c7e1ae637fd867e00d450067766c6" in agents
     assert "v4.0.0 exact-tag requalification: 16/16 required gates passed" in agents
     assert "The repository is public" in agents
-    assert goal.startswith("# Post-v4 release maintenance")
-    assert (
-        "Current `main` is the post-v4 public-maintenance line."
-        in normalized_goal
-    )
-    assert "APM v1.0.0 through v4.0.0 are released and immutable" in normalized_goal
-    assert "Complete and release **APM v4.0.0**" not in goal
-    assert "must not update a historical release review" in normalized_goal
-    assert "changing released model/evidence semantics" in normalized_goal
-    assert "validation/evidence/v4_release_candidate.json" in goal
-    assert "validation/evidence/v4_post_release_requalification.json" in goal
+    assert "# APM v5.0.0: Research Local Mismatch" in goal
+    assert "Implement and qualify APM v5.0.0" in normalized_goal
+    assert "separate explicit user approval" in normalized_goal
+    assert "V5_RELEASE_READY" in normalized_goal
+    assert "Do not modify Benchmark v2 distributions" in normalized_goal
+    assert "native variation semantics" in normalized_goal
+    assert "frozen v1-v4 records" in normalized_goal
 
     for frozen in (
         "V4_MIXED_VOLTAGE.md",
@@ -85,7 +81,7 @@ def test_post_v4_goal_and_historical_document_status_are_explicit() -> None:
         "validation/evidence/v4_*.json",
     ):
         assert frozen in agents
-    assert "it is not current technical instruction" in " ".join(agents.split())
+    assert "phase-specific wording is historical, not current instruction" in " ".join(agents.split())
 
     historical_markers = {
         "RELEASE_V3.md": "Historical record — frozen V3-N3 candidate contract",
@@ -159,7 +155,7 @@ def test_current_guidance_audit_fails_closed_on_completed_goal(tmp_path: Path) -
     )
     result = audit_current_guidance(tmp_path)
     assert result["status"] == "fail"
-    assert "goal_is_post_v4_maintenance" in result["failed_checks"]
+    assert "goal_is_active_v5" in result["failed_checks"]
 
 
 def test_frozen_v4_audit_fails_closed_on_byte_drift(
@@ -196,6 +192,17 @@ def test_psp_product_documentation_acknowledgement_is_preserved() -> None:
     normalized = " ".join(terms.split())
     assert "right to modify, copy, and redistribute" in normalized
     assert "acknowledge NXP Semiconductors" in normalized
+
+
+def test_preflight_bytes_remain_immutable(monkeypatch: pytest.MonkeyPatch) -> None:
+    assert maintenance_validate.audit_frozen_preflight(ROOT)["status"] == "pass"
+    original = maintenance_validate._worktree_bytes
+    target = ROOT / "tools/v5_preflight/run_spike.py"
+    monkeypatch.setattr(maintenance_validate, "_worktree_bytes",
+                        lambda path: b"changed" if path == target else original(path))
+    result = maintenance_validate.audit_frozen_preflight(ROOT)
+    assert result["status"] == "fail"
+    assert result["mismatches"] == ["tools/v5_preflight/run_spike.py"]
 
 
 def load_toml(relative: str) -> dict:

@@ -1,6 +1,6 @@
 """Analog Process Models (APM).
 
-The current maintenance goal lives in GOAL.md and repository policy in AGENTS.md.
+The current implementation goal lives in GOAL.md and repository policy in AGENTS.md.
 """
 
-__version__ = "4.0.0+main"
+__version__ = "5.0.0.dev0"

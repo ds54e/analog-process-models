@@ -7,24 +7,22 @@ Execution evidence, not this index alone, supports validation and release claims
 
 ## Current mission: v5 full implementation
 
-State: IMPLEMENTATION AUTHORIZED / HANDOFF PREPARED / RELEASE NOT READY.
+State: IMPLEMENTATION IN PROGRESS / RELEASE NOT READY.
 
-`GOAL.md`, `V5_RESEARCH_VARIATION.md`, `validation/release_gates_v5.toml` and
-`variation/research/apm045/sources.toml` now define full v5 implementation and
-candidate qualification. `tools/CODEX_V5_PROMPT.md` is the launch instruction.
-The earlier preflight-only restriction is historical. Creating/publishing a new
-tag remains subject to separate candidate approval.
+Current source/runtime/CLI identity is `5.0.0.dev0`. The first implementation
+change replaces obsolete maintenance-only assertions with the authorized v5
+mission and adds an immutable preflight snapshot audit. All 52 frozen v4 files,
+released compatibility checks and model inputs remain protected.
 
-This update supplies instructions and declarative gates only. Runtime/version
-metadata is still `4.0.0+main`; Codex's first coherent implementation change must
-migrate active mission checks and runtime identity to `5.0.0.dev0`. The old
-maintenance-only string/version assertions are not evidence for the new mission.
-Do not describe this handoff as a passing full-repository validation.
+Executed bootstrap validation: `apm validate` passed, including 120 pytest tests
+(no skips), Ruff, REUSE, provenance, the 92-check v3 regression and structural
+Spectre checks. This is current repository compatibility evidence, not v5
+candidate qualification. See `validation/evidence/v5_bootstrap.json` and its
+hash-bound raw report under `.apm/v5/bootstrap-validation/`.
 
-Current handoff validation: see `validation/evidence/v5_implementation_handoff.json`.
-Real ngspice, full current pytest/Ruff/REUSE/provenance and candidate validation
-were NOT_RUN for this instruction update. No v5 evaluator or source profile is
-implemented/approved by the declarative files themselves.
+No measured research profile is approved. Controlled checkout of the required
+OpenVAF commit succeeded; compiler build and provenance repair are in progress.
+No v5 tag or release exists or is authorized by this implementation task.
 
 ## Completed preflight baseline
 

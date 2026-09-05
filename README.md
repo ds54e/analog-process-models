@@ -10,12 +10,14 @@ contracts and adds independently APM-authored `apm045/io18` and
 `apm045/io25` mixed-voltage research families. The live catalog contains 15
 electrical families and 30 public MOS devices across five technologies.
 
-Current post-release `main` packages identify themselves as **4.0.0+main**.
-That PEP 440 local suffix distinguishes a build from mutable maintenance source
-from the immutable 4.0.0 release; it does not declare a new release. Generated
-maintenance validation reports record the Git commit and an exact working-tree
-snapshot hash, and model/result records retain their input hashes for exact
-reproducibility.
+Current `main` implements the authorized v5 Research Local Mismatch mission and
+uses **5.0.0.dev0** during development. A frozen untagged candidate may use plain
+**5.0.0** only before candidate qualification. Tag creation and publication require
+separate approval after `V5_RELEASE_READY`; no v5 release is declared here.
+The active contract is [`V5_RESEARCH_VARIATION.md`](V5_RESEARCH_VARIATION.md).
+Current validation records exact Git/worktree and input/tool identities. Source
+adoption, configured-statistics reproduction and generic-model transfer remain
+separate; the original ambiguous Hart beta coefficients remain blocked.
 
 The immutable annotated `v4.0.0` release is tagged at
 `d224f279921c7e1ae637fd867e00d450067766c6`. Its exact candidate passed 15/15
@@ -313,7 +315,7 @@ For normal installation and current-tree confidence, users should run:
 .venv/bin/apm validate
 ```
 
-The unflagged command validates live maintenance guidance and the preserved
+The unflagged command validates the active v5 mission and the preserved
 released baseline. It does not reinterpret or update a completed release
 review.
 
