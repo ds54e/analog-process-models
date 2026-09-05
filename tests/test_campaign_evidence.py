@@ -1,11 +1,86 @@
 # SPDX-FileCopyrightText: 2026 APM contributors
 # SPDX-License-Identifier: Apache-2.0
 import json
+import sys
 
 import pytest
 
 from apm.campaign_support import inventory, verify_inventory
 from apm.compatibility import noise_names, physical_files
+
+
+@pytest.mark.parametrize('failed_step', ['clone', 'baseline-checkout'])
+def test_comparison_stops_dependent_work_after_failed_process(tmp_path, monkeypatch, failed_step):
+    from apm import campaign_support, compatibility
+
+    root = tmp_path / 'source'
+    (root / 'tools').mkdir(parents=True)
+    (root / 'tools/compatibility_probe.py').write_text('# fixture\n')
+    attempted = []
+
+    def execute(root, output, name, command, **kwargs):
+        assert failed_step not in attempted, 'Dependent work ran after a failed prerequisite'
+        attempted.append(name)
+        if name == failed_step:
+            return campaign_support.run(root, output, name, [sys.executable, '-c', 'raise SystemExit(7)'])
+        (tmp_path / 'comparison/fixed-input-source').mkdir(parents=True)
+        return {'returncode': 0, 'status': 'PASS'}
+
+    monkeypatch.setattr(compatibility, 'git_text', lambda *args: 'a' * 40)
+    monkeypatch.setattr(compatibility, 'run', execute)
+    with pytest.raises(RuntimeError, match='COMPARISON_EXECUTION_FAILED: ' + failed_step):
+        compatibility.execute_comparison(root, tmp_path / 'comparison')
+    receipt = json.loads((tmp_path / 'comparison/executions' / (failed_step + '.json')).read_text())
+    assert receipt['returncode'] == 7 and receipt['status'] == 'FAIL'
+
+
+def test_comparison_rejects_checkout_with_wrong_observed_commit(tmp_path, monkeypatch):
+    from apm import compatibility
+
+    root = tmp_path / 'source'
+    (root / 'tools').mkdir(parents=True)
+    (root / 'tools/compatibility_probe.py').write_text('# fixture\n')
+    attempted = []
+
+    def execute(root, output, name, command, **kwargs):
+        attempted.append(name)
+        assert name in ('clone', 'baseline-checkout'), 'Installed or executed the wrong source'
+        return {'returncode': 0, 'status': 'PASS'}
+
+    monkeypatch.setattr(compatibility, 'git_text', lambda *args: 'a' * 40)
+    monkeypatch.setattr(compatibility, 'run', execute)
+    with pytest.raises(RuntimeError, match='COMPARISON_SOURCE_IDENTITY_DRIFT'):
+        compatibility.execute_comparison(root, tmp_path / 'comparison')
+    assert attempted == ['clone', 'baseline-checkout']
+
+
+@pytest.mark.parametrize('status', ['validated', 'FAIL', 'NOT_VERIFIED'])
+def test_equal_partial_regressions_cannot_pass_comparison(tmp_path, monkeypatch, status):
+    from apm import compatibility
+    from apm.compiler_provenance import digest
+
+    for name in ('baseline', 'current'):
+        stage = tmp_path / name / 'electrical'
+        stage.mkdir(parents=True)
+        (stage / 'report.json').write_text(json.dumps({'status': status}))
+        (stage / 'terminal.csv').write_text('current_a\n1.0\n')
+        research = tmp_path / name / 'research'
+        research.mkdir()
+        (research / 'realization.json').write_text(json.dumps({'devices': []}))
+    legacy = tmp_path / 'baseline/research/realization.json'
+    record = {'status': 'PASS', 'profile_sha256': 'same-profile', 'imported_modules': {},
+              'runs': [{'arrays': [1.0], 'subject': {'tool': 'same-tool'}}] * 3,
+              'saved_original_path': str(legacy), 'saved_original_sha256': digest(legacy),
+              'saved_original_unchanged': True}
+    for name in ('baseline', 'current'):
+        (tmp_path / name / 'research/report.json').write_text(json.dumps(record))
+    (tmp_path / 'source-identities.json').write_text(json.dumps({'current': 'a' * 40}))
+    monkeypatch.setattr(compatibility, 'REGRESSIONS', {'electrical': 'characterization-check'})
+    monkeypatch.setattr(compatibility, 'noise_names', lambda folder: ([('old-id', 'physical-id')], []))
+    monkeypatch.setattr(compatibility.np, 'load', lambda path: [1.0])
+    report = compatibility.compare_outputs(tmp_path)
+    assert report['status'] == ('PASS' if status == 'validated' else 'FAIL')
+    assert report['records'][0]['checks']['exact_physical_files'] is True
 
 
 @pytest.mark.parametrize('fault', ['changed', 'missing', 'extra', 'symlink'])

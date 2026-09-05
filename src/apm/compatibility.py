@@ -115,9 +115,12 @@ def compare_outputs(output):
         mismatches = [k for k in sorted(shared) if digest(a[k]) != digest(b[k])
                       and physical_file(a[k], replacements['baseline']) != physical_file(b[k], replacements['current'])]
         missing = sorted(set(a) ^ set(b))
+        old_status = read(base / stage / 'report.json')['status']
+        new_status = read(current / stage / 'report.json')['status']
         stage_checks = {'exact_physical_files': bool(shared) and not missing and not mismatches,
-                        'same_failure_classification': read(base / stage / 'report.json')['status']
-                            == read(current / stage / 'report.json')['status']}
+                        'both_regressions_passed': old_status in ('PASS', 'pass', 'validated')
+                            and new_status in ('PASS', 'pass', 'validated'),
+                        'same_failure_classification': old_status == new_status}
         if stage == 'benchmark':
             old, new = read(base / stage / 'report.json'), read(current / stage / 'report.json')
             a = normalize({k: old[k] for k in BENCHMARK_FIELDS}, replacements['baseline'])
@@ -166,18 +169,29 @@ def execute_comparison(root, output):
     clone = output / 'fixed-input-source'
     logs = output / 'executions'
     current = git_text(root, 'rev-parse', 'HEAD')
-    run(root, logs, 'clone', ['git', 'clone', '--no-hardlinks', str(root), str(clone)])
+
+    def checked_run(cwd, name, command, **kwargs):
+        receipt = run(cwd, logs, name, command, **kwargs)
+        if receipt['returncode'] != 0 or receipt['status'] != 'PASS':
+            raise RuntimeError('COMPARISON_EXECUTION_FAILED: ' + name)
+        return receipt
+
+    checked_run(root, 'clone', ['git', 'clone', '--no-hardlinks', str(root), str(clone)])
     write_report(output / 'source-identities.json', {'baseline': BASELINE, 'current': current,
                  'method': 'Separate installed packages; sequential exact Git checkouts at identical absolute input paths',
                  'probe_sha256': digest(root / 'tools/compatibility_probe.py')})
     for name, commit in (('baseline', BASELINE), ('current', current)):
-        run(clone, logs, name + '-checkout', ['git', 'checkout', '--detach', commit])
+        checked_run(clone, name + '-checkout', ['git', 'checkout', '--detach', commit])
+        observed_commit = git_text(clone, 'rev-parse', 'HEAD')
+        write_report(logs / (name + '-source.json'), {'expected_commit': commit, 'observed_commit': observed_commit})
+        if observed_commit != commit:
+            raise RuntimeError('COMPARISON_SOURCE_IDENTITY_DRIFT: ' + name)
         folder, site = output / name, output / (name + '-site')
         folder.mkdir()
-        run(clone, logs, name + '-install', [sys.executable, '-m', 'pip', 'install', '--no-deps', '--target', str(site), str(clone)])
+        checked_run(clone, name + '-install', [sys.executable, '-m', 'pip', 'install', '--no-deps', '--target', str(site), str(clone)])
         env = {'APM_REPO_ROOT': str(clone), 'APM_STATE_DIR': str(folder / 'state'),
                'PYTHONPATH': str(site), 'OMP_NUM_THREADS': '1', 'OPENBLAS_NUM_THREADS': '1'}
-        identity = run(clone, logs, name + '-identity', [sys.executable, '-c',
+        identity = checked_run(clone, name + '-identity', [sys.executable, '-c',
             'import apm,importlib.metadata,json; print(json.dumps({"runtime":apm.__version__,"installed":importlib.metadata.version("analog-process-models"),"module":apm.__file__}))'], env=env)
         observed = read(identity['stdout'])
         from pathlib import Path
@@ -186,11 +200,11 @@ def execute_comparison(root, output):
         expected = tomllib.loads((clone / 'pyproject.toml').read_text())['project']['version']
         if observed['runtime'] != expected or observed['installed'] != expected or not Path(observed['module']).is_relative_to(site):
             raise ValueError('COMPARISON_PACKAGE_ISOLATION_FAILED')
-        run(clone, logs, name + '-build', [sys.executable, '-m', 'apm.cli', 'build-models'], env=env)
+        checked_run(clone, name + '-build', [sys.executable, '-m', 'apm.cli', 'build-models'], env=env)
         for stage, command in REGRESSIONS.items():
-            run(clone, logs, name + '-' + stage, [sys.executable, '-m', 'apm.cli', command, '--output', str(folder / stage)], env=env)
+            checked_run(clone, name + '-' + stage, [sys.executable, '-m', 'apm.cli', command, '--output', str(folder / stage)], env=env)
         args = [sys.executable, str(root / 'tools/compatibility_probe.py'), str(clone), str(folder / 'research')]
         if name == 'current':
             args += ['--legacy', str(output / 'baseline/research/realization.json')]
-        run(clone, logs, name + '-research', args, env=env)
+        checked_run(clone, name + '-research', args, env=env)
     return compare_outputs(output)

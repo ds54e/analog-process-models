@@ -1,0 +1,67 @@
+{
+  "before_implementation_sha256": "39852e6bec252dd5b7049d1a756d3b5b437ec069f474f3c1ca1a16cbbc0ba9f0",
+  "create_tag_authorized": false,
+  "current_validation": {
+    "scope": "Development source snapshot before evidence/STATUS summary edits; not clean candidate qualification.",
+    "skipped": 0,
+    "status": "PASS",
+    "tests_passed": 236
+  },
+  "earlier_campaigns": "Earlier exact candidates remain untouched and continue their independent work. Their reports are retained; the corrected candidate requires a complete fresh authoritative-clone campaign.",
+  "evidence": [
+    {
+      "path": ".apm/v6/comparison-prerequisite-repair/after.log",
+      "sha256": "70c90f2b8ff9f9ee2f4d3c3688e94323a3ad750f3c8f85d4c7ba531a6af69b43"
+    },
+    {
+      "path": ".apm/v6/comparison-prerequisite-repair/after.xml",
+      "sha256": "c939405bc0a0da14607b2acc913ce54f4cc0d8e93ae73682e8d97c6b4b7a60e4"
+    },
+    {
+      "path": ".apm/v6/comparison-prerequisite-repair/before.log",
+      "sha256": "a71dd3695b7d20d5e0088573ac6f716e351c56b4e2395d17c8e774dd7b8f8ea8"
+    },
+    {
+      "path": ".apm/v6/comparison-prerequisite-repair/before.xml",
+      "sha256": "ec3654ac7f1e1aa37d5d7e5ff3c7262eceaf1e818774d0db508362d8eb95db7f"
+    },
+    {
+      "path": ".apm/v6/comparison-prerequisite-repair/complete.log",
+      "sha256": "491c278e72f2e23b7d381a1c6211c294f3e730238ee538e12c1ccedbb5627627"
+    },
+    {
+      "path": ".apm/v6/comparison-prerequisite-repair/complete.xml",
+      "sha256": "69c863e60e9c918f28dbbe04f4ec96014e7e143b210d9a2a759641b3ce2dac6a"
+    },
+    {
+      "path": ".apm/v6/comparison-repair-validation/report.json",
+      "sha256": "66da7b690d98e0d761cffe7767572c40ec4eaba879c69f3cb6d891028d04929e"
+    },
+    {
+      "path": ".apm/v6/comparison-repair-validation/pytest.xml",
+      "sha256": "21a9c308aab2571fd7f14645901fed99cb9ace5284c78d9d5129111f294f60a7"
+    }
+  ],
+  "observed_mechanism": "Fault-injected clone/checkout processes exit 7, but the comparison launcher attempts dependent work. An incorrect observed checkout identity also reaches installation. Existing completed simulation commands were successful; this is a qualification failure-path defect, not observed numerical drift.",
+  "publish_release_authorized": false,
+  "repaired_cases": {
+    "log": ".apm/v6/comparison-prerequisite-repair/complete.log",
+    "new_cases": 6,
+    "passed": 12,
+    "skipped": 0
+  },
+  "repairs": [
+    "Check every preparation, installation, identity, build, regression and replay process exit before dependent work.",
+    "Record and verify the observed exact commit after each comparison checkout.",
+    "Matching physical fragments cannot qualify failed or unverified regression reports."
+  ],
+  "retained_before_cases": {
+    "failed": 3,
+    "log": ".apm/v6/comparison-prerequisite-repair/before.log"
+  },
+  "reviewed_candidate": "7fc74c117b31de861f7972010e5e32fe31f73201",
+  "reviewed_tree": "afa269e7383929e851e9afff5d29960c386ce7e8",
+  "schema": "apm.v6-comparison-prerequisite-repair.v1",
+  "science": "No model, coefficient, numerical algorithm, scientific output projection, tolerance, seed or campaign denominator changed.",
+  "status": "NEGATIVE_CONTROLS_REPAIRED_NEW_CANDIDATE_REQUIRED"
+}

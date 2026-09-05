@@ -25,7 +25,7 @@ local and byte-exact. [Helper](releases/helper-migration.json) and
 [check](releases/check-migration.json) mappings cover the migration.
 
 Current runtime no longer imports historical release implementations. The latest
-development suite passed **230 tests, zero skips**, including synthetic exact-tag
+development suite passed **236 tests, zero skips**, including synthetic exact-tag
 orchestration, incomplete/corrupt evidence, current root discovery and legacy
 integrity controls. Current guides have reviewed executable blocks and a
 [source-linked editorial review](docs/maintainers/v6-editorial-review.md).
@@ -54,3 +54,12 @@ preserves every scientific assertion, verifies configured-tool execution without
 a default prefix, and supplies a byte-verified warm binary for untouched historical
 tests. The original 224-test suite now passes without skips. The first candidate's
 independent numerical campaign continues; a new exact candidate must be qualified.
+
+Review of candidate `7fc74c117b31de861f7972010e5e32fe31f73201` found a
+comparison-launcher failure-path defect: a failed prerequisite could reach dependent
+work. [The retained fault injection and repair](validation/evidence/v6_comparison_prerequisite_repair.json)
+add checked process exits, observed checkout identity and rejection of matching
+failed/partial reports. All six new cases pass; the full current check passes with
+236 tests and no skips. Numerical methods, projections and tolerances are unchanged.
+Earlier candidate executions remain independent retained evidence; this corrected
+source requires its own complete fresh-clone qualification.
