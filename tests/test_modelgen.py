@@ -6,6 +6,7 @@ from __future__ import annotations
 import copy
 import json
 import math
+import os
 from pathlib import Path
 
 import numpy as np
@@ -78,7 +79,14 @@ QUALIFICATION_CONFIGURATION_3 = (
 CALIBRATION_REPLAY_CONFIGURATION = (
     ROOT / "tools/modelgen/apm045_mixed_voltage/calibration_replay_v4.toml"
 )
-NGSPICE = ROOT / ".apm/toolchain/ngspice-47/bin/ngspice"
+from apm.paths import state_directory
+from apm.toolchain import ToolchainError, _resolve_executable
+
+_tool_prefix = Path(os.environ.get("APM_TOOLCHAIN_DIR", str(state_directory(ROOT) / "toolchain"))).expanduser().resolve()
+try:
+    NGSPICE = _resolve_executable("APM_NGSPICE", _tool_prefix / "ngspice-47/bin/ngspice", "ngspice")
+except ToolchainError:
+    NGSPICE = None
 
 
 def test_calibration_replay_hash_excludes_only_rebuild_local_tool_fields() -> None:
@@ -518,7 +526,7 @@ def test_filtered_runs_cannot_claim_full_kernel_qualification() -> None:
     assert SUBSET_COMPLETION_STATE != COMPLETION_STATE
 
 
-@pytest.mark.skipif(not NGSPICE.is_file(), reason="bootstrapped ngspice 47 is unavailable")
+@pytest.mark.skipif(NGSPICE is None, reason="configured ngspice is unavailable")
 def test_real_ngspice_terminal_cgg_is_external_and_bias_dependent(tmp_path: Path) -> None:
     request = SweepRequest(
         request_id="real-vtg-n-idvg",

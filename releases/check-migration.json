@@ -187,7 +187,7 @@
     },
     {
       "current": "tests/test_modelgen.py::test_real_ngspice_terminal_cgg_is_external_and_bias_dependent",
-      "disposition": "preserved current scientific/provenance/regression check",
+      "disposition": "Preserved real-tool scientific assertions; current test honors canonical configured ngspice selection. The untouched original executes with a byte-verified warm binary at its historical default path.",
       "original": "25140f57c4c3714f6ab4c9c9df44698ad7732662:tests/test_modelgen.py::test_real_ngspice_terminal_cgg_is_external_and_bias_dependent"
     },
     {

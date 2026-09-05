@@ -3,7 +3,7 @@
 
 # APM status
 
-State: **V6_CANDIDATE**. Full fresh-clone qualification is pending. No v6 tag/release exists.
+State: **V6_CANDIDATE_REPAIR**. No v6 tag/release exists.
 
 Starting main: `25140f57c4c3714f6ab4c9c9df44698ad7732662`, fast-forwarded from
 `4cd57d98a54ad1cfe8deedf38de39a0b81a22d52`. The intervening commits only add the
@@ -46,3 +46,11 @@ including 90,112 Research SPICE pairs and 12,288 circuit realizations. A later r
 summary will identify the exact candidate commit/tree; that summary commit is separate.
 The existing EL9/WSL2 tools and ignored historical raw evidence are preserved.
 No v6 tag or release has been created; GitHub About remains an unapplied proposal.
+
+The first fresh candidate (`17d9969747059dfba65b5d02c7b783a897aadd66`)
+correctly failed its no-skip gate: a model-generator test ignored the configured
+verified tool prefix. [The repair](validation/evidence/v6_tool_selection_repair.json)
+preserves every scientific assertion, verifies configured-tool execution without
+a default prefix, and supplies a byte-verified warm binary for untouched historical
+tests. The original 224-test suite now passes without skips. The first candidate's
+independent numerical campaign continues; a new exact candidate must be qualified.

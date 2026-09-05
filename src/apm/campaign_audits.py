@@ -6,6 +6,7 @@ from __future__ import annotations
 import ast
 import difflib
 import re
+import shutil
 import sys
 from pathlib import Path
 
@@ -15,6 +16,7 @@ from .history import BASELINE as BASE
 from .history import digest as digest_bytes
 from .history import git, git_text, load_index, tomllib
 from .lifecycle import write_report
+from .toolchain import resolve_toolchain
 
 CURRENT_DOCUMENTS = ['README.md', 'AGENTS.md', 'GOAL.md', 'STATUS.md', 'ENVIRONMENT.md',
                      'THIRD_PARTY.md', 'CONTRIBUTING.md', 'SECURITY.md',
@@ -137,6 +139,16 @@ def original_execution(root, output):
                                                  '--target', str(site), str(clone)])
         env = {'APM_REPO_ROOT': str(clone), 'APM_STATE_DIR': str(folder / 'state'),
                'PYTHONPATH': str(site), 'OMP_NUM_THREADS': '1', 'OPENBLAS_NUM_THREADS': '1'}
+        # Original model-generator tests predate configured tool selection and
+        # use this literal path. Supply a byte-verified warm executable copy;
+        # never patch their immutable source or call this a cold bootstrap.
+        binary = resolve_toolchain(root).ngspice
+        legacy_binary = clone / '.apm/toolchain/ngspice-47/bin/ngspice'
+        legacy_binary.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(binary, legacy_binary)
+        legacy_tool = {'original': str(binary), 'warm_copy': str(legacy_binary),
+                       'sha256': digest(binary), 'copy_sha256': digest(legacy_binary)}
+        write_report(logs / 'legacy-tool.json', legacy_tool)
         identity = run(clone, logs, 'identity', [sys.executable, '-c',
             'import apm,importlib.metadata,json; print(json.dumps({"runtime":apm.__version__,"installed":importlib.metadata.version("analog-process-models"),"module":apm.__file__}))'], env=env)
         observed = read(Path(identity['stdout']))
@@ -149,6 +161,7 @@ def original_execution(root, output):
         checks = {'installed_original': installed['returncode'] == 0 and observed['runtime'] == observed['installed'] == expected,
                   'isolated_import': Path(observed['module']).is_relative_to(site),
                   'original_tests_executed': tested['returncode'] == 0 and coverage['status'] == 'PASS',
+                  'byte_exact_warm_tool': legacy_tool['sha256'] == legacy_tool['copy_sha256'],
                   'exact_original_source': git_text(clone, 'rev-parse', 'HEAD') == commit}
         if name == 'v6-baseline':
             preflight_xml = logs / 'preflight.xml'
@@ -157,7 +170,7 @@ def original_execution(root, output):
                             env={**env, 'PYTHONPATH': str(site) + ':' + str(clone / 'tools/v5_preflight')})
             checks['original_preflight'] = preflight['returncode'] == 0 and pytest_coverage(preflight_xml)['status'] == 'PASS'
         records.append({'name': name, 'commit': commit, 'tree': git_text(clone, 'rev-parse', 'HEAD^{tree}'),
-                        'checks': checks, 'identity': observed, 'coverage': coverage,
+                        'checks': checks, 'identity': observed, 'coverage': coverage, 'legacy_tool': legacy_tool,
                         'status': 'PASS' if all(checks.values()) else 'FAIL'})
     return write_report(output / 'report.json', {'status': 'PASS' if len(records) == 6
                         and all(r['status'] == 'PASS' for r in records) else 'FAIL', 'records': records,

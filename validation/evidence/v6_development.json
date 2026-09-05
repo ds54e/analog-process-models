@@ -150,6 +150,11 @@
   },
   "original_execution": {
     "claim": "Original packages and representative tests; no full old release requalification.",
+    "corrected_starting_main_tests": {
+      "evidence": "validation/evidence/v6_tool_selection_repair.json",
+      "passed": 224,
+      "skipped": 0
+    },
     "preflight_tests": 39,
     "released_package_representative_tests": {
       "v1.0.0": 14,
@@ -158,7 +163,13 @@
       "v4.0.0": 15,
       "v5.0.0": 15
     },
-    "starting_main_tests": 224
+    "starting_main_tests": {
+      "collected": 224,
+      "failed": 0,
+      "note": "The original development report already marked this FAIL; its collected count was not a no-skip pass. Candidate qualification exposed the shared hardcoded tool-path cause.",
+      "passed": 223,
+      "skipped": 1
+    }
   },
   "pre_freeze_validation": {
     "scope": "Staged source snapshot before final STATUS/evidence-only updates, not a clean candidate commit.",
@@ -179,6 +190,10 @@
     {
       "issue": "Comparison report helper received a list instead of a mapping; initial postprocessor also used excessive per-cell substitution work.",
       "resolution": "Fixed report serialization and equivalent per-file/compiled identity normalization. All original simulator outputs retained and compared without tolerance or scope changes."
+    },
+    {
+      "issue": "Fresh candidate current tests and original-source reconstruction skipped one native Cgg test because it used a literal .apm/toolchain path, ignoring the configured verified prefix.",
+      "resolution": "Candidate 17d9969747059dfba65b5d02c7b783a897aadd66 remains failed. Repair current test selection; supply a hash-verified warm executable at the old literal path only in explicit historical isolates. Preserve all scientific assertions and old source bytes."
     }
   ],
   "schema": "apm.v6-development-summary.v1",
@@ -187,7 +202,7 @@
   "simulation_tree": "69166de5f478a81d753c385a5abc207943afe075",
   "source_algorithms_models_profiles": "unchanged; current helper coverage strengthens exact denominators and seed/index binding",
   "starting_main": "25140f57c4c3714f6ab4c9c9df44698ad7732662",
-  "status": "DEVELOPMENT_CHECKS_PASSED_CANDIDATE_QUALIFICATION_PENDING",
+  "status": "DEVELOPMENT_OBSERVATIONS_CANDIDATE_NOT_QUALIFIED",
   "v6_release_published": false,
   "v6_tag_created": false
 }

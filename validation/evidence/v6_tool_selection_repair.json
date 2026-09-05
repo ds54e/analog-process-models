@@ -1,0 +1,46 @@
+{
+  "candidate_1_remaining_work": "Independent scientific campaign remains running; this repair does not qualify a new source commit.",
+  "evidence": [
+    {
+      "path": ".apm/v6/fresh-candidate-1/.apm/tutorial-current-validation/report.json",
+      "sha256": "6b8738c14e5ac718b8898f15a75361eebe8f1ea3e92d1cd102257052f0c2a9e8"
+    },
+    {
+      "path": ".apm/v6/fresh-candidate-1/.apm/tutorial-current-validation/pytest.xml",
+      "sha256": "a02cb3a351b63c43bd06a3997ad006911e347f64a3123f876cb0f05a205727ac"
+    },
+    {
+      "path": ".apm/v6/tool-selection-fixture/report.json",
+      "sha256": "7251b62d9749d2954794feb7fa91a1e9eb3df6b27f2411aafce91eeda26b340b"
+    },
+    {
+      "path": ".apm/v6/original-execution-dev-1/v6-baseline/execution/corrected-tool.json",
+      "sha256": "a932e3f919591de6a425f09b396dd3985b8711904559e8821cc74a36b72d11ef"
+    },
+    {
+      "path": ".apm/v6/original-execution-dev-1/v6-baseline/execution/pytest-corrected-coverage.json",
+      "sha256": "9d2ca4c96ee4fc307fc2a535873ec897ddd60b6b77d02e63b49495689e7357d2"
+    }
+  ],
+  "failed_candidate": "17d9969747059dfba65b5d02c7b783a897aadd66",
+  "failed_candidate_tree": "cc3fbf3f42456d83ea134e5526bc1cc0c1615a7f",
+  "no_models_profiles_algorithms_changed": true,
+  "observed_failure": {
+    "cause": "The test used ROOT/.apm/toolchain literally instead of the configured verified tool prefix. The no-skip gate correctly failed.",
+    "current_tests_passed": 229,
+    "skipped": 1,
+    "test": "tests/test_modelgen.py::test_real_ngspice_terminal_cgg_is_external_and_bias_dependent"
+  },
+  "repair": {
+    "current_alternate_prefix_fixture": "1 real test passed with no default local prefix and no skips",
+    "current_test": "Use the same executable-selection primitive and state/prefix precedence as current runtime; all Cgg scientific assertions and real simulation retained.",
+    "original_baseline_recheck": {
+      "passed": 224,
+      "skipped": 0
+    },
+    "original_tests": "Leave original source unchanged. Copy the observed native executable to the old literal path in the isolated historical checkout and verify identical SHA-256; explicitly warm reuse, not cold bootstrap."
+  },
+  "schema": "apm.v6-tool-selection-repair.v1",
+  "status": "REPAIR_VERIFIED_NEW_CANDIDATE_REQUIRED",
+  "tag_or_publication_authorized": false
+}
