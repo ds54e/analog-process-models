@@ -5,26 +5,55 @@
 
 Execution evidence, not this index alone, supports validation and release claims.
 
-## Current mission: v5 full implementation
+## Current mission: post-v5 maintenance
 
-State: **V5_RELEASE_READY / EXACT CANDIDATE RELEASE APPROVED**.
+State: **v5.0.0 RELEASED / EXACT TAG QUALIFIED 17/17**.
 
-The user has explicitly authorized one immutable annotated `v5.0.0` at the
-candidate below, fresh exact-tag requalification and publication only after
-17/17 gates pass. The separate procedure on `main` preserves the candidate's
-16-gate CLI and adds tag identity/clean-clone checks as the seventeenth gate.
-See `validation/evidence/v5_release_authorization.json` and
-`docs/release-publication-v5.md`. At this preparation stage no v5 tag or release
-has been created; exact-tag execution is not yet a pass.
+The separately approved immutable annotated tag is
+`b1a4246b9189fe33915d457e9d7f2938869b8fdf`, peeling exactly to
+`381517fda5107fabf98af7801d5a5103f38e230c`. The current main HEAD was not tagged.
+A genuinely fresh detached GitHub clone reran the complete 16-gate candidate
+validator with a new environment and new OSDI/numerical state. The external
+procedure added tag identity, freshness, clean before/after worktree and report
+bindings as the seventeenth gate. All **17/17 passed** before
+[GitHub publication](https://github.com/ds54e/analog-process-models/releases/tag/v5.0.0).
+
+See [exact-tag findings](validation/evidence/v5_post_release_requalification.md)
+and the [hash-linked record](validation/evidence/v5_post_release_requalification.json).
+Frozen v5 evidence authority: `150084368815f6a57eae9f3e707f685149e920d3`. Raw exact-tag evidence remains
+ignored under `.apm/v5/fresh-exact-tag-1/.apm/v5/exact-tag/`.
+
+The exact-tag run independently repeated all counts below: N and P each passed
+45,056/45,056 SPICE pairs and 6,144/6,144 circuit realizations, zero failures;
+all 194 tagged repository tests and 39 separate preflight tests passed without
+skips. Fixed seeds intentionally reproduce the same candidate realizations;
+candidate/tag runs are not pooled as additional statistical sample size.
+IO execution passed with all four outcomes UNRESOLVED_WITH_EVIDENCE.
 
 Pre-tag procedure validation passed `apm validate`: 216 tests, no skips, including
 22 tag/evidence fault cases, plus Ruff, REUSE and repository audits. Its report
-is hash-linked in the authorization record. This validates the new external
-procedure on `main`; it does not replace the required exact-tag numerical rerun.
+is hash-linked in the authorization record. It is separate from the fresh
+exact-tag numerical run. Post-release main now uses `5.0.0+main`.
+
+Current bookkeeping validation passed unflagged `apm validate`: **224 tests,
+zero skips**, Ruff, REUSE, provenance, distribution, all legacy maintenance
+regressions, package identity and all 30 frozen-v5 artifacts. Eight new cases
+cover successful preservation and rejection of byte, index-mode, tag-object,
+inventory and obsolete-version drift. The full check used worktree snapshot
+`3c1acbd074bcf66898e2450f4ded7e32131e6f7ebffbc87a0afd88b76c36ebd3` above
+frozen evidence commit `150084368815f6a57eae9f3e707f685149e920d3`.
+See `validation/evidence/post_v5_maintenance.json`; the raw report SHA-256 is
+`30ad47f86541aced0501def97ad52695f697951ce21a58dc8acee4cd1bdf6776`.
+Only this status/result bookkeeping followed that full check, with focused
+final document, license and frozen-byte audits. These current-main checks do
+not replace or relabel the separate exact-tag 17/17 qualification.
+
+## Preserved candidate qualification
 
 Exact qualified candidate: `381517fda5107fabf98af7801d5a5103f38e230c`.
 Tree: `8751c3ed03dc31c87f52d3eb3c5c0b4da903ed65`.
-Source/runtime/CLI identity is plain `5.0.0`, untagged and unreleased. All 16
+At candidate qualification source/runtime/CLI identity was plain `5.0.0`,
+then untagged and unreleased. All 16
 candidate-required gates passed from an independent GitHub clone with a fresh
 environment and clean source before/after execution. The later documentation and
 evidence commit records this result; it is not a newly qualified candidate.
@@ -62,10 +91,10 @@ The explicit geometry inference and source-extraction transfer are recorded;
 source confidence/digitization bounds are separate from random variation, while
 process-transfer and log-L interpolation uncertainty remain unquantified.
 
-The candidate-readiness task created no tag or release. The subsequent explicit
-approval above now authorizes the publication sequence. The post-tag gate is
-not yet executed and is not counted as a candidate pass. Spectre remains
-model-only experimental/unverified.
+The candidate-readiness task created no tag or release and did not count the
+post-tag gate. Separate approval and the completed 17/17 exact-tag qualification
+now support publication, as recorded above. Spectre remains model-only
+experimental/unverified.
 
 Result-document maintenance validation also passed `apm validate` with 194 tests
 and no skips. The first README update accidentally omitted its `5.0.0.dev0`
@@ -137,12 +166,13 @@ are not passes. The independent fresh candidate subsequently reran the full fixe
 plan; the incomplete earlier cohort is not candidate evidence.
 Raw development runs are under `.apm/v5/development/`.
 
-The numerical plan, legacy real-tool gates and v5 evaluator have now completed
-at the exact candidate recorded above. No tag/publication is authorized.
+The numerical plan, legacy real-tool gates and v5 evaluator completed at the
+exact candidate above. At that development stage publication was not authorized;
+subsequent explicit approval and exact-tag evidence are recorded separately.
 
 ## Preserved released history
 
-APM v1.0.0 through v4.0.0 remain released and immutable. The nominal catalog is
+APM v1.0.0 through v5.0.0 remain released and immutable. The nominal catalog is
 unchanged at 15 families / 30 MOS devices. APM045 positioning remains generic
 40/45 nm-class; technical namespace remains 45 nm FreePDK45-based.
 
@@ -153,7 +183,7 @@ unchanged at 15 families / 30 MOS devices. APM045 positioning remains generic
 
 The complete previous status and phase-specific restrictions remain in Git at
 `bbb585306f13614b7649c36dd5b7510c845daed9:STATUS.md` and `GOAL.md`.
-This new mission does not retroactively change their evidence or authorize any
+Post-release maintenance does not retroactively change their evidence or authorize any
 rewrite of v4 model-generation or release history.
 
 ## Candidate evaluator development
@@ -174,10 +204,11 @@ execution after startup binding changes. Initial confirmation/interruption and
 legacy real-tool evidence are hash-linked in
 `validation/evidence/v5_evaluator_development.json`.
 
-## Frozen candidate scope
+## Frozen released scope
 
 Methods, profiles, source decisions, code and the full confirmation plan are
-frozen at `381517fda5107fabf98af7801d5a5103f38e230c`. Plain `5.0.0` denotes
-this untagged candidate, not a released version. All 16 candidate-required gates
-passed from the independent fresh clone. Later result-only changes do not alter
-that candidate or certify another commit. No tag or publication is authorized.
+frozen in the released source at `381517fda5107fabf98af7801d5a5103f38e230c`.
+Plain `5.0.0` denotes this immutable release. All 16 candidate-required gates
+passed, then all 17 exact-tag gates passed in a separate fresh clone. Later
+bookkeeping commits neither alter that source nor qualify a different release.
+No additional version, tag or release is authorized by routine maintenance.

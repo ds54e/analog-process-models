@@ -1,141 +1,64 @@
 <!-- SPDX-FileCopyrightText: 2026 APM contributors -->
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
-# APM v5.0.0: Research Local Mismatch
+# APM post-v5 maintenance
 
-Status: V5_RELEASE_READY at candidate
-`381517fda5107fabf98af7801d5a5103f38e230c`; 16/16 candidate-required gates passed.
-The independent companion profile is approved as a source-transfer hypothesis;
-original Hart/ST40 beta remains blocked. The user has now explicitly approved
-immutable tagging of that exact candidate, fresh exact-tag requalification and
-publication only after 17/17 gates pass. See
-`validation/evidence/v5_release_authorization.json` and
-`docs/release-publication-v5.md`; the candidate itself must remain unchanged.
-See [candidate evidence](validation/evidence/v5_release_candidate.md). This live
-status update does not qualify a later documentation/evidence commit.
+Status: v5.0.0 RELEASED; current main uses `5.0.0+main`.
 
-## Current mission
+Maintain the released APM v5.0.0 baseline and its public research/characterization
+flows. The completed v5 implementation goal remains in Git at
+`381517fda5107fabf98af7801d5a5103f38e230c:GOAL.md`; it is not a new implementation
+or release instruction. The qualified candidate first reached V5_RELEASE_READY
+with 16/16 gates. The separately approved exact tag then passed 17/17 before
+GitHub publication. See `validation/evidence/v5_post_release_requalification.json`.
 
-Implement and qualify APM v5.0.0 in this existing repository. Move beyond the
-completed preflight into a usable, optional Research Local Mismatch path for
-APM045/VTG NMOS and PMOS. The intended interpretation remains generic
-40/45 nm-class planar bulk CMOS, not a named-foundry statistical PDK.
+## Immutable release and evidence
 
-The user has authorized this transition from preflight to full implementation
-and release-readiness work. This supersedes the earlier preflight-only ban on
-production code, new research schemas, and development-version changes. It does
-not authorize altering released model bytes or historical evidence.
+- Annotated `v5.0.0`: `b1a4246b9189fe33915d457e9d7f2938869b8fdf`.
+- Peeled approved commit: `381517fda5107fabf98af7801d5a5103f38e230c`.
+- Frozen v5 evidence authority: `150084368815f6a57eae9f3e707f685149e920d3`.
+- v1–v4 tags, released model bytes and their historical records remain immutable.
 
-Current technical authority:
-
-1. `AGENTS.md` and this goal;
-2. `V5_RESEARCH_VARIATION.md`;
-3. `validation/release_gates_v5.toml`;
-4. `variation/research/apm045/sources.toml` for source/adoption state;
-5. preserved electrical/result/noise contracts and current user documentation.
-
-If these disagree materially, record the conflict; do not choose the easier
-requirement. Chat history, an attachment, and an external ZIP are not required.
-
-## Required outcome
-
-- A documented, versioned terminal-extraction coordinate and two-observable
-  instance mapping for VTG N/P, with bounded numerical error.
-- At least one coherent, approved public-source Vth/beta local profile covering
-  the declared v5 minimum domain. This is a transfer to a generic APM model,
-  never a claim of APM silicon measurements or foundry correlation.
-- Deterministic independent device sampling, persistent realizations, and
-  same-realization replay across bias, temperature, and DC/AC/transient runs.
-- Verified application inside hierarchical ngspice circuits, including readback,
-  untouched-device isolation, reset/bad-path controls, and explicit unit banks.
-- Source, numerical, statistical, circuit, and capability evidence kept separate.
-- An io18/io25 Vth-transfer assessment with an explicit, predeclared outcome:
-  either a bounded hypothesis or an evidence-backed unresolved result. No
-  implicit beta=0, complete-IO-Monte-Carlo, or foundry-calibration claim.
-- Correct observed OpenVAF provenance and a genuinely pinned release toolchain.
-- Preserved Benchmark v2/native flows, nominal models, historical releases,
-  and existing public electrical/noise schema semantics.
-- A clean, independently reproduced v5 release candidate and honest documentation.
-
-## Starting evidence and unresolved dependencies
-
-Preflight is completed at `bbb585306f13614b7649c36dd5b7510c845daed9`.
-Read `validation/evidence/v5_preflight_findings.json` and
-`validation/evidence/v5_preflight_source_audit.md` before implementation.
-N/P application, MG extraction and artificial mapping passed at nine W/L points.
-Those results establish neither a measured coefficient nor a six-sigma domain.
-
-The original Hart/ST40 LVT beta normalization remains blocked. Evaluate the
-later Hart study as a separate source, not as a correction. Do not splice one
-process's Vth coefficient with another's beta coefficient into an approved default.
-Source resolution may proceed alongside artificial implementation tests.
-
-The preflight host's compiler source did not match the repository pin, and
-`model_build.py` wrote the expected commit as though observed. Native BSIM4
-preflight results do not depend on OpenVAF; this defect still blocks complete
-v5 reference-toolchain qualification.
-
-## Authorized work and boundaries
-
-Implement runtime modules, CLI commands, tests, source reanalysis, mapping caches,
-current validators, a narrowly scoped toolchain-provenance repair, and new v5
-schemas. Reuse useful preflight code by copying/adapting it into the implementation;
-preserve the completed preflight snapshot and reports as baseline evidence.
-Run real ngspice experiments, repair local tooling in ignored project paths, and
-make coherent commits and normal fast-forward pushes to `main`.
-
-Do not add a new nominal family, io33, Research Global/All, a mixed
-Benchmark-Global/Research-Local default, passive mismatch, layout/PEX, noise MC,
-RTN, aging, calibrated weak-inversion/SS variation, or real-Spectre integration.
 Do not modify Benchmark v2 distributions, native variation semantics, nominal
-model cards/wrappers/manifests, or frozen v1-v4 records. No author contact,
-external messaging, paid data purchase, or repository security/visibility change.
+model cards/wrappers/manifests, or frozen v1-v5 records. Keep candidate/exact-tag
+reports, source decisions, approved profiles, confirmation plan, release notes
+and phase-specific release procedures exact. Their earlier approval flags and
+future-tense wording record the state at that time; they are not current blockers
+or permission to repeat a publication action.
 
-Unresolved required-source data blocks quantitative adoption and release, not
-unrelated implementation. Complete useful independent work, then report the
-specific blocker; do not invent a coefficient, narrow scope silently, or claim
-v5 complete with only artificial profiles.
+## Maintenance boundaries
 
-## Bootstrap and version identity
+Preserve the manifest-driven Technology -> Electrical Family -> Device model,
+native planar W/L and FinFET L/NFIN, released electrical/noise/research schemas,
+terminal finite-difference gm/gds, full complex terminal-Y semantics, and the
+normal Sparse/no-KLU stationary-noise path. The catalog remains 15 families /
+30 public MOS devices. New source coefficients, nominal models, calibration or
+versioned capabilities require separate explicit user authorization.
 
-The instruction handoff began with `4.0.0+main` source metadata. The completed
-bootstrap migrated mission/version checks and mutable guidance to v5, set
-project/runtime/CLI identity to `5.0.0.dev0`, and restored current validation
-without weakening legacy integrity or numerical tests. Tests that
-assert the old maintenance mission are not perpetual requirements; migrate those
-specific assertions with explicit replacement tests. Do not run old release
-workflows against new live guidance and then edit frozen records to make them pass.
+Research Local Mismatch remains optional VTG N/P within the qualified domain.
+Hart/TSMC40 companion data is a source-transfer hypothesis, not foundry
+correlation, yield or reliability evidence. Original Hart/ST40 beta remains
+BLOCKED_NORMALIZATION_CONFLICT. IO18/25 transfer remains UNRESOLVED_WITH_EVIDENCE
+with no default mismatch profile. Research Global/All, statistical passives,
+spatial effects and noise MC remain unsupported. Spectre remains experimental,
+model-only and unverified.
 
-Use `5.0.0.dev0` during development. Use plain `5.0.0` only for a frozen candidate
-before candidate qualification. These are development states for one major
-release, not v4.1/v5.1 or additional releases. Exact identity also requires a
-Git commit, clean-tree or snapshot identity, input hashes, and observed tool hashes.
+Retain actual observed compiler provenance at the unchanged required OpenVAF pin.
+Use the documented EL9 x86_64 / ngspice 47 reference environment; unknown or
+mismatched tool/source identities cannot pass. Never substitute an expected pin
+for an observed build or reinterpret a source uncertainty as device randomness.
 
-## Completion and publication authority
+## Validation and Git
 
-The autonomous finish state is `V5_RELEASE_READY`: all candidate-required gates
-pass on an exact clean commit and an independent fresh clone. Do not stop merely
-because one milestone is complete. A genuine scientific or infrastructure blocker
-must be reported with the independent work already completed.
+Unflagged `apm validate` is the current maintenance path. It checks current
+version/guidance, package metadata, preserved release inputs and frozen evidence,
+regressions, provenance, distribution hygiene, Ruff and REUSE. Historical v3/v4/v5
+qualification procedures remain separate; do not edit them to accept live main.
+Missing, skipped, stale, failed and unavailable checks are not passes.
 
-Creating `v5.0.0` and publishing a GitHub Release require a separate explicit user
-approval of the candidate. The contract already defines post-tag requalification;
-it is not part of the candidate gate dependency and must never be faked before a
-tag exists. Do not move or replace an existing tag if later checks fail.
-
-## Validation and progress
-
-The normal current-tree command remains unflagged `apm validate`, after bootstrap
-migration. Implement a separate v5 candidate-validation path; preserve historical
-`--release` and `--release-v4` meanings. Use fresh output paths.
-
-Run doctor/toolchain provenance, full pytest (no hidden required skips), Ruff,
-REUSE, provenance/public-hygiene checks, legacy regression, and v5 real-tool gates.
-Use WSL2/RHEL-compatible EL9 x86_64, ngspice 47 and the required pinned OSDI
-compiler for release qualification. Local non-reference checks are useful but
-must be labeled as such.
-
-Keep `STATUS.md` current with source-adoption state, exact executed code identity,
-completed gates, blockers, and the next actionable step. Keep raw runs/downloads
-under ignored `.apm/v5/`; commit compact reproducible evidence. A planned,
-missing, skipped, failed, unknown-provenance, or unexecuted check is not a pass.
+Keep raw runs ignored and summaries hash-linked. Record the exact Git commit and
+worktree/input hashes; `5.0.0+main` alone does not identify a source snapshot.
+Normal in-scope maintenance, tests, coherent commits and fast-forward pushes are
+authorized. Future version/release operations require separate explicit user
+authorization. Never force-push, move/recreate released tags, rewrite published
+history or alter repository visibility/security settings through routine work.

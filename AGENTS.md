@@ -15,7 +15,7 @@ repository; do not create or substitute another project authority.
 
 ## Released baseline and current line
 
-APM v1.0.0, v2.0.0, v3.0.0, and v4.0.0 are released and immutable.
+APM v1.0.0, v2.0.0, v3.0.0, v4.0.0, and v5.0.0 are released and immutable.
 
 - v2.0.0 commit: `3cc6cfea4932cc40f2d693784d0a569926cdf399`;
 - v3.0.0 annotated-tag object:
@@ -36,15 +36,24 @@ APM v1.0.0, v2.0.0, v3.0.0, and v4.0.0 are released and immutable.
   `validation/evidence/v4_release_candidate.json` and
   `validation/evidence/v4_post_release_requalification.json`.
 
+- v5.0.0 annotated-tag object:
+  `b1a4246b9189fe33915d457e9d7f2938869b8fdf`;
+- v5.0.0 tagged commit (the separately approved candidate):
+  `381517fda5107fabf98af7801d5a5103f38e230c`;
+- v5.0.0 exact-tag requalification: 17/17 required gates passed;
+- GitHub Release: `Analog Process Models v5.0.0`;
+- v5 candidate and post-tag evidence:
+  `validation/evidence/v5_release_candidate.json` and
+  `validation/evidence/v5_post_release_requalification.json`.
+
 Do not modify, move, recreate, or delete a released tag. Do not amend tagged
-commits, rewrite published history, or force-push. Current `main` is the active
-v5 implementation line under `GOAL.md`, not the immutable v4 release source.
-The v5 bootstrap migrated the handoff identity `4.0.0+main` and current checks
-to `5.0.0.dev0`; implementation now uses the authorized v5 lifecycle.
-Use plain `5.0.0` only for a frozen candidate. Exact source identity is a Git
-commit plus clean-tree/snapshot and input hashes, not a version label alone.
-Creating or publishing v5 requires the separate candidate approval specified in
-`GOAL.md`; implementation and release-readiness work are already authorized.
+commits, rewrite published history, or force-push. Current `main` is the post-v5
+maintenance line under `GOAL.md`. Packages from mutable main use `5.0.0+main`;
+plain `5.0.0` belongs to the immutable released source. Development previously
+used `5.0.0.dev0`. Exact source identity requires a Git commit, clean-tree or
+snapshot identity and input/tool hashes, not a version label alone.
+The separately approved v5 publication is completed. Future version/release
+operations require separate explicit user authorization.
 
 The repository is public. Publication followed a passing pre-publication audit
 and is recorded in `validation/evidence/publication_v3.json`. Do not change the
@@ -53,12 +62,13 @@ without explicit authorization for that exact action.
 
 ## Current mission and instruction hierarchy
 
-Implement the current `GOAL.md` faithfully. For v5, read
+Follow current `GOAL.md` for post-v5 maintenance. Read
 `V5_RESEARCH_VARIATION.md`, `validation/release_gates_v5.toml` and
-`variation/research/apm045/sources.toml`. Full v5 runtime/API/schema work and the
-narrow compiler-provenance repair are authorized; the completed preflight-only
-ban on those changes is no longer the active mission. No released nominal model,
-Benchmark/native semantics or historical evidence may be changed to achieve v5.
+`variation/research/apm045/sources.toml` when maintaining the released research
+flow. These preserve its qualified methods and source boundaries. No released
+nominal model, Benchmark/native semantics or historical evidence may be changed
+through routine maintenance. Completed preflight and implementation missions
+remain historical records.
 
 Read before substantive work:
 
@@ -109,6 +119,19 @@ release-validator implementations, `models/apm045/families/io18/` and
 `models/apm045/families/io25/` trees and their technology, provenance and evidence
 manifests. This authority does not supersede the immutable tagged source.
 
+Completed v5 contracts and evidence are frozen against post-publication commit
+`150084368815f6a57eae9f3e707f685149e920d3`. The exact scope is
+`FROZEN_V5_PATHS` in `src/apm/maintenance_validate.py`: the v5 technical contract,
+release notes, gate and confirmation plans, reference dependency constraints,
+all `validation/evidence/v5_*` files, `variation/research/apm045/`, `tools/v5/`,
+v5 clean-clone and release-validator implementations, the external exact-tag
+procedure and its tests, and v5 release-readiness/publication procedures. Preserve
+their bytes, modes and inventory. Phase-specific authorization flags and wording
+record their historical state; the separate approval/publication evidence records
+the completed release. This evidence authority is not the release source.
+New maintenance summaries use distinct paths such as
+`validation/evidence/post_v5_maintenance.json`.
+
 The completed v5 preflight snapshot is
 `bbb585306f13614b7649c36dd5b7510c845daed9`: preserve `V5_PREFLIGHT.md`,
 `tools/v5_preflight/`, `validation/evidence/v5_preflight_preparation.json`,
@@ -144,9 +167,10 @@ parameter API. Preserve these released schemas and semantics:
 - `apm.noise-fit.contiguous-regions@1.0.0`;
 - `apm.noise-acquisition.bounded-white-search@1.0.0`.
 
-v5 may add separately versioned research schemas and truthful build-provenance
-metadata with explicit legacy-cache handling. It may not silently reinterpret an
-old result format or statistical profile.
+Preserve the released v5 research schemas and observed build-provenance metadata
+with their explicit legacy-cache handling. Do not silently reinterpret an old
+result format or statistical profile. New versioned capabilities require an
+explicit later goal.
 
 Canonical gm/gds remain terminal finite differences. Canonical capacitance remains
 derived from the raw complex terminal Y matrix. Preserve signed terminal data
@@ -192,7 +216,7 @@ with RHEL-compatible EL9 Linux on x86_64, using project-local OpenVAF-Re-Loaded
 and pinned PSP103/BSIM-CMG sources. Keep normal build/run state on a Linux
 filesystem and below ignored project-local paths.
 
-The current goal authorizes repairing observed compiler provenance and building
+Maintenance permits repairing observed compiler provenance and building
 the existing pinned compiler in an ignored local prefix. Never report a configured
 revision as observed, change the pin to fit a host, replace a system tool without
 permission, or overwrite historical evidence. Bind source/build receipts to actual
@@ -223,7 +247,7 @@ credentials, tokens, passwords, personal/private data, generated OSDI binaries,
 virtual environments, caches or large simulator output. Keep legitimate local
 artifacts below ignored paths. Preserve the completed public-hygiene audit boundary;
 no history rewrite is authorized. No author contact, external messages or paid data
-purchase is authorized by the v5 goal.
+purchase is authorized by routine maintenance.
 
 ## Scope discipline
 
@@ -245,17 +269,17 @@ unknowns as zeros, or silently shrink the promised domain. Continue independent
 work when one scientific dependency is blocked; retain precise negative findings.
 
 Write compact summaries under `validation/evidence/`; keep raw data ignored and
-reproducible. After the v5 bootstrap, unflagged `apm validate` checks the current
-mission. Historical `--release` and `--release-v4` workflows retain their original
-meaning and must not be edited to accept new live guidance. The v5 gate document
-is declarative until its evaluator is implemented and executed.
+reproducible. Unflagged `apm validate` checks post-v5 maintenance, package identity
+and frozen release evidence. Historical `--release`, `--release-v4` and v5
+qualification procedures retain their original meaning; do not edit them to
+accept new live guidance. The completed exact-tag procedure binds a full fresh
+16-gate candidate rerun and the seventeenth tag/freshness/identity gate.
 
-High autonomy is authorized for in-scope research, implementation, local toolchain
-repair, tests, documentation, coherent commits and normal pushes. Do not force-push,
-rewrite history, alter released tags/releases or change repository security settings.
-Complete candidate qualification, then stop at `V5_RELEASE_READY` for explicit
-candidate/tag/publication approval. A genuine blocked required source or toolchain
-must not be disguised as completion.
+High autonomy is authorized for in-scope maintenance, local toolchain repair,
+tests, documentation, coherent commits and normal pushes. Do not force-push,
+rewrite history, alter released tags/releases or change repository security
+settings. Future version/tag/publication operations need separate authorization.
+A genuine required-source or toolchain blocker must not be disguised as completion.
 
 Stop and report a credential, proprietary model, ambiguous redistribution right,
 personal/private history artifact or issue requiring released-history rewriting.

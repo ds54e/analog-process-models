@@ -2,6 +2,26 @@
 
 All notable changes to Analog Process Models (APM) are documented here.
 
+## [5.0.0] - 2026-09-05
+
+- Added optional APM045 Research Local Mismatch for VTG N/P, with versioned
+  maximum-gm extraction, two-observable instance mapping, deterministic sampling
+  and saved-realization DC/AC/transient replay across bias and temperature.
+- Qualified the independent Hart/TSMC40 companion adaptation as an explicit
+  source-transfer hypothesis. Original Hart/ST40 beta remains
+  BLOCKED_NORMALIZATION_CONFLICT; io18/io25 transfer remains
+  UNRESOLVED_WITH_EVIDENCE with no default mismatch profile.
+- Repaired observed OpenVAF provenance at the unchanged required source pin;
+  preserved released models, Benchmark/native behavior and electrical/noise schemas.
+- Published the exact approved candidate after 16/16 candidate gates and a
+  separate fresh 17/17 exact-tag qualification. See
+  `validation/evidence/v5_post_release_requalification.md` and `RELEASE_V5.md`.
+
+This remains a generic 40/45 nm-class research environment, not a foundry PDK,
+foundry correlation, yield or reliability qualification. Research Global/All
+remain unsupported; Spectre remains experimental/model-only and unverified.
+Subsequent mutable main uses `5.0.0+main`.
+
 ## [4.0.0] - 2026-09-05
 
 APM 4.0.0 preserves the immutable v3 electrical and stationary-noise

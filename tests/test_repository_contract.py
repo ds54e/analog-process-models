@@ -52,12 +52,12 @@ EXPECTED_FAMILIES = {
 }
 
 
-def test_v5_goal_and_historical_document_status_are_explicit() -> None:
+def test_post_v5_goal_and_historical_document_status_are_explicit() -> None:
     agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
     goal = (ROOT / "GOAL.md").read_text(encoding="utf-8")
     normalized_goal = " ".join(goal.split())
     assert (
-        "APM v1.0.0, v2.0.0, v3.0.0, and v4.0.0 are released and immutable"
+        "APM v1.0.0, v2.0.0, v3.0.0, v4.0.0, and v5.0.0 are released and immutable"
         in agents
     )
     assert "afecec29ea6ed0703ef441d4839fd40a238bef0b" in agents
@@ -65,13 +65,16 @@ def test_v5_goal_and_historical_document_status_are_explicit() -> None:
     assert "d224f279921c7e1ae637fd867e00d450067766c6" in agents
     assert "v4.0.0 exact-tag requalification: 16/16 required gates passed" in agents
     assert "The repository is public" in agents
-    assert "# APM v5.0.0: Research Local Mismatch" in goal
-    assert "Implement and qualify APM v5.0.0" in normalized_goal
-    assert "separate explicit user approval" in normalized_goal
-    assert "V5_RELEASE_READY" in normalized_goal
+    assert maintenance_validate.V5_TAG_OBJECT in agents
+    assert maintenance_validate.V5_TAGGED_COMMIT in agents
+    assert "v5.0.0 exact-tag requalification: 17/17 required gates passed" in agents
+    assert "# APM post-v5 maintenance" in goal
+    assert "Maintain the released APM v5.0.0 baseline" in normalized_goal
+    assert "separate explicit user authorization" in normalized_goal
+    assert "5.0.0+main" in normalized_goal
     assert "Do not modify Benchmark v2 distributions" in normalized_goal
     assert "native variation semantics" in normalized_goal
-    assert "frozen v1-v4 records" in normalized_goal
+    assert "frozen v1-v5 records" in normalized_goal
 
     for frozen in (
         "V4_MIXED_VOLTAGE.md",
@@ -100,7 +103,7 @@ def test_v5_goal_and_historical_document_status_are_explicit() -> None:
     normalized_security = " ".join(security.split())
     assert "Report a vulnerability" in normalized_security
     assert "Private Vulnerability Reporting is enabled" in normalized_security
-    assert "APM v4.0.0 is the latest completed release" in normalized_security
+    assert "APM v5.0.0 is the latest completed release" in normalized_security
 
     positioning = (ROOT / "APM045_POSITIONING.md").read_text(encoding="utf-8")
     assert positioning.startswith(
@@ -155,7 +158,7 @@ def test_current_guidance_audit_fails_closed_on_completed_goal(tmp_path: Path) -
     )
     result = audit_current_guidance(tmp_path)
     assert result["status"] == "fail"
-    assert "goal_is_active_v5" in result["failed_checks"]
+    assert "goal_is_post_v5_maintenance" in result["failed_checks"]
 
 
 def test_frozen_v4_audit_fails_closed_on_byte_drift(
@@ -558,3 +561,70 @@ def test_reference_clean_clone_and_fail_closed_policy_remain_required() -> None:
     assert policy["historical_evidence_satisfies_v3"] is False
     assert policy["final_tag_creation_authorized"] is False
     assert policy["github_release_creation_authorized"] is False
+
+
+def test_frozen_v5_audit_and_released_package_identity() -> None:
+    result = maintenance_validate.audit_frozen_v5_artifacts(ROOT)
+    assert result["status"] == "pass", result
+    assert result["artifact_count"] >= 30
+    assert result["authority_commit"] == maintenance_validate.V5_FROZEN_AUTHORITY_COMMIT
+    assert result["mismatches"] == []
+    assert result["tag_object"] == "b1a4246b9189fe33915d457e9d7f2938869b8fdf"
+    identity = audit_maintenance_package_identity(ROOT)
+    assert identity["status"] == "pass", identity
+    assert identity["main_version"] == "5.0.0+main"
+    assert set(identity["tagged_source_versions"].values()) == {"5.0.0"}
+
+
+@pytest.mark.parametrize("fault", ["bytes", "index_mode", "tag_object", "extra_inventory"])
+def test_frozen_v5_audit_rejects_drift(monkeypatch: pytest.MonkeyPatch, fault: str) -> None:
+    original_git = maintenance_validate._git
+    original_bytes = maintenance_validate._worktree_bytes
+    target = "validation/evidence/v5_release_candidate.json"
+
+    def read(path: Path) -> bytes | None:
+        value = original_bytes(path)
+        if fault == "bytes" and path == ROOT / target and value is not None:
+            return value + b"\n"
+        return value
+
+    def git(root: Path, *args: str) -> str:
+        result = original_git(root, *args)
+        if fault == "tag_object" and args == ("rev-parse", "refs/tags/v5.0.0"):
+            return "0" * 40
+        if fault == "extra_inventory" and args[:3] == ("ls-files", "--cached", "--others"):
+            return result + "\nvalidation/evidence/v5_unapproved.json"
+        if fault == "index_mode" and args[:2] == ("ls-files", "--stage"):
+            return "\n".join(
+                "100755" + line[6:] if line.endswith("\t" + target) else line
+                for line in result.splitlines()
+            )
+        return result
+
+    monkeypatch.setattr(maintenance_validate, "_git", git)
+    monkeypatch.setattr(maintenance_validate, "_worktree_bytes", read)
+    result = maintenance_validate.audit_frozen_v5_artifacts(ROOT)
+    assert result["status"] == "fail", result
+    expected = {
+        "bytes": "bytes_and_modes_exact",
+        "index_mode": "bytes_and_modes_exact",
+        "tag_object": "v5_tag_object_exact",
+        "extra_inventory": "inventory_exact",
+    }
+    assert expected[fault] in result["failed_checks"]
+
+
+@pytest.mark.parametrize("obsolete", ["4.0.0+main", "5.0.0.dev0", "5.0.0"])
+def test_post_release_main_rejects_obsolete_package_identity(
+    monkeypatch: pytest.MonkeyPatch, obsolete: str
+) -> None:
+    original = maintenance_validate._project_version
+    current = (ROOT / "pyproject.toml").read_bytes()
+    monkeypatch.setattr(
+        maintenance_validate,
+        "_project_version",
+        lambda data: obsolete if data == current else original(data),
+    )
+    result = audit_maintenance_package_identity(ROOT)
+    assert result["status"] == "fail", result
+    assert "main_has_post_release_local_identity" in result["failed_checks"]

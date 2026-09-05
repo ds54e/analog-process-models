@@ -261,21 +261,21 @@ def audit_current_guidance(root: Path) -> dict[str, Any]:
         "required_current_documents_present": all(
             (root / relative).is_file() for relative in required_paths
         ),
-        "goal_is_active_v5": _matches(
+        "goal_is_post_v5_maintenance": _matches(
             normalized_goal,
-            r"# APM v5\.0\.0: Research Local Mismatch",
-            r"Implement and qualify APM v5\.0\.0",
-            r"V5_RELEASE_READY",
-            r"separate explicit user approval",
+            r"# APM post-v5 maintenance",
+            r"Maintain the released APM v5\.0\.0 baseline",
+            r"5\.0\.0\+main",
+            r"separate explicit user authorization",
         ),
         "goal_preserves_released_semantics": _matches(
             normalized_goal,
             r"Do not modify Benchmark v2 distributions",
             r"native variation semantics",
             r"nominal model cards/wrappers/manifests",
-            r"frozen v1-v4 records",
+            r"frozen v1-v5 records",
         ),
-        "candidate_publication_boundary": authorization.get("implementation") is True
+        "historical_candidate_authorization_preserved": authorization.get("implementation") is True
         and authorization.get("candidate_qualification") is True
         and authorization.get("create_tag") is False
         and authorization.get("publish_release") is False,
@@ -284,6 +284,7 @@ def audit_current_guidance(root: Path) -> dict[str, Any]:
             and identity.get("frozen_v4_authority") == V4_FROZEN_AUTHORITY_COMMIT
             and identity.get("frozen_v4_tag_object") == V4_TAG_OBJECT
             and identity.get("frozen_v4_tagged_commit") == V4_TAGGED_COMMIT,
+        "policy_identifies_frozen_v5_authority": V5_FROZEN_AUTHORITY_COMMIT in normalized_agents,
         "positioning_has_inline_spdx": positioning.startswith(
             "<!-- SPDX-FileCopyrightText: APM contributors -->\n"
             "<!-- SPDX-License-Identifier: Apache-2.0 -->\n"
@@ -320,14 +321,14 @@ def audit_current_guidance(root: Path) -> dict[str, Any]:
         ),
         "security_names_latest_release": _matches(
             normalized_security,
-            r"APM v4\.0\.0 is the latest completed release",
-            r"active v5 implementation line",
+            r"APM v5\.0\.0 is the latest completed release",
+            r"post-release maintenance line",
         ),
         "environment_separates_current_and_historical_flows": _matches(
             normalized_environment,
             r"historical v4 release qualification boundary",
             r"current v5 validation",
-            r"unflagged `apm validate` checks the active v5 mission",
+            r"unflagged `apm validate` checks post-v5 maintenance",
         ),
         "readme_separates_current_and_historical_flows": _matches(
             normalized_readme,
@@ -337,7 +338,7 @@ def audit_current_guidance(root: Path) -> dict[str, Any]:
         ),
         "no_prohibited_public_claims": not prohibited_patterns,
     }
-    result = _check_map(checks, context="active v5 guidance and preserved released claims")
+    result = _check_map(checks, context="post-v5 maintenance guidance and preserved released claims")
     result.update(
         {
             "reviewed_paths": list(required_paths),
@@ -526,21 +527,24 @@ def audit_maintenance_package_identity(root: Path) -> dict[str, Any]:
     cli_version, cli_returncode, cli_stderr = _executed_cli_version(root)
     try:
         tagged_project = _project_version(
-            _git_object_bytes(root, V4_TAGGED_COMMIT, "pyproject.toml")
+            _git_object_bytes(root, V5_TAGGED_COMMIT, "pyproject.toml")
         )
         tagged_runtime = _runtime_version(
-            _git_object_bytes(root, V4_TAGGED_COMMIT, "src/apm/__init__.py")
+            _git_object_bytes(root, V5_TAGGED_COMMIT, "src/apm/__init__.py")
         )
-        tagged_cli = _source_cli_version(
-            _git_object_bytes(root, V4_TAGGED_COMMIT, "src/apm/cli.py")
+        tagged_cli_source = _git_object_bytes(root, V5_TAGGED_COMMIT, "src/apm/cli.py")
+        tagged_cli_bound_to_runtime = (
+            b"from . import __version__" in tagged_cli_source
+            and b'version=f"APM {__version__}"' in tagged_cli_source
         )
+        tagged_cli = tagged_runtime if tagged_cli_bound_to_runtime else "unbound"
         source_error = None
     except ReleaseValidationError as error:
         tagged_project = tagged_runtime = tagged_cli = "missing"
         source_error = str(error)
-    expected_release = V4_TAG.removeprefix("v")
-    # Lifecycle configuration is explicit: arbitrary versions and v4 +main fail.
-    allowed_current = {"5.0.0.dev0", "5.0.0"}
+    expected_release = V5_TAG.removeprefix("v")
+    # Released 5.0.0 remains immutable; mutable main has a distinct local identity.
+    allowed_current = {"5.0.0+main"}
     expected_main = current_project
 
     checks = {
@@ -548,7 +552,7 @@ def audit_maintenance_package_identity(root: Path) -> dict[str, Any]:
         == tagged_runtime
         == tagged_cli
         == expected_release,
-        "main_has_explicit_v5_lifecycle_identity": current_project in allowed_current,
+        "main_has_post_release_local_identity": current_project in allowed_current,
         "runtime_version_matches_main_identity": __version__ == expected_main,
         "installed_distribution_matches_main_identity": installed == expected_main,
         "executed_cli_matches_main_identity": cli_returncode == 0
@@ -560,11 +564,11 @@ def audit_maintenance_package_identity(root: Path) -> dict[str, Any]:
         "validator_source_is_selected_repository": Path(__file__).resolve()
         == (root / "src/apm/maintenance_validate.py").resolve(),
     }
-    result = _check_map(checks, context="v5 development/candidate package identity and frozen v4 identity")
+    result = _check_map(checks, context="post-v5 main package identity and immutable v5 identity")
     result.update(
         {
             "policy": (
-                "5.0.0.dev0 identifies development; 5.0.0 identifies an untagged candidate. "
+                "5.0.0 is the released source; 5.0.0+main identifies mutable maintenance. "
                 "Exact identity is supplied by the recorded Git/worktree snapshot."
             ),
             "release_version": expected_release,
@@ -735,6 +739,125 @@ def audit_frozen_preflight(root: Path) -> dict[str, Any]:
     return result
 
 
+V5_TAG = "v5.0.0"
+V5_TAG_OBJECT = "b1a4246b9189fe33915d457e9d7f2938869b8fdf"
+V5_TAGGED_COMMIT = "381517fda5107fabf98af7801d5a5103f38e230c"
+V5_FROZEN_AUTHORITY_COMMIT = "150084368815f6a57eae9f3e707f685149e920d3"
+FROZEN_V5_PATHS = (
+    "V5_RESEARCH_VARIATION.md",
+    "RELEASE_V5.md",
+    "validation/release_gates_v5.toml",
+    "validation/v5_confirmation_plan.toml",
+    "validation/v5_reference_constraints.txt",
+    "validation/evidence",
+    "variation/research/apm045",
+    "tools/v5",
+    "src/apm/clean_clone_v5.py",
+    "src/apm/release_validate_v5.py",
+    "tools/attest_clean_clone_v5.py",
+    "tools/requalify_v5_tag.py",
+    "tests/test_v5_exact_tag_procedure.py",
+    "docs/release-readiness-v5.md",
+    "docs/release-publication-v5.md",
+)
+
+
+def audit_frozen_v5_artifacts(root: Path) -> dict[str, Any]:
+    """Keep released v5 source decisions and qualification records exact."""
+
+    def selected(path):
+        return not path.startswith("validation/evidence/") or path.startswith(
+            "validation/evidence/v5_"
+        )
+
+    try:
+        expected = {}
+        for line in _git(
+            root, "ls-tree", "-r", V5_FROZEN_AUTHORITY_COMMIT, "--", *FROZEN_V5_PATHS
+        ).splitlines():
+            metadata, path = line.split("\t", 1)
+            mode, kind, blob = metadata.split()
+            if not selected(path):
+                continue
+            expected[path] = {"mode": mode, "kind": kind, "blob": blob}
+        index = {}
+        for line in _git(root, "ls-files", "--stage", "--", *FROZEN_V5_PATHS).splitlines():
+            metadata, path = line.split("\t", 1)
+            mode, _, stage = metadata.split()
+            if not selected(path):
+                continue
+            index.setdefault(path, []).append({"mode": mode, "stage": stage})
+        paths = set(
+            _git(
+                root,
+                "ls-files",
+                "--cached",
+                "--others",
+                "--exclude-standard",
+                "--",
+                *FROZEN_V5_PATHS,
+            ).splitlines()
+        )
+        paths = {p for p in paths if selected(p)}
+        mismatches = []
+        hashes = {}
+        for path, entry in expected.items():
+            full = root / path
+            content = _worktree_bytes(full)
+            hashes[path] = hashlib.sha256(content).hexdigest() if content is not None else "missing"
+            actual_mode = (
+                "120000"
+                if full.is_symlink()
+                else "100755"
+                if full.exists() and full.stat().st_mode & 0o111
+                else "100644"
+            )
+            if (
+                content is None
+                or content != _git_object_bytes(root, V5_FROZEN_AUTHORITY_COMMIT, path)
+                or index.get(path) != [{"mode": entry["mode"], "stage": "0"}]
+                or actual_mode != entry["mode"]
+            ):
+                mismatches.append(path)
+        checks = {
+            "v5_tag_object_exact": _git(root, "rev-parse", f"refs/tags/{V5_TAG}") == V5_TAG_OBJECT,
+            "v5_tag_commit_exact": _git(root, "rev-parse", f"{V5_TAG}^{{commit}}")
+            == V5_TAGGED_COMMIT,
+            "v5_tag_remains_annotated": _git(root, "cat-file", "-t", f"refs/tags/{V5_TAG}")
+            == "tag",
+            "authority_descends_release": _is_ancestor(
+                root, V5_TAGGED_COMMIT, V5_FROZEN_AUTHORITY_COMMIT
+            ),
+            "authority_in_current_history": _is_ancestor(root, V5_FROZEN_AUTHORITY_COMMIT, "HEAD"),
+            "inventory_exact": bool(expected) and set(expected) == set(index) == paths,
+            "all_entries_are_blobs": bool(expected)
+            and all(x["kind"] == "blob" for x in expected.values()),
+            "bytes_and_modes_exact": not mismatches,
+            "required_release_evidence_present": {
+                "validation/evidence/v5_release_candidate.json",
+                "validation/evidence/v5_post_release_requalification.json",
+                "validation/evidence/v5_release_authorization.json",
+            }
+            <= set(expected),
+        }
+        result = _check_map(checks, context="immutable released v5 methods and evidence")
+        result.update(
+            authority_commit=V5_FROZEN_AUTHORITY_COMMIT,
+            artifact_count=len(expected),
+            artifact_sha256=hashes,
+            mismatches=mismatches,
+            tag_object=V5_TAG_OBJECT,
+            tagged_commit=V5_TAGGED_COMMIT,
+        )
+        return result
+    except (OSError, ValueError, ReleaseValidationError) as error:
+        return {
+            "status": "fail",
+            "audit_error": str(error),
+            "authority_commit": V5_FROZEN_AUTHORITY_COMMIT,
+        }
+
+
 def run_maintenance_static_audits(root: Path, output: Path) -> dict[str, Any]:
     """Run the ordinary static/regression suite against current maintenance guidance."""
 
@@ -786,6 +909,7 @@ def run_maintenance_static_audits(root: Path, output: Path) -> dict[str, Any]:
         "current_guidance": audit_current_guidance(root),
         "frozen_v4_artifacts": frozen_v4,
         "frozen_preflight": audit_frozen_preflight(root),
+        "frozen_v5_artifacts": audit_frozen_v5_artifacts(root),
         "released_public_evidence_integrity": audit_public_evidence(
             root, released_contract
         ),
@@ -846,7 +970,7 @@ def run_maintenance_static_audits(root: Path, output: Path) -> dict[str, Any]:
 def validate_maintenance_repository(
     output: Path | None = None, *, root: Path | None = None
 ) -> dict[str, Any]:
-    """Validate the live post-v4 tree without changing frozen release semantics."""
+    """Validate post-v5 main without changing frozen release semantics."""
 
     selected = (root or repository_root()).resolve()
     destination = (

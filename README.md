@@ -10,18 +10,20 @@ contracts and adds independently APM-authored `apm045/io18` and
 `apm045/io25` mixed-voltage research families. The live catalog contains 15
 electrical families and 30 public MOS devices across five technologies.
 
-Current `main` implements the authorized v5 Research Local Mismatch mission.
-Development used **5.0.0.dev0** before the candidate was frozen.
-The untagged **5.0.0** candidate
-`381517fda5107fabf98af7801d5a5103f38e230c` reached **V5_RELEASE_READY** with
-16/16 candidate-required gates passing in an independent fresh clone. See the
-[candidate evidence](validation/evidence/v5_release_candidate.md). Later result-only
-commits record that qualification without certifying a different candidate.
-Tag creation and publication require separate approval; v5 is not released.
-The active contract is [`V5_RESEARCH_VARIATION.md`](V5_RESEARCH_VARIATION.md).
-Current validation records exact Git/worktree and input/tool identities. Source
-adoption, configured-statistics reproduction and generic-model transfer remain
-separate; the original ambiguous Hart beta coefficients remain blocked.
+Release **5.0.0** adds optional APM045 Research Local Mismatch for VTG N/P.
+The immutable annotated `v5.0.0` tag peels exactly to approved candidate
+`381517fda5107fabf98af7801d5a5103f38e230c`. Its independent candidate run passed
+16/16 gates; a separate fresh exact-tag run passed **17/17** before the
+[GitHub Release](https://github.com/ds54e/analog-process-models/releases/tag/v5.0.0)
+was published. See the [exact-tag evidence](validation/evidence/v5_post_release_requalification.md)
+and preserved [candidate evidence](validation/evidence/v5_release_candidate.md).
+
+Current `main` uses **5.0.0+main** for post-release maintenance. Development used
+**5.0.0.dev0** before the candidate was frozen. The released technical contract is
+[`V5_RESEARCH_VARIATION.md`](V5_RESEARCH_VARIATION.md). Current validation records
+exact Git/worktree and input/tool identities. Source adoption, configured-statistics
+reproduction and generic-model transfer remain separate; the original ambiguous
+Hart/ST40 beta coefficients remain blocked.
 
 The immutable annotated `v4.0.0` release is tagged at
 `d224f279921c7e1ae637fd867e00d450067766c6`. Its exact candidate passed 15/15
@@ -30,11 +32,11 @@ the [GitHub Release](https://github.com/ds54e/analog-process-models/releases/tag
 was published. Earlier released tags remain unchanged.
 
 The current APM045 portfolio and post-release claim boundary are summarized in
-[`APM045_POSITIONING.md`](APM045_POSITIONING.md). Completed v4 contracts,
+[`APM045_POSITIONING.md`](APM045_POSITIONING.md). Completed v4/v5 contracts,
 release procedures, review records, and evidence remain frozen historical
 records rather than current implementation instructions.
 
-The v5 implementation adds an optional [research local variation flow](docs/research-local.md)
+The v5 release adds an optional [research local variation flow](docs/research-local.md)
 with persistent physical-device realizations. Its qualified companion-source
 adaptation remains an explicit transfer hypothesis. The original ambiguous Hart
 beta values remain blocked; io18/io25 have executed assessments with unresolved
@@ -325,7 +327,7 @@ For normal installation and current-tree confidence, users should run:
 .venv/bin/apm validate
 ```
 
-The unflagged command validates the active v5 mission and the preserved
+The unflagged command validates post-v5 maintenance and the preserved
 released baseline. It does not reinterpret or update a completed release
 review.
 

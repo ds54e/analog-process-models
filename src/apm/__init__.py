@@ -3,4 +3,4 @@
 The current implementation goal lives in GOAL.md and repository policy in AGENTS.md.
 """
 
-__version__ = "5.0.0"
+__version__ = "5.0.0+main"

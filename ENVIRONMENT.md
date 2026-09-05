@@ -1,4 +1,4 @@
-# APM v4 Reference Environment and Release Record
+# APM Reference Environment and Release Records
 
 APM v4.0.0 uses the same required real-tool platform as the released v3
 baseline: WSL2, RHEL-compatible EL9 Linux, x86_64, and a Linux-filesystem
@@ -87,9 +87,18 @@ Use the reusable project-local environment for ordinary current-tree work:
 .venv/bin/apm validate
 ```
 
-Unflagged `apm validate` checks the active v5 mission and preserved release baselines. The
-`--release` and `--release-v4` modes preserve their completed release-era
-meaning and are not ordinary maintenance gates.
+Unflagged `apm validate` checks post-v5 maintenance and preserved release baselines.
+Current main uses `5.0.0+main`; the immutable v5 release source uses `5.0.0`.
+Historical `--release`, `--release-v4` and v5 qualification procedures preserve
+their completed release-era meaning and are not ordinary maintenance gates.
+
+The approved v5 candidate passed 16/16 gates. A separate fresh GitHub clone of
+annotated tag `b1a4246b9189fe33915d457e9d7f2938869b8fdf`, detached at approved
+commit `381517fda5107fabf98af7801d5a5103f38e230c`, reran all 16 gates and passed
+the seventeenth exact-tag identity/freshness gate before publication. See
+`validation/evidence/v5_post_release_requalification.json`. Its new environment,
+OSDI builds and numerical runs used the same verified pinned compiler and source;
+no candidate numerical directories or environments were copied.
 
 ## Historical v3 release qualification boundary
 
@@ -155,7 +164,13 @@ build evidence. `apm.doctor.v3` reports smoke execution separately from referenc
 provenance. The current repair and retained failed attempts are documented in
 `validation/evidence/v5_toolchain_repair.json`.
 
-For candidate qualification, see `docs/release-readiness-v5.md`. A fresh clone
+For the preserved candidate procedure, see `docs/release-readiness-v5.md`;
+`docs/release-publication-v5.md` records the external exact-tag procedure. The
+byte-identical dependency constraints used for both completed qualifications are
+now also public at `validation/v5_reference_constraints.txt` (SHA-256
+`ac09124021401efc7e59da64febde74841a5c0417bfb54a20c03694c52e42fb9`).
+A future reproduction can pass this file to `--constraints`; it does not authorize
+repeating any tag/publication action. A fresh clone
 may read the qualified compiler, its clean source/build receipt and the hash-pinned
 primary PDF from existing local storage, while generating its own environment,
 OSDI outputs and numerical runs. Native BSIM4 experiments do not use OpenVAF.

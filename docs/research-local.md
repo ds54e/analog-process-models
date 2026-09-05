@@ -1,16 +1,18 @@
 <!-- SPDX-FileCopyrightText: 2026 APM contributors -->
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
-# Research local variation (v5 candidate)
+# Research local variation (v5.0.0)
 
 This optional flow applies individual VTG N/P threshold/current-factor changes.
 The Hart/TSMC40 companion adaptation is a quantitative **transfer hypothesis**;
 it is not foundry correlation, silicon calibration or yield prediction. The
 original Hart/ST40 beta remains blocked. See the [source decision](../validation/evidence/v5_source_decision.md)
 for the geometry inference, units, extraction convention and uncertainty limits.
-Candidate `381517fda5107fabf98af7801d5a5103f38e230c` passed all 16 required gates
-in an independent fresh clone. See the [qualification evidence](../validation/evidence/v5_release_candidate.md).
-This qualifies that exact source; v5 remains untagged and unreleased.
+Released `v5.0.0` peels to approved commit
+`381517fda5107fabf98af7801d5a5103f38e230c`. It passed 16/16 candidate gates and
+a separate 17/17 exact-tag requalification before publication. See the
+[release evidence](../validation/evidence/v5_post_release_requalification.md).
+Mutable current main uses `5.0.0+main`; its maintenance checks are separate.
 
 From a configured repository checkout:
 
