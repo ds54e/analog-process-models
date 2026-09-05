@@ -138,13 +138,15 @@ def run_doctor(toolchain: Toolchain | None = None) -> dict[str, Any]:
         _run_smoke(selected, work, "bsimcmg-osdi", _bsimcmg_netlist(selected)),
     ]
     report: dict[str, Any] = {
-        "schema": "apm.doctor.v2",
+        "schema": "apm.doctor.v3",
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "status": "pass",
         "repository": str(selected.root),
         "ngspice_path": str(selected.ngspice),
         "ngspice_version_output": version_output.strip(),
         "model_build": model_build,
+        "reference_toolchain_status": model_build["compiler_provenance"]["status"],
+        "status_scope": "executed smoke tests; reference provenance is reported separately",
         "smokes": smokes,
     }
     report_path = work / "report.json"

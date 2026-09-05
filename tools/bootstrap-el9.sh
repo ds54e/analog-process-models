@@ -170,22 +170,17 @@ fi
 
 apm_build_path="${apm_cargo_dir}/bin:${apm_llvm_prefix}/bin:${apm_llvm_root}/usr/bin:/usr/local/bin:/usr/bin:/bin"
 apm_llvm_lib_path="${apm_llvm_prefix}/lib64:${apm_llvm_root}/usr/lib64:/usr/lib64"
-(
-  cd "${apm_openvaf_source}"
-  RUSTUP_HOME="${apm_rustup_dir}" \
-  CARGO_HOME="${apm_cargo_dir}" \
-  LLVM_SYS_201_PREFIX="${apm_llvm_prefix}" \
-  LD_LIBRARY_PATH="${apm_llvm_lib_path}" \
-  PATH="${apm_build_path}" \
-    "${apm_cargo_dir}/bin/cargo" build --locked --release \
-      -p openvaf-driver --features llvm20 -j "${apm_jobs}"
-)
-
+git -C "${apm_openvaf_source}" submodule update --init --recursive
 apm_openvaf_prefix="${apm_toolchain_dir}/openvaf-${apm_openvaf_tag}"
-mkdir -p "${apm_openvaf_prefix}/bin"
-install -m 0755 \
-  "${apm_openvaf_source}/target/release/openvaf-r" \
-  "${apm_openvaf_prefix}/bin/openvaf-r"
+RUSTUP_HOME="${apm_rustup_dir}" \
+CARGO_HOME="${apm_cargo_dir}" \
+LLVM_SYS_201_PREFIX="${apm_llvm_prefix}" \
+LD_LIBRARY_PATH="${apm_llvm_lib_path}" \
+PATH="${apm_build_path}" \
+  python3 "${apm_repo_root}/tools/build_pinned_openvaf.py" \
+    --source "${apm_openvaf_source}" --destination "${apm_openvaf_prefix}" \
+    --cargo "${apm_cargo_dir}/bin/cargo" \
+    --llvm "${apm_llvm_prefix}/bin/llvm-config" --jobs "${apm_jobs}"
 
 "${apm_ngspice_prefix}/bin/ngspice" --version
 LD_LIBRARY_PATH="${apm_llvm_lib_path}" \

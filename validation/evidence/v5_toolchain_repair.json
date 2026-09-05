@@ -1,0 +1,82 @@
+{
+  "schema": "apm.v5-toolchain-repair.v1",
+  "status": "VERIFIED",
+  "expected_commit": "fdf2522b70f42793f64b1c72f0195c96dea0cc19",
+  "observed_commit": "fdf2522b70f42793f64b1c72f0195c96dea0cc19",
+  "observed_source_state": {
+    "commit": "fdf2522b70f42793f64b1c72f0195c96dea0cc19",
+    "tree": "3bd6ac54128e104f39974bb050c0cc8a795e1a22",
+    "dirty": "",
+    "submodules": "c38e0dc464548332ba0768d855f5f8e02254a367 external/vacask (_0.2.0-469-gc38e0dc)"
+  },
+  "compiler_binary_sha256": "d66e2328d0773ddfbc13a53fab0332fdaa4dc3c4a648b0fe2d43bfd81eb54579",
+  "receipt": {
+    "path": ".apm/v5/toolchain/controlled-openvaf-2/receipt.json",
+    "sha256": "46e389308b5e096a671813111c81b16dbe699bb1b0df4297dea75da7f36cae1f"
+  },
+  "doctor": {
+    "path": ".apm/v5/qualified-toolchain-2/doctor/report.json",
+    "sha256": "5f03693fe6b5b279079533ebeda3c014da23f6cc3f2689cb7d4f9d08c987824c",
+    "smokes": [
+      {
+        "id": "native-bsim3",
+        "status": "pass"
+      },
+      {
+        "id": "native-bsim4",
+        "status": "pass"
+      },
+      {
+        "id": "psp103-osdi",
+        "status": "pass"
+      },
+      {
+        "id": "bsimcmg-osdi",
+        "status": "pass"
+      }
+    ]
+  },
+  "rust_llvm": {
+    "cargo": {
+      "path": "/home/admin/projects/analog-process-models/.apm/v5/bootstrap/toolchain/cargo/bin/rustup",
+      "sha256": "dda7234360b7f578ca8b0ddcb80145646fa61a67c1720a5abc7051b35c9fcb71",
+      "version": "cargo 1.98.0 (797e8a9bc 2026-08-05)"
+    },
+    "rustc": {
+      "path": "/home/admin/projects/analog-process-models/.apm/v5/bootstrap/toolchain/cargo/bin/rustup",
+      "sha256": "dda7234360b7f578ca8b0ddcb80145646fa61a67c1720a5abc7051b35c9fcb71",
+      "version": "rustc 1.98.0 (88d9e12ae 2026-08-18)\nbinary: rustc\ncommit-hash: 88d9e12ae178fab0fb5cc050a94da85685d449ea\ncommit-date: 2026-08-18\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.0\nLLVM version: 22.1.8"
+    },
+    "llvm": {
+      "path": "/home/admin/projects/analog-process-models/.apm/v5/bootstrap/toolchain/llvm20-root/usr/lib64/llvm20/bin/llvm-config",
+      "sha256": "d877747be2cc6ebb217e73cca77241a56919ffddb91bb02e58de235e54a983c2",
+      "version": "20.1.8"
+    }
+  },
+  "osdi": [
+    {
+      "model_id": "psp103",
+      "output_sha256": "c4d72a04c083fdd501d797e8b3828cf3510f84abe51721a60825fd60019d1a5d"
+    },
+    {
+      "model_id": "psp103-nqs",
+      "output_sha256": "b07c42c2135b8df79844ebf407ca770aa84129caea7346c1ddba08758a5ab4bc"
+    },
+    {
+      "model_id": "bsimcmg-112.1.0",
+      "output_sha256": "0b7ba7de3081e50b94017a91e4cf24c124e18618b0c0a3c3ef2b518d474f9e01"
+    }
+  ],
+  "negative_tests": "9 passed: absent receipt, wrong pin, changed source/binary/config/log/receipt, legacy cache, tampered OSDI",
+  "earlier_attempts": [
+    {
+      "path": ".apm/v5/initial/bootstrap-toolchain.log",
+      "failure": "cpio unavailable; installed dependency, preserved log"
+    },
+    {
+      "path": ".apm/v5/initial/controlled-compiler.log",
+      "failure": "uninitialized pinned submodule; initialized before fresh build"
+    }
+  ],
+  "legacy_provenance": "Not retrospectively qualified; old v2 asserted caches invalidated."
+}

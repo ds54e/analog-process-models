@@ -20,8 +20,10 @@ Spectre checks. This is current repository compatibility evidence, not v5
 candidate qualification. See `validation/evidence/v5_bootstrap.json` and its
 hash-bound raw report under `.apm/v5/bootstrap-validation/`.
 
-No measured research profile is approved. Controlled checkout of the required
-OpenVAF commit succeeded; compiler build and provenance repair are in progress.
+No measured research profile is approved. A controlled build at the required
+OpenVAF pin is now VERIFIED, with Rust/LLVM/source/submodule/binary/OSDI receipt
+bindings and four passing native/OSDI smoke tests. Nine targeted provenance
+regressions pass. See `validation/evidence/v5_toolchain_repair.json`.
 No v5 tag or release exists or is authorized by this implementation task.
 
 ## Completed preflight baseline
@@ -62,7 +64,6 @@ only the completed preflight and declare v5 complete.
 Required release blockers currently unresolved:
 
 - no approved coherent quantitative VTG N/P Vth+beta profile;
-- actual pinned OpenVAF build provenance not yet repaired/qualified;
 - production research-local API, stochastic/circuit/tail evidence not implemented.
 
 ## Preserved released history

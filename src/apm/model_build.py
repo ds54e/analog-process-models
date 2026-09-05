@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from .compiler_provenance import observe_compiler
 from .toolchain import Toolchain, resolve_toolchain, run_checked
 
 MODEL_SOURCES = {
@@ -40,9 +41,12 @@ def _cached_build(toolchain: Toolchain) -> dict[str, Any] | None:
         return None
     try:
         metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
-        if metadata.get("schema") != "apm.model-build.v2":
+        if metadata.get("schema") != "apm.model-build.v3":
             return None
         if metadata.get("openvaf_sha256") != sha256_file(toolchain.openvaf):
+            return None
+        observation = observe_compiler(toolchain.openvaf)
+        if observation["status"] != "VERIFIED" or metadata.get("compiler_provenance") != observation:
             return None
         artifacts = {item["model_id"]: item for item in metadata["artifacts"]}
         if set(artifacts) != set(MODEL_SOURCES):
@@ -105,14 +109,16 @@ def build_models(toolchain: Toolchain | None = None, *, force: bool = True) -> d
             }
         )
 
+    observation = observe_compiler(selected.openvaf)
     metadata: dict[str, Any] = {
-        "schema": "apm.model-build.v2",
+        "schema": "apm.model-build.v3",
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "openvaf_path": str(selected.openvaf),
         "openvaf_sha256": sha256_file(selected.openvaf),
         "openvaf_version_output": compiler_version.stdout.strip(),
-        "openvaf_upstream_tag": "v24.0.2mob",
-        "openvaf_upstream_commit": "fdf2522b70f42793f64b1c72f0195c96dea0cc19",
+        "compiler_provenance": observation,
+        "openvaf_upstream_tag": "v24.0.2mob" if observation["status"] == "VERIFIED" else None,
+        "openvaf_upstream_commit": observation.get("observed_commit"),
         "target_cpu": "generic",
         "artifacts": artifacts,
     }
