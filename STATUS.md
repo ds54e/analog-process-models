@@ -7,9 +7,9 @@ Execution evidence, not this index alone, supports validation and release claims
 
 ## Current mission: v5 full implementation
 
-State: IMPLEMENTATION IN PROGRESS / RELEASE NOT READY.
+State: CANDIDATE FROZEN / INDEPENDENT QUALIFICATION PENDING.
 
-Current source/runtime/CLI identity is `5.0.0.dev0`. The first implementation
+Current source/runtime/CLI identity is plain `5.0.0`, an untagged candidate. The first implementation
 change replaces obsolete maintenance-only assertions with the authorized v5
 mission and adds an immutable preflight snapshot audit. All 52 frozen v4 files,
 released compatibility checks and model inputs remain protected.
@@ -99,7 +99,7 @@ rewrite of v4 model-generation or release history.
 
 ## Candidate evaluator development
 
-The v5 evaluator and fresh-clone attestation helper are implemented. Twenty
+The v5 evaluator and fresh-clone attestation helper are implemented. Twenty-three
 focused acceptance tests reject missing, duplicate, stale, corrupt and non-PASS
 evidence; post-tag approval is not a candidate dependency. A charge-conservation
 regression includes a deliberately nonconserving negative control. Eight local
@@ -114,3 +114,11 @@ passes. Same-raw N/P replay and charge checks and all four IO assessments passed
 execution after startup binding changes. Initial confirmation/interruption and
 legacy real-tool evidence are hash-linked in
 `validation/evidence/v5_evaluator_development.json`.
+
+## Frozen candidate scope
+
+Methods, profiles, source decisions, code and the full confirmation plan are
+frozen for independent qualification. Plain `5.0.0` denotes this untagged
+candidate, not a released version. The exact candidate will be the commit
+containing this state; all 16 candidate-required gates must still execute from
+a fresh clone. No tag or release publication is authorized.

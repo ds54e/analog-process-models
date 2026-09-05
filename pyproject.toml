@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "analog-process-models"
-version = "5.0.0.dev0"
+version = "5.0.0"
 description = "Open analog compact-model electrical families and terminal-characterization framework"
 readme = "README.md"
 requires-python = ">=3.9"

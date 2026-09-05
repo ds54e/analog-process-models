@@ -12,6 +12,7 @@ import re
 import subprocess
 import sys
 from datetime import datetime, timezone
+from importlib.metadata import version as dependency_version
 from pathlib import Path
 
 import numpy as np
@@ -483,6 +484,19 @@ def reference_platform():
         "machine": platform.machine(),
         "kernel": platform.release(),
         "python": sys.version,
+        "dependencies": {
+            name: dependency_version(name)
+            for name in (
+                "analog-process-models",
+                "numpy",
+                "scipy",
+                "pandas",
+                "pytest",
+                "ruff",
+                "reuse",
+                "PyMuPDF",
+            )
+        },
     }
 
 

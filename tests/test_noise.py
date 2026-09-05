@@ -9,6 +9,7 @@ from types import SimpleNamespace
 
 import pytest
 
+from apm import __version__
 from apm.cli import build_parser
 from apm.noise import (
     ACQUISITION_POLICY_ID,
@@ -332,7 +333,7 @@ def test_noise_cli_contracts_preserve_v3_schema_identity_in_v4_package() -> None
     assert method.command == "noise-method-check"
     assert (
         ROOT / "src/apm/__init__.py"
-    ).read_text(encoding="utf-8").count('"5.0.0.dev0"') == 1
+    ).read_text(encoding="utf-8").count(f'"{__version__}"') == 1
     assert NOISE_SCHEMA == "apm.noise-characterization.v1"
     assert FIT_METHOD_IDENTITY == "apm.noise-fit.contiguous-regions@1.0.0"
     assert ACQUISITION_POLICY_ID == "apm.noise-acquisition.bounded-white-search"

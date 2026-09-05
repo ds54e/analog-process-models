@@ -11,8 +11,8 @@ contracts and adds independently APM-authored `apm045/io18` and
 electrical families and 30 public MOS devices across five technologies.
 
 Current `main` implements the authorized v5 Research Local Mismatch mission and
-uses **5.0.0.dev0** during development. A frozen untagged candidate may use plain
-**5.0.0** only before candidate qualification. Tag creation and publication require
+used **5.0.0.dev0** during development. The current source is a frozen, untagged
+**5.0.0** candidate awaiting independent qualification. Tag creation and publication require
 separate approval after `V5_RELEASE_READY`; no v5 release is declared here.
 The active contract is [`V5_RESEARCH_VARIATION.md`](V5_RESEARCH_VARIATION.md).
 Current validation records exact Git/worktree and input/tool identities. Source

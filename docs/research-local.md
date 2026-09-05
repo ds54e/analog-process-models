@@ -1,7 +1,7 @@
 <!-- SPDX-FileCopyrightText: 2026 APM contributors -->
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
-# Research local variation (v5 development)
+# Research local variation (v5 candidate)
 
 This optional flow applies individual VTG N/P threshold/current-factor changes.
 The Hart/TSMC40 companion adaptation is a quantitative **transfer hypothesis**;
